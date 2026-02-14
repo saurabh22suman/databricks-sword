@@ -1,0 +1,76 @@
+{
+  "id": "sql-analytics-intro",
+  "title": "SQL Analytics Intro",
+  "subtitle": "Query the lakehouse with SQL Warehouses and understand serverless compute",
+  "description": "Learn SQL Warehouse architecture, multi-table JOINs, aggregations, and the tradeoffs between SQL and PySpark for analytics.",
+  "industry": "technology",
+  "rank": "B",
+  "xpRequired": 200,
+  "xpReward": 375,
+  "estimatedMinutes": 45,
+  "databricksEnabled": false,
+  "prerequisites": [
+    "lakehouse-fundamentals"
+  ],
+  "primaryFeatures": [
+    "SQL Warehouse architecture",
+    "Multi-table JOINs",
+    "GROUP BY aggregations",
+    "Views and CTEs",
+    "SQL vs PySpark tradeoffs"
+  ],
+  "achievements": [
+    "sql-analyst"
+  ],
+  "stages": [
+    {
+      "id": "01-briefing",
+      "type": "briefing",
+      "title": "Mission Briefing",
+      "file": "stages/01-briefing.json"
+    },
+    {
+      "id": "02-diagram",
+      "type": "diagram",
+      "title": "SQL Warehouse Architecture",
+      "file": "stages/02-diagram.json"
+    },
+    {
+      "id": "03-drag-drop",
+      "type": "drag-drop",
+      "title": "Multi-Table JOIN Components",
+      "file": "stages/03-drag-drop.json"
+    },
+    {
+      "id": "04-fill-blank",
+      "type": "fill-blank",
+      "title": "SQL Query Construction",
+      "file": "stages/04-fill-blank.json"
+    },
+    {
+      "id": "05-quiz",
+      "type": "quiz",
+      "title": "Knowledge Check",
+      "file": "stages/05-quiz.json"
+    },
+    {
+      "id": "06-debrief",
+      "type": "debrief",
+      "title": "Mission Debrief",
+      "file": "stages/06-debrief.json"
+    }
+  ],
+  "sideQuests": [
+    {
+      "id": "sql-history",
+      "title": "The Evolution of SQL",
+      "ossProject": "SQL Standard",
+      "trigger": "after",
+      "parentStageId": "01-briefing",
+      "type": "quiz",
+      "configFile": "side-quests/sql-history.json",
+      "xpBonus": 50,
+      "optional": true
+    }
+  ]
+}

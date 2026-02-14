@@ -1,0 +1,46 @@
+{{
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+}  ]    {"componentId": "monitoring", "zoneId": "zone-5"}    {"componentId": "serving", "zoneId": "zone-4"},    {"componentId": "registry", "zoneId": "zone-3"},    {"componentId": "training", "zoneId": "zone-2"},    {"componentId": "feature-store", "zoneId": "zone-1"},  "correctPlacements": [  ],    {"id": "zone-5", "label": "Observability", "position": {"x": 350, "y": 200}}    {"id": "zone-4", "label": "Real-Time Inference", "position": {"x": 160, "y": 200}},    {"id": "zone-3", "label": "Model Governance", "position": {"x": 440, "y": 50}},    {"id": "zone-2", "label": "Model Development", "position": {"x": 250, "y": 50}},    {"id": "zone-1", "label": "Feature Engineering", "position": {"x": 60, "y": 50}},  "dropZones": [  ],    {"id": "monitoring", "label": "Drift Monitor & Alerts", "icon": "activity"}    {"id": "serving", "label": "Model Serving Endpoint", "icon": "globe"},    {"id": "registry", "label": "Model Registry (UC)", "icon": "archive"},    {"id": "training", "label": "Model Training (MLflow)", "icon": "cpu"},    {"id": "feature-store", "label": "Feature Store (Online Tables)", "icon": "database"},  "components": [  "components": [
+    {"id": "feature-store", "label": "Feature Store (Online Tables)", "icon": "database"},
+    {"id": "training", "label": "Model Training Pipeline", "icon": "cpu"},
+    {"id": "registry", "label": "Model Registry", "icon": "archive"},
+    {"id": "serving", "label": "Model Serving Endpoint", "icon": "globe"},
+    {"id": "monitoring", "label": "Drift Monitor & Alerts", "icon": "activity"}
+  ],
+  "dropZones": [
+    {"id": "zone-1", "label": "Feature Engineering", "position": {"x": 80, "y": 60}},
+    {"id": "zone-2", "label": "Model Development", "position": {"x": 330, "y": 60}},
+    {"id": "zone-3", "label": "Version Management", "position": {"x": 80, "y": 200}},
+    {"id": "zone-4", "label": "Real-Time Inference", "position": {"x": 330, "y": 200}},
+    {"id": "zone-5", "label": "Observability", "position": {"x": 200, "y": 330}}
+  ],
+  "correctPlacements": [
+    {"componentId": "feature-store", "zoneId": "zone-1"},
+    {"componentId": "training", "zoneId": "zone-2"},
+    {"componentId": "registry", "zoneId": "zone-3"},
+    {"componentId": "serving", "zoneId": "zone-4"},
+    {"componentId": "monitoring", "zoneId": "zone-5"}
+  ]
+}

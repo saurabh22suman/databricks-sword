@@ -1,0 +1,38 @@
+# Databricks Asset Bundle Configuration
+# Mission: Data Ingestion Pipeline
+# Learn Auto Loader and incremental ingestion
+
+bundle:
+  name: dbsword-data-ingestion-pipeline
+
+targets:
+  dev:
+    mode: development
+    default: true
+    workspace:
+      root_path: /Workspace/Users/${workspace.current_user.userName}/dbsword-data-ingestion-pipeline
+
+resources:
+  schemas:
+    data_ingestion:
+      catalog_name: main
+      name: dbsword_data_ingestion
+      comment: "Databricks Sword - Data Ingestion Pipeline mission schema"
+
+  volumes:
+    data_volume:
+      catalog_name: main
+      schema_name: dbsword_data_ingestion
+      name: raw_data
+      volume_type: MANAGED
+      comment: "Raw data files for ingestion exercises"
+
+sync:
+  include:
+    - notebooks/**
+    - data/**
+
+artifacts:
+  notebooks:
+    path: notebooks
+    deploy_to: /Workspace/Users/${workspace.current_user.userName}/dbsword-data-ingestion-pipeline/notebooks

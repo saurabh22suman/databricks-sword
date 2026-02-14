@@ -1,0 +1,74 @@
+{
+  "id": "ml-pipelines-production",
+  "title": "ML Pipelines in Production",
+  "subtitle": "Deploy and monitor production ML pipelines with model serving and Feature Store",
+  "description": "Build end-to-end production ML systems on Databricks. Master Feature Store for feature engineering, model serving endpoints for real-time inference, A/B testing with Champion/Challenger patterns, and monitoring for drift detection.",
+  "industry": "finance",
+  "rank": "S",
+  "xpRequired": 4000,
+  "xpReward": 750,
+  "estimatedMinutes": 65,
+  "primaryFeatures": [
+    "Feature Store",
+    "Model Serving",
+    "A/B Testing",
+    "Drift Monitoring",
+    "Champion/Challenger"
+  ],
+  "prerequisites": [
+    "mlflow-experiment-tracking",
+    "unity-catalog-governance"
+  ],
+  "databricksEnabled": false,
+  "stages": [
+    {
+      "id": "briefing",
+      "title": "Mission Briefing",
+      "type": "briefing",
+      "configFile": "stages/01-briefing.json",
+      "xpReward": 0,
+      "estimatedMinutes": 5
+    },
+    {
+      "id": "diagram",
+      "title": "Production ML Architecture",
+      "type": "diagram",
+      "configFile": "stages/02-diagram.json",
+      "xpReward": 75,
+      "estimatedMinutes": 12
+    },
+    {
+      "id": "drag-drop-pipeline",
+      "title": "Build Production ML Pipeline",
+      "type": "drag-drop",
+      "configFile": "stages/03-drag-drop.json",
+      "xpReward": 100,
+      "estimatedMinutes": 15
+    },
+    {
+      "id": "fill-blank-serving",
+      "title": "Configure Model Serving & Monitoring",
+      "type": "fill-blank",
+      "configFile": "stages/04-fill-blank.json",
+      "xpReward": 100,
+      "estimatedMinutes": 15
+    },
+    {
+      "id": "quiz",
+      "title": "Knowledge Check",
+      "type": "quiz",
+      "configFile": "stages/05-quiz.json",
+      "xpReward": 75,
+      "estimatedMinutes": 10
+    },
+    {
+      "id": "debrief",
+      "title": "Mission Debrief",
+      "type": "debrief",
+      "configFile": "stages/06-debrief.json",
+      "xpReward": 0,
+      "estimatedMinutes": 5
+    }
+  ],
+  "sideQuests": []
+}

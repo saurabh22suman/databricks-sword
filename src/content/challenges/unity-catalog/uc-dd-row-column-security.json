@@ -1,0 +1,46 @@
+{
+  "id": "uc-dd-row-column-security",
+  "title": "Order Row and Column Level Security Setup",
+  "category": "unity-catalog",
+  "difficulty": "A",
+  "format": "drag-drop",
+  "description": "Arrange the steps to implement row-level and column-level security using Unity Catalog and dynamic views.",
+  "hints": [
+    "Create the underlying table first",
+    "Row filters come before column masks",
+    "Apply the view for user access"
+  ],
+  "xpReward": 125,
+  "optimalSolution": "CREATE TABLE sales_data (region, revenue, ssn);\nALTER TABLE sales_data SET ROW FILTER region_filter ON (region);\nALTER TABLE sales_data ALTER COLUMN ssn SET MASK ssn_mask;\nGRANT SELECT ON TABLE sales_data TO analysts;",
+  "explanation": "Row-level security filters rows based on user context (e.g., region). Column-level masking hides sensitive data (e.g., SSN) while allowing access to other columns. These features enable fine-grained data access without creating multiple table copies.",
+  "dragDrop": {
+    "blocks": [
+      {
+        "id": "create_table",
+        "code": "CREATE TABLE sales_data (region, revenue, ssn)",
+        "label": "Create Base Table"
+      },
+      {
+        "id": "row_filter",
+        "code": "ALTER TABLE sales_data SET ROW FILTER region_filter ON (region)",
+        "label": "Apply Row Filter"
+      },
+      {
+        "id": "col_mask",
+        "code": "ALTER TABLE sales_data ALTER COLUMN ssn SET MASK ssn_mask",
+        "label": "Apply Column Mask"
+      },
+      {
+        "id": "grant",
+        "code": "GRANT SELECT ON TABLE sales_data TO analysts",
+        "label": "Grant Access"
+      }
+    ],
+    "correctOrder": [
+      "create_table",
+      "row_filter",
+      "col_mask",
+      "grant"
+    ]
+  }
+}

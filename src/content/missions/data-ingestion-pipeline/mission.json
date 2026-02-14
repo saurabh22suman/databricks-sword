@@ -1,0 +1,112 @@
+{
+  "id": "data-ingestion-pipeline",
+  "title": "Data Ingestion Pipeline",
+  "subtitle": "Stream data from multiple sources into the lakehouse with Auto Loader",
+  "description": "Learn Auto Loader for incremental file ingestion, COPY INTO for batch loads, and schema inference for evolving data sources.",
+  "industry": "technology",
+  "rank": "B",
+  "xpRequired": 500,
+  "xpReward": 450,
+  "estimatedMinutes": 55,
+  "databricksEnabled": false,
+  "prerequisites": [
+    "pyspark-essentials",
+    "sql-analytics-intro"
+  ],
+  "primaryFeatures": [
+    "Auto Loader streaming",
+    "Schema inference",
+    "COPY INTO batch loads",
+    "Bronze layer ingestion",
+    "File format handling"
+  ],
+  "achievements": [
+    "ingestion-engineer"
+  ],
+  "stages": [
+    {
+      "id": "01-briefing",
+      "type": "briefing",
+      "title": "Mission Briefing",
+      "file": "stages/01-briefing.json"
+    },
+    {
+      "id": "02-diagram",
+      "type": "diagram",
+      "title": "Ingestion Architecture",
+      "file": "stages/02-diagram.json"
+    },
+    {
+      "id": "03-drag-drop",
+      "type": "drag-drop",
+      "title": "Auto Loader Pipeline",
+      "file": "stages/03-drag-drop.json"
+    },
+    {
+      "id": "04-fill-blank",
+      "type": "fill-blank",
+      "title": "COPY INTO and Auto Loader Config",
+      "file": "stages/04-fill-blank.json"
+    },
+    {
+      "id": "05-quiz",
+      "type": "quiz",
+      "title": "Knowledge Check",
+      "file": "stages/05-quiz.json"
+    },
+    {
+      "id": "06-debrief",
+      "type": "debrief",
+      "title": "Mission Debrief",
+      "file": "stages/06-debrief.json"
+    }
+  ],
+  "sideQuests": [],
+  "concepts": [
+    {
+      "question": "What is Auto Loader in Databricks?",
+      "answer": "A feature that incrementally processes new files as they arrive in cloud storage, using structured streaming under the hood.",
+      "codeExample": "spark.readStream.format(\"cloudFiles\").option(\"cloudFiles.format\", \"json\").load(path)",
+      "difficulty": "A",
+      "type": "code",
+      "tags": [
+        "auto-loader",
+        "streaming",
+        "ingestion"
+      ]
+    },
+    {
+      "question": "What is schema evolution in Delta Lake?",
+      "answer": "The ability for a Delta table to automatically adapt its schema when new columns appear in incoming data, enabled via mergeSchema option.",
+      "hint": "Use .option(\"mergeSchema\", \"true\") on writes.",
+      "difficulty": "A",
+      "type": "concept",
+      "tags": [
+        "delta-lake",
+        "schema"
+      ]
+    },
+    {
+      "question": "What is the difference between COPY INTO and Auto Loader?",
+      "answer": "COPY INTO is a SQL command for batch file ingestion with idempotent retries. Auto Loader uses structured streaming for continuous ingestion with file notification or directory listing.",
+      "difficulty": "A",
+      "type": "comparison",
+      "tags": [
+        "ingestion",
+        "auto-loader",
+        "sql"
+      ]
+    },
+    {
+      "question": "How do you handle bad records during ingestion?",
+      "answer": "Use rescue data pattern: .option(\"rescuedDataColumn\", \"_rescued_data\") captures schema-mismatched data in a separate column instead of failing.",
+      "codeExample": "spark.readStream.format(\"cloudFiles\").option(\"rescuedDataColumn\", \"_rescued_data\").load(path)",
+      "difficulty": "A",
+      "type": "code",
+      "tags": [
+        "data-quality",
+        "ingestion"
+      ]
+    }
+  ]
+}

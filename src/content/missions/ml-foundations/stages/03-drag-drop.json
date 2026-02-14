@@ -1,0 +1,64 @@
+{
+  "description": "Arrange the code blocks in the correct order to build a collaborative filtering pipeline using PySpark MLlib's ALS algorithm.",
+  "instructions": "Follow the standard ML workflow: What must you import before using? Can you train without data? Why split data before training? What must exist before you can call .fit()? What produces predictions? What measures model quality? Pattern: dependencies → data → train/test split → model config → training → inference → evaluation.",
+  "blocks": [
+    {
+      "id": "import",
+      "code": "from pyspark.ml.recommendation import ALS\nfrom pyspark.ml.evaluation import RegressionEvaluator",
+      "label": "Import MLlib classes"
+    },
+    {
+      "id": "load",
+      "code": "ratings_df = spark.read.format(\"delta\").load(\"/data/ratings\")",
+      "label": "Load ratings data"
+    },
+    {
+      "id": "split",
+      "code": "train_df, test_df = ratings_df.randomSplit([0.8, 0.2], seed=42)",
+      "label": "Split train/test"
+    },
+    {
+      "id": "init-als",
+      "code": "als = ALS(\n    userCol=\"user_id\",\n    itemCol=\"product_id\",\n    ratingCol=\"rating\",\n    rank=10,\n    maxIter=10,\n    regParam=0.1,\n    coldStartStrategy=\"drop\"\n)",
+      "label": "Initialize ALS model"
+    },
+    {
+      "id": "train",
+      "code": "model = als.fit(train_df)",
+      "label": "Train the model"
+    },
+    {
+      "id": "predict",
+      "code": "predictions = model.transform(test_df)",
+      "label": "Generate predictions"
+    },
+    {
+      "id": "evaluate",
+      "code": "evaluator = RegressionEvaluator(\n    metricName=\"rmse\",\n    labelCol=\"rating\",\n    predictionCol=\"prediction\"\n)\nrmse = evaluator.evaluate(predictions)",
+      "label": "Calculate RMSE"
+    }
+  ],
+  "correctOrder": [
+    "import",
+    "load",
+    "split",
+    "init-als",
+    "train",
+    "predict",
+    "evaluate"
+  ],
+  "hints": [
+    "Start by importing the necessary MLlib classes",
+    "Load the data before splitting it",
+    "Initialize the ALS model with hyperparameters before training",
+    "Always evaluate on the test set, not the training set"
+  ],
+  "explanation": "This pipeline follows the standard ML workflow: import libraries → load data → split train/test → initialize model → train → predict → evaluate. The ALS algorithm uses matrix factorization to learn latent features for users and products.",
+  "learnings": [
+    "Data preparation is critical - garbage in, garbage out",
+    "Feature engineering transforms raw data into model inputs",
+    "Train/test split prevents overfitting evaluation",
+    "Model training finds patterns in the training data",
+    "Evaluation metrics determine if the model meets requirements"
+  ]
+}

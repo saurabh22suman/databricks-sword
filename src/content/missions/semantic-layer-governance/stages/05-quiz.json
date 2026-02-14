@@ -1,0 +1,96 @@
+{
+  "questions": [
+    {
+      "id": "q1",
+      "question": "What problem does a semantic layer solve?",
+      "options": [
+        "Provides standard business definitions so all teams use the same metrics, prevents conflicting answers",
+        "Makes queries run faster",
+        "Replaces the need for a data warehouse",
+        "Automatically cleans data quality issues"
+      ],
+      "correctAnswer": "Provides standard business definitions so all teams use the same metrics, prevents conflicting answers",
+      "explanation": "The semantic layer standardizes business metrics (revenue, churn, LTV) in governed SQL views. All dashboards and questions reference the same definitions, eliminating the 'three revenue numbers' problem."
+    },
+    {
+      "id": "q2",
+      "question": "How does row-level security work in Unity Catalog?",
+      "options": [
+        "Dynamic views filter rows based on the querying user's identity attributes at query time",
+        "Separate tables are created for each user",
+        "Data is encrypted per user",
+        "Users must specify their filter manually"
+      ],
+      "correctAnswer": "Dynamic views filter rows based on the querying user's identity attributes at query time",
+      "explanation": "RLS uses dynamic views with current_user_attribute() to automatically filter data. Each user's query transparently sees only their authorized rows. The same dashboard shows different data to different users."
+    },
+    {
+      "id": "q3",
+      "question": "What is AI/BI Genie?",
+      "options": [
+        "A natural language interface that translates English questions into SQL queries using table metadata and metric definitions",
+        "A data cleaning tool",
+        "A machine learning model trainer",
+        "A dashboard designer AI"
+      ],
+      "correctAnswer": "A natural language interface that translates English questions into SQL queries using table metadata and metric definitions",
+      "explanation": "Genie uses table descriptions, column comments, metric definitions, and curated instructions to translate natural language questions into accurate SQL. It's governed by UC permissions — users can only query data they're authorized to see."
+    },
+    {
+      "id": "q4",
+      "question": "What is a data contract in the context of data products?",
+      "options": [
+        "A set of guarantees about schema stability, data quality, and freshness that downstream consumers can rely on",
+        "A legal document between teams",
+        "A pricing model for data access",
+        "A backup schedule for tables"
+      ],
+      "correctAnswer": "A set of guarantees about schema stability, data quality, and freshness that downstream consumers can rely on",
+      "explanation": "Data contracts define expectations: required columns, data types, NOT NULL constraints, freshness SLAs (updated within 1 hour), and schema evolution rules (additive only). Breaking a contract triggers alerts."
+    },
+    {
+      "id": "q5",
+      "question": "[Recall: Unity Catalog] What is the three-level namespace in Unity Catalog?",
+      "options": [
+        "Catalog → Schema → Table/View",
+        "Database → Table → Column",
+        "Workspace → Folder → Notebook",
+        "Metastore → Catalog → Schema"
+      ],
+      "correctAnswer": "Catalog → Schema → Table/View",
+      "explanation": "Recall from Unity Catalog Governance: UC uses catalog.schema.table as its three-level namespace. Catalogs organize by domain, schemas by layer or function, and tables/views hold the data and metrics."
+    },
+    {
+      "id": "q6",
+      "question": "[Recall: Unity Catalog] How do you grant SELECT access to a group on a specific table?",
+      "options": [
+        "GRANT SELECT ON TABLE catalog.schema.table TO group_name",
+        "ALLOW READ ON catalog.schema.table FOR group_name",
+        "PERMISSION SELECT table TO group",
+        "SET ACCESS READ ON table FOR group"
+      ],
+      "correctAnswer": "GRANT SELECT ON TABLE catalog.schema.table TO group_name",
+      "explanation": "Recall from Unity Catalog Governance: GRANT/REVOKE is the standard UC permission model. GRANT SELECT ON TABLE gives read access. This applies to tables, views, functions, and models."
+    },
+    {
+      "id": "q7",
+      "question": "[Recall: Advanced SQL] What is the benefit of materialized views for the semantic layer?",
+      "options": [
+        "Pre-computed metric aggregations that refresh automatically, making dashboard queries instant",
+        "They store raw data more efficiently",
+        "They enable natural language queries",
+        "They replace the need for row-level security"
+      ],
+      "correctAnswer": "Pre-computed metric aggregations that refresh automatically, making dashboard queries instant",
+      "explanation": "Recall from Advanced SQL Analytics: Materialized views store pre-computed results. In a semantic layer, metric views backed by materialized views deliver instant results for common dashboard queries."
+    }
+  ],
+  "passingScore": 70,
+  "learnings": [
+    "Semantic layer standardizes business definitions",
+    "Metrics ensure consistent calculations",
+    "RLS protects data at row level",
+    "Column masking hides sensitive columns",
+    "Genie enables natural language queries"
+  ]
+}

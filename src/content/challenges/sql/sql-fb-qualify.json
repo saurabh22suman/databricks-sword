@@ -1,0 +1,51 @@
+{
+  "id": "sql-fb-qualify",
+  "title": "Complete the QUALIFY Clause",
+  "category": "sql",
+  "difficulty": "A",
+  "format": "fill-blank",
+  "description": "Fill in the blanks to use QUALIFY with a window function to get the most recent order per customer.",
+  "hints": [
+    "QUALIFY filters on window function results",
+    "ROW_NUMBER assigns sequential numbers within partitions",
+    "PARTITION BY defines the grouping for numbering"
+  ],
+  "xpReward": 125,
+  "optimalSolution": "SELECT customer_id, order_id, order_date, amount\nFROM orders\nQUALIFY ROW_NUMBER() OVER (PARTITION BY customer_id ORDER BY order_date DESC) = 1",
+  "explanation": "QUALIFY is like HAVING for window functions. It filters rows after window function computation. This pattern is cleaner than subqueries or CTEs for 'top N per group' queries.",
+  "fillBlank": {
+    "codeTemplate": "SELECT customer_id, order_id, order_date, amount\nFROM orders\n__BLANK_0__ __BLANK_1__() OVER (__BLANK_2__ BY customer_id ORDER BY order_date DESC) = 1",
+    "blanks": [
+      {
+        "id": 0,
+        "correctAnswer": "QUALIFY",
+        "options": [
+          "QUALIFY",
+          "HAVING",
+          "WHERE",
+          "FILTER"
+        ]
+      },
+      {
+        "id": 1,
+        "correctAnswer": "ROW_NUMBER",
+        "options": [
+          "ROW_NUMBER",
+          "RANK",
+          "DENSE_RANK",
+          "COUNT"
+        ]
+      },
+      {
+        "id": 2,
+        "correctAnswer": "PARTITION",
+        "options": [
+          "PARTITION",
+          "GROUP",
+          "CLUSTER",
+          "DISTRIBUTE"
+        ]
+      }
+    ]
+  }
+}

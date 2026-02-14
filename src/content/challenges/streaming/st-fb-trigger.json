@@ -1,0 +1,51 @@
+{
+  "id": "st-fb-trigger",
+  "title": "Complete the Streaming Trigger Configuration",
+  "category": "streaming",
+  "difficulty": "A",
+  "format": "fill-blank",
+  "description": "Fill in the blanks to configure a streaming query with a processing time trigger and a checkpoint location.",
+  "hints": [
+    "trigger() specifies how often the stream processes",
+    "processingTime runs micro-batches at fixed intervals",
+    "checkpointLocation enables exactly-once semantics"
+  ],
+  "xpReward": 125,
+  "optimalSolution": "stream_df.writeStream \\\n    .format('delta') \\\n    .option('checkpointLocation', '/checkpoint/events') \\\n    .trigger(processingTime='30 seconds') \\\n    .start('/output/events')",
+  "explanation": "Trigger modes control streaming execution: processingTime runs micro-batches at intervals, once runs a single batch, and availableNow processes all available data then stops. Checkpoints store offsets and state for fault tolerance.",
+  "fillBlank": {
+    "codeTemplate": "stream_df.writeStream \\\n    .format('delta') \\\n    .option('__BLANK_0__', '/checkpoint/events') \\\n    .__BLANK_1__(__BLANK_2__='30 seconds') \\\n    .start('/output/events')",
+    "blanks": [
+      {
+        "id": 0,
+        "correctAnswer": "checkpointLocation",
+        "options": [
+          "checkpointLocation",
+          "checkpoint",
+          "offsetPath",
+          "statePath"
+        ]
+      },
+      {
+        "id": 1,
+        "correctAnswer": "trigger",
+        "options": [
+          "trigger",
+          "schedule",
+          "interval",
+          "batch"
+        ]
+      },
+      {
+        "id": 2,
+        "correctAnswer": "processingTime",
+        "options": [
+          "processingTime",
+          "interval",
+          "every",
+          "frequency"
+        ]
+      }
+    ]
+  }
+}

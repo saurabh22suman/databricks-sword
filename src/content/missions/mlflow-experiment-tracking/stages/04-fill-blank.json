@@ -1,0 +1,82 @@
+{
+  "description": "Complete the MLflow experiment tracking and model registry code.",
+  "expectedOutput": "When completed correctly, this code will:\n1. Set the MLflow experiment for organized tracking\n2. Start a tracked run with a descriptive name\n3. Log hyperparameters (learning_rate, max_depth)\n4. Log evaluation metrics (AUC, F1 score)\n5. Register the best model and set production alias",
+  "codeTemplate": "import mlflow\nfrom mlflow.tracking import MlflowClient\n\n# Set the active experiment\nmlflow.__BLANK_0__('/Shared/credit-scoring-experiment')\n\n# Start a tracked training run\nwith mlflow.__BLANK_1__(run_name='xgboost-v3') as run:\n    # Log hyperparameters\n    mlflow.log_param('learning_rate', 0.01)\n    mlflow.log_param('max_depth', 6)\n    \n    # Train model (simulated)\n    model = train_xgboost(X_train, y_train)\n    \n    # Log evaluation metrics\n    mlflow.__BLANK_2__('auc', evaluate(model, X_test, y_test))\n    \n    # Log the trained model as an artifact\n    mlflow.sklearn.__BLANK_3__(model, 'credit_model')\n\n# Register the best model in the Model Registry\nclient = MlflowClient()\nmodel_uri = f'runs:/{run.info.run_id}/credit_model'\nmlflow.register_model(model_uri, '__BLANK_4__')\n\n# Promote to Champion\nclient.set_registered_model___BLANK_5__(\n    'credit-scoring-model', 'Champion', version=3\n)",
+  "blanks": [
+    {
+      "id": 0,
+      "options": [
+        "set_experiment",
+        "create_experiment",
+        "get_experiment",
+        "use_experiment"
+      ],
+      "correctAnswer": "set_experiment"
+    },
+    {
+      "id": 1,
+      "options": [
+        "start_run",
+        "begin_run",
+        "create_run",
+        "new_run"
+      ],
+      "correctAnswer": "start_run"
+    },
+    {
+      "id": 2,
+      "options": [
+        "log_metric",
+        "log_param",
+        "log_artifact",
+        "log_result"
+      ],
+      "correctAnswer": "log_metric"
+    },
+    {
+      "id": 3,
+      "options": [
+        "log_model",
+        "save_model",
+        "register_model",
+        "store_model"
+      ],
+      "correctAnswer": "log_model"
+    },
+    {
+      "id": 4,
+      "options": [
+        "credit-scoring-model",
+        "credit_model",
+        "xgboost-v3",
+        "model_v3"
+      ],
+      "correctAnswer": "credit-scoring-model"
+    },
+    {
+      "id": 5,
+      "options": [
+        "alias",
+        "tag",
+        "label",
+        "stage"
+      ],
+      "correctAnswer": "alias"
+    }
+  ],
+  "hints": [
+    "set_experiment creates or switches to an experiment by name",
+    "start_run creates a new tracked run within the active experiment",
+    "log_metric records a numeric performance metric",
+    "log_model saves the model as an MLflow artifact",
+    "The registered model name should be descriptive and consistent",
+    "Aliases replace the old stage-based deployment routing"
+  ],
+  "learnings": [
+    "mlflow.start_run() begins an experiment run",
+    "mlflow.log_param() records hyperparameters",
+    "mlflow.log_metric() records evaluation metrics",
+    "mlflow.sklearn.log_model() saves the model artifact",
+    "mlflow.register_model() adds to Model Registry"
+  ]
+}

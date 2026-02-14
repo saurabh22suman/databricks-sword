@@ -1,0 +1,50 @@
+# Databricks Asset Bundle Configuration
+# Mission: Lakehouse Fundamentals
+# Creates a development environment for learning Delta Lake basics
+
+bundle:
+  name: dbsword-lakehouse-fundamentals
+
+# Define workspace targets
+targets:
+  dev:
+    mode: development
+    default: true
+    workspace:
+      # Host and token provided via environment variables:
+      # DATABRICKS_HOST, DATABRICKS_TOKEN
+      root_path: /Workspace/Users/${workspace.current_user.userName}/dbsword-lakehouse-fundamentals
+
+# Resources to deploy
+resources:
+  # Create a schema for the mission's tables
+  schemas:
+    lakehouse_fundamentals:
+      catalog_name: main
+      name: dbsword_lakehouse_fundamentals
+      comment: "Databricks Sword - Lakehouse Fundamentals mission schema"
+
+  # Create a volume for raw data
+  volumes:
+    data_volume:
+      catalog_name: main
+      schema_name: dbsword_lakehouse_fundamentals
+      name: data
+      volume_type: MANAGED
+      comment: "Sample data for Lakehouse Fundamentals exercises"
+
+# Sync notebooks and data to workspace
+sync:
+  include:
+    - notebooks/**
+    - data/**
+
+# Artifact mappings
+artifacts:
+  notebooks:
+    path: notebooks
+    deploy_to: /Workspace/Users/${workspace.current_user.userName}/dbsword-lakehouse-fundamentals/notebooks
+
+# Post-deployment: upload data to volume
+# Note: Data files in ./data/ will be available in the workspace.
+# Users should manually upload to the volume or use the notebook to ingest.

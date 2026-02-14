@@ -1,0 +1,96 @@
+{
+  "questions": [
+    {
+      "id": "q1",
+      "question": "What does AQE's dynamic partition coalescing do?",
+      "options": [
+        "Merges small shuffle partitions at runtime to reduce overhead",
+        "Creates more partitions for parallelism",
+        "Splits large files into smaller ones",
+        "Reorders join operations"
+      ],
+      "correctAnswer": "Merges small shuffle partitions at runtime to reduce overhead",
+      "explanation": "AQE monitors shuffle partition sizes at runtime. If partitions are too small, it coalesces (merges) them to reduce the overhead of processing many tiny partitions."
+    },
+    {
+      "id": "q2",
+      "question": "How does the Photon engine improve performance?",
+      "options": [
+        "Uses vectorized C++ execution for Delta Lake operations, providing 2-8x speedup",
+        "Increases cluster size automatically",
+        "Compresses data more efficiently",
+        "Caches all queries in memory"
+      ],
+      "correctAnswer": "Uses vectorized C++ execution for Delta Lake operations, providing 2-8x speedup",
+      "explanation": "Photon replaces Java/Scala execution with native C++ code that processes data in columnar batches (vectors). It excels at scans, filters, aggregations, and joins on Delta tables."
+    },
+    {
+      "id": "q3",
+      "question": "What is Liquid Clustering?",
+      "options": [
+        "Automatic, incremental data layout optimization that replaces Z-ORDER and Hive partitioning",
+        "A new type of cluster compute",
+        "A memory management strategy",
+        "A network optimization protocol"
+      ],
+      "correctAnswer": "Automatic, incremental data layout optimization that replaces Z-ORDER and Hive partitioning",
+      "explanation": "Liquid Clustering (ALTER TABLE CLUSTER BY) automatically reorganizes data incrementally as new data arrives. Unlike Z-ORDER, it doesn't require re-running OPTIMIZE on the entire table."
+    },
+    {
+      "id": "q4",
+      "question": "When should you use a broadcast join?",
+      "options": [
+        "When one join table is small enough to fit in memory on each executor",
+        "Always, for every join",
+        "Only when both tables are large",
+        "Never — it's deprecated"
+      ],
+      "correctAnswer": "When one join table is small enough to fit in memory on each executor",
+      "explanation": "Broadcast joins replicate the smaller table to all executors, eliminating the expensive shuffle. The threshold is controlled by spark.sql.autoBroadcastJoinThreshold (default 10MB)."
+    },
+    {
+      "id": "q5",
+      "question": "[Recall: Transformations] What causes data skew in joins?",
+      "options": [
+        "Uneven distribution of join key values causing some partitions to be much larger",
+        "Too many columns in the SELECT",
+        "Using LEFT JOIN instead of INNER JOIN",
+        "Incorrect column types"
+      ],
+      "correctAnswer": "Uneven distribution of join key values causing some partitions to be much larger",
+      "explanation": "Recall from Advanced Transformations: Skew occurs when certain join key values (e.g., 'NULL' or popular items) appear far more often than others, creating oversized partitions that become bottlenecks."
+    },
+    {
+      "id": "q6",
+      "question": "[Recall: Delta Lake] What does OPTIMIZE do before Z-ORDER can be effective?",
+      "options": [
+        "Compacts small files into larger files, creating the right file sizes for Z-ORDER",
+        "Deletes old versions",
+        "Creates the transaction log",
+        "Enables time travel"
+      ],
+      "correctAnswer": "Compacts small files into larger files, creating the right file sizes for Z-ORDER",
+      "explanation": "Recall from Delta Lake Deep Dive: OPTIMIZE compacts many small files into fewer larger ones. Z-ORDER then rearranges data within these files so related values are co-located for data skipping."
+    },
+    {
+      "id": "q7",
+      "question": "[Recall: Advanced Transformations] What does EXPLAIN EXTENDED show?",
+      "options": [
+        "The full query execution plan including physical plan, optimizations, and cost estimates",
+        "Only the SQL syntax errors",
+        "The table schema",
+        "Only the estimated row count"
+      ],
+      "correctAnswer": "The full query execution plan including physical plan, optimizations, and cost estimates",
+      "explanation": "Recall: EXPLAIN EXTENDED reveals the parsed, analyzed, optimized, and physical plans. This is essential for understanding how Spark will execute your query and finding optimization opportunities."
+    }
+  ],
+  "passingScore": 70,
+  "learnings": [
+    "AQE optimizes queries at runtime",
+    "Photon provides native vectorized execution",
+    "Partitioning reduces scan for filtered queries",
+    "Caching speeds up repeated data access",
+    "Broadcast joins optimize small table joins"
+  ]
+}

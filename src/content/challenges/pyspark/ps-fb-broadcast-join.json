@@ -1,0 +1,51 @@
+{
+  "id": "ps-fb-broadcast-join",
+  "title": "Optimize a Join with Broadcast",
+  "category": "pyspark",
+  "difficulty": "A",
+  "format": "fill-blank",
+  "description": "Fill in the blanks to broadcast a small dimension table and join it with a large fact table for optimized performance.",
+  "hints": [
+    "broadcast() hints Spark to send the small table to all executors",
+    "Use join() with the join condition and join type",
+    "The small table should be wrapped in broadcast()"
+  ],
+  "xpReward": 125,
+  "optimalSolution": "from pyspark.sql.functions import broadcast\n\nresult = fact_df.join(broadcast(dim_df), fact_df.product_id == dim_df.product_id, 'inner')",
+  "explanation": "Broadcast joins avoid shuffling the large table across the cluster. Instead, the small table is replicated to every executor node. This is ideal when one side is under ~10MB. Spark auto-broadcasts below spark.sql.autoBroadcastJoinThreshold but explicit hints guarantee it.",
+  "fillBlank": {
+    "codeTemplate": "from pyspark.sql.functions import __BLANK_0__\n\nresult = fact_df.__BLANK_1__(__BLANK_2__(dim_df), fact_df.product_id == dim_df.product_id, 'inner')",
+    "blanks": [
+      {
+        "id": 0,
+        "correctAnswer": "broadcast",
+        "options": [
+          "broadcast",
+          "coalesce",
+          "repartition",
+          "cache"
+        ]
+      },
+      {
+        "id": 1,
+        "correctAnswer": "join",
+        "options": [
+          "join",
+          "merge",
+          "union",
+          "crossJoin"
+        ]
+      },
+      {
+        "id": 2,
+        "correctAnswer": "broadcast",
+        "options": [
+          "broadcast",
+          "collect",
+          "cache",
+          "persist"
+        ]
+      }
+    ]
+  }
+}

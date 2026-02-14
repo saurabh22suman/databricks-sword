@@ -1,0 +1,66 @@
+---
+title: "MLflow Experiment Tracking"
+subtitle: "Systematic experiment management for reproducible ML"
+---
+
+# MISSION BRIEFING: Operation Model Registry
+
+**OPERATIVE CLASSIFICATION:** A-Rank — ML Track
+
+---
+
+## SITUATION REPORT
+
+**Client:** QuantumRisk Analytics — a fintech company building credit scoring models for 15 million customers.
+
+**Crisis:** Their data science team of 25 has been running experiments across notebooks with no tracking system. Models are promoted to production via Slack messages ("hey the model in my notebook is good, deploy it"). Last month, a model trained on stale data was deployed, causing $2.3M in bad credit decisions before anyone noticed.
+
+**Your Mission:** Implement MLflow-based experiment tracking and model registry to bring order, reproducibility, and governance to their ML workflow.
+
+---
+
+## INTELLIGENCE BRIEFING
+
+### The MLflow Lifecycle
+
+MLflow provides four core components, but experiment tracking and model registry are the foundation:
+
+**Experiment Tracking** organizes ML runs into experiments. Each run records:
+- **Parameters:** Hyperparameters (learning_rate, max_depth, etc.)
+- **Metrics:** Performance measures (accuracy, F1, AUC) logged at each step
+- **Artifacts:** Model files, plots, feature importance charts
+- **Tags:** Custom metadata (team, dataset_version, commit_hash)
+
+**Model Registry** provides a centralized hub for model lifecycle management:
+- **Registered Models:** Named models in the registry (e.g., "credit-scoring-v2")
+- **Model Versions:** Each version tracks the source run, artifacts, and lineage
+- **Aliases:** Production, Staging, Champion, Challenger labels for deployment routing
+
+### Why This Matters
+
+Without experiment tracking:
+- No one knows which hyperparameters produced the best model
+- Models can't be reproduced — "works on my machine" syndrome
+- No audit trail for regulatory compliance (critical in finance)
+- Deployment is manual and error-prone
+
+With MLflow:
+- Every experiment is versioned and comparable
+- Models have clear lineage from data → training → deployment
+- Regulatory auditors can trace any prediction back to its source
+- Promotion from staging to production is a governed workflow
+
+---
+
+## MISSION OBJECTIVES
+
+1. **Map the MLflow registry architecture** — Understand how experiments, runs, and models connect
+2. **Build the experiment workflow** — From data prep through model registration
+3. **Implement tracking code** — Log params, metrics, artifacts, and register models
+4. **Validate your knowledge** — Prove mastery of MLflow concepts
+
+---
+
+*"In the shadow war of data science, the team that tracks wins. Reproducibility isn't a luxury — it's your armor."*
+
+**— Commander Nexus, QuantumRisk Ops**

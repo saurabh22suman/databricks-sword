@@ -1,0 +1,101 @@
+{
+  "instructions": "Build the SQL Analytics Stack! Place components to show how Databricks SQL connects BI tools to Delta Lake tables through serverless compute.",
+  "components": [
+    {
+      "id": "sql-endpoint",
+      "label": "SQL Endpoint (Serverless)",
+      "icon": "database"
+    },
+    {
+      "id": "photon-engine",
+      "label": "Photon Query Engine",
+      "icon": "zap"
+    },
+    {
+      "id": "unity-catalog",
+      "label": "Unity Catalog (Metadata)",
+      "icon": "book"
+    },
+    {
+      "id": "delta-tables",
+      "label": "Delta Lake Tables",
+      "icon": "hard-drive"
+    },
+    {
+      "id": "bi-tools",
+      "label": "BI Tools (Tableau/PowerBI)",
+      "icon": "bar-chart"
+    }
+  ],
+  "dropZones": [
+    {
+      "id": "zone-1",
+      "label": "Serving Layer",
+      "position": {
+        "x": 100,
+        "y": 80
+      }
+    },
+    {
+      "id": "zone-2",
+      "label": "Compute Layer",
+      "position": {
+        "x": 300,
+        "y": 80
+      }
+    },
+    {
+      "id": "zone-3",
+      "label": "Catalog Layer",
+      "position": {
+        "x": 500,
+        "y": 80
+      }
+    },
+    {
+      "id": "zone-4",
+      "label": "Storage Layer",
+      "position": {
+        "x": 300,
+        "y": 250
+      }
+    },
+    {
+      "id": "zone-5",
+      "label": "Client Layer",
+      "position": {
+        "x": 100,
+        "y": 250
+      }
+    }
+  ],
+  "correctPlacements": [
+    {
+      "componentId": "sql-endpoint",
+      "zoneId": "zone-1"
+    },
+    {
+      "componentId": "photon-engine",
+      "zoneId": "zone-2"
+    },
+    {
+      "componentId": "unity-catalog",
+      "zoneId": "zone-3"
+    },
+    {
+      "componentId": "delta-tables",
+      "zoneId": "zone-4"
+    },
+    {
+      "componentId": "bi-tools",
+      "zoneId": "zone-5"
+    }
+  ],
+  "learnings": [
+    "SQL Endpoint: Serverless compute that auto-scales based on query load",
+    "Photon Engine: C++ vectorized engine providing up to 10x faster queries",
+    "Unity Catalog: Centralized metadata and governance for all your data assets",
+    "Delta Tables: Your data stored in open format with ACID transactions",
+    "BI Tools: Connect Tableau, Power BI, or any JDBC/ODBC tool to your lakehouse"
+  ]
+}

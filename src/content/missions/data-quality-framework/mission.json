@@ -1,0 +1,74 @@
+{
+  "id": "data-quality-framework",
+  "title": "Data Quality Framework",
+  "subtitle": "Expectations, Quarantine & DLT",
+  "description": "Build data quality pipelines with Delta Live Tables expectations, quarantine patterns, and automated validation rules.",
+  "industry": "healthcare",
+  "rank": "A",
+  "xpRequired": 500,
+  "xpReward": 450,
+  "estimatedMinutes": 50,
+  "databricksEnabled": false,
+  "prerequisites": [
+    "delta-lake-deep-dive",
+    "unity-catalog-governance"
+  ],
+  "primaryFeatures": [
+    "DLT Expectations",
+    "Quarantine Patterns",
+    "Data Validation",
+    "Quality Metrics",
+    "Automated Testing"
+  ],
+  "stages": [
+    {
+      "id": "briefing",
+      "type": "briefing",
+      "title": "Mission Briefing",
+      "configFile": "stages/01-briefing.json",
+      "xpReward": 0,
+      "estimatedMinutes": 5
+    },
+    {
+      "id": "diagram",
+      "type": "diagram",
+      "title": "Quality Pipeline",
+      "configFile": "stages/02-diagram.json",
+      "xpReward": 50,
+      "estimatedMinutes": 10
+    },
+    {
+      "id": "drag-drop",
+      "type": "drag-drop",
+      "title": "Build Quality Rules",
+      "configFile": "stages/03-drag-drop.json",
+      "xpReward": 75,
+      "estimatedMinutes": 12
+    },
+    {
+      "id": "fill-blank",
+      "type": "fill-blank",
+      "title": "Write DLT Expectations",
+      "configFile": "stages/04-fill-blank.json",
+      "xpReward": 75,
+      "estimatedMinutes": 12
+    },
+    {
+      "id": "quiz",
+      "type": "quiz",
+      "title": "Knowledge Check",
+      "configFile": "stages/05-quiz.json",
+      "xpReward": 50,
+      "estimatedMinutes": 8
+    },
+    {
+      "id": "debrief",
+      "type": "debrief",
+      "title": "Mission Debrief",
+      "configFile": "stages/06-debrief.json",
+      "xpReward": 0,
+      "estimatedMinutes": 3
+    }
+  ],
+  "sideQuests": []
+}

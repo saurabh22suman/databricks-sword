@@ -1,0 +1,96 @@
+{
+  "questions": [
+    {
+      "id": "q1",
+      "question": "What is the primary benefit of job clusters over all-purpose clusters?",
+      "options": [
+        "They auto-create and auto-terminate per job run, reducing cost",
+        "They run faster than all-purpose clusters",
+        "They support more languages",
+        "They have more memory"
+      ],
+      "correctAnswer": "They auto-create and auto-terminate per job run, reducing cost",
+      "explanation": "Job clusters start when the job begins and terminate when it ends, so you only pay for compute during actual processing. All-purpose clusters stay running and cost money even when idle."
+    },
+    {
+      "id": "q2",
+      "question": "How do you define that Task B should run only after Task A completes?",
+      "options": [
+        "Set depends_on: [{task_key: 'task_a'}] on Task B",
+        "Set after: 'task_a' on Task B",
+        "Set requires: ['task_a'] on Task B",
+        "List Task B after Task A in the tasks array"
+      ],
+      "correctAnswer": "Set depends_on: [{task_key: 'task_a'}] on Task B",
+      "explanation": "The depends_on field explicitly defines task dependencies. It takes an array of {task_key: string} objects, enabling both sequential and fan-in/fan-out patterns."
+    },
+    {
+      "id": "q3",
+      "question": "What task type runs a SQL query directly without a notebook?",
+      "options": [
+        "sql_task",
+        "query_task",
+        "sql_notebook_task",
+        "script_task"
+      ],
+      "correctAnswer": "sql_task",
+      "explanation": "sql_task runs a SQL query, alert, or dashboard directly. Other task types include notebook_task, python_wheel_task, spark_jar_task, and dbt_task."
+    },
+    {
+      "id": "q4",
+      "question": "What happens when a task with retries fails on the first attempt?",
+      "options": [
+        "It automatically retries up to max_retries times with configured delay",
+        "The entire job immediately fails",
+        "It skips to the next task",
+        "It pauses and waits for manual intervention"
+      ],
+      "correctAnswer": "It automatically retries up to max_retries times with configured delay",
+      "explanation": "Retry policies define max_retries and min_retry_interval_millis. On failure, the task is re-executed automatically. The job only fails if all retry attempts are exhausted."
+    },
+    {
+      "id": "q5",
+      "question": "What cron expression schedules a job to run daily at 6 AM?",
+      "options": [
+        "0 0 6 * * ?",
+        "0 6 * * *",
+        "6 0 * * *",
+        "* * 6 * *"
+      ],
+      "correctAnswer": "0 0 6 * * ?",
+      "explanation": "Databricks uses Quartz cron format (seconds minutes hours day month day-of-week). '0 0 6 * * ?' means at second 0, minute 0, hour 6, every day."
+    },
+    {
+      "id": "q6",
+      "question": "[Recall: Ingestion] What triggers a job when new files arrive in cloud storage?",
+      "options": [
+        "File arrival trigger",
+        "Cron schedule",
+        "Manual API call",
+        "Webhook notification"
+      ],
+      "correctAnswer": "File arrival trigger",
+      "explanation": "Recall from Data Ingestion Pipeline: File arrival triggers start a workflow when new files land in a cloud storage location, enabling event-driven pipelines instead of fixed schedules."
+    },
+    {
+      "id": "q7",
+      "question": "[Recall: Streaming] What guarantees does checkpointing provide?",
+      "options": [
+        "Exactly-once processing by tracking progress across restarts",
+        "Faster query execution",
+        "Data encryption at rest",
+        "Schema enforcement"
+      ],
+      "correctAnswer": "Exactly-once processing by tracking progress across restarts",
+      "explanation": "Recall from Structured Streaming: Checkpoint locations store streaming query progress. Combined with Workflows retries, this ensures exactly-once semantics even after failures."
+    }
+  ],
+  "passingScore": 70,
+  "learnings": [
+    "Jobs orchestrate multi-task workflows",
+    "Task dependencies define execution order",
+    "Job clusters are ephemeral and cost-effective",
+    "Retries handle transient failures gracefully",
+    "Alerts notify on job success or failure"
+  ]
+}

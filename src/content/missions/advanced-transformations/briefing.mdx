@@ -1,0 +1,38 @@
+# Mission Briefing: Advanced Transformations
+
+## The Situation
+
+**RetailMax**, a national grocery chain with 2,000 stores, has a working data pipeline (great job on the foundations!). But the analytics team is hitting a wall.
+
+They need to answer questions that simple GROUP BY can't solve:
+- "What's the **running total** of sales for each store this quarter?"
+- "What's the **rank** of each product by revenue within its category?"
+- "How does each store's sales compare to the **rolling 7-day average**?"
+- "What's the **percent change** from the previous month for each region?"
+
+These require **window functions** — one of the most powerful (and most asked-about in interviews) SQL/PySpark features.
+
+## Your Mission
+
+Build **advanced transformation pipelines** using window functions, UDFs, and pivots:
+
+1. **Window functions:** ROW_NUMBER, RANK, LAG/LEAD, running totals
+2. **User-defined functions:** Custom business logic as reusable functions
+3. **Pivot/unpivot:** Reshape data between wide and long formats
+4. **Complex aggregations:** Nested structs, arrays, and higher-order functions
+5. **Performance:** Understand partition-level vs shuffle-level operations
+
+## Success Criteria
+
+- **Window functions** applied correctly with PARTITION BY and ORDER BY
+- **UDFs** created and registered for reuse
+- **Pivot operations** transforming data shape correctly
+- **Performance awareness** of wide vs narrow transformations
+
+## The Stakes
+
+These techniques are used in **every data engineering interview**. Mastering them means you can handle real-world analytics that 80% of junior engineers struggle with.
+
+---
+
+**Next Step:** Architecture Diagram — Understand transformation types

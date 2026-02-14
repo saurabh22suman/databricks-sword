@@ -1,0 +1,101 @@
+{
+  "instructions": "Design the ML Pipeline! Arrange components to show the end-to-end machine learning workflow from data to deployment.",
+  "components": [
+    {
+      "id": "data-ingestion",
+      "label": "Data Ingestion",
+      "icon": "database"
+    },
+    {
+      "id": "feature-engineering",
+      "label": "Feature Engineering",
+      "icon": "settings"
+    },
+    {
+      "id": "model-training",
+      "label": "Model Training (MLflow)",
+      "icon": "cpu"
+    },
+    {
+      "id": "evaluation",
+      "label": "Model Evaluation",
+      "icon": "activity"
+    },
+    {
+      "id": "deployment",
+      "label": "Model Deployment",
+      "icon": "rocket"
+    }
+  ],
+  "dropZones": [
+    {
+      "id": "zone-1",
+      "label": "Step 1: Load Data",
+      "position": {
+        "x": 50,
+        "y": 100
+      }
+    },
+    {
+      "id": "zone-2",
+      "label": "Step 2: Transform Features",
+      "position": {
+        "x": 250,
+        "y": 100
+      }
+    },
+    {
+      "id": "zone-3",
+      "label": "Step 3: Train Model",
+      "position": {
+        "x": 450,
+        "y": 100
+      }
+    },
+    {
+      "id": "zone-4",
+      "label": "Step 4: Validate Results",
+      "position": {
+        "x": 250,
+        "y": 250
+      }
+    },
+    {
+      "id": "zone-5",
+      "label": "Step 5: Deploy to Production",
+      "position": {
+        "x": 450,
+        "y": 250
+      }
+    }
+  ],
+  "correctPlacements": [
+    {
+      "componentId": "data-ingestion",
+      "zoneId": "zone-1"
+    },
+    {
+      "componentId": "feature-engineering",
+      "zoneId": "zone-2"
+    },
+    {
+      "componentId": "model-training",
+      "zoneId": "zone-3"
+    },
+    {
+      "componentId": "evaluation",
+      "zoneId": "zone-4"
+    },
+    {
+      "componentId": "deployment",
+      "zoneId": "zone-5"
+    }
+  ],
+  "learnings": [
+    "Data Ingestion: Load training data from Delta tables or feature stores",
+    "Feature Engineering: Transform raw data into meaningful features for models",
+    "Model Training: Use MLflow to track experiments, parameters, and metrics",
+    "Model Evaluation: Validate model performance against business requirements",
+    "Model Deployment: Serve models for batch or real-time inference"
+  ]
+}

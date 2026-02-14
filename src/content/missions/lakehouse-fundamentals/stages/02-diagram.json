@@ -1,0 +1,86 @@
+{
+  "instructions": "Build the Lakehouse Architecture! Drag each component to its correct layer. The lakehouse combines data lake flexibility with data warehouse performance. Click a placed component to remove it, or drag it to a different zone.",
+  "components": [
+    {
+      "id": "cloud-storage",
+      "label": "Cloud Storage (S3/ADLS/GCS)",
+      "icon": "database"
+    },
+    {
+      "id": "delta-lake",
+      "label": "Delta Lake (Transaction Log)",
+      "icon": "file-text"
+    },
+    {
+      "id": "spark-engine",
+      "label": "Spark Engine (Photon)",
+      "icon": "cpu"
+    },
+    {
+      "id": "sql-warehouse",
+      "label": "SQL Warehouse",
+      "icon": "bar-chart"
+    },
+    {
+      "id": "notebooks",
+      "label": "Notebooks (PySpark/SQL)",
+      "icon": "code"
+    }
+  ],
+  "dropZones": [
+    {
+      "id": "zone-1",
+      "label": "Storage Layer",
+      "position": { "x": 50, "y": 300 }
+    },
+    {
+      "id": "zone-2",
+      "label": "Format Layer",
+      "position": { "x": 250, "y": 300 }
+    },
+    {
+      "id": "zone-3",
+      "label": "Compute Layer",
+      "position": { "x": 450, "y": 300 }
+    },
+    {
+      "id": "zone-4",
+      "label": "Serving Layer (Analytics)",
+      "position": { "x": 300, "y": 100 }
+    },
+    {
+      "id": "zone-5",
+      "label": "Serving Layer (Engineering)",
+      "position": { "x": 500, "y": 100 }
+    }
+  ],
+  "correctPlacements": [
+    {
+      "componentId": "cloud-storage",
+      "zoneId": "zone-1"
+    },
+    {
+      "componentId": "delta-lake",
+      "zoneId": "zone-2"
+    },
+    {
+      "componentId": "spark-engine",
+      "zoneId": "zone-3"
+    },
+    {
+      "componentId": "sql-warehouse",
+      "zoneId": "zone-4"
+    },
+    {
+      "componentId": "notebooks",
+      "zoneId": "zone-5"
+    }
+  ],
+  "learnings": [
+    "Storage Layer: Cloud object storage (S3, ADLS, GCS) provides cheap, scalable, durable storage for all your data",
+    "Format Layer: Delta Lake adds ACID transactions, time travel, and schema enforcement on top of Parquet files",
+    "Compute Layer: Spark Engine (with Photon acceleration) processes data at scale with distributed computing",
+    "Serving Layers: SQL Warehouse serves BI tools and analysts, while Notebooks enable data engineering and ML workflows",
+    "This layered architecture is the foundation of the Lakehouse paradigm - combining lake flexibility with warehouse reliability"
+  ]
+}

@@ -1,0 +1,101 @@
+{
+  "instructions": "Design the Streaming Pipeline! Arrange components to show how Structured Streaming processes real-time data with exactly-once semantics.",
+  "components": [
+    {
+      "id": "source-stream",
+      "label": "readStream (Source)",
+      "icon": "play"
+    },
+    {
+      "id": "watermark",
+      "label": "withWatermark()",
+      "icon": "clock"
+    },
+    {
+      "id": "aggregation",
+      "label": "Window Aggregation",
+      "icon": "bar-chart"
+    },
+    {
+      "id": "checkpoint",
+      "label": "Checkpoint Location",
+      "icon": "save"
+    },
+    {
+      "id": "sink",
+      "label": "writeStream (Sink)",
+      "icon": "database"
+    }
+  ],
+  "dropZones": [
+    {
+      "id": "zone-1",
+      "label": "Data Source",
+      "position": {
+        "x": 50,
+        "y": 150
+      }
+    },
+    {
+      "id": "zone-2",
+      "label": "Late Data Handler",
+      "position": {
+        "x": 200,
+        "y": 80
+      }
+    },
+    {
+      "id": "zone-3",
+      "label": "Processing Logic",
+      "position": {
+        "x": 350,
+        "y": 150
+      }
+    },
+    {
+      "id": "zone-4",
+      "label": "Recovery Store",
+      "position": {
+        "x": 200,
+        "y": 300
+      }
+    },
+    {
+      "id": "zone-5",
+      "label": "Output Destination",
+      "position": {
+        "x": 500,
+        "y": 150
+      }
+    }
+  ],
+  "correctPlacements": [
+    {
+      "componentId": "source-stream",
+      "zoneId": "zone-1"
+    },
+    {
+      "componentId": "watermark",
+      "zoneId": "zone-2"
+    },
+    {
+      "componentId": "aggregation",
+      "zoneId": "zone-3"
+    },
+    {
+      "componentId": "checkpoint",
+      "zoneId": "zone-4"
+    },
+    {
+      "componentId": "sink",
+      "zoneId": "zone-5"
+    }
+  ],
+  "learnings": [
+    "readStream: Connects to streaming sources like Kafka, files, or Delta tables",
+    "Watermark: Handles late-arriving data by tracking event time vs processing time",
+    "Window Aggregation: Groups streaming data into time-based windows for analysis",
+    "Checkpoint: Stores progress for exactly-once processing and failure recovery",
+    "writeStream: Outputs results to sinks with configurable trigger intervals"
+  ]
+}

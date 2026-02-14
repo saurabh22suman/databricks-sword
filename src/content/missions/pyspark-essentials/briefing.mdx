@@ -1,0 +1,59 @@
+# Mission Briefing: PySpark Essentials
+
+## The Situation
+
+TechCorp's lakehouse pilot succeeded (nice work!). Now the data team faces a new challenge: **scalability**.
+
+The marketing team needs to analyze **5 billion user events** from the past year to identify churn risk. They tried running a Pandas script on their laptop. It crashed after 3 hours with an out-of-memory error.
+
+Traditional tools can't handle this volume:
+- **Pandas:** Single-threaded, works on one machine's RAM (~16GB limit)
+- **SQL on small clusters:** Fast for queries, slow for complex transformations
+- **Manual scripts:** 100+ hours to process 5B rows sequentially
+
+The VP of Data wants **distributed processing** — spread the work across 20 machines in parallel.
+
+## The Opportunity
+
+**PySpark** is Python's interface to Apache Spark, a distributed processing engine that can:
+- Process **petabytes** of data across hundreds of machines
+- Automatically **parallelize** operations across cluster nodes
+- Provide a **DataFrame API** similar to Pandas (but distributed)
+- Handle **fault tolerance** — if a node fails, Spark recovers automatically
+
+Industry adoption is massive:
+- **Netflix:** Processes 1 trillion events/day with PySpark
+- **Uber:** 100+ petabytes of data on Spark
+- **Apple:** 10,000+ Spark jobs daily for ML training
+- **Airbnb:** Real-time pricing with PySpark Streaming
+
+## Your Mission
+
+Build a **PySpark transformation pipeline** to analyze user events:
+
+1. **Load** 5 billion event records from Delta Lake
+2. **Filter** for specific event types (page_view, click, purchase)
+3. **GroupBy** user_id to aggregate behavior metrics
+4. **Join** with customer dimension table
+5. **Write** results back to Delta Lake
+6. **Understand** Spark's execution model (driver, executors, tasks)
+
+## Success Criteria
+
+- **DataFrame pipeline** with 5+ transformations
+- **Lazy evaluation** demonstrated (transformations vs actions)
+- **Distributed read/write** from/to Delta Lake
+- **Performance understanding** (partitions, shuffle, broadcast)
+
+## The Stakes
+
+If PySpark works for this pilot, TechCorp will adopt it as the **standard** for all large-scale data processing. This replaces:
+- **50+ manual scripts** (saving 200 hours/month)
+- **Expensive ETL tools** (saving $120K/year in licensing)
+- **Slow SQL batch jobs** (10x faster processing)
+
+This is your chance to unlock **petabyte-scale analytics** for the company.
+
+---
+
+**Next Step:** Architecture Diagram — Understand the Spark execution model

@@ -1,0 +1,56 @@
+{
+  "id": "lakehouse-platform-design",
+  "title": "Lakehouse Platform Design",
+  "subtitle": "Capstone: Enterprise Architecture",
+  "description": "Design a complete enterprise Lakehouse platform integrating medallion architecture, governance, security, cost optimization, and multi-team workflows.",
+  "industry": "enterprise",
+  "rank": "S",
+  "xpRequired": 4000,
+  "xpReward": 1100,
+  "estimatedMinutes": 75,
+  "prerequisites": [
+    "medallion-architecture",
+    "performance-tuning",
+    "production-pipelines"
+  ],
+  "primaryFeatures": [
+    "Platform Architecture",
+    "Multi-Team Design",
+    "Cost Optimization",
+    "Security Architecture",
+    "Disaster Recovery"
+  ],
+  "stages": [
+    {
+      "id": "briefing",
+      "type": "briefing",
+      "title": "Mission Briefing"
+    },
+    {
+      "id": "diagram",
+      "type": "diagram",
+      "title": "Platform Architecture"
+    },
+    {
+      "id": "drag-drop",
+      "type": "drag-drop",
+      "title": "Design the Platform"
+    },
+    {
+      "id": "fill-blank",
+      "type": "fill-blank",
+      "title": "Configure the Platform"
+    },
+    {
+      "id": "quiz",
+      "type": "quiz",
+      "title": "Knowledge Check"
+    },
+    {
+      "id": "debrief",
+      "type": "debrief",
+      "title": "Mission Debrief"
+    }
+  ],
+  "sideQuests": []
+}

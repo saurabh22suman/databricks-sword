@@ -1,0 +1,59 @@
+{
+  "description": "Arrange the workflow setup steps in the correct order to build GlobalShip's daily ETL pipeline.",
+  "instructions": "Think about building a scheduled workflow: What container holds tasks? What resources do tasks need? What's the natural ETL order? Pattern: create container \u2192 configure compute \u2192 define task DAG \u2192 schedule.",
+  "blocks": [
+    {
+      "id": "create-job",
+      "code": "Create a new Databricks Workflow (Job)",
+      "label": "Create the Job"
+    },
+    {
+      "id": "add-ingest",
+      "code": "Add Task 1: ingest_raw_data (Notebook)",
+      "label": "Add Ingestion Task"
+    },
+    {
+      "id": "add-transform",
+      "code": "Add Task 2: transform_data (depends_on: ingest_raw_data)",
+      "label": "Add Transform Task"
+    },
+    {
+      "id": "add-report",
+      "code": "Add Task 3: generate_report (depends_on: transform_data)",
+      "label": "Add Report Task"
+    },
+    {
+      "id": "configure-cluster",
+      "code": "Set job cluster: Standard_DS3_v2, min 2, max 8 workers, auto-terminate",
+      "label": "Configure Job Cluster"
+    },
+    {
+      "id": "set-schedule",
+      "code": "Set schedule: cron 0 6 * * * (daily at 6 AM UTC)",
+      "label": "Set Schedule"
+    }
+  ],
+  "correctOrder": [
+    "create-job",
+    "configure-cluster",
+    "add-ingest",
+    "add-transform",
+    "add-report",
+    "set-schedule"
+  ],
+  "hints": [
+    "Create the job container first",
+    "Configure compute before adding tasks",
+    "Ingestion is always the first data task",
+    "Transform depends on raw data being loaded",
+    "Reports depend on transformed data",
+    "Schedule is the last configuration step"
+  ],
+  "learnings": [
+    "Define job parameters before creating tasks",
+    "Tasks can depend on other tasks for execution order",
+    "Clusters can be job-scoped or shared across tasks",
+    "Retries and alerts handle failures gracefully",
+    "Schedule triggers automate recurring workflows"
+  ]
+}

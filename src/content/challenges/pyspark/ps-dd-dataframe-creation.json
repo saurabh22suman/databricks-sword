@@ -1,0 +1,46 @@
+{
+  "id": "ps-dd-dataframe-creation",
+  "title": "Order DataFrame Creation Methods",
+  "category": "pyspark",
+  "difficulty": "B",
+  "format": "drag-drop",
+  "description": "Arrange the PySpark DataFrame creation methods from most common to most specialized use cases.",
+  "hints": [
+    "Reading files is the most common data source",
+    "Creating from RDDs is used for custom processing",
+    "Range is typically for testing/demo purposes"
+  ],
+  "xpReward": 75,
+  "optimalSolution": "spark.read (most common) \u2192 spark.createDataFrame (from list/RDD) \u2192 spark.sql (from query) \u2192 spark.range (for testing)",
+  "explanation": "DataFrame creation in Spark varies by use case. spark.read is the primary method for production data. createDataFrame handles in-memory data or RDD conversion. sql() enables DataFrame creation from SQL queries. range() generates test data.",
+  "dragDrop": {
+    "blocks": [
+      {
+        "id": "read",
+        "code": "df = spark.read.parquet('/data/events/')",
+        "label": "Read Files"
+      },
+      {
+        "id": "create",
+        "code": "df = spark.createDataFrame([(1, 'a'), (2, 'b')], ['id', 'name'])",
+        "label": "From List"
+      },
+      {
+        "id": "sql",
+        "code": "df = spark.sql('SELECT * FROM table')",
+        "label": "From SQL"
+      },
+      {
+        "id": "range",
+        "code": "df = spark.range(1000)",
+        "label": "Range (Testing)"
+      }
+    ],
+    "correctOrder": [
+      "read",
+      "create",
+      "sql",
+      "range"
+    ]
+  }
+}

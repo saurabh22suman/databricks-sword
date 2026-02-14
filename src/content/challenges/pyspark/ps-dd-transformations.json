@@ -1,0 +1,46 @@
+{
+  "id": "ps-dd-transformations",
+  "title": "Order PySpark Transformations",
+  "category": "pyspark",
+  "difficulty": "B",
+  "format": "drag-drop",
+  "description": "Arrange the PySpark transformation steps in the correct order to read a CSV, filter rows, select columns, and write the result.",
+  "hints": [
+    "Start with the data source read operation",
+    "Filtering should happen before selecting to reduce data volume",
+    "Writing is always the final action that triggers execution"
+  ],
+  "xpReward": 75,
+  "optimalSolution": "df = spark.read.csv('data.csv', header=True)\ndf_filtered = df.filter(col('amount') > 100)\ndf_selected = df_filtered.select('customer_id', 'amount')\ndf_selected.write.parquet('/output/result')",
+  "explanation": "PySpark transformations are lazy \u2014 they build a logical plan. Actions like write() trigger execution. Filtering early reduces the data that flows through subsequent transformations, improving performance.",
+  "dragDrop": {
+    "blocks": [
+      {
+        "id": "read",
+        "code": "df = spark.read.csv('data.csv', header=True)",
+        "label": "Read CSV"
+      },
+      {
+        "id": "filter",
+        "code": "df_filtered = df.filter(col('amount') > 100)",
+        "label": "Filter Rows"
+      },
+      {
+        "id": "select",
+        "code": "df_selected = df_filtered.select('customer_id', 'amount')",
+        "label": "Select Columns"
+      },
+      {
+        "id": "write",
+        "code": "df_selected.write.parquet('/output/result')",
+        "label": "Write Output"
+      }
+    ],
+    "correctOrder": [
+      "read",
+      "filter",
+      "select",
+      "write"
+    ]
+  }
+}

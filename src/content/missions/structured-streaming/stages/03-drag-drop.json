@@ -1,0 +1,59 @@
+{
+  "description": "Arrange the Structured Streaming pipeline steps in the correct order to process NovaPay transactions in real time.",
+  "instructions": "Think about stream processing flow: Where does data enter? What must be set BEFORE time-based aggregation? Pattern: source \u2192 watermark \u2192 aggregate \u2192 filter \u2192 sink \u2192 activate.",
+  "blocks": [
+    {
+      "id": "read-stream",
+      "code": "spark.readStream.format('delta').table('raw_transactions')",
+      "label": "Read from Source Stream"
+    },
+    {
+      "id": "add-watermark",
+      "code": ".withWatermark('event_time', '10 minutes')",
+      "label": "Add Watermark for Late Data"
+    },
+    {
+      "id": "window-agg",
+      "code": ".groupBy(window('event_time', '5 minutes'), 'merchant_id').agg(sum('amount'))",
+      "label": "Window Aggregation"
+    },
+    {
+      "id": "filter-suspicious",
+      "code": ".filter(col('sum(amount)') > 50000)",
+      "label": "Filter Suspicious Activity"
+    },
+    {
+      "id": "write-stream",
+      "code": ".writeStream.format('delta').outputMode('append')",
+      "label": "Write to Delta Sink"
+    },
+    {
+      "id": "start-query",
+      "code": ".trigger(processingTime='10 seconds').option('checkpointLocation', '/checkpoints/fraud').start()",
+      "label": "Start with Trigger & Checkpoint"
+    }
+  ],
+  "correctOrder": [
+    "read-stream",
+    "add-watermark",
+    "window-agg",
+    "filter-suspicious",
+    "write-stream",
+    "start-query"
+  ],
+  "hints": [
+    "Start by reading from the source stream",
+    "Watermarks must be set before any aggregation",
+    "groupBy with window() creates time-based aggregations",
+    "Filter after aggregation to find suspicious patterns",
+    "writeStream configures the sink before starting",
+    "trigger() and checkpointLocation go in the start() call"
+  ],
+  "learnings": [
+    "readStream initiates the streaming source connection",
+    "Transformations define the pipeline logic",
+    "Watermarks handle late-arriving data gracefully",
+    "Checkpointing enables exactly-once processing",
+    "writeStream outputs to the sink with the trigger interval"
+  ]
+}

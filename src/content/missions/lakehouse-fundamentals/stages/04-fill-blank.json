@@ -1,0 +1,92 @@
+{
+  "description": "Complete the SQL statements to create and manage a customer table with proper Delta Lake syntax.",
+  "expectedOutput": "When completed correctly, this code will:\n1. Create a 'customers' table with STRING IDs, INT purchase counts, stored as DELTA format\n2. Insert 2 customer records (Alice and Bob)\n3. Increment Alice's purchase count from 0 to 1\n4. Filter to show only customers with purchases > 0, sorted newest first",
+  "codeTemplate": "-- Create a customer table with Delta Lake\nCREATE TABLE customers (\n    customer_id __BLANK_0__,\n    name STRING,\n    email STRING,\n    signup_date DATE,\n    total_purchases __BLANK_1__\n) USING __BLANK_2__\nLOCATION '__BLANK_3__';\n\n-- Insert customer records\nINSERT INTO customers VALUES\n  ('C001', 'Alice Johnson', 'alice@example.com', '2024-01-10', 0),\n  ('C002', 'Bob Smith', 'bob@example.com', '2024-01-11', 0);\n\n-- Update purchase count\nUPDATE customers\nSET total_purchases = __BLANK_4__\nWHERE customer_id = 'C001';\n\n-- Query with filtering\nSELECT * FROM customers\nWHERE total_purchases __BLANK_5__ 0\nORDER BY signup_date __BLANK_6__;",
+  "blanks": [
+    {
+      "id": 0,
+      "options": [
+        "STRING",
+        "INT",
+        "VARCHAR(50)",
+        "TEXT"
+      ],
+      "correctAnswer": "STRING"
+    },
+    {
+      "id": 1,
+      "options": [
+        "INT",
+        "BIGINT",
+        "DECIMAL",
+        "DOUBLE"
+      ],
+      "correctAnswer": "INT"
+    },
+    {
+      "id": 2,
+      "options": [
+        "DELTA",
+        "PARQUET",
+        "ORC",
+        "CSV"
+      ],
+      "correctAnswer": "DELTA"
+    },
+    {
+      "id": 3,
+      "options": [
+        "/mnt/data/customers",
+        "/tmp/customers",
+        "s3://bucket/customers",
+        "./customers"
+      ],
+      "correctAnswer": "/mnt/data/customers"
+    },
+    {
+      "id": 4,
+      "options": [
+        "1",
+        "total_purchases + 1",
+        "COUNT(*)",
+        "SUM(amount)"
+      ],
+      "correctAnswer": "total_purchases + 1"
+    },
+    {
+      "id": 5,
+      "options": [
+        ">",
+        ">=",
+        "=",
+        "!="
+      ],
+      "correctAnswer": ">"
+    },
+    {
+      "id": 6,
+      "options": [
+        "DESC",
+        "ASC",
+        "NULLS FIRST",
+        "NULLS LAST"
+      ],
+      "correctAnswer": "DESC"
+    }
+  ],
+  "hints": [
+    "Delta Lake tables use 'USING DELTA' in CREATE TABLE syntax",
+    "STRING is the preferred type for IDs in Databricks (not VARCHAR)",
+    "INT is sufficient for counting purchases (no decimals needed)",
+    "Mounted storage paths typically use /mnt/ prefix",
+    "UPDATE can reference the existing column value (e.g., column + 1)",
+    "DESC sorts from newest to oldest for dates"
+  ],
+  "learnings": [
+    "STRING is preferred over VARCHAR for IDs in Databricks",
+    "USING DELTA specifies the Delta Lake format for ACID transactions",
+    "INT is sufficient for count columns (no decimals needed)",
+    "Mounted paths use /mnt/ prefix in Databricks",
+    "Column expressions (column + 1) can reference existing values in UPDATE"
+  ]
+}

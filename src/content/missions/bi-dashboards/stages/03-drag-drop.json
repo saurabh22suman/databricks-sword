@@ -1,0 +1,59 @@
+{
+  "description": "Arrange the BI dashboard creation workflow in the correct order.",
+  "instructions": "Think about what a dashboard needs to function: What provides compute to run queries? What defines the data before you can visualize it? What makes queries reusable? Pattern: compute \u2192 data \u2192 flexibility \u2192 visualization \u2192 alerting \u2192 automation.",
+  "blocks": [
+    {
+      "id": "warehouse",
+      "code": "Create a Pro SQL Warehouse with size Small and auto-stop after 10 minutes",
+      "label": "Configure SQL Warehouse"
+    },
+    {
+      "id": "query",
+      "code": "Write SQL queries for KPIs: daily_revenue, inventory_levels, regional_sales",
+      "label": "Write SQL Queries"
+    },
+    {
+      "id": "params",
+      "code": "Add date_range and region parameters to make queries interactive",
+      "label": "Add Query Parameters"
+    },
+    {
+      "id": "dashboard",
+      "code": "Create Lakeview dashboard with charts, tables, and counter visualizations",
+      "label": "Build Dashboard"
+    },
+    {
+      "id": "alert",
+      "code": "Create SQL alert: trigger when inventory_level < 50 for any SKU",
+      "label": "Set Up Alerts"
+    },
+    {
+      "id": "schedule",
+      "code": "Schedule dashboard refresh every 15 minutes during business hours",
+      "label": "Schedule Refresh"
+    }
+  ],
+  "correctOrder": [
+    "warehouse",
+    "query",
+    "params",
+    "dashboard",
+    "alert",
+    "schedule"
+  ],
+  "hints": [
+    "SQL Warehouse provides the compute \u2014 must exist first",
+    "Queries define the data before visualization",
+    "Parameters make queries reusable across regions/dates",
+    "Dashboards visualize the parameterized queries",
+    "Alerts monitor query results for threshold breaches",
+    "Scheduled refresh keeps dashboards up to date automatically"
+  ],
+  "learnings": [
+    "SQL warehouses provide compute for queries",
+    "Parameters make queries interactive",
+    "Visualizations transform data into insights",
+    "Dashboards combine multiple visualizations",
+    "Alerts notify when metrics cross thresholds"
+  ]
+}

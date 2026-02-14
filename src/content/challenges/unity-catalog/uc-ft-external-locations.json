@@ -1,0 +1,20 @@
+{
+  "id": "uc-ft-external-locations",
+  "title": "Configure External Location with Storage Credential",
+  "category": "unity-catalog",
+  "difficulty": "S",
+  "format": "free-text",
+  "description": "Write SQL statements to create a storage credential referencing an Azure service principal, create an external location pointing to an ADLS Gen2 container, and create an external table using that location.",
+  "hints": [
+    "CREATE STORAGE CREDENTIAL requires Azure service principal details",
+    "CREATE EXTERNAL LOCATION references the storage credential",
+    "External tables use LOCATION instead of storing data in Unity Catalog managed storage"
+  ],
+  "xpReward": 150,
+  "optimalSolution": "-- Create storage credential with Azure service principal\nCREATE STORAGE CREDENTIAL azure_cred\nWITH (\n  AZURE_SERVICE_PRINCIPAL = (\n    DIRECTORY_ID = 'tenant-id',\n    APPLICATION_ID = 'app-id',\n    CLIENT_SECRET = 'secret'\n  )\n);\n\n-- Create external location\nCREATE EXTERNAL LOCATION adls_sales\nURL 'abfss://container@storage.dfs.core.windows.net/sales/'\nWITH (STORAGE CREDENTIAL azure_cred);\n\n-- Create external table\nCREATE EXTERNAL TABLE main.sales.orders\nLOCATION 'abfss://container@storage.dfs.core.windows.net/sales/orders/'\nAS SELECT * FROM parquet.`/tmp/orders`;",
+  "explanation": "External locations enable Unity Catalog to govern data stored outside Databricks-managed storage. Storage credentials securely store cloud provider authentication. This pattern is essential for organizations migrating existing data lakes to Unity Catalog governance.",
+  "freeText": {
+    "validationRegex": "STORAGE CREDENTIAL|EXTERNAL LOCATION|AZURE_SERVICE_PRINCIPAL|abfss://",
+    "sampleAnswer": "CREATE STORAGE CREDENTIAL my_cred WITH (AZURE_SERVICE_PRINCIPAL = (...));\nCREATE EXTERNAL LOCATION my_loc URL 'abfss://...' WITH (STORAGE CREDENTIAL my_cred);"
+  }
+}

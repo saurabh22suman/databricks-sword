@@ -1,0 +1,101 @@
+{
+  "instructions": "Optimize the Performance Stack! Arrange components to show how Databricks accelerates queries through optimizer, engine, and storage tuning.",
+  "components": [
+    {
+      "id": "aqe",
+      "label": "Adaptive Query Execution",
+      "icon": "zap"
+    },
+    {
+      "id": "photon",
+      "label": "Photon Engine (C++)",
+      "icon": "cpu"
+    },
+    {
+      "id": "partitioning",
+      "label": "Z-ORDER / Liquid Clustering",
+      "icon": "grid"
+    },
+    {
+      "id": "caching",
+      "label": "Delta & SQL Cache",
+      "icon": "hard-drive"
+    },
+    {
+      "id": "broadcast",
+      "label": "Broadcast Joins",
+      "icon": "radio"
+    }
+  ],
+  "dropZones": [
+    {
+      "id": "zone-1",
+      "label": "Query Optimizer",
+      "position": {
+        "x": 100,
+        "y": 50
+      }
+    },
+    {
+      "id": "zone-2",
+      "label": "Execution Engine",
+      "position": {
+        "x": 350,
+        "y": 50
+      }
+    },
+    {
+      "id": "zone-3",
+      "label": "Data Layout",
+      "position": {
+        "x": 100,
+        "y": 200
+      }
+    },
+    {
+      "id": "zone-4",
+      "label": "Memory Layer",
+      "position": {
+        "x": 350,
+        "y": 200
+      }
+    },
+    {
+      "id": "zone-5",
+      "label": "Join Strategy",
+      "position": {
+        "x": 225,
+        "y": 320
+      }
+    }
+  ],
+  "correctPlacements": [
+    {
+      "componentId": "aqe",
+      "zoneId": "zone-1"
+    },
+    {
+      "componentId": "photon",
+      "zoneId": "zone-2"
+    },
+    {
+      "componentId": "partitioning",
+      "zoneId": "zone-3"
+    },
+    {
+      "componentId": "caching",
+      "zoneId": "zone-4"
+    },
+    {
+      "componentId": "broadcast",
+      "zoneId": "zone-5"
+    }
+  ],
+  "learnings": [
+    "Adaptive Query Execution: Runtime optimization of joins, skew handling, and partitions",
+    "Photon Engine: Native C++ vectorized engine - up to 10x faster than Spark",
+    "Z-ORDER/Liquid Clustering: Colocate related data for aggressive data skipping",
+    "Delta/SQL Cache: Automatically caches frequently accessed data in memory",
+    "Broadcast Joins: Replicate small tables to all nodes for faster joins"
+  ]
+}

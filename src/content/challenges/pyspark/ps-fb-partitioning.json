@@ -1,0 +1,51 @@
+{
+  "id": "ps-fb-partitioning",
+  "title": "Complete the Partitioning Strategy",
+  "category": "pyspark",
+  "difficulty": "A",
+  "format": "fill-blank",
+  "description": "Fill in the blanks to repartition a DataFrame by a key column with a specific number of partitions, then write with partition columns for optimized queries.",
+  "hints": [
+    "repartition() reshuffles by hash of key column",
+    "partitionBy() creates file system partitions on write",
+    "coalesce() reduces partitions without full shuffle"
+  ],
+  "xpReward": 125,
+  "optimalSolution": "df.repartition(100, 'customer_id')\n  .write\n  .partitionBy('region', 'date')\n  .parquet('/output/events')",
+  "explanation": "Repartition controls in-memory parallelism by hash-distributing rows. partitionBy creates a file-system directory structure that enables partition pruning during reads. Use repartition for join/aggregation optimization and partitionBy for query performance.",
+  "fillBlank": {
+    "codeTemplate": "df.__BLANK_0__(100, 'customer_id')\n  .write\n  .__BLANK_1__('region', 'date')\n  .__BLANK_2__('/output/events')",
+    "blanks": [
+      {
+        "id": 0,
+        "correctAnswer": "repartition",
+        "options": [
+          "repartition",
+          "coalesce",
+          "partition",
+          "distribute"
+        ]
+      },
+      {
+        "id": 1,
+        "correctAnswer": "partitionBy",
+        "options": [
+          "partitionBy",
+          "repartition",
+          "bucketBy",
+          "sortBy"
+        ]
+      },
+      {
+        "id": 2,
+        "correctAnswer": "parquet",
+        "options": [
+          "parquet",
+          "save",
+          "write",
+          "output"
+        ]
+      }
+    ]
+  }
+}

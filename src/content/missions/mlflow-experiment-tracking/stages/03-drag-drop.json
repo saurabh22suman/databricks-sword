@@ -1,0 +1,59 @@
+{
+  "description": "Arrange the MLflow experiment-to-production workflow in the correct order.",
+  "instructions": "Think about the MLflow tracking lifecycle: What container groups related runs? What do you log at the START vs AFTER evaluation? Pattern: experiment context \u2192 run \u2192 parameters \u2192 metrics \u2192 registry \u2192 production alias.",
+  "blocks": [
+    {
+      "id": "create-exp",
+      "code": "mlflow.set_experiment('/Shared/credit-scoring-experiment')",
+      "label": "Create/Set Experiment"
+    },
+    {
+      "id": "start-run",
+      "code": "with mlflow.start_run(run_name='xgboost-v3'):",
+      "label": "Start Tracked Run"
+    },
+    {
+      "id": "log-params",
+      "code": "mlflow.log_param('learning_rate', 0.01)\nmlflow.log_param('max_depth', 6)",
+      "label": "Log Parameters"
+    },
+    {
+      "id": "log-metrics",
+      "code": "mlflow.log_metric('auc', 0.94)\nmlflow.log_metric('f1_score', 0.88)",
+      "label": "Log Metrics"
+    },
+    {
+      "id": "register",
+      "code": "mlflow.register_model(model_uri, 'credit-scoring-model')",
+      "label": "Register Best Model"
+    },
+    {
+      "id": "alias",
+      "code": "client.set_registered_model_alias('credit-scoring-model', 'Champion', version=3)",
+      "label": "Set Production Alias"
+    }
+  ],
+  "correctOrder": [
+    "create-exp",
+    "start-run",
+    "log-params",
+    "log-metrics",
+    "register",
+    "alias"
+  ],
+  "hints": [
+    "Set the experiment context before starting any runs",
+    "Each run is a single training attempt within an experiment",
+    "Log parameters at the start of the run",
+    "Log metrics after model evaluation",
+    "Register the best-performing model in the Model Registry",
+    "Aliases route traffic to the right model version"
+  ],
+  "learnings": [
+    "Create experiments to organize related runs",
+    "Log parameters to track what you tried",
+    "Log metrics to measure model performance",
+    "Log artifacts to save models and visualizations",
+    "Register models for production deployment"
+  ]
+}

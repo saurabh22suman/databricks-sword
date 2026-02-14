@@ -1,0 +1,73 @@
+{
+  "id": "mlflow-experiment-tracking",
+  "title": "MLflow Experiment Tracking",
+  "subtitle": "Master experiment management, model registry, and reproducible ML workflows",
+  "description": "Deep-dive into MLflow's experiment tracking, model versioning, and registry workflows. Learn to organize runs, compare metrics, log artifacts, and promote models through staging to production.",
+  "industry": "finance",
+  "rank": "A",
+  "xpRequired": 500,
+  "xpReward": 500,
+  "estimatedMinutes": 55,
+  "primaryFeatures": [
+    "MLflow Experiments",
+    "Model Registry",
+    "Run Comparison",
+    "Artifact Logging",
+    "Model Versioning"
+  ],
+  "prerequisites": [
+    "ml-foundations"
+  ],
+  "databricksEnabled": false,
+  "stages": [
+    {
+      "id": "briefing",
+      "title": "Mission Briefing",
+      "type": "briefing",
+      "configFile": "stages/01-briefing.json",
+      "xpReward": 0,
+      "estimatedMinutes": 5
+    },
+    {
+      "id": "diagram",
+      "title": "MLflow Registry Architecture",
+      "type": "diagram",
+      "configFile": "stages/02-diagram.json",
+      "xpReward": 50,
+      "estimatedMinutes": 10
+    },
+    {
+      "id": "drag-drop-pipeline",
+      "title": "Build Experiment Workflow",
+      "type": "drag-drop",
+      "configFile": "stages/03-drag-drop.json",
+      "xpReward": 75,
+      "estimatedMinutes": 12
+    },
+    {
+      "id": "fill-blank-mlflow",
+      "title": "Configure MLflow Registry",
+      "type": "fill-blank",
+      "configFile": "stages/04-fill-blank.json",
+      "xpReward": 75,
+      "estimatedMinutes": 15
+    },
+    {
+      "id": "quiz",
+      "title": "Knowledge Check",
+      "type": "quiz",
+      "configFile": "stages/05-quiz.json",
+      "xpReward": 50,
+      "estimatedMinutes": 8
+    },
+    {
+      "id": "debrief",
+      "title": "Mission Debrief",
+      "type": "debrief",
+      "configFile": "stages/06-debrief.json",
+      "xpReward": 0,
+      "estimatedMinutes": 5
+    }
+  ],
+  "sideQuests": []
+}

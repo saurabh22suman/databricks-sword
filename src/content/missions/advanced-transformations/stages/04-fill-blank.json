@@ -1,0 +1,93 @@
+{
+  "description": "Complete the advanced PySpark transformation code using window functions and UDFs.",
+  "expectedOutput": "When completed correctly, this code will:\n1. Import window functions from pyspark.sql.window\n2. Define partition-based window specifications\n3. Calculate running totals with sum().over(window)\n4. Add row rankings within each partition\n5. Compute lag values to compare with previous rows",
+  "codeTemplate": "from pyspark.sql.window import Window\nfrom pyspark.sql.functions import col, row_number, sum, lag, udf\nfrom pyspark.sql.types import StringType\n\n# Define window spec partitioned by category, ordered by date\nwindow_spec = Window.__BLANK_0__(\"category\").__BLANK_1__(\"sale_date\")\n\n# Running total of sales within each category\ndf = df.withColumn(\"running_total\",\n    __BLANK_2__(\"amount\").over(window_spec))\n\n# Rank products by revenue within category\nrank_spec = Window.partitionBy(\"category\").orderBy(col(\"revenue\").__BLANK_3__())\ndf = df.withColumn(\"revenue_rank\",\n    __BLANK_4__().over(rank_spec))\n\n# Get previous month's sales using lag\ndf = df.withColumn(\"prev_month_sales\",\n    __BLANK_5__(\"amount\", 1).over(window_spec))\n\n# Create a UDF for loyalty tier\ndef loyalty_tier(total_spend):\n    if total_spend > 10000: return \"Platinum\"\n    elif total_spend > 5000: return \"Gold\"\n    elif total_spend > 1000: return \"Silver\"\n    return \"Bronze\"\n\nloyalty_udf = __BLANK_6__(loyalty_tier, StringType())",
+  "blanks": [
+    {
+      "id": 0,
+      "options": [
+        "partitionBy",
+        "groupBy",
+        "orderBy",
+        "sortBy"
+      ],
+      "correctAnswer": "partitionBy"
+    },
+    {
+      "id": 1,
+      "options": [
+        "orderBy",
+        "sortBy",
+        "groupBy",
+        "filter"
+      ],
+      "correctAnswer": "orderBy"
+    },
+    {
+      "id": 2,
+      "options": [
+        "sum",
+        "count",
+        "avg",
+        "max"
+      ],
+      "correctAnswer": "sum"
+    },
+    {
+      "id": 3,
+      "options": [
+        "desc",
+        "asc",
+        "reverse",
+        "descending"
+      ],
+      "correctAnswer": "desc"
+    },
+    {
+      "id": 4,
+      "options": [
+        "row_number",
+        "rank",
+        "dense_rank",
+        "ntile"
+      ],
+      "correctAnswer": "row_number"
+    },
+    {
+      "id": 5,
+      "options": [
+        "lag",
+        "lead",
+        "first",
+        "last"
+      ],
+      "correctAnswer": "lag"
+    },
+    {
+      "id": 6,
+      "options": [
+        "udf",
+        "pandas_udf",
+        "register_udf",
+        "create_udf"
+      ],
+      "correctAnswer": "udf"
+    }
+  ],
+  "hints": [
+    "Window.partitionBy() defines the partition for window calculations",
+    "orderBy() sets the ordering within partitions",
+    "sum().over(window) calculates running totals",
+    "desc() orders from highest to lowest",
+    "row_number() gives unique sequential numbers",
+    "lag(col, 1) gets the previous row's value",
+    "udf() wraps a Python function for Spark execution"
+  ],
+  "learnings": [
+    "ROWS BETWEEN defines the window frame bounds",
+    "UNBOUNDED PRECEDING starts from partition beginning",
+    "CURRENT ROW is the current row in calculations",
+    "LAG() accesses previous row values",
+    "LEAD() accesses next row values"
+  ]
+}

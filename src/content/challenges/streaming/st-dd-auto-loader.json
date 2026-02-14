@@ -1,0 +1,53 @@
+{
+  "id": "st-dd-auto-loader",
+  "title": "Build an Auto Loader Pipeline",
+  "category": "streaming",
+  "difficulty": "B",
+  "format": "drag-drop",
+  "description": "Arrange the PySpark code blocks to set up Auto Loader for incrementally ingesting JSON files from cloud storage into a Delta table.",
+  "hints": [
+    "readStream with cloudFiles format reads new files incrementally",
+    "Schema location stores inferred schema for consistency",
+    "Checkpoint location tracks which files have been processed"
+  ],
+  "xpReward": 100,
+  "optimalSolution": "df = spark.readStream.format('cloudFiles').option('cloudFiles.format', 'json').option('cloudFiles.schemaLocation', '/schema/events').load('s3://bucket/landing/events/')\ndf.writeStream.format('delta').option('checkpointLocation', '/checkpoints/events').trigger(availableNow=True).start('/delta/bronze/events')",
+  "explanation": "Auto Loader (cloudFiles format) efficiently discovers and processes new files from cloud storage. It uses file notification services for scalable file discovery and handles schema inference/evolution automatically. The schema location persists inferred schemas, while the checkpoint location tracks processing state for exactly-once guarantees.",
+  "dragDrop": {
+    "blocks": [
+      {
+        "id": "b1",
+        "code": "df = spark.readStream"
+      },
+      {
+        "id": "b2",
+        "code": ".format('cloudFiles')"
+      },
+      {
+        "id": "b3",
+        "code": ".option('cloudFiles.format', 'json')"
+      },
+      {
+        "id": "b4",
+        "code": ".option('cloudFiles.schemaLocation', '/schema/events')"
+      },
+      {
+        "id": "b5",
+        "code": ".load('s3://bucket/landing/events/')"
+      },
+      {
+        "id": "b6",
+        "code": "df.writeStream.format('delta')"
+      },
+      {
+        "id": "b7",
+        "code": ".option('checkpointLocation', '/checkpoints/events')"
+      },
+      {
+        "id": "b8",
+        "code": ".trigger(availableNow=True).start('/delta/bronze/events')"
+      }
+    ],
+    "correctOrder": ["b1", "b2", "b3", "b4", "b5", "b6", "b7", "b8"]
+  }
+}

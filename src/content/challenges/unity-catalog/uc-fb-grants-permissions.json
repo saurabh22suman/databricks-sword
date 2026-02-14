@@ -1,0 +1,51 @@
+{
+  "id": "uc-fb-grants-permissions",
+  "title": "Complete the GRANT Statement",
+  "category": "unity-catalog",
+  "difficulty": "A",
+  "format": "fill-blank",
+  "description": "Fill in the blanks to grant SELECT permission on a schema to a group, and USE CATALOG permission to access the parent catalog.",
+  "hints": [
+    "GRANT is followed by the privilege name",
+    "ON specifies the object type and name",
+    "TO specifies the principal (user/group)"
+  ],
+  "xpReward": 125,
+  "optimalSolution": "GRANT USE CATALOG ON CATALOG main TO `data-analysts`;\nGRANT SELECT ON SCHEMA main.sales TO `data-analysts`;",
+  "explanation": "Unity Catalog permissions are inherited but explicit grants are needed at each level. USE CATALOG is required to access any objects within a catalog. SELECT on a schema grants read access to all current and future tables in that schema.",
+  "fillBlank": {
+    "codeTemplate": "__BLANK_0__ USE CATALOG __BLANK_1__ CATALOG main TO `data-analysts`;\nGRANT __BLANK_2__ ON SCHEMA main.sales TO `data-analysts`;",
+    "blanks": [
+      {
+        "id": 0,
+        "correctAnswer": "GRANT",
+        "options": [
+          "GRANT",
+          "ALLOW",
+          "PERMIT",
+          "GIVE"
+        ]
+      },
+      {
+        "id": 1,
+        "correctAnswer": "ON",
+        "options": [
+          "ON",
+          "FOR",
+          "TO",
+          "AT"
+        ]
+      },
+      {
+        "id": 2,
+        "correctAnswer": "SELECT",
+        "options": [
+          "SELECT",
+          "READ",
+          "VIEW",
+          "ACCESS"
+        ]
+      }
+    ]
+  }
+}

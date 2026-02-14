@@ -1,0 +1,64 @@
+---
+title: "BI Dashboards"
+subtitle: "Interactive analytics with Databricks SQL and Lakeview"
+---
+
+# MISSION BRIEFING: Operation Glass Dashboard
+
+**OPERATIVE CLASSIFICATION:** A-Rank — BI Track
+
+---
+
+## SITUATION REPORT
+
+**Client:** NovaMart — a national retail chain with 800 stores, 12,000 SKUs, and $4.2B annual revenue.
+
+**Crisis:** Their BI team uses legacy Tableau/Power BI dashboards connected to a data warehouse that's 6 hours stale. Store managers make inventory decisions on yesterday's data. The VP of Analytics wants real-time dashboards directly on the Lakehouse — no data copies, no ETL delays. They also need self-service analytics with parameterized views so each regional manager sees only their region's data.
+
+**Your Mission:** Build a production BI dashboard system using Databricks SQL: configure SQL Warehouses for optimal cost/performance, create Lakeview dashboards with parameters, set up alerts for KPI breaches, and schedule automated refreshes.
+
+---
+
+## INTELLIGENCE BRIEFING
+
+### Databricks BI Stack
+
+**SQL Warehouses** are the compute layer for BI:
+- **Serverless SQL Warehouse:** Instant startup, pay-per-query, best for ad-hoc
+- **Pro SQL Warehouse:** Dedicated endpoints, predictive caching, best for dashboards
+- **Classic SQL Warehouse:** Legacy, being deprecated
+
+**Lakeview Dashboards** are Databricks-native:
+- Drag-and-drop visualization builder
+- SQL-backed — every chart is a SQL query
+- Parameters for interactivity (date range, region, category)
+- Sharing via URL with row-level security via Unity Catalog
+- Auto-refresh schedules (every 5min, hourly, daily)
+
+**SQL Alerts** monitor your data:
+- Run a query on a schedule
+- Trigger when a condition is met (e.g., inventory < threshold)
+- Notify via Slack, email, or webhook
+- Pair with scheduled queries for automated reporting
+
+### Why This Matters
+
+- Dashboard directly on Lakehouse = no data copies, no staleness
+- Parameters give self-service without separate dashboards per team
+- Alerts turn passive dashboards into active monitoring
+- SQL Warehouses with caching make dashboards feel instant
+
+---
+
+## MISSION OBJECTIVES
+
+1. **Map the BI dashboard architecture** — SQL Warehouse → Queries → Dashboards → Alerts
+2. **Build the dashboard workflow** — From data preparation to published dashboard
+3. **Implement dashboard and alert configuration** — Parameters, visualizations, alerts
+4. **Validate your knowledge** — Prove mastery of Databricks BI
+
+---
+
+*"Our store managers shouldn't need a data engineering degree to see their sales. Give them dashboards that just work."*
+
+**— VP Analytics, NovaMart**

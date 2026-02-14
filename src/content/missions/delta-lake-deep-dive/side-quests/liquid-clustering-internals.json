@@ -1,0 +1,65 @@
+{
+  "questions": [
+    {
+      "id": "liquid-1",
+      "question": "What problem does Liquid Clustering solve that traditional partitioning struggles with?",
+      "options": [
+        "Data compression",
+        "Multi-dimensional filtering on columns that aren't well-suited for static partitions",
+        "Data deduplication",
+        "Schema evolution"
+      ],
+      "correctAnswer": 1,
+      "explanation": "Liquid Clustering uses a space-filling curve (Hilbert curve) to cluster data across multiple columns, enabling efficient filtering even when query patterns change or columns have high cardinality—unlike static partitions which are fixed at write time."
+    },
+    {
+      "id": "liquid-2",
+      "question": "How does Liquid Clustering differ from Z-ORDER optimization?",
+      "options": [
+        "They are exactly the same",
+        "Liquid Clustering is incremental and automatic; Z-ORDER requires full table rewrites",
+        "Z-ORDER is faster than Liquid Clustering",
+        "Liquid Clustering only works on string columns"
+      ],
+      "correctAnswer": 1,
+      "explanation": "Z-ORDER requires running OPTIMIZE on the entire table. Liquid Clustering is incremental—new data is automatically clustered, and you can run OPTIMIZE FULL to recluster existing data without rewriting everything."
+    },
+    {
+      "id": "liquid-3",
+      "question": "What is a 'space-filling curve' in the context of data clustering?",
+      "options": [
+        "A type of data encryption",
+        "A mathematical function that maps multi-dimensional data to a single dimension while preserving locality",
+        "A method for compressing images",
+        "A network routing algorithm"
+      ],
+      "correctAnswer": 1,
+      "explanation": "Space-filling curves (like Hilbert curves) map multi-dimensional points to a one-dimensional line while keeping nearby points close together. This enables efficient range scans across multiple columns using a single ordering."
+    },
+    {
+      "id": "liquid-4",
+      "question": "Why is Liquid Clustering considered 'write-optimized' compared to traditional partitioning?",
+      "options": [
+        "It compresses data better",
+        "Data lands in optimal clusters without upfront partition planning; reorganization happens lazily",
+        "It uses less storage",
+        "It disables ACID transactions"
+      ],
+      "correctAnswer": 1,
+      "explanation": "Traditional partitioning requires choosing partition columns upfront—wrong choices cause performance issues. Liquid Clustering lets data land quickly, then intelligently reorganizes it in the background based on actual access patterns."
+    },
+    {
+      "id": "liquid-5",
+      "question": "When should you consider using Liquid Clustering over traditional partitioning?",
+      "options": [
+        "When you have exactly one filter column with low cardinality",
+        "When query patterns are unpredictable or filter on multiple high-cardinality columns",
+        "When you need the smallest possible storage footprint",
+        "When you never run OPTIMIZE"
+      ],
+      "correctAnswer": 1,
+      "explanation": "Liquid Clustering shines when queries filter on multiple columns, when filter columns have high cardinality (e.g., user_id), or when query patterns evolve over time. Traditional partitioning is still fine for simple, predictable access patterns on low-cardinality columns."
+    }
+  ],
+  "passingScore": 60
+}

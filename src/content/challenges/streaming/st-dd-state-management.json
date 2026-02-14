@@ -1,0 +1,46 @@
+{
+  "id": "st-dd-state-management",
+  "title": "Order Stateful Streaming Operations",
+  "category": "streaming",
+  "difficulty": "A",
+  "format": "drag-drop",
+  "description": "Arrange stateful streaming operations from least to most state complexity, considering memory requirements.",
+  "hints": [
+    "Stateless operations don't accumulate state",
+    "Watermark is required for bounded state",
+    "aggregation with state timeout expires old keys"
+  ],
+  "xpReward": 125,
+  "optimalSolution": "Stateless (filter/map) \u2192 Deduplication \u2192 Windowed aggregation \u2192 Arbitrary stateful (mapGroupsWithState)",
+  "explanation": "State complexity increases with operation type. Stateless ops need no memory. Deduplication tracks seen keys. Windowed aggregations maintain per-window state. Arbitrary stateful processing (mapGroupsWithState) requires manual state management and timeout handling.",
+  "dragDrop": {
+    "blocks": [
+      {
+        "id": "stateless",
+        "code": "df.filter(...).select(...)",
+        "label": "Stateless (filter/select)"
+      },
+      {
+        "id": "dedup",
+        "code": "df.dropDuplicates(['event_id'])",
+        "label": "Deduplication"
+      },
+      {
+        "id": "window",
+        "code": "df.groupBy(window('timestamp', '1 hour')).agg(...)",
+        "label": "Windowed Aggregation"
+      },
+      {
+        "id": "custom",
+        "code": "df.groupByKey(...).mapGroupsWithState(...)",
+        "label": "Custom State (most complex)"
+      }
+    ],
+    "correctOrder": [
+      "stateless",
+      "dedup",
+      "window",
+      "custom"
+    ]
+  }
+}

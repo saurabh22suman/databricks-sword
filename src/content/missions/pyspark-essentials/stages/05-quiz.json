@@ -1,0 +1,96 @@
+{
+  "questions": [
+    {
+      "id": "q1",
+      "question": "What is the difference between a transformation and an action in PySpark?",
+      "options": [
+        "Transformations are lazy (build DAG), actions trigger execution",
+        "Transformations modify data, actions read data",
+        "Transformations run on driver, actions run on executors",
+        "Transformations are faster, actions are slower"
+      ],
+      "correctAnswer": "Transformations are lazy (build DAG), actions trigger execution",
+      "explanation": "Transformations (filter, select, groupBy) are lazy operations that build an execution plan (DAG). Actions (count, collect, write) trigger actual computation on the cluster."
+    },
+    {
+      "id": "q2",
+      "question": "Which of the following is an ACTION (not a transformation)?",
+      "options": [
+        "count()",
+        "filter()",
+        "select()",
+        "groupBy()"
+      ],
+      "correctAnswer": "count()",
+      "explanation": "count() is an action that triggers execution and returns a result to the driver. filter(), select(), and groupBy() are transformations that build the execution plan lazily."
+    },
+    {
+      "id": "q3",
+      "question": "What does the Spark Driver do?",
+      "options": [
+        "Orchestrates execution, builds DAG, schedules tasks",
+        "Stores all data in memory",
+        "Executes transformations on data partitions",
+        "Manages cluster hardware resources"
+      ],
+      "correctAnswer": "Orchestrates execution, builds DAG, schedules tasks",
+      "explanation": "The Spark Driver runs the main program, builds the execution plan (DAG), and schedules tasks to executors. It orchestrates but doesn't process data itself."
+    },
+    {
+      "id": "q4",
+      "question": "What is a partition in PySpark?",
+      "options": [
+        "A subset of data processed by a single task",
+        "A file format for storage",
+        "A node in the cluster",
+        "A database table"
+      ],
+      "correctAnswer": "A subset of data processed by a single task",
+      "explanation": "Partitions are logical splits of the dataset. Each partition is processed by one task on one executor core. More partitions = more parallelism (up to a point)."
+    },
+    {
+      "id": "q5",
+      "question": "Why should you avoid calling collect() on large DataFrames?",
+      "options": [
+        "It brings all data to the driver, causing out-of-memory errors",
+        "It's slower than show()",
+        "It deletes the data from executors",
+        "It only works on small tables"
+      ],
+      "correctAnswer": "It brings all data to the driver, causing out-of-memory errors",
+      "explanation": "collect() gathers ALL rows from executors to the driver. On large datasets (millions+ rows), this exceeds driver memory and crashes the application. Use take(n) or write to storage instead."
+    },
+    {
+      "id": "q6",
+      "question": "What is lazy evaluation in PySpark?",
+      "options": [
+        "Transformations build an execution plan without running until an action is called",
+        "Slow execution due to network latency",
+        "Delayed startup time for Spark clusters",
+        "Loading data incrementally from disk"
+      ],
+      "correctAnswer": "Transformations build an execution plan without running until an action is called",
+      "explanation": "Lazy evaluation means Spark doesn't execute transformations immediately. It builds a DAG (plan) and optimizes it before running when an action (count, write) is called."
+    },
+    {
+      "id": "q7",
+      "question": "Which operation causes a shuffle in PySpark (expensive network transfer)?",
+      "options": [
+        "groupBy()",
+        "filter()",
+        "select()",
+        "withColumn()"
+      ],
+      "correctAnswer": "groupBy()",
+      "explanation": "groupBy() requires shuffling data across executors so that all rows with the same key end up on the same partition. filter(), select(), and withColumn() are narrow transformations (no shuffle)."
+    }
+  ],
+  "passingScore": 70,
+  "learnings": [
+    "SparkSession is the entry point to all Spark functionality",
+    "Transformations are lazy - they build a DAG, not execute",
+    "Actions trigger execution of the transformation DAG",
+    "Partitions enable parallel processing across the cluster",
+    "Caching persists data in memory for repeated access"
+  ]
+}

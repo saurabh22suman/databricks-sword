@@ -1,0 +1,71 @@
+---
+title: "Semantic Layer & Governance"
+subtitle: "Data products, AI/BI Genie, and enterprise governance"
+---
+
+# MISSION BRIEFING: Operation Crystal Lens
+
+**OPERATIVE CLASSIFICATION:** S-Rank — BI Track (Capstone)
+
+---
+
+## SITUATION REPORT
+
+**Client:** OmniGroup Holdings — a Fortune 500 conglomerate with 8 business units, 3,000 analysts, and 500+ dashboards.
+
+**Crisis:** Every business unit defines "revenue" differently. Marketing counts gross bookings, Finance counts net after refunds, and Operations counts fulfilled orders only. When the CEO asks "What's our revenue?", she gets three different answers. Furthermore, analysts without SQL skills can't self-serve, creating a bottleneck on the BI team. The CDO demands a single source of truth with natural language access.
+
+**Your Mission:** Build the semantic layer: governed data products with standard metric definitions, AI/BI Genie for natural language analytics, data contracts to prevent breaking changes, and row-level security so each business unit sees only their data.
+
+---
+
+## INTELLIGENCE BRIEFING
+
+### The Semantic Layer
+
+A semantic layer sits between raw data and business users, providing:
+
+**Data Products** — Curated, documented, discoverable datasets:
+- Published in Unity Catalog with rich metadata
+- Quality expectations defined via data contracts
+- Versioned with SLA commitments
+- Discoverable via Catalog Explorer search
+
+**AI/BI Genie** — Natural language analytics:
+- Business users ask questions in plain English
+- Genie translates to SQL using table metadata and metric definitions
+- Governed by UC permissions — users only see authorized data
+- Learns from feedback and curated instructions
+
+**Metric Layer** — Standard business definitions:
+- Company-wide metric definitions (revenue = net after refunds)
+- Encoded as SQL views with documentation
+- Version-controlled — changes require approval
+- Referenced by dashboards, reports, and Genie
+
+**Data Contracts** — Stability guarantees:
+- Schema expectations: required columns, types, constraints
+- Freshness SLAs: data updated within X hours
+- Quality rules: null rate < 1%, unique keys enforced
+- Breaking change prevention: schema evolution with compatibility checks
+
+**Row-Level Security (RLS)** — Multi-tenant access:
+- Dynamic views that filter data based on user identity
+- Each business unit sees only their rows
+- Transparent to dashboards — same dashboard, different data
+- Implemented via Unity Catalog dynamic views
+
+---
+
+## MISSION OBJECTIVES
+
+1. **Map the semantic layer architecture** — Data products → Metric layer → Genie → Consumers
+2. **Build a governed data product** — From Gold table to published, documented data product
+3. **Implement security and contracts** — RLS, column masking, schema contracts
+4. **Validate mastery** — Prove expertise in enterprise BI governance
+
+---
+
+*"Three answers to one question isn't analytics — it's chaos. Give me one truth, accessible to everyone."*
+
+**— CDO, OmniGroup Holdings**

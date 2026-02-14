@@ -1,0 +1,96 @@
+{
+  "questions": [
+    {
+      "id": "q1",
+      "question": "What is the primary benefit of Databricks Feature Store over manual feature engineering?",
+      "options": [
+        "Features computed once and shared across models with point-in-time correctness and online serving",
+        "It makes models train faster",
+        "It automatically selects the best features",
+        "It replaces the need for data cleaning"
+      ],
+      "correctAnswer": "Features computed once and shared across models with point-in-time correctness and online serving",
+      "explanation": "Feature Store centralizes feature definitions so they're computed once and reused. Point-in-time correctness prevents data leakage, and online tables enable real-time feature lookups for serving."
+    },
+    {
+      "id": "q2",
+      "question": "What does 'scale to zero' mean for a model serving endpoint?",
+      "options": [
+        "The endpoint shuts down compute when idle and starts up on the first request, saving costs",
+        "The model accuracy drops to zero",
+        "The endpoint scales to the smallest instance type",
+        "The model is deleted when not in use"
+      ],
+      "correctAnswer": "The endpoint shuts down compute when idle and starts up on the first request, saving costs",
+      "explanation": "Scale-to-zero eliminates idle costs. When no requests arrive, compute is released. The first request triggers a cold start (a few seconds), then the endpoint auto-scales based on traffic."
+    },
+    {
+      "id": "q3",
+      "question": "In a Champion/Challenger deployment, what happens if the Challenger model underperforms?",
+      "options": [
+        "Traffic is automatically routed back to 100% Champion, and the Challenger is rolled back",
+        "The Challenger replaces the Champion anyway",
+        "Both models are deleted",
+        "An alert is sent but no action is taken"
+      ],
+      "correctAnswer": "Traffic is automatically routed back to 100% Champion, and the Challenger is rolled back",
+      "explanation": "The Champion/Challenger pattern is a safety mechanism. If the Challenger's metrics (accuracy, latency) don't meet thresholds, traffic shifts back to 100% Champion automatically."
+    },
+    {
+      "id": "q4",
+      "question": "What is the difference between data drift and concept drift?",
+      "options": [
+        "Data drift: input features change distribution. Concept drift: the relationship between features and target changes.",
+        "Data drift is about volume, concept drift is about variety",
+        "Data drift is slow, concept drift is fast",
+        "They are the same thing"
+      ],
+      "correctAnswer": "Data drift: input features change distribution. Concept drift: the relationship between features and target changes.",
+      "explanation": "Data drift means your inputs look different (e.g., transaction amounts increase). Concept drift means the rules changed (e.g., a new fraud pattern emerges). Both degrade model performance but require different responses."
+    },
+    {
+      "id": "q5",
+      "question": "[Recall: MLflow] How do you load a model for inference using its Champion alias?",
+      "options": [
+        "mlflow.pyfunc.load_model('models:/model-name@Champion')",
+        "mlflow.load('Champion')",
+        "mlflow.registry.get('model-name', alias='Champion')",
+        "Model.load(alias='Champion')"
+      ],
+      "correctAnswer": "mlflow.pyfunc.load_model('models:/model-name@Champion')",
+      "explanation": "Recall from MLflow Experiment Tracking: The models:/ URI with @alias syntax loads the model version pointed to by that alias. This is the standard way to reference production models."
+    },
+    {
+      "id": "q6",
+      "question": "[Recall: MLflow] What does mlflow.log_metric() record?",
+      "options": [
+        "Numeric performance measurements like accuracy, F1 score, or AUC",
+        "Hyperparameters used for training",
+        "The model binary file",
+        "Training data samples"
+      ],
+      "correctAnswer": "Numeric performance measurements like accuracy, F1 score, or AUC",
+      "explanation": "Recall from MLflow Experiment Tracking: log_metric records output metrics (performance), while log_param records input hyperparameters. This distinction is key for experiment comparison."
+    },
+    {
+      "id": "q7",
+      "question": "[Recall: Unity Catalog] How does Unity Catalog govern model access in production?",
+      "options": [
+        "GRANT permissions on registered models control who can deploy, serve, or query models",
+        "Models are ungoverned in Unity Catalog",
+        "Only the model creator can access it",
+        "All models are public by default"
+      ],
+      "correctAnswer": "GRANT permissions on registered models control who can deploy, serve, or query models",
+      "explanation": "Recall from Unity Catalog Governance: UC applies the same GRANT/REVOKE model to ML assets. Teams need EXECUTE permission to query a serving endpoint and USE MODEL permission to deploy."
+    }
+  ],
+  "passingScore": 70,
+  "learnings": [
+    "Feature Store centralizes feature engineering",
+    "Model Registry versions production models",
+    "Model Serving provides real-time inference",
+    "Online tables enable low-latency feature lookup",
+    "Monitoring detects data and model drift"
+  ]
+}

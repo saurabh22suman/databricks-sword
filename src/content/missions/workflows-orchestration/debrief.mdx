@@ -1,0 +1,44 @@
+# Mission Debrief: Workflows & Orchestration
+
+## Mission Complete
+
+GlobalShip's daily ETL now runs as a fully orchestrated workflow with automatic retries, conditional branching, and real-time alerts. No more manual execution.
+
+## What You Learned
+
+### Job Architecture
+- **Multi-task jobs** — DAG-based execution with dependencies between tasks
+- **Task types** — Notebooks, Python scripts, SQL, JARs, dbt tasks, DLT pipelines
+- **Job clusters vs all-purpose clusters** — job clusters are cheaper (auto-created, auto-terminated)
+
+### Task Dependencies
+- **Sequential** — Task B depends on Task A completing successfully
+- **Parallel** — Tasks B and C run simultaneously after Task A
+- **Conditional** — `if_else` conditions based on task values or outcomes
+
+### Reliability Patterns
+- **Retry policies** — automatic retries with configurable max attempts and delay
+- **Timeout settings** — prevent runaway tasks from blocking the pipeline
+- **Email/webhook alerts** — notifications on failure, success, or duration exceeds threshold
+
+### Scheduling & Triggers
+- **Cron schedules** — `0 6 * * *` for daily 6 AM runs
+- **File arrival triggers** — start jobs when new data lands in cloud storage
+- **Continuous triggers** — for streaming jobs that should always be running
+
+### Monitoring
+- **Run history** — view past executions, durations, and failure reasons
+- **Gantt charts** — visualize task parallelism and bottlenecks
+- **Cost tracking** — monitor DBU consumption per job
+
+## Key Takeaways
+
+1. Use job clusters (not all-purpose) for production workflows
+2. Set retry policies on tasks prone to transient failures
+3. Use conditional tasks for error handling branches
+4. Schedule with file arrival triggers when possible for event-driven pipelines
+5. Set up alerts on both failure and long-running conditions
+
+## Next Steps
+
+Your orchestration skills combine with governance to unlock **Data Quality Framework** — where you'll build validation rules into your pipelines.

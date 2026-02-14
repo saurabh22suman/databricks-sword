@@ -1,0 +1,72 @@
+{
+  "questions": [
+    {
+      "id": "q1",
+      "question": "What is the purpose of mlflow.set_experiment()?",
+      "options": [
+        "Sets the active experiment context so all subsequent runs are grouped together",
+        "Deletes an existing experiment",
+        "Exports experiment data to CSV",
+        "Creates a new MLflow server"
+      ],
+      "correctAnswer": "Sets the active experiment context so all subsequent runs are grouped together",
+      "explanation": "set_experiment creates or activates a named experiment. All subsequent mlflow.start_run() calls will create runs under this experiment, keeping related training attempts organized."
+    },
+    {
+      "id": "q2",
+      "question": "What is the difference between mlflow.log_param() and mlflow.log_metric()?",
+      "options": [
+        "log_param records hyperparameters (inputs), log_metric records performance measures (outputs)",
+        "log_param is for strings, log_metric is for integers",
+        "log_param stores in the registry, log_metric stores locally",
+        "They are aliases for the same function"
+      ],
+      "correctAnswer": "log_param records hyperparameters (inputs), log_metric records performance measures (outputs)",
+      "explanation": "Parameters are the inputs you choose (learning_rate, max_depth), while metrics are the outputs you measure (accuracy, AUC). This distinction enables comparing runs by what changed (params) vs what improved (metrics)."
+    },
+    {
+      "id": "q3",
+      "question": "In the Unity Catalog Model Registry, what replaced Staging/Production stages?",
+      "options": [
+        "Model Aliases (Champion, Challenger, etc.)",
+        "Model Tags",
+        "Model Flavors",
+        "Model Signatures"
+      ],
+      "correctAnswer": "Model Aliases (Champion, Challenger, etc.)",
+      "explanation": "Aliases are flexible labels that point to specific model versions. Unlike the old fixed stages, aliases are customizable — you can have Champion, Challenger, Canary, or any deployment pattern."
+    },
+    {
+      "id": "q4",
+      "question": "How do you load a registered model for inference using its alias?",
+      "options": [
+        "mlflow.pyfunc.load_model('models:/model-name@Champion')",
+        "mlflow.load_model('Champion')",
+        "mlflow.get_model('model-name', stage='Champion')",
+        "mlflow.registry.load('Champion')"
+      ],
+      "correctAnswer": "mlflow.pyfunc.load_model('models:/model-name@Champion')",
+      "explanation": "The models:/ URI scheme with @alias syntax loads the model version that has the specified alias. This decouples deployment routing from version numbers."
+    },
+    {
+      "id": "q5",
+      "question": "[Recall: ML Foundations] What are the THREE levels of MLflow's experiment hierarchy?",
+      "options": [
+        "Experiment → Run → Artifact",
+        "Model → Version → Stage",
+        "Pipeline → Step → Output",
+        "Workspace → Notebook → Cell"
+      ],
+      "correctAnswer": "Experiment → Run → Artifact",
+      "explanation": "Recall from ML Foundations: An Experiment groups related Runs. Each Run logs parameters, metrics, and Artifacts (model files, plots, data)."
+    }
+  ],
+  "passingScore": 70,
+  "learnings": [
+    "Experiments organize related training runs",
+    "Parameters capture configuration settings",
+    "Metrics track model performance",
+    "Artifacts store models and visualizations",
+    "Model Registry manages model lifecycle"
+  ]
+}

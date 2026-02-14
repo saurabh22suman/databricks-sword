@@ -1,0 +1,101 @@
+{
+  "instructions": "Build the Data Quality Pipeline! Arrange components to show how Delta Live Tables expectations validate data at different severity levels.",
+  "components": [
+    {
+      "id": "raw-data",
+      "label": "Raw Ingestion Layer",
+      "icon": "download"
+    },
+    {
+      "id": "expect-warn",
+      "label": "EXPECT (Warn Only)",
+      "icon": "alert-triangle"
+    },
+    {
+      "id": "expect-drop",
+      "label": "EXPECT OR DROP",
+      "icon": "x-circle"
+    },
+    {
+      "id": "expect-fail",
+      "label": "EXPECT OR FAIL",
+      "icon": "alert-octagon"
+    },
+    {
+      "id": "quarantine",
+      "label": "Quarantine Table",
+      "icon": "archive"
+    }
+  ],
+  "dropZones": [
+    {
+      "id": "zone-1",
+      "label": "Data Source",
+      "position": {
+        "x": 50,
+        "y": 150
+      }
+    },
+    {
+      "id": "zone-2",
+      "label": "Non-Critical Check",
+      "position": {
+        "x": 250,
+        "y": 50
+      }
+    },
+    {
+      "id": "zone-3",
+      "label": "Filter Invalid",
+      "position": {
+        "x": 250,
+        "y": 150
+      }
+    },
+    {
+      "id": "zone-4",
+      "label": "Critical Check",
+      "position": {
+        "x": 250,
+        "y": 250
+      }
+    },
+    {
+      "id": "zone-5",
+      "label": "Invalid Records",
+      "position": {
+        "x": 500,
+        "y": 150
+      }
+    }
+  ],
+  "correctPlacements": [
+    {
+      "componentId": "raw-data",
+      "zoneId": "zone-1"
+    },
+    {
+      "componentId": "expect-warn",
+      "zoneId": "zone-2"
+    },
+    {
+      "componentId": "expect-drop",
+      "zoneId": "zone-3"
+    },
+    {
+      "componentId": "expect-fail",
+      "zoneId": "zone-4"
+    },
+    {
+      "componentId": "quarantine",
+      "zoneId": "zone-5"
+    }
+  ],
+  "learnings": [
+    "Raw Ingestion: Source data enters the pipeline before quality checks",
+    "EXPECT (Warn): Logs violations but allows records through - for monitoring",
+    "EXPECT OR DROP: Filters out invalid records silently - for non-critical rules",
+    "EXPECT OR FAIL: Stops the pipeline on violations - for critical business rules",
+    "Quarantine Table: Stores invalid records for investigation and reprocessing"
+  ]
+}

@@ -1,0 +1,79 @@
+{
+  "id": "performance-tuning",
+  "title": "Performance Tuning",
+  "subtitle": "AQE, Photon & Optimization",
+  "description": "Master Spark performance optimization: Adaptive Query Execution, Photon engine, partitioning strategies, caching, and broadcast joins.",
+  "industry": "gaming",
+  "rank": "A",
+  "xpRequired": 1500,
+  "xpReward": 750,
+  "estimatedMinutes": 60,
+  "prerequisites": [
+    "advanced-transformations",
+    "delta-lake-deep-dive"
+  ],
+  "primaryFeatures": [
+    "Adaptive Query Execution",
+    "Photon Engine",
+    "Partitioning",
+    "Caching",
+    "Broadcast Joins",
+    "Spill Prevention"
+  ],
+  "stages": [
+    {
+      "id": "briefing",
+      "type": "briefing",
+      "title": "Mission Briefing"
+    },
+    {
+      "id": "diagram",
+      "type": "diagram",
+      "title": "Optimization Layers"
+    },
+    {
+      "id": "drag-drop",
+      "type": "drag-drop",
+      "title": "Optimize the Query"
+    },
+    {
+      "id": "fill-blank",
+      "type": "fill-blank",
+      "title": "Tuning Configuration"
+    },
+    {
+      "id": "quiz",
+      "type": "quiz",
+      "title": "Knowledge Check"
+    },
+    {
+      "id": "debrief",
+      "type": "debrief",
+      "title": "Mission Debrief"
+    }
+  ],
+  "sideQuests": [
+    {
+      "id": "spark-ui-deep-dive",
+      "title": "Mastering the Spark UI",
+      "ossProject": "Apache Spark",
+      "trigger": "after",
+      "parentStageId": "diagram",
+      "type": "quiz",
+      "configFile": "side-quests/spark-ui-deep-dive.json",
+      "xpBonus": 100,
+      "optional": true
+    },
+    {
+      "id": "photon-engine",
+      "title": "Photon: Databricks Native Query Engine",
+      "ossProject": "Photon",
+      "trigger": "after",
+      "parentStageId": "drag-drop",
+      "type": "quiz",
+      "configFile": "side-quests/photon-engine.json",
+      "xpBonus": 100,
+      "optional": true
+    }
+  ]
+}

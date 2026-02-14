@@ -1,0 +1,86 @@
+{
+  "id": "advanced-sql-analytics",
+  "title": "Advanced SQL Analytics",
+  "subtitle": "Master CTEs, window functions, materialized views, and query optimization",
+  "description": "Level up your SQL skills for Databricks. Master Common Table Expressions (CTEs), advanced window functions, materialized views for performance, and query optimization techniques that make dashboards snappy.",
+  "industry": "media",
+  "rank": "A",
+  "xpRequired": 500,
+  "xpReward": 500,
+  "estimatedMinutes": 55,
+  "primaryFeatures": [
+    "CTEs",
+    "Window Functions",
+    "Materialized Views",
+    "Query Optimization",
+    "EXPLAIN Plans"
+  ],
+  "prerequisites": [
+    "advanced-transformations",
+    "bi-dashboards"
+  ],
+  "databricksEnabled": false,
+  "stages": [
+    {
+      "id": "briefing",
+      "title": "Mission Briefing",
+      "type": "briefing",
+      "configFile": "stages/01-briefing.json",
+      "xpReward": 0,
+      "estimatedMinutes": 5
+    },
+    {
+      "id": "diagram",
+      "title": "SQL Query Execution Flow",
+      "type": "diagram",
+      "configFile": "stages/02-diagram.json",
+      "xpReward": 50,
+      "estimatedMinutes": 10
+    },
+    {
+      "id": "drag-drop-pipeline",
+      "title": "Build Advanced Query",
+      "type": "drag-drop",
+      "configFile": "stages/03-drag-drop.json",
+      "xpReward": 75,
+      "estimatedMinutes": 12
+    },
+    {
+      "id": "fill-blank-sql",
+      "title": "Write Advanced SQL Patterns",
+      "type": "fill-blank",
+      "configFile": "stages/04-fill-blank.json",
+      "xpReward": 75,
+      "estimatedMinutes": 15
+    },
+    {
+      "id": "quiz",
+      "title": "Knowledge Check",
+      "type": "quiz",
+      "configFile": "stages/05-quiz.json",
+      "xpReward": 50,
+      "estimatedMinutes": 8
+    },
+    {
+      "id": "debrief",
+      "title": "Mission Debrief",
+      "type": "debrief",
+      "configFile": "stages/06-debrief.json",
+      "xpReward": 0,
+      "estimatedMinutes": 5
+    }
+  ],
+  "sideQuests": [
+    {
+      "id": "spark-sql-optimizer",
+      "title": "Inside the Catalyst Optimizer",
+      "ossProject": "Apache Spark SQL",
+      "trigger": "after",
+      "parentStageId": "diagram",
+      "type": "quiz",
+      "configFile": "side-quests/spark-sql-optimizer.json",
+      "xpBonus": 75,
+      "optional": true
+    }
+  ]
+}

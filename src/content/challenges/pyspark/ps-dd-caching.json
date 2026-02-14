@@ -1,0 +1,52 @@
+{
+  "id": "ps-dd-caching",
+  "title": "Order Caching Strategies by Priority",
+  "category": "pyspark",
+  "difficulty": "A",
+  "format": "drag-drop",
+  "description": "Arrange the Spark caching strategies from highest to lowest persistence priority, considering memory pressure scenarios.",
+  "hints": [
+    "MEMORY_ONLY is fastest but gets evicted first",
+    "DISK_ONLY survives memory pressure",
+    "Checkpointing survives driver restarts"
+  ],
+  "xpReward": 125,
+  "optimalSolution": "checkpoint() (most durable) \u2192 MEMORY_AND_DISK \u2192 DISK_ONLY \u2192 MEMORY_ONLY_SER \u2192 MEMORY_ONLY (least durable)",
+  "explanation": "Caching strategies trade off speed vs. durability. MEMORY_ONLY is fastest but evicted under memory pressure. Adding DISK preserves data. Serialization reduces memory footprint. Checkpointing writes to reliable storage and truncates lineage.",
+  "dragDrop": {
+    "blocks": [
+      {
+        "id": "checkpoint",
+        "code": "df.checkpoint()",
+        "label": "Checkpoint (most durable)"
+      },
+      {
+        "id": "memdisk",
+        "code": "df.persist(StorageLevel.MEMORY_AND_DISK)",
+        "label": "Memory + Disk Spillover"
+      },
+      {
+        "id": "disk",
+        "code": "df.persist(StorageLevel.DISK_ONLY)",
+        "label": "Disk Only"
+      },
+      {
+        "id": "memser",
+        "code": "df.persist(StorageLevel.MEMORY_ONLY_SER)",
+        "label": "Memory Serialized"
+      },
+      {
+        "id": "mem",
+        "code": "df.cache()",
+        "label": "Memory Only (least durable)"
+      }
+    ],
+    "correctOrder": [
+      "checkpoint",
+      "memdisk",
+      "disk",
+      "memser",
+      "mem"
+    ]
+  }
+}

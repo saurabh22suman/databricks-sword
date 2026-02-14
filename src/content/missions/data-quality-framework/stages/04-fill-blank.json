@@ -1,0 +1,82 @@
+{
+  "description": "Complete the Delta Live Tables expectations and quality rules.",
+  "expectedOutput": "When completed correctly, this code will:\n1. Define a DLT pipeline with quality expectations\n2. Apply soft constraints (warn but keep records)\n3. Apply hard constraints (drop invalid records)\n4. Define the clean output table\n5. Route rejected records to a quarantine table",
+  "codeTemplate": "import dlt\nfrom pyspark.sql.functions import *\n\n# Bronze: Raw clinical trial data\n@dlt.table\ndef raw_trials():\n    return spark.readStream.format('cloudFiles').load('/raw/trials')\n\n# Silver: Validated trials \u2014 drop rows with null patient\n@dlt.__BLANK_0__('valid_patient', 'patient_id IS NOT NULL')\n@dlt.table\ndef clean_trials():\n    return dlt.read_stream('raw_trials')\n\n# Warn but keep rows with unusual dosage\n@dlt.__BLANK_1__('valid_dosage', 'dosage BETWEEN 0.1 AND 1000')\n# Fail the entire pipeline if trial_id format is wrong\n@dlt.__BLANK_2__('valid_trial', \"trial_id RLIKE '^CT-[0-9]+$'\")\n@dlt.table\ndef validated_trials():\n    return dlt.read_stream('clean_trials')\n\n# Gold: Aggregate by trial\n@dlt.table\ndef trial_summary():\n    return (\n        dlt.__BLANK_3__('validated_trials')\n        .groupBy('trial_id')\n        .agg(\n            count('patient_id').alias('patient_count'),\n            avg('__BLANK_4__').alias('avg_dosage')\n        )\n    )\n\n# Quarantine: Capture dropped records\n@dlt.table\ndef quarantine_trials():\n    return (\n        dlt.read_stream('raw_trials')\n        .filter('patient_id IS __BLANK_5__')\n    )",
+  "blanks": [
+    {
+      "id": 0,
+      "options": [
+        "expect_or_drop",
+        "expect",
+        "expect_or_fail",
+        "validate"
+      ],
+      "correctAnswer": "expect_or_drop"
+    },
+    {
+      "id": 1,
+      "options": [
+        "expect",
+        "expect_or_drop",
+        "expect_or_fail",
+        "warn"
+      ],
+      "correctAnswer": "expect"
+    },
+    {
+      "id": 2,
+      "options": [
+        "expect_or_fail",
+        "expect",
+        "expect_or_drop",
+        "assert"
+      ],
+      "correctAnswer": "expect_or_fail"
+    },
+    {
+      "id": 3,
+      "options": [
+        "read",
+        "read_stream",
+        "load",
+        "table"
+      ],
+      "correctAnswer": "read"
+    },
+    {
+      "id": 4,
+      "options": [
+        "dosage",
+        "patient_id",
+        "trial_id",
+        "timestamp"
+      ],
+      "correctAnswer": "dosage"
+    },
+    {
+      "id": 5,
+      "options": [
+        "NULL",
+        "NOT NULL",
+        "EMPTY",
+        "MISSING"
+      ],
+      "correctAnswer": "NULL"
+    }
+  ],
+  "hints": [
+    "expect_or_drop removes records that violate the constraint",
+    "expect logs a warning but keeps the record",
+    "expect_or_fail halts the pipeline \u2014 use for critical validations",
+    "dlt.read() for batch reads from other DLT tables (gold aggregations)",
+    "We're averaging dosage values per trial",
+    "Quarantine captures records WHERE patient_id IS NULL"
+  ],
+  "learnings": [
+    "@dlt.expect() defines a data quality rule",
+    "on_violation_drop removes failing records",
+    "on_violation_fail stops pipeline on violation",
+    "@dlt.table creates a materialized table",
+    "spark.conf expectations configure pipeline behavior"
+  ]
+}

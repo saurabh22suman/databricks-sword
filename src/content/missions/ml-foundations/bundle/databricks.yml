@@ -1,0 +1,38 @@
+# Databricks Asset Bundle Configuration
+# Mission: ML Foundations
+# Learn MLflow and model training basics
+
+bundle:
+  name: dbsword-ml-foundations
+
+targets:
+  dev:
+    mode: development
+    default: true
+    workspace:
+      root_path: /Workspace/Users/${workspace.current_user.userName}/dbsword-ml-foundations
+
+resources:
+  schemas:
+    ml_foundations:
+      catalog_name: main
+      name: dbsword_ml_foundations
+      comment: "Databricks Sword - ML Foundations mission schema"
+
+  volumes:
+    data_volume:
+      catalog_name: main
+      schema_name: dbsword_ml_foundations
+      name: data
+      volume_type: MANAGED
+      comment: "Training data for ML Foundations exercises"
+
+sync:
+  include:
+    - notebooks/**
+    - data/**
+
+artifacts:
+  notebooks:
+    path: notebooks
+    deploy_to: /Workspace/Users/${workspace.current_user.userName}/dbsword-ml-foundations/notebooks

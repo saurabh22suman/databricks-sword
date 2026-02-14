@@ -1,0 +1,101 @@
+{
+  "instructions": "Build the Advanced SQL Toolkit! Arrange components to show how CTEs, window functions, and materialized views optimize complex analytics.",
+  "components": [
+    {
+      "id": "cte",
+      "label": "CTEs (WITH Clause)",
+      "icon": "layers"
+    },
+    {
+      "id": "window",
+      "label": "Window Functions",
+      "icon": "bar-chart-2"
+    },
+    {
+      "id": "materialized",
+      "label": "Materialized Views",
+      "icon": "database"
+    },
+    {
+      "id": "explain",
+      "label": "EXPLAIN Plan",
+      "icon": "search"
+    },
+    {
+      "id": "zorder",
+      "label": "Z-ORDER Index",
+      "icon": "grid"
+    }
+  ],
+  "dropZones": [
+    {
+      "id": "zone-1",
+      "label": "Query Composition",
+      "position": {
+        "x": 100,
+        "y": 50
+      }
+    },
+    {
+      "id": "zone-2",
+      "label": "Analytical Calculations",
+      "position": {
+        "x": 350,
+        "y": 50
+      }
+    },
+    {
+      "id": "zone-3",
+      "label": "Result Caching",
+      "position": {
+        "x": 100,
+        "y": 190
+      }
+    },
+    {
+      "id": "zone-4",
+      "label": "Execution Analysis",
+      "position": {
+        "x": 350,
+        "y": 190
+      }
+    },
+    {
+      "id": "zone-5",
+      "label": "Storage Optimization",
+      "position": {
+        "x": 225,
+        "y": 320
+      }
+    }
+  ],
+  "correctPlacements": [
+    {
+      "componentId": "cte",
+      "zoneId": "zone-1"
+    },
+    {
+      "componentId": "window",
+      "zoneId": "zone-2"
+    },
+    {
+      "componentId": "materialized",
+      "zoneId": "zone-3"
+    },
+    {
+      "componentId": "explain",
+      "zoneId": "zone-4"
+    },
+    {
+      "componentId": "zorder",
+      "zoneId": "zone-5"
+    }
+  ],
+  "learnings": [
+    "CTEs (WITH Clause): Break complex queries into readable, reusable sub-queries",
+    "Window Functions: Perform calculations across rows without grouping (rank, running totals)",
+    "Materialized Views: Pre-compute and cache expensive aggregations for fast access",
+    "EXPLAIN Plan: Understand query execution to identify optimization opportunities",
+    "Z-ORDER Index: Optimize data layout for column-based filtering predicates"
+  ]
+}

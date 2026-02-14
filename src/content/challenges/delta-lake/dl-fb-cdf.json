@@ -1,0 +1,51 @@
+{
+  "id": "dl-fb-cdf",
+  "title": "Complete the Change Data Feed Query",
+  "category": "delta-lake",
+  "difficulty": "A",
+  "format": "fill-blank",
+  "description": "Fill in the blanks to enable Change Data Feed on a Delta table and query the changes between two versions.",
+  "hints": [
+    "CDF is enabled with a table property",
+    "table_changes() is the function to read CDF",
+    "_change_type identifies insert/update/delete"
+  ],
+  "xpReward": 125,
+  "optimalSolution": "-- Enable CDF on existing table\nALTER TABLE orders SET TBLPROPERTIES (delta.enableChangeDataFeed = true);\n\n-- Query changes between versions\nSELECT * FROM table_changes('orders', 5, 10)\nWHERE _change_type IN ('insert', 'update_postimage');",
+  "explanation": "Change Data Feed (CDF) captures row-level changes in Delta tables. It records inserts, updates (before/after images), and deletes with version and timestamp metadata. CDF enables efficient incremental pipelines without scanning entire tables.",
+  "fillBlank": {
+    "codeTemplate": "-- Enable CDF\nALTER TABLE orders SET __BLANK_0__ (delta.__BLANK_1__ = true);\n\n-- Query changes\nSELECT * FROM __BLANK_2__('orders', 5, 10)\nWHERE _change_type IN ('insert', 'update_postimage');",
+    "blanks": [
+      {
+        "id": 0,
+        "correctAnswer": "TBLPROPERTIES",
+        "options": [
+          "TBLPROPERTIES",
+          "OPTIONS",
+          "SETTINGS",
+          "PROPERTIES"
+        ]
+      },
+      {
+        "id": 1,
+        "correctAnswer": "enableChangeDataFeed",
+        "options": [
+          "enableChangeDataFeed",
+          "changeFeed",
+          "enableCDF",
+          "trackChanges"
+        ]
+      },
+      {
+        "id": 2,
+        "correctAnswer": "table_changes",
+        "options": [
+          "table_changes",
+          "delta_changes",
+          "get_changes",
+          "read_changes"
+        ]
+      }
+    ]
+  }
+}

@@ -1,0 +1,77 @@
+{
+  "description": "Arrange the SQL query components in the correct order to build a multi-table JOIN query that analyzes customer orders.",
+  "instructions": "Remember the SQL clause order: What defines columns? What identifies the base table? How do you connect tables? The sacred order: SELECT \u2192 FROM \u2192 JOIN(s) \u2192 WHERE \u2192 GROUP BY \u2192 HAVING \u2192 ORDER BY.",
+  "blocks": [
+    {
+      "id": "select-clause",
+      "code": "SELECT \n  c.customer_id,\n  c.name,\n  COUNT(o.order_id) as total_orders,\n  SUM(oi.quantity * p.price) as total_spent",
+      "label": "SELECT Clause"
+    },
+    {
+      "id": "from-customers",
+      "code": "FROM customers c",
+      "label": "FROM Customers"
+    },
+    {
+      "id": "join-orders",
+      "code": "INNER JOIN orders o ON c.customer_id = o.customer_id",
+      "label": "JOIN Orders"
+    },
+    {
+      "id": "join-order-items",
+      "code": "INNER JOIN order_items oi ON o.order_id = oi.order_id",
+      "label": "JOIN Order Items"
+    },
+    {
+      "id": "join-products",
+      "code": "INNER JOIN products p ON oi.product_id = p.product_id",
+      "label": "JOIN Products"
+    },
+    {
+      "id": "where-clause",
+      "code": "WHERE o.order_date >= '2024-01-01'",
+      "label": "WHERE Filter"
+    },
+    {
+      "id": "group-by",
+      "code": "GROUP BY c.customer_id, c.name",
+      "label": "GROUP BY"
+    },
+    {
+      "id": "having-clause",
+      "code": "HAVING COUNT(o.order_id) > 5",
+      "label": "HAVING Filter"
+    },
+    {
+      "id": "order-by",
+      "code": "ORDER BY total_spent DESC",
+      "label": "ORDER BY"
+    }
+  ],
+  "correctOrder": [
+    "select-clause",
+    "from-customers",
+    "join-orders",
+    "join-order-items",
+    "join-products",
+    "where-clause",
+    "group-by",
+    "having-clause",
+    "order-by"
+  ],
+  "hints": [
+    "SQL query order: SELECT \u2192 FROM \u2192 JOIN \u2192 WHERE \u2192 GROUP BY \u2192 HAVING \u2192 ORDER BY",
+    "Start with the base table (customers) in FROM clause",
+    "Add JOINs one at a time, maintaining referential integrity",
+    "WHERE filters rows BEFORE aggregation, HAVING filters AFTER",
+    "GROUP BY must include all non-aggregated columns from SELECT",
+    "ORDER BY comes last to sort the final result"
+  ],
+  "learnings": [
+    "CTEs (WITH clause) make complex queries more readable",
+    "Window functions calculate values across related rows",
+    "Aggregations reduce many rows to summary statistics",
+    "JOINs combine data from multiple tables",
+    "ORDER BY and LIMIT control result set presentation"
+  ]
+}

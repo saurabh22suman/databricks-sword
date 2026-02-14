@@ -1,0 +1,20 @@
+{
+  "id": "sql-ft-dynamic-views",
+  "title": "Create Dynamic Views for Row-Level Security",
+  "category": "sql",
+  "difficulty": "S",
+  "format": "free-text",
+  "description": "Write SQL to create a dynamic view that filters data based on the current user's region. Use current_user() and a user-region mapping table to implement row-level security without using Unity Catalog row filters.",
+  "hints": [
+    "current_user() returns the logged-in user's email",
+    "Join with a mapping table to get allowed regions",
+    "EXISTS or IN clause filters rows dynamically"
+  ],
+  "xpReward": 150,
+  "optimalSolution": "-- Create user-region mapping\nCREATE TABLE user_regions (\n  user_email STRING,\n  allowed_region STRING\n);\n\n-- Insert mappings\nINSERT INTO user_regions VALUES\n  ('alice@company.com', 'EMEA'),\n  ('alice@company.com', 'NA'),\n  ('bob@company.com', 'APAC');\n\n-- Create dynamic view with row-level security\nCREATE OR REPLACE VIEW sales_secure AS\nSELECT s.*\nFROM sales s\nWHERE EXISTS (\n  SELECT 1 FROM user_regions ur\n  WHERE ur.user_email = current_user()\n    AND ur.allowed_region = s.region\n)\nOR current_user() IN ('admin@company.com', 'superuser@company.com');",
+  "explanation": "Dynamic views are a legacy pattern for row-level security before Unity Catalog row filters. They use current_user() to filter rows at query time. This approach is transparent to users \u2014 they query the view and see only their allowed data. Admin bypass clauses enable full access for privileged users.",
+  "freeText": {
+    "validationRegex": "current_user\\(\\)|CREATE.*VIEW|EXISTS|row.*level|security|allowed.*region",
+    "sampleAnswer": "CREATE VIEW sales_secure AS SELECT * FROM sales WHERE region IN (SELECT region FROM user_map WHERE user = current_user())"
+  }
+}

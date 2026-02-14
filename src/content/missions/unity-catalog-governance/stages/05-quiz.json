@@ -1,0 +1,96 @@
+{
+  "questions": [
+    {
+      "id": "q1",
+      "question": "What is the three-level namespace in Unity Catalog?",
+      "options": [
+        "catalog.schema.table",
+        "database.table.column",
+        "metastore.catalog.schema",
+        "workspace.folder.notebook"
+      ],
+      "correctAnswer": "catalog.schema.table",
+      "explanation": "Unity Catalog uses a three-level namespace: catalog.schema.table (or view). This replaces the flat two-level Hive model (database.table) and enables better organization and governance."
+    },
+    {
+      "id": "q2",
+      "question": "What does GRANT USAGE permission allow?",
+      "options": [
+        "Ability to see and reference the object but not read data",
+        "Full read and write access",
+        "Only write access",
+        "Administrative control"
+      ],
+      "correctAnswer": "Ability to see and reference the object but not read data",
+      "explanation": "USAGE is a prerequisite permission. It allows discovering the object (seeing it in lists) but doesn't grant data access. You need additional privileges like SELECT for reading data."
+    },
+    {
+      "id": "q3",
+      "question": "How does privilege cascading work in Unity Catalog?",
+      "options": [
+        "Permissions on a catalog automatically apply to all schemas and tables within",
+        "Permissions must be granted at every level separately",
+        "Permissions only cascade downward from schemas",
+        "There is no cascading — each object is independent"
+      ],
+      "correctAnswer": "Permissions on a catalog automatically apply to all schemas and tables within",
+      "explanation": "Granting a privilege on a catalog cascades to all children (schemas, tables). This enables efficient permission management — grant broad access at catalog level, restrict at lower levels."
+    },
+    {
+      "id": "q4",
+      "question": "What function is used in dynamic views for row-level security?",
+      "options": [
+        "current_user() to filter rows based on the executing user",
+        "row_filter() to limit access",
+        "secure_view() to create filtered output",
+        "auth_check() to verify permissions"
+      ],
+      "correctAnswer": "current_user() to filter rows based on the executing user",
+      "explanation": "Dynamic views use current_user() and is_member() functions in WHERE clauses to implement row-level security. Each user sees only the rows they're authorized to access."
+    },
+    {
+      "id": "q5",
+      "question": "What types of data lineage does Unity Catalog automatically track?",
+      "options": [
+        "Table-to-table lineage from SQL, Python, and pipeline operations",
+        "Only manual lineage entries",
+        "File-level dependencies only",
+        "Schema change history only"
+      ],
+      "correctAnswer": "Table-to-table lineage from SQL, Python, and pipeline operations",
+      "explanation": "Unity Catalog automatically captures lineage — which tables were read and written — from SQL queries, PySpark operations, and pipeline runs. This provides a full audit trail."
+    },
+    {
+      "id": "q6",
+      "question": "[Recall: SQL Analytics] What type of SQL object stores a precomputed result set?",
+      "options": [
+        "View",
+        "Index",
+        "Trigger",
+        "Procedure"
+      ],
+      "correctAnswer": "View",
+      "explanation": "Recall from SQL Analytics Intro: A view stores a SQL query (virtual table). In Unity Catalog, dynamic views extend this concept with row-level security using current_user()."
+    },
+    {
+      "id": "q7",
+      "question": "[Recall: Delta Lake] What Delta Lake feature enables auditing all changes to a table?",
+      "options": [
+        "DESCRIBE HISTORY",
+        "SHOW CHANGES",
+        "AUDIT TABLE",
+        "LOG TABLE"
+      ],
+      "correctAnswer": "DESCRIBE HISTORY",
+      "explanation": "Recall from Delta Lake Deep Dive: DESCRIBE HISTORY shows every operation performed on a Delta table — who changed what and when. Combined with Unity Catalog lineage, this provides end-to-end audit capability."
+    }
+  ],
+  "passingScore": 70,
+  "learnings": [
+    "Unity Catalog provides unified governance across workspaces",
+    "Three-level namespace: catalog.schema.table",
+    "Fine-grained access control at any level",
+    "Data lineage tracks data flow automatically",
+    "Centralized audit logging for compliance"
+  ]
+}

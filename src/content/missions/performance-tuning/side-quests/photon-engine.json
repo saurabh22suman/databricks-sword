@@ -1,0 +1,65 @@
+{
+  "questions": [
+    {
+      "id": "photon-1",
+      "question": "What is Photon in Databricks?",
+      "options": [
+        "A visualization library",
+        "A next-generation vectorized query engine written in C++ for faster SQL and DataFrame execution",
+        "A storage format",
+        "A monitoring tool"
+      ],
+      "correctAnswer": 1,
+      "explanation": "Photon is Databricks' native vectorized execution engine. Written in C++ (not JVM-based), it processes data in batches using SIMD instructions, achieving significant speedups for SQL and DataFrame workloads—often 2-8x faster than standard Spark."
+    },
+    {
+      "id": "photon-2",
+      "question": "What does 'vectorized execution' mean in the context of query engines?",
+      "options": [
+        "Processing one row at a time",
+        "Processing batches of rows together using CPU vector instructions (SIMD)",
+        "Storing data as vectors",
+        "Parallel network requests"
+      ],
+      "correctAnswer": 1,
+      "explanation": "Vectorized execution processes data in column batches (typically 1000+ rows) rather than row-by-row. Modern CPUs can apply the same operation to multiple values simultaneously (SIMD), dramatically improving throughput for analytical queries."
+    },
+    {
+      "id": "photon-3",
+      "question": "Which workloads benefit most from Photon acceleration?",
+      "options": [
+        "Machine learning training",
+        "SQL analytics, aggregations, joins, and data transformations on structured data",
+        "Image processing",
+        "Network operations"
+      ],
+      "correctAnswer": 1,
+      "explanation": "Photon accelerates SQL and DataFrame operations: scans, filters, aggregations, joins, and window functions. It's especially effective for data warehousing workloads on Delta Lake tables. ML training still uses standard Spark or ML libraries."
+    },
+    {
+      "id": "photon-4",
+      "question": "How do you enable Photon on a Databricks cluster?",
+      "options": [
+        "It requires a code change",
+        "Select a Photon-enabled cluster type or toggle Photon acceleration in cluster config",
+        "Install a separate package",
+        "It's only available via API"
+      ],
+      "correctAnswer": 1,
+      "explanation": "Photon is enabled at the cluster level. When creating or editing a cluster, select a Photon Runtime or enable the Photon acceleration toggle. No code changes are needed—your existing SQL and DataFrames automatically use Photon where applicable."
+    },
+    {
+      "id": "photon-5",
+      "question": "Why is Photon written in C++ rather than running on the JVM like Spark?",
+      "options": [
+        "C++ is easier to write",
+        "Native C++ code avoids JVM overhead, enables direct memory management, and leverages CPU instructions efficiently",
+        "Java doesn't support databases",
+        "It was a random choice"
+      ],
+      "correctAnswer": 1,
+      "explanation": "C++ allows Photon to manage memory directly (no garbage collection pauses), use SIMD instructions explicitly, and minimize per-row overhead. The JVM adds abstraction layers that, while convenient, can limit performance for tight compute loops."
+    }
+  ],
+  "passingScore": 60
+}

@@ -1,0 +1,206 @@
+---
+title: "How to Set Up Databricks Free Edition for Databricks Sword"
+description: "Step-by-step guide to creating a free Databricks workspace and connecting it to Databricks Sword for real cluster execution."
+author: "Databricks Sword"
+tags:
+  - databricks
+  - setup
+  - free-edition
+  - getting-started
+category: "tutorials"
+publishedAt: "2025-01-15"
+featured: true
+---
+
+# How to Set Up Databricks Free Edition for Databricks Sword
+
+Databricks Sword works entirely in simulated mode — you never *need* a real Databricks workspace.
+But if you want to run your code against a real Spark cluster, Databricks offers a **free Community Edition** that's perfect for learning.
+
+This guide walks you through setup in under 10 minutes.
+
+---
+
+## What Is Databricks Community Edition?
+
+Databricks Community Edition is a free, limited version of the full Databricks platform. It gives you:
+
+- **A single-node Spark cluster** (driver only, no workers)
+- **Notebooks** for writing PySpark, SQL, Scala, and R
+- **Delta Lake** support (ACID transactions, time travel)
+- **DBFS** (Databricks File System) for storing data
+- **MLflow** for experiment tracking
+
+### Limitations
+
+- No multi-node clusters (single driver only)
+- No Jobs/Workflows scheduler
+- No Unity Catalog
+- No SQL Warehouses
+- Cluster auto-terminates after 2 hours of inactivity
+- Community support only (no SLA)
+
+For Databricks Sword missions, the Community Edition covers all B-rank and most A-rank content.
+S-rank missions that require Unity Catalog or Workflows will remain in simulated mode.
+
+---
+
+## Step 1: Sign Up
+
+1. Navigate to [community.cloud.databricks.com](https://community.cloud.databricks.com)
+2. Click **Sign Up** (or **Get Started — Free**)
+3. Fill in:
+   - First name, last name
+   - Email address (use a personal email — corporate emails may redirect to a trial)
+   - Company (enter "Learning" or your actual company)
+4. Check the terms of service checkbox
+5. Click **Sign Up**
+6. Verify your email address by clicking the link sent to your inbox
+
+> **Tip:** If you're redirected to a 14-day trial page instead of Community Edition, look for a small link that says "Get started with Community Edition" near the bottom.
+
+---
+
+## Step 2: Create Your Workspace
+
+After verifying your email:
+
+1. You'll be prompted to choose a cloud provider — select **Community Edition** (not AWS/Azure/GCP)
+2. Wait 1-2 minutes for your workspace to provision
+3. You'll land on the **Databricks Workspace** home page
+
+Your workspace URL will look like: `https://community.cloud.databricks.com`
+
+### Explore the Interface
+
+- **Workspace** — your notebooks and files
+- **Repos** — Git integration
+- **Data** — browse tables and DBFS
+- **Compute** — manage your cluster
+- **Machine Learning** — MLflow experiments
+
+---
+
+## Step 3: Start Your Cluster
+
+Before running any code, you need an active cluster:
+
+1. Click **Compute** in the left sidebar
+2. Click **Create Cluster** (or your existing cluster if one exists)
+3. Give it a name like `databricks-sword-cluster`
+4. Leave all defaults (single node, latest runtime)
+5. Click **Create Cluster**
+6. Wait 3-5 minutes for the cluster to start (status changes from "Pending" to "Running")
+
+> **Note:** The cluster auto-terminates after **2 hours** of inactivity. You can restart it anytime from the Compute page.
+
+---
+
+## Step 4: Generate a Personal Access Token (PAT)
+
+To connect your Databricks workspace to Databricks Sword, you need a PAT:
+
+1. Click your **profile icon** (top-right corner)
+2. Select **Settings**
+3. Navigate to **Developer** → **Access Tokens**
+4. Click **Generate New Token**
+5. Enter a description: `Databricks Sword`
+6. Set expiration: **90 days** (or your preference)
+7. Click **Generate**
+8. **Copy the token immediately** — you won't be able to see it again!
+
+Store the token somewhere safe (password manager recommended).
+
+---
+
+## Step 5: Connect to Databricks Sword
+
+1. Open Databricks Sword at your deployed URL
+2. Navigate to **Profile** → **Settings**
+3. Find the **Databricks Connection** section
+4. Enter:
+   - **Workspace URL:** `https://community.cloud.databricks.com`
+   - **Personal Access Token:** paste your PAT
+5. Click **Verify Connection**
+6. If successful, you'll see a green checkmark
+7. Click **Save**
+
+---
+
+## Step 6: Enable Real Mode on Missions
+
+Now that you're connected:
+
+1. Open any mission
+2. Look for the **Mode Toggle** at the top of the stage player
+3. Switch from **Simulated** to **Real Databricks**
+4. Your code will now execute against your real Databricks cluster
+
+> **Important:** Not all stages support real mode. Drag-drop and quiz stages are always simulated. Code challenges (fill-blank, free-text) will execute against your workspace.
+
+---
+
+## What's Next?
+
+With your workspace connected, you can:
+
+- **Run PySpark code** against a real Spark cluster
+- **Create Delta tables** and query them with time travel
+- **Track MLflow experiments** in your workspace
+- **Compare your results** with the simulated output
+
+Start with a B-rank mission like **Lakehouse Fundamentals** to test your connection.
+
+---
+
+## Troubleshooting
+
+### "PAT expired" Error
+
+Your Personal Access Token has a set expiration date. Generate a new one:
+
+1. Go to Settings → Developer → Access Tokens
+2. Generate a new token
+3. Update it in Databricks Sword Profile → Settings
+
+### "Cluster not running" Error
+
+Your cluster auto-terminates after 2 hours of inactivity:
+
+1. Go to Compute in your Databricks workspace
+2. Find your cluster and click **Start**
+3. Wait for it to reach "Running" state
+4. Retry the mission
+
+### "Connection refused" Error
+
+Check that:
+
+- Your workspace URL is exactly `https://community.cloud.databricks.com`
+- There are no trailing slashes
+- Your PAT is correct and hasn't expired
+- Your cluster is running
+
+### "Redirected to trial" During Signup
+
+If you keep getting redirected to the 14-day trial:
+
+1. Try using a different email address (personal Gmail, etc.)
+2. Look for "Community Edition" link at the bottom of the trial page
+3. Clear your browser cookies and try again
+4. Use an incognito/private window
+
+### Cluster Takes Too Long to Start
+
+Community Edition clusters can take 3-7 minutes to start. If it takes longer than 10 minutes:
+
+1. Cancel the cluster creation
+2. Create a new cluster
+3. Try during off-peak hours (early morning or late evening UTC)
+
+---
+
+That's it! You're now ready to level up your Databricks skills with real cluster execution.
+Remember — simulated mode works perfectly for all missions. Real mode is optional but recommended for the full experience.
+
+**Happy forging!** ⚔️

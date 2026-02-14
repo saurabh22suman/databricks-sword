@@ -1,0 +1,65 @@
+{
+  "questions": [
+    {
+      "id": "sql-history-1",
+      "question": "Who invented SQL and at which company?",
+      "options": [
+        "Bill Gates at Microsoft",
+        "Donald Chamberlin and Raymond Boyce at IBM",
+        "Larry Ellison at Oracle",
+        "Linus Torvalds at Linux Foundation"
+      ],
+      "correctAnswer": 1,
+      "explanation": "SQL was invented in the early 1970s at IBM by Donald Chamberlin and Raymond Boyce. It was originally called SEQUEL (Structured English Query Language) and was designed to interact with IBM's System R database."
+    },
+    {
+      "id": "sql-history-2",
+      "question": "What is ANSI SQL and why does it matter?",
+      "options": [
+        "A proprietary SQL dialect from Microsoft",
+        "A standardized version of SQL maintained by the American National Standards Institute",
+        "A faster version of SQL for analytics",
+        "A SQL dialect specific to Databricks"
+      ],
+      "correctAnswer": 1,
+      "explanation": "ANSI SQL is the standard specification for SQL, ensuring portability across database systems. While vendors add extensions, ANSI SQL (1986, 1992, 1999, 2003, 2011, 2016, 2023) provides a common foundation."
+    },
+    {
+      "id": "sql-history-3",
+      "question": "What significant feature did SQL:1999 (SQL3) introduce?",
+      "options": [
+        "Basic SELECT statements",
+        "Common Table Expressions (CTEs) and recursive queries",
+        "The ability to create tables",
+        "Support for NULL values"
+      ],
+      "correctAnswer": 1,
+      "explanation": "SQL:1999 introduced CTEs (WITH clause), recursive queries, OLAP functions like ROLLUP and CUBE, and user-defined types. CTEs dramatically improved query readability and enabled elegant recursive operations."
+    },
+    {
+      "id": "sql-history-4",
+      "question": "What are window functions, and which SQL standard introduced them?",
+      "options": [
+        "Functions for GUI windows; SQL:2016",
+        "Functions that operate across a set of rows related to the current row; SQL:2003",
+        "Functions for time-based queries; SQL:1992",
+        "Functions for creating indexes; SQL:2011"
+      ],
+      "correctAnswer": 1,
+      "explanation": "Window functions (OVER clause, ROW_NUMBER, RANK, LAG, LEAD) were standardized in SQL:2003. They allow calculations across 'windows' of related rows without collapsing the result set like GROUP BY."
+    },
+    {
+      "id": "sql-history-5",
+      "question": "What does Spark SQL's compatibility with ANSI SQL mean for Databricks users?",
+      "options": [
+        "Databricks only supports proprietary syntax",
+        "SQL skills are transferable between Databricks and other databases",
+        "Users must learn a completely new query language",
+        "ANSI SQL is deprecated in Databricks"
+      ],
+      "correctAnswer": 1,
+      "explanation": "Spark SQL aims for ANSI SQL compatibility, meaning standard SQL skills transfer to Databricks. You can write familiar SELECT, JOIN, GROUP BY, and window functions while benefiting from Spark's distributed execution."
+    }
+  ],
+  "passingScore": 60
+}

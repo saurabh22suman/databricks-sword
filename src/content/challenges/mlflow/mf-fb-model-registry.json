@@ -1,0 +1,51 @@
+{
+  "id": "mf-fb-model-registry",
+  "title": "Complete the Model Registry Workflow",
+  "category": "mlflow",
+  "difficulty": "A",
+  "format": "fill-blank",
+  "description": "Fill in the blanks to register a trained model to the MLflow Model Registry, then transition it to production.",
+  "hints": [
+    "register_model() takes the run URI and a name",
+    "MlflowClient is used for model management operations",
+    "transition_model_version_stage() moves a model between stages"
+  ],
+  "xpReward": 125,
+  "optimalSolution": "model_uri = f'runs:/{run_id}/model'\nmlflow.register_model(model_uri, 'my_classifier')\nclient = MlflowClient()\nclient.transition_model_version_stage('my_classifier', 1, 'Production')",
+  "explanation": "The MLflow Model Registry provides a central hub for model versioning and stage transitions. Models move through stages: None \u2192 Staging \u2192 Production \u2192 Archived. This workflow enables controlled model deployment.",
+  "fillBlank": {
+    "codeTemplate": "model_uri = f'runs:/{run_id}/model'\nmlflow.__BLANK_0__(model_uri, 'my_classifier')\nclient = __BLANK_1__()\nclient.__BLANK_2__('my_classifier', 1, 'Production')",
+    "blanks": [
+      {
+        "id": 0,
+        "correctAnswer": "register_model",
+        "options": [
+          "register_model",
+          "log_model",
+          "save_model",
+          "push_model"
+        ]
+      },
+      {
+        "id": 1,
+        "correctAnswer": "MlflowClient",
+        "options": [
+          "MlflowClient",
+          "MLflowRegistry",
+          "ModelClient",
+          "TrackingClient"
+        ]
+      },
+      {
+        "id": 2,
+        "correctAnswer": "transition_model_version_stage",
+        "options": [
+          "transition_model_version_stage",
+          "promote_model",
+          "set_model_stage",
+          "update_model_version"
+        ]
+      }
+    ]
+  }
+}

@@ -1,0 +1,65 @@
+{
+  "questions": [
+    {
+      "id": "airflow-1",
+      "question": "What is Apache Airflow primarily designed for?",
+      "options": [
+        "Real-time stream processing",
+        "Authoring, scheduling, and monitoring data pipelines as DAGs",
+        "Machine learning model training",
+        "Data storage"
+      ],
+      "correctAnswer": 1,
+      "explanation": "Airflow is a workflow orchestration platform. You define pipelines as Directed Acyclic Graphs (DAGs) in Python, then Airflow handles scheduling, dependency management, retries, and monitoring across your data infrastructure."
+    },
+    {
+      "id": "airflow-2",
+      "question": "What is a 'DAG' in Apache Airflow?",
+      "options": [
+        "Data Analytics Gateway",
+        "A Directed Acyclic Graph representing a workflow with tasks and dependencies",
+        "A database administration group",
+        "A data aggregation method"
+      ],
+      "correctAnswer": 1,
+      "explanation": "A DAG (Directed Acyclic Graph) defines the workflow structure: tasks as nodes, dependencies as edges. 'Directed' means edges have direction (task A before task B). 'Acyclic' means no circular dependencies."
+    },
+    {
+      "id": "airflow-3",
+      "question": "How does Airflow relate to Databricks Workflows?",
+      "options": [
+        "They are completely unrelated",
+        "Airflow can orchestrate Databricks jobs, or Databricks Workflows can replace Airflow for Databricks-centric pipelines",
+        "Airflow only works with AWS",
+        "Databricks Workflows is a fork of Airflow"
+      ],
+      "correctAnswer": 1,
+      "explanation": "Airflow has a Databricks provider for orchestrating Databricks jobs. However, Databricks Workflows provides native orchestration with tighter integration. Many teams use Airflow for cross-platform orchestration or Workflows for Databricks-only pipelines."
+    },
+    {
+      "id": "airflow-4",
+      "question": "What is an Airflow 'Operator'?",
+      "options": [
+        "A human administrator",
+        "A template for a task that defines what action to perform",
+        "A mathematical function",
+        "A monitoring dashboard"
+      ],
+      "correctAnswer": 1,
+      "explanation": "Operators are the building blocks of Airflow DAGs. Each operator type performs a specific action: PythonOperator runs Python code, BashOperator runs shell commands, DatabricksSubmitRunOperator submits Databricks jobs, etc."
+    },
+    {
+      "id": "airflow-5",
+      "question": "What does 'idempotency' mean in the context of Airflow tasks, and why is it important?",
+      "options": [
+        "Tasks run faster",
+        "Running a task multiple times produces the same result—crucial for safe retries",
+        "Tasks are encrypted",
+        "Tasks use less memory"
+      ],
+      "correctAnswer": 1,
+      "explanation": "Idempotent tasks produce the same result regardless of how many times they run. This is critical because Airflow may retry failed tasks. Design patterns like MERGE (instead of INSERT) and overwrite mode ensure safe, repeatable execution."
+    }
+  ],
+  "passingScore": 60
+}

@@ -1,0 +1,96 @@
+{
+  "questions": [
+    {
+      "id": "q1",
+      "question": "What does a window function do that GROUP BY cannot?",
+      "options": [
+        "Computes values across rows without collapsing them into groups",
+        "Runs faster than GROUP BY",
+        "Works with more data types",
+        "Supports more aggregation functions"
+      ],
+      "correctAnswer": "Computes values across rows without collapsing them into groups",
+      "explanation": "Window functions compute a value for each row based on a 'window' of related rows, without reducing the result set. GROUP BY collapses multiple rows into one per group."
+    },
+    {
+      "id": "q2",
+      "question": "What is the difference between RANK() and DENSE_RANK()?",
+      "options": [
+        "RANK() leaves gaps after ties, DENSE_RANK() does not",
+        "DENSE_RANK() is faster",
+        "RANK() only works with integers",
+        "They produce identical results"
+      ],
+      "correctAnswer": "RANK() leaves gaps after ties, DENSE_RANK() does not",
+      "explanation": "If two items tie at rank 1, RANK() assigns the next as rank 3 (gap), while DENSE_RANK() assigns rank 2 (no gap)."
+    },
+    {
+      "id": "q3",
+      "question": "Why are Pandas UDFs preferred over standard Python UDFs in PySpark?",
+      "options": [
+        "Pandas UDFs use Apache Arrow for vectorized processing (10-100x faster)",
+        "Pandas UDFs have access to more libraries",
+        "Standard UDFs cannot return complex types",
+        "Pandas UDFs are easier to write"
+      ],
+      "correctAnswer": "Pandas UDFs use Apache Arrow for vectorized processing (10-100x faster)",
+      "explanation": "Standard Python UDFs serialize/deserialize each row individually. Pandas UDFs transfer data in Arrow batches, enabling vectorized operations that are 10-100x faster."
+    },
+    {
+      "id": "q4",
+      "question": "What does pivot() do in PySpark?",
+      "options": [
+        "Rotates unique values from one column into multiple columns",
+        "Sorts data by column values",
+        "Joins two DataFrames",
+        "Filters rows based on column values"
+      ],
+      "correctAnswer": "Rotates unique values from one column into multiple columns",
+      "explanation": "pivot() takes distinct values from a column and creates new columns for each value, typically used with an aggregation (e.g., sum, count) to create cross-tabulation tables."
+    },
+    {
+      "id": "q5",
+      "question": "What does LAG(column, 1) return in a window function?",
+      "options": [
+        "The value from the previous row in the window ordering",
+        "The last row in the partition",
+        "The minimum value in the window",
+        "The row count"
+      ],
+      "correctAnswer": "The value from the previous row in the window ordering",
+      "explanation": "LAG(column, offset) accesses a row at a given offset before the current row within the window. LAG(revenue, 1) returns the previous row's revenue value, useful for period-over-period comparisons."
+    },
+    {
+      "id": "q6",
+      "question": "[Recall: PySpark] What is the difference between transformations and actions?",
+      "options": [
+        "Transformations are lazy (build DAG), actions trigger execution",
+        "Transformations modify data, actions read data",
+        "Both execute immediately",
+        "Actions are always faster"
+      ],
+      "correctAnswer": "Transformations are lazy (build DAG), actions trigger execution",
+      "explanation": "Recall from PySpark Essentials: transformations (filter, select, groupBy) build an execution plan lazily. Actions (count, collect, write) trigger actual computation."
+    },
+    {
+      "id": "q7",
+      "question": "[Recall: SQL] What does HAVING do that WHERE cannot?",
+      "options": [
+        "HAVING filters on aggregated values after GROUP BY",
+        "HAVING is faster than WHERE",
+        "HAVING works with JOINs",
+        "WHERE cannot filter strings"
+      ],
+      "correctAnswer": "HAVING filters on aggregated values after GROUP BY",
+      "explanation": "Recall from SQL Analytics: WHERE filters individual rows before aggregation. HAVING filters groups after aggregation (e.g., HAVING COUNT(*) > 5). Use WHERE for row-level, HAVING for group-level."
+    }
+  ],
+  "passingScore": 70,
+  "learnings": [
+    "Window functions preserve row-level detail",
+    "Frame bounds control calculation scope",
+    "LAG/LEAD access adjacent row values",
+    "RANK vs ROW_NUMBER handle ties differently",
+    "NTILE distributes rows into buckets"
+  ]
+}

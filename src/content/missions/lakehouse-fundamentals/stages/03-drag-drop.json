@@ -1,0 +1,57 @@
+{
+  "description": "Arrange the Delta Lake CRUD operations in the correct order to create, populate, and manage a customer transactions table.",
+  "instructions": "Follow the natural lifecycle of database operations: What must exist before you can add data to it? Can you modify records that don't exist yet? Think about when you'd want to query data versus when you'd delete it. The pattern follows: define structure → populate → modify → analyze → cleanup → confirm.",
+  "blocks": [
+    {
+      "id": "create-table",
+      "code": "CREATE TABLE IF NOT EXISTS transactions (\n  transaction_id STRING,\n  customer_id STRING,\n  amount DECIMAL(10, 2),\n  timestamp TIMESTAMP\n) USING DELTA",
+      "label": "Create Table"
+    },
+    {
+      "id": "insert-data",
+      "code": "INSERT INTO transactions VALUES\n  ('TXN001', 'CUST123', 49.99, '2024-01-15 10:30:00'),\n  ('TXN002', 'CUST456', 129.50, '2024-01-15 11:45:00')",
+      "label": "Insert Records"
+    },
+    {
+      "id": "update-data",
+      "code": "UPDATE transactions\nSET amount = 54.99\nWHERE transaction_id = 'TXN001'",
+      "label": "Update Record"
+    },
+    {
+      "id": "query-data",
+      "code": "SELECT customer_id, SUM(amount) as total_spent\nFROM transactions\nGROUP BY customer_id",
+      "label": "Query Aggregates"
+    },
+    {
+      "id": "delete-data",
+      "code": "DELETE FROM transactions\nWHERE amount < 50",
+      "label": "Delete Records"
+    },
+    {
+      "id": "verify-delete",
+      "code": "SELECT COUNT(*) FROM transactions",
+      "label": "Verify Count"
+    }
+  ],
+  "correctOrder": [
+    "create-table",
+    "insert-data",
+    "update-data",
+    "query-data",
+    "delete-data",
+    "verify-delete"
+  ],
+  "hints": [
+    "Start by creating the table structure before inserting data",
+    "UPDATE modifies existing records, so it must come after INSERT",
+    "DELETE operations come after queries to demonstrate ACID transactions",
+    "Always verify your operations with SELECT queries"
+  ],
+  "learnings": [
+    "CREATE TABLE must come before INSERT - you cannot add data to a table that does not exist",
+    "UPDATE modifies existing records and requires data to already be present",
+    "Aggregate queries (GROUP BY) only work on existing data",
+    "DELETE operations demonstrate ACID transactions - changes are atomic",
+    "Verify operations with SELECT to confirm your changes took effect"
+  ]
+}

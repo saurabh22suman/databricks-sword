@@ -1,0 +1,100 @@
+{
+  "description": "Complete the ALS model configuration by filling in the correct hyperparameters and column names.",
+  "expectedOutput": "When completed correctly, this code will:\n1. Split data into training (80%) and test (20%) sets\n2. Create a feature vector from numeric columns\n3. Configure a RandomForestClassifier with specified parameters\n4. Build a pipeline combining vectorizer and classifier\n5. Train the model and generate predictions on test data",
+  "codeTemplate": "# Configure ALS model for collaborative filtering\nals = ALS(\n    # Specify column names\n    userCol=__BLANK_0__,\n    itemCol=__BLANK_1__,\n    ratingCol=__BLANK_2__,\n    \n    # Hyperparameters\n    rank=__BLANK_3__,              # Number of latent features\n    maxIter=__BLANK_4__,           # Maximum training iterations\n    regParam=__BLANK_5__,          # Regularization parameter\n    \n    # Handle cold start problem\n    coldStartStrategy=__BLANK_6__\n)\n\n# Train the model\nmodel = als.fit(train_df)\n\n# Generate top 10 recommendations for all users\nuser_recs = model.__BLANK_7__(10)",
+  "blanks": [
+    {
+      "id": 0,
+      "options": [
+        "\"user_id\"",
+        "\"customer_id\"",
+        "\"userId\"",
+        "\"id\""
+      ],
+      "correctAnswer": "\"user_id\""
+    },
+    {
+      "id": 1,
+      "options": [
+        "\"product_id\"",
+        "\"item_id\"",
+        "\"productId\"",
+        "\"sku\""
+      ],
+      "correctAnswer": "\"product_id\""
+    },
+    {
+      "id": 2,
+      "options": [
+        "\"rating\"",
+        "\"score\"",
+        "\"value\"",
+        "\"stars\""
+      ],
+      "correctAnswer": "\"rating\""
+    },
+    {
+      "id": 3,
+      "options": [
+        "5",
+        "10",
+        "20",
+        "50"
+      ],
+      "correctAnswer": "10"
+    },
+    {
+      "id": 4,
+      "options": [
+        "5",
+        "10",
+        "20",
+        "100"
+      ],
+      "correctAnswer": "10"
+    },
+    {
+      "id": 5,
+      "options": [
+        "0.01",
+        "0.1",
+        "1.0",
+        "10.0"
+      ],
+      "correctAnswer": "0.1"
+    },
+    {
+      "id": 6,
+      "options": [
+        "\"drop\"",
+        "\"nan\"",
+        "\"skip\"",
+        "\"ignore\""
+      ],
+      "correctAnswer": "\"drop\""
+    },
+    {
+      "id": 7,
+      "options": [
+        "recommendForAllUsers",
+        "predictAll",
+        "generateRecs",
+        "transform"
+      ],
+      "correctAnswer": "recommendForAllUsers"
+    }
+  ],
+  "hints": [
+    "The column names should match the schema: user_id, product_id, rating",
+    "rank=10 is a good starting point (not too small, not too large)",
+    "coldStartStrategy='drop' removes users/items with no ratings",
+    "Use recommendForAllUsers() to generate top-N recommendations"
+  ],
+  "learnings": [
+    "train_test_split separates data for evaluation",
+    "fit() trains the model on data",
+    "predict() generates model outputs",
+    "score() calculates model accuracy",
+    "mlflow.log_metric() tracks experiment results"
+  ]
+}

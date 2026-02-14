@@ -1,0 +1,108 @@
+{
+  "questions": [
+    {
+      "id": "q1",
+      "question": "What is the primary purpose of MLflow in machine learning workflows?",
+      "options": [
+        "Data preprocessing",
+        "Experiment tracking and model management",
+        "Feature engineering",
+        "Data visualization"
+      ],
+      "correctAnswer": "Experiment tracking and model management",
+      "explanation": "MLflow is an open-source platform for managing the ML lifecycle, including experiment tracking, model packaging, deployment, and reproducibility."
+    },
+    {
+      "id": "q2",
+      "question": "Which MLflow component is used to log parameters, metrics, and artifacts?",
+      "options": [
+        "MLflow Projects",
+        "MLflow Models",
+        "MLflow Tracking",
+        "MLflow Registry"
+      ],
+      "correctAnswer": "MLflow Tracking",
+      "explanation": "MLflow Tracking provides APIs to log parameters (hyperparameters), metrics (accuracy, loss), and artifacts (models, plots) during training runs."
+    },
+    {
+      "id": "q3",
+      "question": "What does ALS stand for in PySpark MLlib?",
+      "options": [
+        "Automatic Learning System",
+        "Alternating Least Squares",
+        "Advanced Linear Solver",
+        "Adaptive Latent Space"
+      ],
+      "correctAnswer": "Alternating Least Squares",
+      "explanation": "ALS (Alternating Least Squares) is a matrix factorization algorithm used for collaborative filtering. It alternates between fixing user factors and solving for item factors."
+    },
+    {
+      "id": "q4",
+      "question": "What problem does the 'coldStartStrategy' parameter address?",
+      "options": [
+        "Items with no ratings",
+        "Slow model training",
+        "Memory overflow",
+        "Data imbalance"
+      ],
+      "correctAnswer": "Items with no ratings",
+      "explanation": "The cold start problem occurs when you have users or items with no ratings. Setting coldStartStrategy='drop' removes these predictions to avoid NaN values."
+    },
+    {
+      "id": "q5",
+      "question": "What does the 'rank' hyperparameter control in ALS?",
+      "options": [
+        "Ranking position of recommendations",
+        "Number of latent features in the model",
+        "Maximum number of recommendations",
+        "Training data rank order"
+      ],
+      "correctAnswer": "Number of latent features in the model",
+      "explanation": "The rank parameter determines the number of latent features (factors) learned for users and items. Higher rank = more complex model but risk of overfitting."
+    },
+    {
+      "id": "q6",
+      "question": "Which metric is commonly used to evaluate ALS model performance?",
+      "options": [
+        "Accuracy",
+        "F1 Score",
+        "RMSE (Root Mean Square Error)",
+        "ROC-AUC"
+      ],
+      "correctAnswer": "RMSE (Root Mean Square Error)",
+      "explanation": "RMSE measures the difference between predicted and actual ratings. Lower RMSE = better predictions. It's the standard metric for regression tasks."
+    },
+    {
+      "id": "q7",
+      "question": "In MLflow, what is an 'experiment'?",
+      "options": [
+        "A single training run",
+        "A group of related runs",
+        "A deployed model",
+        "A hyperparameter set"
+      ],
+      "correctAnswer": "A group of related runs",
+      "explanation": "An MLflow experiment is a collection of related runs (training iterations) for a specific ML task. It helps organize and compare different model versions."
+    },
+    {
+      "id": "q8",
+      "question": "What is the main advantage of collaborative filtering over content-based filtering?",
+      "options": [
+        "Faster training time",
+        "No need for item features",
+        "Better for new users",
+        "Lower memory usage"
+      ],
+      "correctAnswer": "No need for item features",
+      "explanation": "Collaborative filtering only needs user-item interactions (ratings/clicks). No need for product features like color or category. It discovers hidden patterns in behavior."
+    }
+  ],
+  "passingScore": 70,
+  "learnings": [
+    "Feature engineering is critical for model performance",
+    "Train/test split prevents overfitting evaluation",
+    "Cross-validation provides robust performance estimates",
+    "Hyperparameter tuning optimizes model configuration",
+    "MLflow tracks experiments and reproducibility"
+  ]
+}

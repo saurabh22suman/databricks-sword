@@ -1,0 +1,96 @@
+{
+  "questions": [
+    {
+      "id": "q1",
+      "question": "What does @dlt.expect_or_drop do when a record violates the constraint?",
+      "options": [
+        "Silently removes the invalid record and continues processing",
+        "Logs a warning and keeps the record",
+        "Halts the entire pipeline",
+        "Sends an alert email"
+      ],
+      "correctAnswer": "Silently removes the invalid record and continues processing",
+      "explanation": "@dlt.expect_or_drop filters out records that violate the expectation. They are dropped from the output table but the pipeline continues. Use this for non-critical fields you want to filter."
+    },
+    {
+      "id": "q2",
+      "question": "When should you use @dlt.expect_or_fail?",
+      "options": [
+        "When invalid data would corrupt downstream results and the pipeline must stop",
+        "For all quality checks",
+        "Only for performance optimization",
+        "When you want to keep invalid records"
+      ],
+      "correctAnswer": "When invalid data would corrupt downstream results and the pipeline must stop",
+      "explanation": "expect_or_fail is the strictest level. It stops the pipeline on any violation. Use it for critical data integrity rules where proceeding with bad data is worse than stopping."
+    },
+    {
+      "id": "q3",
+      "question": "What is a data quarantine pattern?",
+      "options": [
+        "Routing invalid records to a separate table for review while processing continues",
+        "Deleting all invalid records permanently",
+        "Pausing the pipeline until bad data is fixed",
+        "Encrypting sensitive data"
+      ],
+      "correctAnswer": "Routing invalid records to a separate table for review while processing continues",
+      "explanation": "Quarantine captures invalid records in a separate table with metadata about why they failed. This preserves the data for investigation while keeping the main pipeline clean."
+    },
+    {
+      "id": "q4",
+      "question": "Where are DLT expectation metrics stored?",
+      "options": [
+        "In the DLT event log, queryable as a Delta table",
+        "In a separate monitoring database",
+        "In the Spark driver logs only",
+        "In the system catalog"
+      ],
+      "correctAnswer": "In the DLT event log, queryable as a Delta table",
+      "explanation": "DLT automatically logs expectation results (pass/fail counts) to the event log. You can query this log as a Delta table to build quality dashboards and trending."
+    },
+    {
+      "id": "q5",
+      "question": "What is the difference between dlt.read() and dlt.read_stream()?",
+      "options": [
+        "read() is batch (for gold tables), read_stream() is streaming (for silver tables)",
+        "They are identical",
+        "read() is faster",
+        "read_stream() only works with Kafka"
+      ],
+      "correctAnswer": "read() is batch (for gold tables), read_stream() is streaming (for silver tables)",
+      "explanation": "dlt.read_stream() maintains streaming semantics (incremental processing), while dlt.read() performs a batch read of the entire table. Use read_stream() for silver layers and read() for gold aggregations."
+    },
+    {
+      "id": "q6",
+      "question": "[Recall: Delta Lake] What prevents schema changes from corrupting a table?",
+      "options": [
+        "Schema enforcement rejects writes that don't match the table schema",
+        "Automatic type casting",
+        "File format validation",
+        "Manual schema reviews"
+      ],
+      "correctAnswer": "Schema enforcement rejects writes that don't match the table schema",
+      "explanation": "Recall from Delta Lake Deep Dive: Delta Lake's schema enforcement (schema-on-write) rejects any write operation with a different schema. This is the first line of defense in data quality."
+    },
+    {
+      "id": "q7",
+      "question": "[Recall: Unity Catalog] How does governance support data quality?",
+      "options": [
+        "Access controls prevent unauthorized modifications, lineage tracks data provenance",
+        "It runs quality checks automatically",
+        "It creates backup copies",
+        "It encrypts all data"
+      ],
+      "correctAnswer": "Access controls prevent unauthorized modifications, lineage tracks data provenance",
+      "explanation": "Recall from Unity Catalog: Governance ensures only authorized users can modify data (preventing accidental corruption), and lineage tracking shows where data came from and how it was transformed."
+    }
+  ],
+  "passingScore": 70,
+  "learnings": [
+    "DLT provides declarative pipeline definitions",
+    "Expectations enforce data quality rules",
+    "Quarantine tables capture rejected records",
+    "Event log provides pipeline observability",
+    "Automatic dependency management simplifies pipelines"
+  ]
+}

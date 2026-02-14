@@ -1,0 +1,74 @@
+{
+  "id": "advanced-transformations",
+  "title": "Advanced Transformations",
+  "subtitle": "Master window functions, UDFs, and complex aggregations in PySpark and SQL",
+  "description": "Learn advanced DataFrame operations including window functions, user-defined functions, pivots, and complex multi-step transformations.",
+  "industry": "retail",
+  "rank": "A",
+  "xpRequired": 500,
+  "xpReward": 500,
+  "estimatedMinutes": 60,
+  "databricksEnabled": false,
+  "prerequisites": [
+    "pyspark-essentials",
+    "sql-analytics-intro"
+  ],
+  "primaryFeatures": [
+    "Window functions",
+    "User-defined functions",
+    "Pivot/unpivot",
+    "Complex aggregations",
+    "Higher-order functions"
+  ],
+  "stages": [
+    {
+      "id": "briefing",
+      "type": "briefing",
+      "title": "Mission Briefing",
+      "configFile": "stages/01-briefing.json",
+      "xpReward": 0,
+      "estimatedMinutes": 5
+    },
+    {
+      "id": "diagram",
+      "type": "diagram",
+      "title": "Transformation Pipeline",
+      "configFile": "stages/02-diagram.json",
+      "xpReward": 50,
+      "estimatedMinutes": 10
+    },
+    {
+      "id": "drag-drop",
+      "type": "drag-drop",
+      "title": "Window Function Pipeline",
+      "configFile": "stages/03-drag-drop.json",
+      "xpReward": 75,
+      "estimatedMinutes": 12
+    },
+    {
+      "id": "fill-blank",
+      "type": "fill-blank",
+      "title": "Advanced PySpark Operations",
+      "configFile": "stages/04-fill-blank.json",
+      "xpReward": 75,
+      "estimatedMinutes": 15
+    },
+    {
+      "id": "quiz",
+      "type": "quiz",
+      "title": "Knowledge Check",
+      "configFile": "stages/05-quiz.json",
+      "xpReward": 50,
+      "estimatedMinutes": 8
+    },
+    {
+      "id": "debrief",
+      "type": "debrief",
+      "title": "Mission Debrief",
+      "configFile": "stages/06-debrief.json",
+      "xpReward": 0,
+      "estimatedMinutes": 5
+    }
+  ],
+  "sideQuests": []
+}

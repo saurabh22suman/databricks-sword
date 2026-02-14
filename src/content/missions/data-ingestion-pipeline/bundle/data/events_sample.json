@@ -1,0 +1,10 @@
+{"event_id": "E001", "user_id": "U100", "event_type": "page_view", "timestamp": "2024-01-15T10:30:00Z", "page": "/home"}
+{"event_id": "E002", "user_id": "U101", "event_type": "click", "timestamp": "2024-01-15T10:31:00Z", "button": "signup"}
+{"event_id": "E003", "user_id": "U100", "event_type": "purchase", "timestamp": "2024-01-15T10:32:00Z", "item": "widget", "amount": 29.99}
+{"event_id": "E004", "user_id": "U102", "event_type": "page_view", "timestamp": "2024-01-15T10:33:00Z", "page": "/products"}
+{"event_id": "E005", "user_id": "U101", "event_type": "page_view", "timestamp": "2024-01-15T10:34:00Z", "page": "/checkout"}
+{"event_id": "E006", "user_id": "U101", "event_type": "purchase", "timestamp": "2024-01-15T10:35:00Z", "item": "gadget", "amount": 49.99}
+{"event_id": "E007", "user_id": "U103", "event_type": "signup", "timestamp": "2024-01-15T10:36:00Z"}
+{"event_id": "E008", "user_id": "U103", "event_type": "page_view", "timestamp": "2024-01-15T10:37:00Z", "page": "/home"}
+{"event_id": "E009", "user_id": "U102", "event_type": "click", "timestamp": "2024-01-15T10:38:00Z", "button": "add_to_cart"}
+{"event_id": "E010", "user_id": "U100", "event_type": "page_view", "timestamp": "2024-01-15T10:39:00Z", "page": "/account"}

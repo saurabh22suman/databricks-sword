@@ -1,0 +1,101 @@
+{
+  "instructions": "Design the Production Pipeline! Arrange components to show how Delta Live Tables handles CDC, error handling, and observability.",
+  "components": [
+    {
+      "id": "dlt-pipeline",
+      "label": "DLT Pipeline (Parameterized)",
+      "icon": "layers"
+    },
+    {
+      "id": "cdc-apply",
+      "label": "APPLY CHANGES (CDC)",
+      "icon": "refresh-cw"
+    },
+    {
+      "id": "dlq",
+      "label": "Dead Letter Queue",
+      "icon": "alert-circle"
+    },
+    {
+      "id": "event-log",
+      "label": "DLT Event Log",
+      "icon": "file-text"
+    },
+    {
+      "id": "sla-monitor",
+      "label": "SLA Monitor & Alerts",
+      "icon": "bell"
+    }
+  ],
+  "dropZones": [
+    {
+      "id": "zone-1",
+      "label": "Pipeline Engine",
+      "position": {
+        "x": 50,
+        "y": 150
+      }
+    },
+    {
+      "id": "zone-2",
+      "label": "Change Tracking",
+      "position": {
+        "x": 200,
+        "y": 60
+      }
+    },
+    {
+      "id": "zone-3",
+      "label": "Error Handling",
+      "position": {
+        "x": 200,
+        "y": 240
+      }
+    },
+    {
+      "id": "zone-4",
+      "label": "Audit & Observability",
+      "position": {
+        "x": 400,
+        "y": 60
+      }
+    },
+    {
+      "id": "zone-5",
+      "label": "Alerting Layer",
+      "position": {
+        "x": 400,
+        "y": 240
+      }
+    }
+  ],
+  "correctPlacements": [
+    {
+      "componentId": "dlt-pipeline",
+      "zoneId": "zone-1"
+    },
+    {
+      "componentId": "cdc-apply",
+      "zoneId": "zone-2"
+    },
+    {
+      "componentId": "dlq",
+      "zoneId": "zone-3"
+    },
+    {
+      "componentId": "event-log",
+      "zoneId": "zone-4"
+    },
+    {
+      "componentId": "sla-monitor",
+      "zoneId": "zone-5"
+    }
+  ],
+  "learnings": [
+    "DLT Pipeline: Declarative ETL with automatic dependency management",
+    "APPLY CHANGES: Built-in CDC support for merge, update, and delete operations",
+    "Dead Letter Queue: Captures rows that fail quality checks for review",
+    "Event Log: Full audit trail of pipeline runs, data quality, and lineage",
+    "SLA Monitor: Alerts on freshness violations and pipeline failures"
+  ]
+}

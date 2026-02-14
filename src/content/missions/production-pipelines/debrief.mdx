@@ -1,0 +1,48 @@
+# Mission Debrief: Production Pipelines
+
+## Mission Complete
+
+MegaMart's pipelines are now production-grade: parameterized for multiple environments, resilient to failures, and monitored with automated SLA tracking.
+
+## What You Learned
+
+### DLT Production Patterns
+- **Parameterized pipelines** — use `spark.conf.get("pipeline.env")` for dev/staging/prod
+- **Pipeline configuration** — separate storage paths, catalog names, and compute per environment
+- **Idempotent operations** — pipelines produce the same output regardless of how many times they run
+- **Development mode** — use "Development" mode for faster iteration, "Production" for reliability
+
+### CDC with APPLY CHANGES
+- `dlt.apply_changes()` tracks insert/update/delete operations
+- `sequence_by` column ensures events are applied in correct order
+- SCD Type 1 (overwrite) and Type 2 (historical) patterns
+- CDC enables tracking order status changes: pending → processing → shipped → delivered
+
+### Error Handling
+- **Dead letter queues** — route failed records to a separate table with error metadata
+- **Retry logic** — exponential backoff for transient failures (API timeouts, throttling)
+- **Circuit breakers** — stop calling failing upstream systems after N consecutive failures
+- **Graceful degradation** — use cached/stale data when upstream is unavailable
+
+### Monitoring & Alerting
+- **DLT event log** — built-in audit trail of pipeline executions and quality metrics
+- **Custom metrics** — `spark.sparkContext.setJobDescription()` for tracking within tasks
+- **Freshness monitoring** — track `MAX(updated_at)` in Gold tables against SLA thresholds
+- **Alerting** — webhook/email alerts when SLAs are at risk or violated
+
+### SLA Management
+- Define SLAs per table: "Gold order summary refreshed within 15 minutes of Silver update"
+- Monitor with scheduled SQL queries against DLT event log
+- Escalation: warning at 80% of SLA → alert at 95% → page at 100%
+
+## Key Takeaways
+
+1. Always parameterize pipelines for environment promotion (dev → staging → prod)
+2. Never block a pipeline for non-critical errors — use dead letter queues
+3. Monitor data freshness as the primary SLA metric
+4. DLT event logs are your built-in observability layer
+5. Test failure scenarios in staging before they happen in production
+
+## Next Steps
+
+This mission, combined with all previous S-rank skills, unlocks the capstone: **Lakehouse Platform Design**.

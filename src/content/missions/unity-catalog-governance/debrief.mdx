@@ -1,0 +1,39 @@
+# Mission Debrief: Unity Catalog & Governance
+
+## Mission Complete
+
+Federal DataVault now has a robust governance framework. Every dataset has clear ownership, auditable permissions, and automatic lineage tracking across all 15 departments.
+
+## What You Learned
+
+### Three-Level Namespace
+- **Metastore** → **Catalog** → **Schema** → **Table/View** hierarchy
+- Catalogs map to business domains (e.g., `finance`, `healthcare`, `operations`)
+- Schemas map to projects or data stages (e.g., `raw`, `curated`, `analytics`)
+
+### Access Control
+- **GRANT/REVOKE** — SQL-based permission management
+- **Privilege cascading** — permissions granted at catalog level flow to all children
+- **Securable objects** — catalogs, schemas, tables, views, functions, volumes
+- **Principals** — users, groups, service principals
+
+### Fine-Grained Security
+- **Dynamic views** — implement row-level security with `current_user()` and `is_member()`
+- **Column masking** — hide sensitive columns based on group membership
+- **Row filters** — restrict visible rows based on user attributes
+
+### Data Lineage
+- Unity Catalog automatically tracks table-to-table lineage
+- Lineage captured from SQL, Python, and notebook operations
+- Visual lineage explorer in the Databricks workspace
+
+## Key SQL Commands Mastered
+- `CREATE CATALOG`, `CREATE SCHEMA`
+- `GRANT SELECT ON TABLE ... TO ...`
+- `REVOKE ALL PRIVILEGES ON ...`
+- `SHOW GRANTS ON ...`
+- `ALTER TABLE ... SET OWNER TO ...`
+
+## Next Steps
+
+Your governance skills unlock **Data Quality Framework** — where you'll build validation rules on top of this access control layer.

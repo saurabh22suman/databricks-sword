@@ -1,0 +1,59 @@
+{
+  "description": "Arrange the enterprise Lakehouse platform design steps in the correct order.",
+  "instructions": "Think about enterprise platform architecture layers: What's the foundation everything depends on? How do you organize teams and data? Pattern: foundation \u2192 organization \u2192 data structure \u2192 cost control \u2192 security \u2192 resilience.",
+  "blocks": [
+    {
+      "id": "metastore",
+      "code": "Create regional metastore(s) in Unity Catalog",
+      "label": "Establish Metastore"
+    },
+    {
+      "id": "workspace-topology",
+      "code": "Create hub + domain workspaces (platform, finance, supply_chain, marketing)",
+      "label": "Design Workspace Topology"
+    },
+    {
+      "id": "catalog-hierarchy",
+      "code": "Create catalogs per domain: finance, supply_chain, marketing (each with raw/curated/analytics schemas)",
+      "label": "Define Catalog Hierarchy"
+    },
+    {
+      "id": "cluster-policies",
+      "code": "Create cluster policies: max 20 workers, auto-terminate 30min, approved instance types only",
+      "label": "Set Cluster Policies"
+    },
+    {
+      "id": "governance",
+      "code": "Configure GRANT/REVOKE, row-level security, audit logging to SIEM",
+      "label": "Implement Governance"
+    },
+    {
+      "id": "dr-plan",
+      "code": "Configure DEEP CLONE for critical tables, cross-region replication, backup schedules",
+      "label": "Design DR Strategy"
+    }
+  ],
+  "correctOrder": [
+    "metastore",
+    "workspace-topology",
+    "catalog-hierarchy",
+    "cluster-policies",
+    "governance",
+    "dr-plan"
+  ],
+  "hints": [
+    "Metastore is the root \u2014 everything else depends on it",
+    "Workspace topology defines the organizational structure",
+    "Catalogs organize data by business domain within the metastore",
+    "Cluster policies control compute costs from day one",
+    "Governance secures data access and enables compliance",
+    "DR strategy protects against data loss and outages"
+  ],
+  "learnings": [
+    "Hub workspace manages shared infrastructure",
+    "Domain workspaces isolate team environments",
+    "Unity Catalog spans all workspaces",
+    "Delta Sharing enables cross-org collaboration",
+    "Policies enforce cost and security guardrails"
+  ]
+}

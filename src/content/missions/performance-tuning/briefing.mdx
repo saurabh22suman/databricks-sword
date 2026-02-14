@@ -1,0 +1,31 @@
+# Mission Briefing: Performance Tuning
+
+## Situation Report
+
+**Client:** TitanGames — an online gaming platform with 200M active players. Their analytics queries on player behavior data take 45 minutes to complete, making real-time game balancing impossible. Data engineers are throwing hardware at the problem, but costs are spiraling out of control.
+
+## Your Mission
+
+Optimize TitanGames' Spark workloads to achieve 10x performance improvements without increasing cluster size. Use Adaptive Query Execution, Photon, intelligent partitioning, and caching strategies.
+
+## Objectives
+
+1. **Understand Adaptive Query Execution (AQE)** — runtime query optimization
+2. **Leverage the Photon engine** — vectorized C++ execution for Delta Lake
+3. **Design partitioning strategies** — optimize data layout for query patterns
+4. **Implement caching** — Delta caching and Spark SQL caching
+5. **Optimize joins** — broadcast joins, skew handling, and shuffle tuning
+
+## Key Intelligence
+
+- AQE dynamically adjusts query plans at runtime based on actual data statistics
+- Photon is a C++ vectorized engine that's 2-8x faster for Delta Lake operations
+- Poor partitioning is the #1 cause of slow queries in the lakehouse
+- Broadcast joins eliminate shuffles for small dimension tables
+- Data skew causes "straggler" tasks that bottleneck the entire query
+
+## Stakes
+
+Every minute saved on analytics queries means faster game balancing decisions. Reducing compute costs by 60% saves TitanGames $2.4M annually while improving player experience.
+
+> "Premature optimization is the root of all evil, but mature optimization is the root of all performance." — Adapted from Knuth

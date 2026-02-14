@@ -1,0 +1,92 @@
+{
+  "description": "Complete the Structured Streaming pipeline for real-time transaction processing.",
+  "expectedOutput": "When completed correctly, this code will:\n1. Read from source stream in Delta format\n2. Add watermark for handling late data (10 min tolerance)\n3. Create 5-minute tumbling windows grouped by merchant\n4. Aggregate transaction amounts per window\n5. Write to Delta sink with append mode and checkpointing",
+  "codeTemplate": "# Read streaming data from Kafka\ndf_stream = spark.__BLANK_0__\\\n    .format('kafka')\\\n    .option('kafka.bootstrap.servers', 'broker:9092')\\\n    .option('subscribe', 'transactions')\\\n    .load()\n\n# Parse JSON and set watermark\nparsed = df_stream\\\n    .select(from_json(col('value').cast('string'), schema).alias('data'))\\\n    .select('data.*')\\\n    .__BLANK_1__('event_time', '10 minutes')\n\n# Window aggregation for fraud detection\nfraud_signals = parsed\\\n    .groupBy(\n        __BLANK_2__('event_time', '5 minutes'),\n        'card_id'\n    ).agg(\n        count('*').alias('tx_count'),\n        sum('amount').alias('total_amount')\n    )\n\n# Write results to Delta table\nquery = fraud_signals\\\n    .__BLANK_3__\\\n    .format('delta')\\\n    .outputMode('__BLANK_4__')\\\n    .option('__BLANK_5__', '/checkpoints/fraud_alerts')\\\n    .trigger(processingTime='__BLANK_6__')\\\n    .start('/delta/fraud_alerts')",
+  "blanks": [
+    {
+      "id": 0,
+      "options": [
+        "readStream",
+        "read",
+        "readTable",
+        "streamReader"
+      ],
+      "correctAnswer": "readStream"
+    },
+    {
+      "id": 1,
+      "options": [
+        "withWatermark",
+        "setWatermark",
+        "watermark",
+        "addWatermark"
+      ],
+      "correctAnswer": "withWatermark"
+    },
+    {
+      "id": 2,
+      "options": [
+        "window",
+        "timeWindow",
+        "tumble",
+        "sessionWindow"
+      ],
+      "correctAnswer": "window"
+    },
+    {
+      "id": 3,
+      "options": [
+        "writeStream",
+        "write",
+        "writeTable",
+        "streamWriter"
+      ],
+      "correctAnswer": "writeStream"
+    },
+    {
+      "id": 4,
+      "options": [
+        "update",
+        "append",
+        "complete",
+        "overwrite"
+      ],
+      "correctAnswer": "update"
+    },
+    {
+      "id": 5,
+      "options": [
+        "checkpointLocation",
+        "checkpoint",
+        "checkpointDir",
+        "recoveryDir"
+      ],
+      "correctAnswer": "checkpointLocation"
+    },
+    {
+      "id": 6,
+      "options": [
+        "10 seconds",
+        "1 second",
+        "1 minute",
+        "once"
+      ],
+      "correctAnswer": "10 seconds"
+    }
+  ],
+  "hints": [
+    "readStream is the streaming version of read",
+    "withWatermark defines how long to wait for late data",
+    "window() creates tumbling or sliding time windows",
+    "writeStream initiates the streaming output",
+    "update mode outputs only changed rows \u2014 suited for aggregations",
+    "checkpointLocation stores progress for exactly-once guarantees"
+  ],
+  "learnings": [
+    "readStream.format() specifies the streaming source",
+    "withWatermark() handles late-arriving data",
+    "groupBy().count() creates streaming aggregations",
+    "writeStream.outputMode() controls output behavior",
+    "trigger(processingTime) sets the micro-batch interval"
+  ]
+}

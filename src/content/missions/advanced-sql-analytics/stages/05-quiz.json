@@ -1,0 +1,72 @@
+{
+  "questions": [
+    {
+      "id": "q1",
+      "question": "What is the primary advantage of CTEs over nested subqueries?",
+      "options": [
+        "Readability and maintainability — each step is named and can be debugged independently",
+        "CTEs are always faster than subqueries",
+        "CTEs use less memory",
+        "CTEs are required for window functions"
+      ],
+      "correctAnswer": "Readability and maintainability — each step is named and can be debugged independently",
+      "explanation": "CTEs break complex queries into named, logical steps. Each CTE can be tested independently. The optimizer often produces the same execution plan as equivalent subqueries, so the benefit is primarily readability."
+    },
+    {
+      "id": "q2",
+      "question": "What does LAG(column, 1) return?",
+      "options": [
+        "The value of column from the PREVIOUS row in the window partition",
+        "The value of column from the NEXT row",
+        "The first value in the partition",
+        "The last value in the partition"
+      ],
+      "correctAnswer": "The value of column from the PREVIOUS row in the window partition",
+      "explanation": "LAG(column, offset) looks backward. LAG(views, 1) returns the previous row's views value. LEAD(column, 1) looks forward to the next row. Both respect the ORDER BY in the window specification."
+    },
+    {
+      "id": "q3",
+      "question": "When should you use a materialized view instead of a regular view?",
+      "options": [
+        "When the underlying query is expensive and the results are queried frequently — the pre-computed results avoid redundant computation",
+        "Always — materialized views are better than regular views",
+        "Only for real-time data",
+        "Only when the table has fewer than 1000 rows"
+      ],
+      "correctAnswer": "When the underlying query is expensive and the results are queried frequently — the pre-computed results avoid redundant computation",
+      "explanation": "Materialized views store pre-computed results. They're ideal for expensive aggregations (GROUP BY over billions of rows) that are queried often (dashboards). Regular views are better for simple transformations or rarely-used queries where storage cost isn't justified."
+    },
+    {
+      "id": "q4",
+      "question": "What does Z-ORDER optimize?",
+      "options": [
+        "Multi-column filter performance by co-locating related data within Delta files",
+        "Query parsing speed",
+        "Network transfer between nodes",
+        "Memory allocation for joins"
+      ],
+      "correctAnswer": "Multi-column filter performance by co-locating related data within Delta files",
+      "explanation": "Z-ORDER reorders data within files so rows with similar values for the Z-ORDER columns are physically close together. This enables file skipping when filtering on those columns, dramatically reducing I/O."
+    },
+    {
+      "id": "q5",
+      "question": "[Recall: Advanced Transformations] What is the difference between groupBy().agg() and window functions?",
+      "options": [
+        "groupBy collapses rows into groups; window functions compute across rows while keeping every individual row",
+        "They are identical",
+        "Window functions are faster",
+        "groupBy supports more functions"
+      ],
+      "correctAnswer": "groupBy collapses rows into groups; window functions compute across rows while keeping every individual row",
+      "explanation": "Recall from Advanced Transformations: groupBy reduces the row count (one row per group). Window functions add computed columns to every row based on a sliding window, preserving the original row count."
+    }
+  ],
+  "passingScore": 70,
+  "learnings": [
+    "Recursive CTEs handle hierarchical queries",
+    "Materialized views cache expensive computations",
+    "Query optimization requires statistics",
+    "Indexes accelerate selective queries",
+    "Cost-based optimizer selects execution plans"
+  ]
+}

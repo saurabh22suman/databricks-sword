@@ -1,0 +1,31 @@
+# Mission Briefing: Workflows & Orchestration
+
+## Situation Report
+
+**Client:** GlobalShip Logistics — operating a fleet of 10,000 container ships with IoT sensors streaming GPS, fuel, and cargo data. Their data team manually runs notebooks every morning, and when one fails, the entire daily report is delayed or silently incorrect.
+
+## Your Mission
+
+Replace GlobalShip's fragile manual notebook execution with a production-grade orchestrated workflow. Build dependent task graphs, implement retry policies, and set up monitoring for their daily ETL pipeline.
+
+## Objectives
+
+1. **Design multi-task jobs** — connect notebooks, Python scripts, and SQL tasks in dependency graphs
+2. **Configure task dependencies** — sequential, parallel, and conditional branches
+3. **Set up job clusters** — cost-efficient compute that spins up per job run
+4. **Implement retry and alerting** — handle transient failures gracefully
+5. **Monitor job health** — dashboards, alerts, and run history
+
+## Key Intelligence
+
+- Databricks Workflows (Jobs) orchestrate multi-task pipelines with a DAG structure
+- Tasks can be notebooks, JARs, Python scripts, SQL queries, or Delta Live Tables pipelines
+- Job clusters are created per run and auto-terminate, saving costs
+- Conditional tasks use `if/else` branching based on prior task outcomes
+- Built-in retry policies handle transient failures automatically
+
+## Stakes
+
+Manual execution costs GlobalShip 4 engineer-hours per day and produces unreliable data. Automating with Workflows saves $180K/year in labor and eliminates late/incorrect reports.
+
+> "Orchestration is the difference between a script and a system."

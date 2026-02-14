@@ -1,0 +1,101 @@
+{
+  "instructions": "Design the MLflow Architecture! Arrange components to show the experiment tracking and model lifecycle management flow.",
+  "components": [
+    {
+      "id": "experiment",
+      "label": "MLflow Experiment",
+      "icon": "flask-conical"
+    },
+    {
+      "id": "runs",
+      "label": "Experiment Runs",
+      "icon": "play"
+    },
+    {
+      "id": "registry",
+      "label": "Model Registry",
+      "icon": "database"
+    },
+    {
+      "id": "aliases",
+      "label": "Model Aliases (Champion/Challenger)",
+      "icon": "tag"
+    },
+    {
+      "id": "serving",
+      "label": "Model Serving Endpoint",
+      "icon": "globe"
+    }
+  ],
+  "dropZones": [
+    {
+      "id": "zone-1",
+      "label": "Experiment Organization",
+      "position": {
+        "x": 100,
+        "y": 50
+      }
+    },
+    {
+      "id": "zone-2",
+      "label": "Training & Logging",
+      "position": {
+        "x": 350,
+        "y": 50
+      }
+    },
+    {
+      "id": "zone-3",
+      "label": "Version Management",
+      "position": {
+        "x": 100,
+        "y": 190
+      }
+    },
+    {
+      "id": "zone-4",
+      "label": "Deployment Routing",
+      "position": {
+        "x": 350,
+        "y": 190
+      }
+    },
+    {
+      "id": "zone-5",
+      "label": "Production Inference",
+      "position": {
+        "x": 225,
+        "y": 320
+      }
+    }
+  ],
+  "correctPlacements": [
+    {
+      "componentId": "experiment",
+      "zoneId": "zone-1"
+    },
+    {
+      "componentId": "runs",
+      "zoneId": "zone-2"
+    },
+    {
+      "componentId": "registry",
+      "zoneId": "zone-3"
+    },
+    {
+      "componentId": "aliases",
+      "zoneId": "zone-4"
+    },
+    {
+      "componentId": "serving",
+      "zoneId": "zone-5"
+    }
+  ],
+  "learnings": [
+    "MLflow Experiment: Organizes related runs (e.g., all training attempts for a model)",
+    "Experiment Runs: Individual training iterations with logged params and metrics",
+    "Model Registry: Central repository for versioned, production-ready models",
+    "Model Aliases: Champion/Challenger patterns for safe model deployments",
+    "Model Serving: Deploy models as REST endpoints for real-time inference"
+  ]
+}

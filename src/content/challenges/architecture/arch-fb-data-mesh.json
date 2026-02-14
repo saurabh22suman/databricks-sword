@@ -1,0 +1,51 @@
+{
+  "id": "arch-fb-data-mesh",
+  "title": "Complete the Data Mesh Pattern",
+  "category": "architecture",
+  "difficulty": "A",
+  "format": "fill-blank",
+  "description": "Fill in the blanks to describe key data mesh concepts: domain ownership, data products, and federated governance.",
+  "hints": [
+    "Domain teams own their data end-to-end",
+    "Data products have SLAs and documentation",
+    "Federated governance enables autonomous decision-making"
+  ],
+  "xpReward": 125,
+  "optimalSolution": "Data mesh shifts ownership to domain teams who treat data as products. Each domain publishes self-serve data products with discoverability, documentation, and SLAs. Federated governance enables autonomous decisions while maintaining interoperability standards.",
+  "explanation": "Data mesh is a decentralized socio-technical approach. Domains own their data pipelines. Products are discoverable, addressable, trustworthy, and interoperable. Federated governance balances autonomy with enterprise standards.",
+  "fillBlank": {
+    "codeTemplate": "Data mesh shifts ownership to __BLANK_0__ who treat data as products.\nEach domain publishes self-serve data __BLANK_1__ with discoverability and SLAs.\n__BLANK_2__ governance enables autonomous decisions while maintaining standards.",
+    "blanks": [
+      {
+        "id": 0,
+        "correctAnswer": "domain teams",
+        "options": [
+          "domain teams",
+          "central IT",
+          "data engineers",
+          "the platform team"
+        ]
+      },
+      {
+        "id": 1,
+        "correctAnswer": "products",
+        "options": [
+          "products",
+          "pipelines",
+          "warehouses",
+          "lakes"
+        ]
+      },
+      {
+        "id": 2,
+        "correctAnswer": "Federated",
+        "options": [
+          "Federated",
+          "Centralized",
+          "Distributed",
+          "Delegated"
+        ]
+      }
+    ]
+  }
+}

@@ -1,0 +1,82 @@
+{
+  "description": "Complete the Databricks Workflow configuration commands.",
+  "expectedOutput": "When completed correctly, this code will:\n1. Create a Databricks Workflow (Job) container\n2. Configure job cluster with appropriate instance type\n3. Add tasks with dependencies (ingest \u2192 transform \u2192 report)\n4. Set a cron schedule for daily execution at 6 AM UTC\n5. Configure retry policies and alerting",
+  "codeTemplate": "# Define the job with JSON configuration\n{\n  \"name\": \"globalship_daily_etl\",\n  \"__BLANK_0__\": {\n    \"quartz_cron_expression\": \"0 0 6 * * ?\",\n    \"timezone_id\": \"UTC\"\n  },\n  \"tasks\": [\n    {\n      \"task_key\": \"ingest_raw\",\n      \"notebook_task\": {\"notebook_path\": \"/Shared/ingest_raw\"},\n      \"__BLANK_1__\": {\"max_retries\": 3, \"min_retry_interval_millis\": 60000}\n    },\n    {\n      \"task_key\": \"transform\",\n      \"__BLANK_2__\": [{\"task_key\": \"ingest_raw\"}],\n      \"notebook_task\": {\"notebook_path\": \"/Shared/transform_data\"}\n    },\n    {\n      \"task_key\": \"report\",\n      \"depends_on\": [{\"task_key\": \"__BLANK_3__\"}],\n      \"notebook_task\": {\"notebook_path\": \"/Shared/generate_report\"}\n    }\n  ],\n  \"__BLANK_4__\": {\n    \"new_cluster\": {\n      \"spark_version\": \"14.3.x-scala2.12\",\n      \"num_workers\": __BLANK_5__\n    }\n  }\n}",
+  "blanks": [
+    {
+      "id": 0,
+      "options": [
+        "schedule",
+        "trigger",
+        "cron",
+        "timer"
+      ],
+      "correctAnswer": "schedule"
+    },
+    {
+      "id": 1,
+      "options": [
+        "retry_on_timeout",
+        "retry_policy",
+        "error_handler",
+        "on_failure"
+      ],
+      "correctAnswer": "retry_on_timeout"
+    },
+    {
+      "id": 2,
+      "options": [
+        "depends_on",
+        "requires",
+        "after",
+        "predecessors"
+      ],
+      "correctAnswer": "depends_on"
+    },
+    {
+      "id": 3,
+      "options": [
+        "transform",
+        "ingest_raw",
+        "report",
+        "all"
+      ],
+      "correctAnswer": "transform"
+    },
+    {
+      "id": 4,
+      "options": [
+        "job_clusters",
+        "compute",
+        "clusters",
+        "resources"
+      ],
+      "correctAnswer": "job_clusters"
+    },
+    {
+      "id": 5,
+      "options": [
+        "4",
+        "0",
+        "1",
+        "100"
+      ],
+      "correctAnswer": "4"
+    }
+  ],
+  "hints": [
+    "schedule contains the cron expression for the job",
+    "retry_on_timeout configures automatic retry behavior",
+    "depends_on declares task dependencies in the DAG",
+    "The report task depends on transform, not ingest_raw",
+    "job_clusters defines ephemeral compute for the workflow",
+    "4 workers is reasonable for a mid-size ETL workload"
+  ],
+  "learnings": [
+    "task_key uniquely identifies tasks in a job",
+    "depends_on creates task dependencies",
+    "notebook_task runs a Databricks notebook",
+    "max_retries handles transient failures",
+    "email_notifications alert on job events"
+  ]
+}

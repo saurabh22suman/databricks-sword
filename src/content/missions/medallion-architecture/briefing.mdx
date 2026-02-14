@@ -1,0 +1,31 @@
+# Mission Briefing: Medallion Architecture
+
+## Situation Report
+
+**Client:** StreamVerse Media — a streaming platform with 80M subscribers generating 2TB of event data daily across clicks, views, pauses, skips, and subscriptions. Their data lake is a "data swamp" — raw files mixed with partially processed tables, no clear lineage, and analysts waste hours finding the right data.
+
+## Your Mission
+
+Design and implement a full medallion architecture (Bronze → Silver → Gold) using Delta Live Tables. Transform StreamVerse's chaotic data lake into a structured, reliable, and performant lakehouse.
+
+## Objectives
+
+1. **Design the Bronze layer** — raw data ingestion with schema enforcement
+2. **Build the Silver layer** — cleaned, deduplicated, enriched data
+3. **Create the Gold layer** — business-level aggregations and feature tables
+4. **Implement CDC patterns** — handle updates and deletes across layers
+5. **Compare medallion approaches** — when to use streaming vs batch per layer
+
+## Key Intelligence
+
+- **Bronze (Raw)**: Append-only, schema-on-read, preserves raw data exactly as received
+- **Silver (Validated)**: Cleaned, deduplicated, conformed schema, business keys resolved
+- **Gold (Business)**: Aggregated, feature-engineered, optimized for specific use cases
+- DLT automates dependency resolution between layers
+- CDC (Change Data Capture) propagates updates through the medallion layers
+
+## Stakes
+
+StreamVerse's analysts currently spend 60% of their time finding and cleaning data instead of analyzing it. A well-designed medallion architecture will reclaim 500+ analyst-hours per month.
+
+> "A data lake without structure is just a swamp." — Unknown Data Engineer

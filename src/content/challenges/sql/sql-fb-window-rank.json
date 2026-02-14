@@ -1,0 +1,51 @@
+{
+  "id": "sql-fb-window-rank",
+  "title": "Rank Employees by Salary per Department",
+  "category": "sql",
+  "difficulty": "B",
+  "format": "fill-blank",
+  "description": "Fill in the blanks to rank employees within each department by salary in descending order using a window function.",
+  "hints": [
+    "RANK() assigns the same rank to ties and skips subsequent numbers",
+    "PARTITION BY divides rows into groups for the window function",
+    "ORDER BY within OVER() determines the ranking order"
+  ],
+  "xpReward": 75,
+  "optimalSolution": "SELECT\n  employee_name,\n  department,\n  salary,\n  RANK() OVER (PARTITION BY department ORDER BY salary DESC) AS dept_rank\nFROM employees",
+  "explanation": "Window functions compute values across related rows without collapsing them into groups (unlike GROUP BY). RANK() OVER (PARTITION BY ... ORDER BY ...) is one of the most common patterns. PARTITION BY defines the window groups, and ORDER BY sets the ranking criteria. RANK() handles ties by assigning the same rank and skipping the next, while DENSE_RANK() doesn't skip.",
+  "fillBlank": {
+    "codeTemplate": "SELECT\n  employee_name,\n  department,\n  salary,\n  __BLANK_0__() OVER (__BLANK_1__ BY department __BLANK_2__ BY salary DESC) AS dept_rank\nFROM employees",
+    "blanks": [
+      {
+        "id": 0,
+        "correctAnswer": "RANK",
+        "options": [
+          "RANK",
+          "ROW_NUMBER",
+          "DENSE_RANK",
+          "NTILE"
+        ]
+      },
+      {
+        "id": 1,
+        "correctAnswer": "PARTITION",
+        "options": [
+          "PARTITION",
+          "GROUP",
+          "CLUSTER",
+          "DISTRIBUTE"
+        ]
+      },
+      {
+        "id": 2,
+        "correctAnswer": "ORDER",
+        "options": [
+          "ORDER",
+          "SORT",
+          "RANK",
+          "ARRANGE"
+        ]
+      }
+    ]
+  }
+}

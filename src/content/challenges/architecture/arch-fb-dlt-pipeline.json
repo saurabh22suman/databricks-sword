@@ -1,0 +1,51 @@
+{
+  "id": "arch-fb-dlt-pipeline",
+  "title": "Define a DLT Expectations Pipeline",
+  "category": "architecture",
+  "difficulty": "A",
+  "format": "fill-blank",
+  "description": "Fill in the blanks to create a Delta Live Tables (DLT) pipeline with data quality expectations that validate incoming data.",
+  "hints": [
+    "@dlt.table decorator defines a DLT table",
+    "@dlt.expect sets a warning-level quality check",
+    "@dlt.expect_or_drop removes records that fail the check"
+  ],
+  "xpReward": 100,
+  "optimalSolution": "@dlt.table\n@dlt.expect('valid_amount', 'amount > 0')\n@dlt.expect_or_drop('valid_customer', 'customer_id IS NOT NULL')\ndef silver_transactions():\n    return dlt.read('bronze_transactions').filter(col('status') == 'completed')",
+  "explanation": "Delta Live Tables (DLT) simplifies ETL pipelines with declarative definitions and built-in data quality. @dlt.expect logs violations but keeps records. @dlt.expect_or_drop removes violating records. @dlt.expect_or_fail stops the pipeline on violations. This provides graduated data quality enforcement through the medallion architecture.",
+  "fillBlank": {
+    "codeTemplate": "@dlt.__BLANK_0__\n@dlt.expect('valid_amount', 'amount > 0')\n@dlt.__BLANK_1__('valid_customer', 'customer_id IS NOT NULL')\ndef silver_transactions():\n    return dlt.__BLANK_2__('bronze_transactions').filter(col('status') == 'completed')",
+    "blanks": [
+      {
+        "id": 0,
+        "correctAnswer": "table",
+        "options": [
+          "table",
+          "view",
+          "stream",
+          "dataset"
+        ]
+      },
+      {
+        "id": 1,
+        "correctAnswer": "expect_or_drop",
+        "options": [
+          "expect_or_drop",
+          "expect_or_fail",
+          "filter_if",
+          "require"
+        ]
+      },
+      {
+        "id": 2,
+        "correctAnswer": "read",
+        "options": [
+          "read",
+          "load",
+          "table",
+          "source"
+        ]
+      }
+    ]
+  }
+}

@@ -1,0 +1,70 @@
+{
+  "id": "arch-dd-lakehouse-migration",
+  "title": "Order Lakehouse Migration Phases",
+  "category": "architecture",
+  "difficulty": "S",
+  "format": "drag-drop",
+  "description": "Arrange the phases of migrating from a traditional data warehouse to a lakehouse architecture in the correct order.",
+  "hints": [
+    "Assessment comes before any data movement",
+    "Parallel processing enables validation",
+    "Cutover happens only after validation succeeds"
+  ],
+  "xpReward": 150,
+  "optimalSolution": "Assessment \u2192 Landing Zone \u2192 Parallel Ingest \u2192 Schema Migration \u2192 Workload Migration \u2192 Validation \u2192 Cutover \u2192 Decommission",
+  "explanation": "Lakehouse migration requires careful phasing. Assess existing workloads first. Set up the landing zone (storage, Unity Catalog). Run parallel pipelines for comparison. Migrate schemas to Delta. Move workloads incrementally. Validate outputs match. Cut over and finally decommission legacy systems.",
+  "dragDrop": {
+    "blocks": [
+      {
+        "id": "assess",
+        "code": "Assess existing warehouse workloads and dependencies",
+        "label": "Assessment"
+      },
+      {
+        "id": "landing",
+        "code": "Set up lakehouse landing zone (storage + Unity Catalog)",
+        "label": "Landing Zone"
+      },
+      {
+        "id": "parallel",
+        "code": "Run parallel data ingestion pipelines",
+        "label": "Parallel Ingest"
+      },
+      {
+        "id": "schema",
+        "code": "Migrate schemas to Delta tables with partitioning",
+        "label": "Schema Migration"
+      },
+      {
+        "id": "workload",
+        "code": "Migrate ETL/ELT workloads to Databricks",
+        "label": "Workload Migration"
+      },
+      {
+        "id": "validate",
+        "code": "Validate outputs match between systems",
+        "label": "Validation"
+      },
+      {
+        "id": "cutover",
+        "code": "Cut over production traffic to lakehouse",
+        "label": "Cutover"
+      },
+      {
+        "id": "decommission",
+        "code": "Decommission legacy data warehouse",
+        "label": "Decommission"
+      }
+    ],
+    "correctOrder": [
+      "assess",
+      "landing",
+      "parallel",
+      "schema",
+      "workload",
+      "validate",
+      "cutover",
+      "decommission"
+    ]
+  }
+}

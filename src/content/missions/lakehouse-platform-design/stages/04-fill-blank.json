@@ -1,0 +1,82 @@
+{
+  "description": "Complete the enterprise Lakehouse platform configuration.",
+  "expectedOutput": "When completed correctly, this code will:\n1. Create regional metastore(s) in Unity Catalog\n2. Define workspace topology (hub + domain workspaces)\n3. Create catalogs per business domain\n4. Set cluster policies for cost control\n5. Configure cross-region replication for DR",
+  "codeTemplate": "-- Create the Unity Catalog metastore\nCREATE __BLANK_0__ IF NOT EXISTS nexacorp_metastore;\n\n-- Create domain catalogs\nCREATE __BLANK_1__ IF NOT EXISTS finance;\nCREATE CATALOG IF NOT EXISTS supply_chain;\nCREATE CATALOG IF NOT EXISTS shared_platform;\n\n-- Grant domain teams ownership of their catalogs\nALTER CATALOG finance SET __BLANK_2__ TO `finance_platform_team`;\n\n-- Create cluster policy (JSON)\n{\n  \"name\": \"standard-production\",\n  \"definition\": {\n    \"autotermination_minutes\": {\"type\": \"fixed\", \"value\": __BLANK_3__},\n    \"num_workers\": {\"type\": \"range\", \"maxValue\": 16}\n  }\n}\n\n-- Cross-region disaster recovery\nCREATE TABLE dr_region.finance.gold_transactions\n__BLANK_4__ CLONE finance.gold.transactions;\n\n-- Share data externally via Delta Sharing\nCREATE __BLANK_5__ IF NOT EXISTS partner_share;\nALTER SHARE partner_share ADD TABLE finance.gold.quarterly_report;",
+  "blanks": [
+    {
+      "id": 0,
+      "options": [
+        "METASTORE",
+        "DATABASE",
+        "CATALOG",
+        "SCHEMA"
+      ],
+      "correctAnswer": "METASTORE"
+    },
+    {
+      "id": 1,
+      "options": [
+        "CATALOG",
+        "DATABASE",
+        "SCHEMA",
+        "NAMESPACE"
+      ],
+      "correctAnswer": "CATALOG"
+    },
+    {
+      "id": 2,
+      "options": [
+        "OWNER",
+        "ADMIN",
+        "MANAGER",
+        "CREATOR"
+      ],
+      "correctAnswer": "OWNER"
+    },
+    {
+      "id": 3,
+      "options": [
+        "30",
+        "60",
+        "120",
+        "0"
+      ],
+      "correctAnswer": "30"
+    },
+    {
+      "id": 4,
+      "options": [
+        "DEEP",
+        "SHALLOW",
+        "FULL",
+        "MIRROR"
+      ],
+      "correctAnswer": "DEEP"
+    },
+    {
+      "id": 5,
+      "options": [
+        "SHARE",
+        "EXPORT",
+        "LINK",
+        "FEED"
+      ],
+      "correctAnswer": "SHARE"
+    }
+  ],
+  "hints": [
+    "CREATE METASTORE is the top-level governance object",
+    "CATALOG is the first level of Unity Catalog's three-level namespace",
+    "SET OWNER transfers ownership to a group or service principal",
+    "30 minutes auto-termination balances cost and convenience",
+    "DEEP CLONE creates a full independent copy (for DR replication)",
+    "CREATE SHARE creates a Delta Sharing share object"
+  ],
+  "learnings": [
+    "CREATE SHARE packages data for sharing",
+    "ALTER SHARE ADD TABLE adds tables to shares",
+    "CREATE RECIPIENT grants share access",
+    "CREATE PROVIDER enables data marketplace",
+    "SHOW SHARES lists available shares"
+  ]
+}

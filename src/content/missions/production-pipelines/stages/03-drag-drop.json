@@ -1,0 +1,59 @@
+{
+  "description": "Arrange the production pipeline components in the correct implementation order.",
+  "instructions": "Think about production-grade setup: What makes the pipeline environment-agnostic? What's the entry point for raw data? Pattern: config \u2192 ingest \u2192 CDC \u2192 quality gates \u2192 error handling \u2192 observability.",
+  "blocks": [
+    {
+      "id": "parameterize",
+      "code": "env = spark.conf.get('pipeline.env', 'dev')\ncatalog = f'{env}_megamart'",
+      "label": "Parameterize for Environment"
+    },
+    {
+      "id": "bronze-ingest",
+      "code": "@dlt.table\ndef bronze_orders():\n    return spark.readStream.format('cloudFiles').load(f'/{env}/raw/orders')",
+      "label": "Bronze: Ingest Raw Orders"
+    },
+    {
+      "id": "cdc-apply",
+      "code": "dlt.apply_changes(\n  target='silver_orders',\n  source='bronze_orders',\n  keys=['order_id'],\n  sequence_by='updated_at')",
+      "label": "CDC: Apply Order Updates"
+    },
+    {
+      "id": "quality-check",
+      "code": "@dlt.expect_or_fail('valid_total', 'order_total > 0')\n@dlt.table\ndef gold_order_summary(): ...",
+      "label": "Quality Check + Gold Table"
+    },
+    {
+      "id": "dlq-route",
+      "code": "@dlt.table\ndef dead_letter_orders():\n    return dlt.read_stream('bronze_orders').filter('order_total IS NULL')",
+      "label": "Route Failures to DLQ"
+    },
+    {
+      "id": "sla-monitor",
+      "code": "SELECT CASE WHEN data_freshness > INTERVAL 15 MINUTES THEN 'SLA_BREACH' END FROM freshness_check",
+      "label": "SLA Freshness Monitoring"
+    }
+  ],
+  "correctOrder": [
+    "parameterize",
+    "bronze-ingest",
+    "cdc-apply",
+    "quality-check",
+    "dlq-route",
+    "sla-monitor"
+  ],
+  "hints": [
+    "Parameterize first \u2014 all other steps depend on the environment",
+    "Bronze ingestion is the entry point for raw data",
+    "CDC applies updates to build the current state table",
+    "Quality checks ensure Gold table integrity",
+    "Dead letter queue captures records that fail processing",
+    "SLA monitoring is the final observability layer"
+  ],
+  "learnings": [
+    "DLT pipelines are declarative - define what, not how",
+    "APPLY CHANGES handles CDC merge operations",
+    "Expectations enforce data quality at each step",
+    "Event log captures pipeline execution history",
+    "Monitoring alerts on freshness and failures"
+  ]
+}

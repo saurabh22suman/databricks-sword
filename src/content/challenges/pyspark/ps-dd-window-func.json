@@ -1,0 +1,46 @@
+{
+  "id": "ps-dd-window-func",
+  "title": "Build a Window Function Pipeline",
+  "category": "pyspark",
+  "difficulty": "A",
+  "format": "drag-drop",
+  "description": "Order the steps to compute a running total of sales per customer using window functions.",
+  "hints": [
+    "Define the window specification before using it",
+    "Window functions need a partitionBy and orderBy",
+    "Use sum() over the window for running totals"
+  ],
+  "xpReward": 125,
+  "optimalSolution": "from pyspark.sql.window import Window\nfrom pyspark.sql.functions import sum as _sum\n\nwindow_spec = Window.partitionBy('customer_id').orderBy('order_date').rowsBetween(Window.unboundedPreceding, Window.currentRow)\n\nresult = df.withColumn('running_total', _sum('amount').over(window_spec))",
+  "explanation": "Window functions compute values across a set of rows related to the current row. partitionBy defines groups, orderBy defines order within groups, and rowsBetween defines the frame. This avoids expensive self-joins.",
+  "dragDrop": {
+    "blocks": [
+      {
+        "id": "import",
+        "code": "from pyspark.sql.window import Window\nfrom pyspark.sql.functions import sum as _sum",
+        "label": "Import Window"
+      },
+      {
+        "id": "spec",
+        "code": "window_spec = Window.partitionBy('customer_id').orderBy('order_date')",
+        "label": "Define Window Spec"
+      },
+      {
+        "id": "frame",
+        "code": "window_spec = window_spec.rowsBetween(Window.unboundedPreceding, Window.currentRow)",
+        "label": "Set Frame"
+      },
+      {
+        "id": "apply",
+        "code": "result = df.withColumn('running_total', _sum('amount').over(window_spec))",
+        "label": "Apply Window"
+      }
+    ],
+    "correctOrder": [
+      "import",
+      "spec",
+      "frame",
+      "apply"
+    ]
+  }
+}

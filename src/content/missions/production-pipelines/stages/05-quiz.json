@@ -1,0 +1,96 @@
+{
+  "questions": [
+    {
+      "id": "q1",
+      "question": "Why should DLT pipelines be parameterized?",
+      "options": [
+        "To promote the same pipeline code across dev/staging/prod with different configurations",
+        "To make pipelines run faster",
+        "To reduce storage costs",
+        "To enable parallel execution"
+      ],
+      "correctAnswer": "To promote the same pipeline code across dev/staging/prod with different configurations",
+      "explanation": "Parameterization means one codebase works across environments. spark.conf.get('pipeline.env') switches catalogs, paths, and settings without code changes."
+    },
+    {
+      "id": "q2",
+      "question": "What does the sequence_by parameter in apply_changes control?",
+      "options": [
+        "The order in which changes are applied to ensure consistency",
+        "The partition column",
+        "The output format",
+        "The number of retries"
+      ],
+      "correctAnswer": "The order in which changes are applied to ensure consistency",
+      "explanation": "sequence_by specifies the column (usually a timestamp or version number) that determines the order of CDC events. This ensures updates are applied in the correct chronological sequence."
+    },
+    {
+      "id": "q3",
+      "question": "What is a dead letter queue in data pipelines?",
+      "options": [
+        "A separate table that captures records that failed processing, with error metadata",
+        "A queue for deleting old data",
+        "A high-priority processing queue",
+        "A backup storage location"
+      ],
+      "correctAnswer": "A separate table that captures records that failed processing, with error metadata",
+      "explanation": "Dead letter queues store records that couldn't be processed successfully. Each record is annotated with the failure reason and timestamp, enabling investigation and reprocessing."
+    },
+    {
+      "id": "q4",
+      "question": "How do you monitor data freshness in a production pipeline?",
+      "options": [
+        "Track MAX(updated_at) in Gold tables and compare against SLA thresholds",
+        "Check if the pipeline is running",
+        "Count the number of files in storage",
+        "Monitor CPU usage"
+      ],
+      "correctAnswer": "Track MAX(updated_at) in Gold tables and compare against SLA thresholds",
+      "explanation": "Data freshness = how recent is the latest data in consumer-facing tables. By tracking MAX(updated_at) and comparing to the current time, you measure data lag against SLA targets."
+    },
+    {
+      "id": "q5",
+      "question": "[Recall: Workflows] How do you set up automated alerts for pipeline failures?",
+      "options": [
+        "Configure email_notifications in the Databricks Job with on_failure triggers",
+        "Manually check the Spark UI daily",
+        "Write a cron job to check logs",
+        "Set up a separate monitoring pipeline"
+      ],
+      "correctAnswer": "Configure email_notifications in the Databricks Job with on_failure triggers",
+      "explanation": "Recall from Workflows & Orchestration: Databricks Jobs support email_notifications with on_failure, on_success, and on_duration_warning_threshold triggers for automated alerting."
+    },
+    {
+      "id": "q6",
+      "question": "[Recall: Data Quality] What DLT expectation level should you use for critical production checks?",
+      "options": [
+        "expect_or_fail — halt the pipeline to prevent bad data from reaching Gold tables",
+        "expect — just log warnings",
+        "expect_or_drop — silently remove",
+        "No expectations needed in production"
+      ],
+      "correctAnswer": "expect_or_fail — halt the pipeline to prevent bad data from reaching Gold tables",
+      "explanation": "Recall from Data Quality Framework: expect_or_fail is the strictest level — it stops the pipeline on violation. For critical production checks (e.g., primary key not null), this prevents corrupted data from propagating."
+    },
+    {
+      "id": "q7",
+      "question": "[Recall: Medallion] Why is Bronze append-only in production?",
+      "options": [
+        "To preserve raw data for reprocessing and audit compliance",
+        "To save storage costs",
+        "Because Delta Lake doesn't support updates",
+        "For faster query performance"
+      ],
+      "correctAnswer": "To preserve raw data for reprocessing and audit compliance",
+      "explanation": "Recall from Medallion Architecture: Bronze is append-only so you can always reprocess from raw data if Silver/Gold logic changes. This is critical for audit compliance and data governance."
+    }
+  ],
+  "passingScore": 70,
+  "learnings": [
+    "DLT simplifies ETL pipeline development",
+    "CDC captures and applies data changes",
+    "SCD Type 2 maintains historical versions",
+    "Quality metrics track pipeline health",
+    "Recovery handles failures gracefully"
+  ]
+}

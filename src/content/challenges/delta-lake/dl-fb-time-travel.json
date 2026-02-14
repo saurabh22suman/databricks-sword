@@ -1,0 +1,51 @@
+{
+  "id": "dl-fb-time-travel",
+  "title": "Query Historical Data with Time Travel",
+  "category": "delta-lake",
+  "difficulty": "A",
+  "format": "fill-blank",
+  "description": "Fill in the blanks to query a Delta table as it existed at a previous version and timestamp, then restore it to a known-good state.",
+  "hints": [
+    "VERSION AS OF lets you query a specific version number",
+    "TIMESTAMP AS OF lets you query as of a datetime",
+    "RESTORE TABLE reverts a Delta table to a previous version"
+  ],
+  "xpReward": 125,
+  "optimalSolution": "-- Query version 5\nSELECT * FROM events VERSION AS OF 5;\n\n-- Query as of a timestamp\nSELECT * FROM events TIMESTAMP AS OF '2024-01-15T10:00:00';\n\n-- Restore to version 5\nRESTORE TABLE events TO VERSION AS OF 5;",
+  "explanation": "Delta Lake's time travel lets you access previous table states using VERSION AS OF (by version number) or TIMESTAMP AS OF (by datetime). DESCRIBE HISTORY shows available versions. RESTORE TABLE reverts the table to a past state \u2014 useful for undoing bad writes. Time travel is powered by the Delta transaction log which keeps metadata about every change.",
+  "fillBlank": {
+    "codeTemplate": "-- Query version 5\nSELECT * FROM events __BLANK_0__ AS OF 5;\n\n-- Query as of a timestamp\nSELECT * FROM events __BLANK_1__ AS OF '2024-01-15T10:00:00';\n\n-- Restore to version 5\n__BLANK_2__ TABLE events TO VERSION AS OF 5;",
+    "blanks": [
+      {
+        "id": 0,
+        "correctAnswer": "VERSION",
+        "options": [
+          "VERSION",
+          "SNAPSHOT",
+          "REVISION",
+          "COMMIT"
+        ]
+      },
+      {
+        "id": 1,
+        "correctAnswer": "TIMESTAMP",
+        "options": [
+          "TIMESTAMP",
+          "DATETIME",
+          "TIME",
+          "DATE"
+        ]
+      },
+      {
+        "id": 2,
+        "correctAnswer": "RESTORE",
+        "options": [
+          "RESTORE",
+          "ROLLBACK",
+          "REVERT",
+          "UNDO"
+        ]
+      }
+    ]
+  }
+}

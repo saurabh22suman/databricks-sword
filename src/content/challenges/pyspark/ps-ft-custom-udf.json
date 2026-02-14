@@ -1,0 +1,20 @@
+{
+  "id": "ps-ft-custom-udf",
+  "title": "Write a Custom UDF for Data Cleansing",
+  "category": "pyspark",
+  "difficulty": "S",
+  "format": "free-text",
+  "description": "Write a PySpark UDF that normalizes phone numbers to the format +1-XXX-XXX-XXXX. The UDF should strip all non-digit characters, ensure exactly 10 digits remain (US numbers), and format them consistently. Register it and apply it to a DataFrame column.",
+  "hints": [
+    "Use @udf with a return type of StringType()",
+    "Python's re module works inside UDFs",
+    "Register with spark.udf.register() for SQL usage or use the decorator for DataFrame API"
+  ],
+  "xpReward": 150,
+  "optimalSolution": "from pyspark.sql.functions import udf\nfrom pyspark.sql.types import StringType\nimport re\n\n@udf(returnType=StringType())\ndef normalize_phone(phone):\n    if phone is None:\n        return None\n    digits = re.sub(r'\\D', '', phone)\n    if len(digits) == 11 and digits[0] == '1':\n        digits = digits[1:]\n    if len(digits) != 10:\n        return None\n    return f'+1-{digits[:3]}-{digits[3:6]}-{digits[6:]}'  \n\nresult = df.withColumn('clean_phone', normalize_phone(df.raw_phone))",
+  "explanation": "UDFs (User Defined Functions) let you extend PySpark with custom Python logic. While powerful, they serialize data to Python and back, making them slower than native Spark functions. Use them when no built-in function exists. The @udf decorator is the cleanest approach for DataFrame API usage. Always handle None/null inputs gracefully.",
+  "freeText": {
+    "validationRegex": "udf.*StringType|@udf.*returnType.*StringType",
+    "sampleAnswer": "from pyspark.sql.functions import udf\nfrom pyspark.sql.types import StringType\nimport re\n\n@udf(returnType=StringType())\ndef normalize_phone(phone):\n    digits = re.sub(r'\\D', '', phone)\n    if len(digits) == 10:\n        return f'+1-{digits[:3]}-{digits[3:6]}-{digits[6:]}'\n    return None\n\nresult = df.withColumn('clean_phone', normalize_phone(df.phone))"
+  }
+}

@@ -1,0 +1,47 @@
+{
+  "id": "sql-dd-cte-pipeline",
+  "title": "Build a CTE Data Pipeline",
+  "category": "sql",
+  "difficulty": "A",
+  "format": "drag-drop",
+  "description": "Arrange the SQL clauses to create a multi-step CTE pipeline that filters active users, aggregates their purchases, and selects top spenders.",
+  "hints": [
+    "CTEs start with WITH and use commas to separate multiple CTEs",
+    "Each CTE has the pattern: name AS (SELECT ...)",
+    "The final SELECT references the last CTE"
+  ],
+  "xpReward": 125,
+  "optimalSolution": "WITH active_users AS (\n  SELECT user_id, username FROM users WHERE status = 'active'\n),\nuser_totals AS (\n  SELECT au.user_id, au.username, SUM(p.amount) AS total_spent\n  FROM active_users au JOIN purchases p ON au.user_id = p.user_id\n  GROUP BY au.user_id, au.username\n)\nSELECT username, total_spent FROM user_totals WHERE total_spent > 500 ORDER BY total_spent DESC",
+  "explanation": "Common Table Expressions (CTEs) break complex queries into readable, named steps. Each CTE can reference the ones defined before it, creating a clear data pipeline. CTEs improve readability over deeply nested subqueries and can be referenced multiple times in the final query. In Databricks SQL, CTEs are optimized by the Catalyst engine just like subqueries.",
+  "dragDrop": {
+    "blocks": [
+      {
+        "id": "b1",
+        "content": "WITH active_users AS ("
+      },
+      {
+        "id": "b2",
+        "content": "  SELECT user_id, username FROM users WHERE status = 'active'"
+      },
+      {
+        "id": "b3",
+        "content": "), user_totals AS ("
+      },
+      {
+        "id": "b4",
+        "content": "  SELECT au.user_id, au.username, SUM(p.amount) AS total_spent\n  FROM active_users au JOIN purchases p ON au.user_id = p.user_id\n  GROUP BY au.user_id, au.username"
+      },
+      {
+        "id": "b5",
+        "content": ") SELECT username, total_spent FROM user_totals WHERE total_spent > 500 ORDER BY total_spent DESC"
+      }
+    ],
+    "correctOrder": [
+      "b1",
+      "b2",
+      "b3",
+      "b4",
+      "b5"
+    ]
+  }
+}

@@ -1,0 +1,27 @@
+{
+  "editor.defaultFormatter": "esbenp.prettier-vscode",
+  "editor.formatOnSave": true,
+  "editor.codeActionsOnSave": {
+    "source.fixAll.eslint": "explicit",
+    "source.organizeImports": "explicit"
+  },
+  "typescript.preferences.importModuleSpecifier": "non-relative",
+  "typescript.suggest.autoImports": true,
+  "tailwindCSS.experimental.classRegex": [
+    ["cn\\(([^)]*)\\)", "'([^']*)'"],
+    ["cn\\(([^)]*)\\)", "\"([^\"]*)\""],
+    ["cn\\(([^)]*)\\)", "`([^`]*)`"]
+  ],
+  "files.associations": {
+    "*.mdx": "mdx"
+  },
+  "[typescriptreact]": {
+    "editor.defaultFormatter": "esbenp.prettier-vscode"
+  },
+  "[typescript]": {
+    "editor.defaultFormatter": "esbenp.prettier-vscode"
+  },
+  "[mdx]": {
+    "editor.defaultFormatter": "esbenp.prettier-vscode"
+  }
+}

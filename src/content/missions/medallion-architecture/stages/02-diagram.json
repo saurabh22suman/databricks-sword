@@ -1,0 +1,101 @@
+{
+  "instructions": "Design the Medallion Architecture! Arrange components to show the data flow from raw sources through Bronze, Silver, and Gold layers to different consumers.",
+  "components": [
+    {
+      "id": "raw-source",
+      "label": "Raw Sources (Files/Kafka)",
+      "icon": "hard-drive"
+    },
+    {
+      "id": "bronze",
+      "label": "Bronze (Raw Append-Only)",
+      "icon": "database"
+    },
+    {
+      "id": "silver",
+      "label": "Silver (Clean & Enriched)",
+      "icon": "filter"
+    },
+    {
+      "id": "gold-agg",
+      "label": "Gold (Aggregated Metrics)",
+      "icon": "bar-chart"
+    },
+    {
+      "id": "gold-features",
+      "label": "Gold (ML Feature Tables)",
+      "icon": "cpu"
+    }
+  ],
+  "dropZones": [
+    {
+      "id": "zone-1",
+      "label": "Data Sources",
+      "position": {
+        "x": 50,
+        "y": 150
+      }
+    },
+    {
+      "id": "zone-2",
+      "label": "Raw Layer",
+      "position": {
+        "x": 200,
+        "y": 150
+      }
+    },
+    {
+      "id": "zone-3",
+      "label": "Validated Layer",
+      "position": {
+        "x": 350,
+        "y": 150
+      }
+    },
+    {
+      "id": "zone-4",
+      "label": "BI Consumers",
+      "position": {
+        "x": 500,
+        "y": 80
+      }
+    },
+    {
+      "id": "zone-5",
+      "label": "ML Consumers",
+      "position": {
+        "x": 500,
+        "y": 220
+      }
+    }
+  ],
+  "correctPlacements": [
+    {
+      "componentId": "raw-source",
+      "zoneId": "zone-1"
+    },
+    {
+      "componentId": "bronze",
+      "zoneId": "zone-2"
+    },
+    {
+      "componentId": "silver",
+      "zoneId": "zone-3"
+    },
+    {
+      "componentId": "gold-agg",
+      "zoneId": "zone-4"
+    },
+    {
+      "componentId": "gold-features",
+      "zoneId": "zone-5"
+    }
+  ],
+  "learnings": [
+    "Raw Sources: External data from files, Kafka, APIs - the starting point of your pipeline",
+    "Bronze Layer: Raw, append-only data with minimal processing - your audit trail",
+    "Silver Layer: Cleaned, validated, and enriched data - the foundation for analytics",
+    "Gold Layers: Business-level aggregations tailored for BI dashboards and ML features",
+    "This layered approach enables data quality, lineage tracking, and iterative refinement"
+  ]
+}

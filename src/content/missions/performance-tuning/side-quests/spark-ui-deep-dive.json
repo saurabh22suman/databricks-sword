@@ -1,0 +1,65 @@
+{
+  "questions": [
+    {
+      "id": "spark-ui-1",
+      "question": "What is the primary purpose of the Spark UI?",
+      "options": [
+        "Write Spark code",
+        "Monitor and debug Spark applications by visualizing jobs, stages, and tasks",
+        "Deploy Spark clusters",
+        "Store Spark data"
+      ],
+      "correctAnswer": 1,
+      "explanation": "The Spark UI provides visibility into your application's execution: job/stage/task breakdown, shuffle metrics, storage, SQL plans, and executor metrics. It's essential for performance debugging and optimization."
+    },
+    {
+      "id": "spark-ui-2",
+      "question": "In the Spark UI, what does a 'stage' represent?",
+      "options": [
+        "A single row of data",
+        "A set of tasks that can run in parallel, separated by shuffle boundaries",
+        "A type of storage",
+        "A user account"
+      ],
+      "correctAnswer": 1,
+      "explanation": "A stage is a set of tasks with no shuffle dependencies between them—they can all run in parallel. Stage boundaries occur at shuffle operations (joins, groupBy, repartition). Fewer stages generally means better performance."
+    },
+    {
+      "id": "spark-ui-3",
+      "question": "What does 'data skew' look like in the Spark UI task metrics?",
+      "options": [
+        "All tasks complete at the same time",
+        "A few tasks take much longer than others, with significantly more input data",
+        "No tasks complete",
+        "Tasks run in sequence"
+      ],
+      "correctAnswer": 1,
+      "explanation": "Data skew appears as a few slow tasks (stragglers) while most finish quickly. The UI's Task Metrics table shows input size per task—look for outliers with 10x or more data than the median. This indicates uneven data distribution."
+    },
+    {
+      "id": "spark-ui-4",
+      "question": "What does 'Shuffle Read' and 'Shuffle Write' in the Spark UI tell you?",
+      "options": [
+        "How much data was compressed",
+        "How much data was exchanged between executors during shuffle operations",
+        "How much data was cached",
+        "How much data was deleted"
+      ],
+      "correctAnswer": 1,
+      "explanation": "Shuffle metrics show data movement across the network. High shuffle read/write indicates expensive data redistribution. Reducing shuffles (broadcast joins, pre-partitioning, avoiding unnecessary groupBy) is a key optimization strategy."
+    },
+    {
+      "id": "spark-ui-5",
+      "question": "How can you access the SQL tab's query execution plan in the Spark UI?",
+      "options": [
+        "It's not available in the UI",
+        "Click on a query in the SQL tab to see the DAG visualization and physical plan details",
+        "Export to a file only",
+        "Use a separate tool"
+      ],
+      "correctAnswer": 1,
+      "explanation": "The SQL tab shows all executed queries. Clicking a query reveals the DAG visualization and detailed metrics for each plan node—scan, filter, join, aggregate, etc. This is invaluable for understanding how Spark executed your SQL or DataFrame operations."
+    }
+  ],
+  "passingScore": 60
+}

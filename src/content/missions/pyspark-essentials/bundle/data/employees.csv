@@ -1,0 +1,16 @@
+employee_id,name,department,salary,hire_date
+E001,Alice,Engineering,95000,2020-01-15
+E002,Bob,Marketing,75000,2019-03-20
+E003,Charlie,Engineering,110000,2018-06-10
+E004,Diana,Sales,85000,2021-02-01
+E005,Eve,Marketing,80000,2020-08-15
+E006,Frank,Engineering,120000,2017-04-22
+E007,Grace,Sales,90000,2019-11-30
+E008,Henry,Engineering,105000,2020-05-18
+E009,Ivy,Marketing,70000,2021-09-01
+E010,Jack,Sales,92000,2018-12-10
+E011,Kate,Engineering,115000,2019-07-15
+E012,Leo,Marketing,82000,2020-04-01
+E013,Mia,Sales,88000,2019-05-20
+E014,Noah,Engineering,98000,2021-03-15
+E015,Olivia,Marketing,78000,2020-11-01

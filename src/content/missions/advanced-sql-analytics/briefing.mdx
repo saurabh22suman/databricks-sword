@@ -1,0 +1,64 @@
+---
+title: "Advanced SQL Analytics"
+subtitle: "CTEs, window functions, materialized views, and optimization"
+---
+
+# MISSION BRIEFING: Operation Query Blade
+
+**OPERATIVE CLASSIFICATION:** A-Rank — BI Track
+
+---
+
+## SITUATION REPORT
+
+**Client:** StreamVerse Media — a streaming platform with 45 million subscribers and 2 billion viewing events per month.
+
+**Crisis:** Their analytics team writes SQL queries that take 20+ minutes to return on their Gold tables. Dashboard refresh times are unacceptable. The root causes: deeply nested subqueries that are impossible to debug, redundant full table scans, and no use of materialized views. The CTO wants "analytics at the speed of thought."
+
+**Your Mission:** Refactor their analytics SQL using advanced patterns: replace subquery spaghetti with CTEs, leverage window functions for rankings and running totals, create materialized views for hot queries, and optimize execution plans.
+
+---
+
+## INTELLIGENCE BRIEFING
+
+### Advanced SQL Patterns
+
+**Common Table Expressions (CTEs):**
+- Named, temporary result sets defined with `WITH`
+- Break complex queries into readable, debuggable steps
+- Can reference each other (chaining)
+- Replace nested subqueries for clarity and maintainability
+
+**Window Functions (Advanced):**
+- `ROW_NUMBER()`, `RANK()`, `DENSE_RANK()` — row ordering
+- `LAG()`, `LEAD()` — access previous/next rows
+- `FIRST_VALUE()`, `LAST_VALUE()` — boundary values
+- `NTILE()` — distribute rows into buckets
+- Frame specifications: `ROWS BETWEEN`, `RANGE BETWEEN`
+
+**Materialized Views:**
+- Pre-computed query results stored as Delta tables
+- Automatically refreshed when base data changes
+- Massive speedup for expensive aggregations
+- Created with `CREATE MATERIALIZED VIEW`
+
+**Query Optimization:**
+- `EXPLAIN` plans reveal execution strategy
+- Predicate pushdown: filters pushed to storage layer
+- Z-ORDER indexing for multi-column filtering
+- ANALYZE TABLE for statistics collection
+
+---
+
+## MISSION OBJECTIVES
+
+1. **Map SQL execution flow** — Parse → Optimize → Execute → Cache
+2. **Build a complex analytics query** — Step-by-step from CTEs to final result
+3. **Write advanced SQL** — CTEs, window functions, materialized views
+4. **Validate mastery** — Prove expertise in SQL optimization
+
+---
+
+*"A fast query isn't about hardware — it's about writing SQL that cooperates with the optimizer. Think like the engine."*
+
+**— Chief Architect, StreamVerse**

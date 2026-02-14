@@ -1,0 +1,82 @@
+{
+  "description": "Complete the DLT medallion architecture pipeline code.",
+  "expectedOutput": "When completed correctly, this code will:\n1. Read raw events from bronze layer (append-only)\n2. Deduplicate by event_id to create clean silver data\n3. Enrich with user dimension data via broadcast join\n4. Aggregate daily metrics for the gold layer\n5. Apply quality expectations to enforce data contracts",
+  "codeTemplate": "import dlt\nfrom pyspark.sql.functions import *\n\n# Bronze: Raw event ingestion \u2014 append-only\n@dlt.table(\n    comment='Raw events from StreamVerse platform'\n)\ndef bronze_events():\n    return (\n        spark.__BLANK_0__\n        .format('cloudFiles')\n        .option('cloudFiles.format', 'json')\n        .load('/raw/events/')\n        .select('*', current_timestamp().alias('__BLANK_1__'))\n    )\n\n# Silver: Cleaned and deduplicated events\n@dlt.__BLANK_2__('valid_event', 'user_id IS NOT NULL AND event_type IS NOT NULL')\n@dlt.table\ndef silver_events():\n    return (\n        dlt.read_stream('bronze_events')\n        .__BLANK_3__(['event_id'])\n        .withColumn('event_date', to_date('event_time'))\n    )\n\n# Gold: Daily engagement metrics\n@dlt.table\ndef gold_daily_engagement():\n    return (\n        dlt.__BLANK_4__('silver_events')\n        .groupBy('event_date', 'event_type')\n        .agg(\n            countDistinct('user_id').alias('unique_users'),\n            count('*').alias('event_count')\n        )\n    )\n\n# CDC: Apply changes from user profile updates\ndlt.__BLANK_5__(\n    target='silver_users',\n    source='bronze_user_updates',\n    keys=['user_id'],\n    sequence_by='updated_at'\n)",
+  "blanks": [
+    {
+      "id": 0,
+      "options": [
+        "readStream",
+        "read",
+        "load",
+        "stream"
+      ],
+      "correctAnswer": "readStream"
+    },
+    {
+      "id": 1,
+      "options": [
+        "_ingested_at",
+        "_created_at",
+        "_loaded_at",
+        "_timestamp"
+      ],
+      "correctAnswer": "_ingested_at"
+    },
+    {
+      "id": 2,
+      "options": [
+        "expect_or_drop",
+        "expect",
+        "expect_or_fail",
+        "validate"
+      ],
+      "correctAnswer": "expect_or_drop"
+    },
+    {
+      "id": 3,
+      "options": [
+        "dropDuplicates",
+        "distinct",
+        "deduplicate",
+        "removeDuplicates"
+      ],
+      "correctAnswer": "dropDuplicates"
+    },
+    {
+      "id": 4,
+      "options": [
+        "read",
+        "read_stream",
+        "load",
+        "table"
+      ],
+      "correctAnswer": "read"
+    },
+    {
+      "id": 5,
+      "options": [
+        "apply_changes",
+        "merge_into",
+        "upsert",
+        "cdc_apply"
+      ],
+      "correctAnswer": "apply_changes"
+    }
+  ],
+  "hints": [
+    "readStream for streaming ingestion in Bronze",
+    "_ingested_at is the convention for tracking when data was loaded",
+    "expect_or_drop removes invalid records at Silver",
+    "dropDuplicates removes duplicate events by event_id",
+    "dlt.read() (batch) for Gold aggregations \u2014 not read_stream()",
+    "dlt.apply_changes() is DLT's CDC operator for propagating updates"
+  ],
+  "learnings": [
+    "Bronze tables use append mode for raw data audit",
+    "Silver tables apply data quality filters",
+    "Gold tables aggregate for business metrics",
+    "Delta format enables time travel across all layers",
+    "Naming conventions help track data lineage"
+  ]
+}

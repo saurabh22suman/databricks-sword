@@ -1,0 +1,91 @@
+{
+  "description": "Complete the SQL queries to perform JOINs, aggregations, and create reusable views on lakehouse tables.",
+  "expectedOutput": "When completed correctly, this code will:\n1. Create a daily_sales VIEW grouping orders by date\n2. Count distinct orders and sum revenue per day\n3. Join customers \u2192 orders \u2192 order_items \u2192 products\n4. Calculate line totals (price \u00d7 quantity)\n5. Filter orders between specific dates using BETWEEN",
+  "codeTemplate": "-- Create a daily sales summary view\nCREATE OR REPLACE VIEW daily_sales AS\nSELECT \n  __BLANK_0__(order_date) as sale_date,\n  COUNT(__BLANK_1__) as order_count,\n  __BLANK_2__(total_amount) as revenue\nFROM orders\nGROUP BY __BLANK_3__(order_date);\n\n-- Query with multiple JOINs\nSELECT \n  c.name,\n  p.product_name,\n  oi.quantity,\n  p.price * oi.quantity as line_total\nFROM customers c\n__BLANK_4__ orders o ON c.customer_id = o.customer_id\nINNER JOIN order_items oi ON o.order_id = oi.order_id\n__BLANK_5__ products p ON oi.product_id = p.product_id\nWHERE o.order_date __BLANK_6__ '2024-01-01' AND '2024-12-31';",
+  "blanks": [
+    {
+      "id": 0,
+      "options": [
+        "DATE",
+        "TO_DATE",
+        "CAST",
+        "CONVERT"
+      ],
+      "correctAnswer": "DATE"
+    },
+    {
+      "id": 1,
+      "options": [
+        "*",
+        "DISTINCT order_id",
+        "order_id",
+        "1"
+      ],
+      "correctAnswer": "DISTINCT order_id"
+    },
+    {
+      "id": 2,
+      "options": [
+        "SUM",
+        "TOTAL",
+        "ADD",
+        "AGGREGATE"
+      ],
+      "correctAnswer": "SUM"
+    },
+    {
+      "id": 3,
+      "options": [
+        "DATE",
+        "TO_DATE",
+        "CAST",
+        "order_date"
+      ],
+      "correctAnswer": "DATE"
+    },
+    {
+      "id": 4,
+      "options": [
+        "INNER JOIN",
+        "LEFT JOIN",
+        "JOIN",
+        "OUTER JOIN"
+      ],
+      "correctAnswer": "INNER JOIN"
+    },
+    {
+      "id": 5,
+      "options": [
+        "INNER JOIN",
+        "LEFT JOIN",
+        "RIGHT JOIN",
+        "CROSS JOIN"
+      ],
+      "correctAnswer": "INNER JOIN"
+    },
+    {
+      "id": 6,
+      "options": [
+        "BETWEEN",
+        "IN",
+        ">=",
+        "LIKE"
+      ],
+      "correctAnswer": "BETWEEN"
+    }
+  ],
+  "hints": [
+    "DATE() extracts the date portion from a timestamp",
+    "COUNT(DISTINCT column) counts unique values, avoiding duplicates",
+    "SUM() aggregates numeric values across grouped rows",
+    "INNER JOIN returns only matching rows from both tables",
+    "BETWEEN is inclusive: checks value >= start AND value <= end"
+  ],
+  "learnings": [
+    "WITH clause defines Common Table Expressions",
+    "ROW_NUMBER() assigns unique sequential numbers",
+    "OVER() clause specifies the window for calculations",
+    "PARTITION BY groups rows for window functions",
+    "ORDER BY within OVER() determines row sequence"
+  ]
+}

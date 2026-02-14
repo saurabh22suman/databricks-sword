@@ -1,0 +1,96 @@
+{
+  "questions": [
+    {
+      "id": "q1",
+      "question": "What is the primary purpose of the Bronze layer?",
+      "options": [
+        "Append-only raw data ingestion preserving original data exactly",
+        "Aggregated business metrics",
+        "Cleaned and validated data",
+        "ML feature tables"
+      ],
+      "correctAnswer": "Append-only raw data ingestion preserving original data exactly",
+      "explanation": "Bronze stores raw data as-is, with ingestion metadata (_ingested_at). It's append-only — you never modify Bronze data. This preserves the full history for reprocessing."
+    },
+    {
+      "id": "q2",
+      "question": "What operations are typically performed in the Silver layer?",
+      "options": [
+        "Deduplication, schema conformance, data enrichment, and quality validation",
+        "Raw data extraction and storage",
+        "Business-level aggregation only",
+        "Machine learning model training"
+      ],
+      "correctAnswer": "Deduplication, schema conformance, data enrichment, and quality validation",
+      "explanation": "Silver is where most engineering effort goes. It deduplicates records, standardizes schemas, enriches with reference data, and applies quality rules."
+    },
+    {
+      "id": "q3",
+      "question": "What does dlt.apply_changes() do?",
+      "options": [
+        "Applies CDC (Change Data Capture) to propagate row-level updates through the pipeline",
+        "Applies schema changes to tables",
+        "Modifies pipeline configuration",
+        "Updates DLT expectations"
+      ],
+      "correctAnswer": "Applies CDC (Change Data Capture) to propagate row-level updates through the pipeline",
+      "explanation": "dlt.apply_changes() is DLT's CDC operator. It processes inserts, updates, and deletes from a source, applying them to a target table while maintaining order via sequence_by."
+    },
+    {
+      "id": "q4",
+      "question": "Why use dlt.read() instead of dlt.read_stream() for Gold tables?",
+      "options": [
+        "Gold aggregations need the complete dataset, not incremental micro-batches",
+        "read() is faster than read_stream()",
+        "read_stream() doesn't support aggregations",
+        "There is no difference"
+      ],
+      "correctAnswer": "Gold aggregations need the complete dataset, not incremental micro-batches",
+      "explanation": "Gold tables often contain aggregations (groupBy, count, avg) that need the full Silver dataset. Batch read with dlt.read() ensures correct totals, while read_stream() would only process new data."
+    },
+    {
+      "id": "q5",
+      "question": "[Recall: Delta Lake] How does time travel benefit the medallion architecture?",
+      "options": [
+        "Enables restoring any layer to a previous version if a bad pipeline run corrupts data",
+        "Makes queries faster",
+        "Reduces storage costs",
+        "Enables real-time processing"
+      ],
+      "correctAnswer": "Enables restoring any layer to a previous version if a bad pipeline run corrupts data",
+      "explanation": "Recall from Delta Lake Deep Dive: Time travel lets you RESTORE any Bronze/Silver/Gold table to a previous version. If a pipeline bug introduces bad data, you can revert and reprocess."
+    },
+    {
+      "id": "q6",
+      "question": "[Recall: Streaming] Why is checkpointing critical for streaming Bronze ingestion?",
+      "options": [
+        "It tracks which files have been processed, enabling exactly-once guarantees",
+        "It improves query speed",
+        "It reduces file sizes",
+        "It enables schema evolution"
+      ],
+      "correctAnswer": "It tracks which files have been processed, enabling exactly-once guarantees",
+      "explanation": "Recall from Structured Streaming: Auto Loader uses checkpoints to track processed files. On restart, it resumes from the checkpoint, ensuring each file is ingested exactly once into Bronze."
+    },
+    {
+      "id": "q7",
+      "question": "[Recall: Workflows] How do you schedule a medallion pipeline to run daily?",
+      "options": [
+        "Create a Databricks Workflow with a cron schedule triggering the DLT pipeline",
+        "Set a timer in the notebook",
+        "Use a sleep() loop",
+        "Manually run it each day"
+      ],
+      "correctAnswer": "Create a Databricks Workflow with a cron schedule triggering the DLT pipeline",
+      "explanation": "Recall from Workflows & Orchestration: Databricks Jobs can schedule DLT pipeline runs with cron expressions. The job creates compute, runs the pipeline, and auto-terminates."
+    }
+  ],
+  "passingScore": 70,
+  "learnings": [
+    "Bronze captures raw data with minimal transformation",
+    "Silver cleanses and validates data quality",
+    "Gold provides business-level aggregations and metrics",
+    "Each layer adds value through progressive refinement",
+    "Delta format enables consistency across all layers"
+  ]
+}

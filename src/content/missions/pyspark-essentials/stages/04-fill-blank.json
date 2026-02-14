@@ -1,0 +1,92 @@
+{
+  "description": "Complete the PySpark DataFrame code to read, transform, and write data using the DataFrame API.",
+  "expectedOutput": "When completed correctly, this code will:\n1. Read Delta table with proper format specification\n2. Filter to orders from the last 30 days\n3. Group by customer_id and aggregate total spent + order count\n4. Sort by total_spent descending to find top customers\n5. Write results as a new Delta table in overwrite mode",
+  "codeTemplate": "from pyspark.sql import SparkSession\nfrom pyspark.sql.functions import col, sum, avg, count\n\n# Initialize Spark Session\nspark = SparkSession.builder.__BLANK_0__(\"User Analytics\").getOrCreate()\n\n# Read data from Delta Lake\ndf = spark.read.__BLANK_1__(\"delta\").load(\"/mnt/data/transactions\")\n\n# Filter for high-value transactions\nfiltered_df = df.__BLANK_2__(col(\"amount\") > 100)\n\n# Select specific columns\nselected_df = filtered_df.select(\"customer_id\", \"amount\", \"timestamp\")\n\n# Group by customer and aggregate\naggregated_df = selected_df.__BLANK_3__(\"customer_id\").agg(\n    __BLANK_4__(\"amount\").alias(\"total_spent\"),\n    __BLANK_5__(\"amount\").alias(\"avg_transaction\"),\n    count(\"*\").alias(\"transaction_count\")\n)\n\n# Write results to Delta Lake\naggregated_df.write.format(\"delta\").__BLANK_6__(\"overwrite\").save(\"/mnt/data/customer_summary\")",
+  "blanks": [
+    {
+      "id": 0,
+      "options": [
+        "appName",
+        "name",
+        "setMaster",
+        "config"
+      ],
+      "correctAnswer": "appName"
+    },
+    {
+      "id": 1,
+      "options": [
+        "format",
+        "table",
+        "parquet",
+        "csv"
+      ],
+      "correctAnswer": "format"
+    },
+    {
+      "id": 2,
+      "options": [
+        "filter",
+        "where",
+        "select",
+        "query"
+      ],
+      "correctAnswer": "filter"
+    },
+    {
+      "id": 3,
+      "options": [
+        "groupBy",
+        "group",
+        "pivot",
+        "aggregate"
+      ],
+      "correctAnswer": "groupBy"
+    },
+    {
+      "id": 4,
+      "options": [
+        "sum",
+        "total",
+        "add",
+        "accumulate"
+      ],
+      "correctAnswer": "sum"
+    },
+    {
+      "id": 5,
+      "options": [
+        "avg",
+        "mean",
+        "average",
+        "median"
+      ],
+      "correctAnswer": "avg"
+    },
+    {
+      "id": 6,
+      "options": [
+        "mode",
+        "save_mode",
+        "writeMode",
+        "option"
+      ],
+      "correctAnswer": "mode"
+    }
+  ],
+  "hints": [
+    "SparkSession.builder.appName() sets the application name visible in Spark UI",
+    "spark.read.format() specifies the file format (delta, parquet, csv, json)",
+    "filter() and where() are synonyms in PySpark (prefer filter for consistency)",
+    "groupBy() groups rows by one or more columns before aggregation",
+    "sum(), avg(), count() are aggregation functions from pyspark.sql.functions",
+    "mode() controls write behavior: 'overwrite', 'append', 'error', 'ignore'"
+  ],
+  "learnings": [
+    "spark.read starts batch reading, readStream for streaming",
+    "filter() and where() are interchangeable in PySpark",
+    "select() projects specific columns from a DataFrame",
+    "groupBy() followed by agg() creates aggregations",
+    "write.mode() controls overwrite vs append behavior"
+  ]
+}

@@ -1,0 +1,101 @@
+{
+  "instructions": "Build the Transformation Pipeline! Arrange components to show the flow from source data through window functions, UDFs, and reshape operations.",
+  "components": [
+    {
+      "id": "source-df",
+      "label": "Source DataFrame",
+      "icon": "database"
+    },
+    {
+      "id": "window-spec",
+      "label": "Window Specification",
+      "icon": "columns"
+    },
+    {
+      "id": "window-func",
+      "label": "Window Functions",
+      "icon": "bar-chart"
+    },
+    {
+      "id": "udf-engine",
+      "label": "UDF Engine",
+      "icon": "code"
+    },
+    {
+      "id": "pivot-reshape",
+      "label": "Pivot/Reshape",
+      "icon": "rotate-cw"
+    }
+  ],
+  "dropZones": [
+    {
+      "id": "zone-1",
+      "label": "Input Data",
+      "position": {
+        "x": 50,
+        "y": 150
+      }
+    },
+    {
+      "id": "zone-2",
+      "label": "Define Partitions & Order",
+      "position": {
+        "x": 200,
+        "y": 80
+      }
+    },
+    {
+      "id": "zone-3",
+      "label": "Apply Analytics",
+      "position": {
+        "x": 400,
+        "y": 80
+      }
+    },
+    {
+      "id": "zone-4",
+      "label": "Custom Business Logic",
+      "position": {
+        "x": 200,
+        "y": 250
+      }
+    },
+    {
+      "id": "zone-5",
+      "label": "Reshape Output",
+      "position": {
+        "x": 400,
+        "y": 250
+      }
+    }
+  ],
+  "correctPlacements": [
+    {
+      "componentId": "source-df",
+      "zoneId": "zone-1"
+    },
+    {
+      "componentId": "window-spec",
+      "zoneId": "zone-2"
+    },
+    {
+      "componentId": "window-func",
+      "zoneId": "zone-3"
+    },
+    {
+      "componentId": "udf-engine",
+      "zoneId": "zone-4"
+    },
+    {
+      "componentId": "pivot-reshape",
+      "zoneId": "zone-5"
+    }
+  ],
+  "learnings": [
+    "Source DataFrame: Your starting point - data from Delta tables or streaming sources",
+    "Window Specification: Defines partitioning and ordering for window calculations",
+    "Window Functions: ROW_NUMBER, RANK, LAG/LEAD, running aggregations",
+    "UDF Engine: Custom business logic when built-in functions aren't enough",
+    "Pivot/Reshape: Transform rows to columns or vice versa for reporting"
+  ]
+}

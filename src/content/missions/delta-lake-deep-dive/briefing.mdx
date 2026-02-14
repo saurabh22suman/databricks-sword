@@ -1,0 +1,25 @@
+# Mission Briefing: Delta Lake Deep Dive
+
+## The Situation
+
+**MedData Health**, a nationwide hospital network, stores **500TB of patient records** in Delta Lake. Compliance requires 7-year data retention with full audit trails.
+
+The problems:
+- **Query performance degraded** after 6 months (small files, no optimization)
+- **Accidental deletions** happened twice — no easy recovery
+- **Storage costs rising** (old versions never cleaned up)
+- **CDC feeds** from 200 hospital systems need real-time sync
+
+They need **Delta Lake power features** to manage this data at scale.
+
+## Your Mission
+
+1. **Time travel:** Restore accidentally deleted records using versioning
+2. **OPTIMIZE:** Compact small files for better query performance
+3. **Z-ORDER:** Co-locate related data for faster scans
+4. **VACUUM:** Clean old file versions to reduce storage costs
+5. **Change Data Capture:** Stream incremental changes from source systems
+
+---
+
+**Next Step:** Diagram — Understand Delta Lake internals

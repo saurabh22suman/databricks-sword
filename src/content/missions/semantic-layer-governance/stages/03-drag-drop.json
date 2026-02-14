@@ -1,0 +1,59 @@
+{
+  "description": "Arrange the governed data product creation steps in the correct order.",
+  "instructions": "Think about building a governed data product: What quality of data serves business users? What standardizes terminology? Pattern: curated data \u2192 business metrics \u2192 access control \u2192 contracts \u2192 discoverability \u2192 AI access.",
+  "blocks": [
+    {
+      "id": "gold-table",
+      "code": "Create curated Gold table with business-quality data (cleaned, aggregated)",
+      "label": "Prepare Gold Table"
+    },
+    {
+      "id": "metric-views",
+      "code": "Create SQL views defining standard metrics (net_revenue, customer_ltv, churn_rate)",
+      "label": "Define Metric Layer"
+    },
+    {
+      "id": "rls-views",
+      "code": "Create dynamic views with row-level security: WHERE business_unit = current_user_attribute('bu')",
+      "label": "Implement Row-Level Security"
+    },
+    {
+      "id": "data-contract",
+      "code": "Define data contract: required columns, NOT NULL constraints, freshness SLA (< 1 hour)",
+      "label": "Establish Data Contract"
+    },
+    {
+      "id": "publish",
+      "code": "Add COMMENT, tags, and documentation. Mark as 'Published' in Catalog Explorer",
+      "label": "Publish Data Product"
+    },
+    {
+      "id": "genie",
+      "code": "Configure AI/BI Genie with metric instructions and table descriptions for NL queries",
+      "label": "Enable Genie Access"
+    }
+  ],
+  "correctOrder": [
+    "gold-table",
+    "metric-views",
+    "rls-views",
+    "data-contract",
+    "publish",
+    "genie"
+  ],
+  "hints": [
+    "Clean, curated data is the foundation of any data product",
+    "Metric definitions standardize business language before exposing data",
+    "Row-level security is applied before publishing to ensure governance",
+    "Data contracts define the stability guarantees downstream consumers rely on",
+    "Publishing adds documentation and makes the data discoverable",
+    "Genie is the final consumer-facing layer for natural language access"
+  ],
+  "learnings": [
+    "Gold tables are the foundation of the semantic layer",
+    "Metrics definitions standardize business calculations",
+    "Data products package assets for consumers",
+    "AI/BI Genie enables natural language queries",
+    "Row-level security protects sensitive data"
+  ]
+}

@@ -1,0 +1,79 @@
+{
+  "id": "medallion-architecture",
+  "title": "Medallion Architecture",
+  "subtitle": "Bronze \u2192 Silver \u2192 Gold Pipeline Design",
+  "description": "Design and implement end-to-end medallion architecture pipelines with Delta Live Tables, comparing approaches for different use cases.",
+  "industry": "media",
+  "rank": "S",
+  "xpRequired": 1500,
+  "xpReward": 750,
+  "estimatedMinutes": 60,
+  "prerequisites": [
+    "delta-lake-deep-dive",
+    "structured-streaming",
+    "workflows-orchestration"
+  ],
+  "primaryFeatures": [
+    "Medallion Architecture",
+    "Bronze/Silver/Gold",
+    "DLT Pipelines",
+    "Schema Evolution",
+    "CDC Patterns"
+  ],
+  "stages": [
+    {
+      "id": "briefing",
+      "type": "briefing",
+      "title": "Mission Briefing"
+    },
+    {
+      "id": "diagram",
+      "type": "diagram",
+      "title": "Medallion Layers"
+    },
+    {
+      "id": "drag-drop",
+      "type": "drag-drop",
+      "title": "Design the Pipeline"
+    },
+    {
+      "id": "fill-blank",
+      "type": "fill-blank",
+      "title": "Build DLT Pipeline"
+    },
+    {
+      "id": "quiz",
+      "type": "quiz",
+      "title": "Knowledge Check"
+    },
+    {
+      "id": "debrief",
+      "type": "debrief",
+      "title": "Mission Debrief"
+    }
+  ],
+  "sideQuests": [
+    {
+      "id": "apache-airflow",
+      "title": "Apache Airflow: The Industry Standard Orchestrator",
+      "ossProject": "Apache Airflow",
+      "trigger": "after",
+      "parentStageId": "diagram",
+      "type": "quiz",
+      "configFile": "side-quests/apache-airflow.json",
+      "xpBonus": 100,
+      "optional": true
+    },
+    {
+      "id": "dbt-core",
+      "title": "dbt Core: SQL-First Transformations",
+      "ossProject": "dbt Core",
+      "trigger": "after",
+      "parentStageId": "fill-blank",
+      "type": "quiz",
+      "configFile": "side-quests/dbt-core.json",
+      "xpBonus": 100,
+      "optional": true
+    }
+  ]
+}

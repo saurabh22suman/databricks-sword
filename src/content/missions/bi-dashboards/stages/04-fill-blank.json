@@ -1,0 +1,82 @@
+{
+  "description": "Complete the BI dashboard and alert configuration.",
+  "expectedOutput": "When completed correctly, this code will:\n1. Create parameterized queries with date and region filters\n2. Define KPI metrics (revenue, inventory, regional sales)\n3. Set up SQL alerts for threshold monitoring\n4. Schedule dashboard refresh every 15 minutes\n5. Configure dynamic visualizations for interactive exploration",
+  "codeTemplate": "-- Create a parameterized sales query\nSELECT \n    store_region,\n    DATE_TRUNC('day', sale_timestamp) AS sale_date,\n    SUM(revenue) AS daily_revenue,\n    COUNT(DISTINCT transaction_id) AS num_transactions\nFROM gold.sales_facts\nWHERE sale_timestamp BETWEEN :__BLANK_0__ AND :date_end\n    AND store_region = :region\nGROUP BY store_region, sale_date\nORDER BY sale_date DESC;\n\n-- Create an inventory alert query\nSELECT \n    sku_id,\n    product_name,\n    current_stock,\n    reorder_point\nFROM gold.inventory_status\nWHERE current_stock __BLANK_1__ reorder_point;\n\n-- SQL Alert configuration (JSON)\n{\n    \"name\": \"Low Inventory Alert\",\n    \"query_id\": \"inventory_alert_query\",\n    \"condition\": {\n        \"op\": \"__BLANK_2__\",\n        \"operand\": {\"column\": \"num_rows\"},\n        \"threshold\": 0\n    },\n    \"schedule\": {\n        \"interval\": \"__BLANK_3__\",\n        \"until\": null\n    },\n    \"notifications\": [\n        {\"destination_type\": \"__BLANK_4__\", \"destination\": \"#inventory-alerts\"}\n    ]\n}\n\n-- Dashboard refresh schedule\n{\n    \"dashboard_id\": \"regional-sales-dashboard\",\n    \"schedule\": {\n        \"quartz_cron_expression\": \"0 */15 8-20 ? * MON-FRI\",\n        \"__BLANK_5__\": \"America/New_York\"\n    }\n}",
+  "blanks": [
+    {
+      "id": 0,
+      "options": [
+        "date_start",
+        "start_date",
+        "begin_date",
+        "from_date"
+      ],
+      "correctAnswer": "date_start"
+    },
+    {
+      "id": 1,
+      "options": [
+        "<",
+        ">",
+        "<=",
+        "="
+      ],
+      "correctAnswer": "<"
+    },
+    {
+      "id": 2,
+      "options": [
+        "GREATER_THAN",
+        "LESS_THAN",
+        "EQUAL",
+        "NOT_EQUAL"
+      ],
+      "correctAnswer": "GREATER_THAN"
+    },
+    {
+      "id": 3,
+      "options": [
+        "15 minutes",
+        "1 hour",
+        "5 minutes",
+        "daily"
+      ],
+      "correctAnswer": "15 minutes"
+    },
+    {
+      "id": 4,
+      "options": [
+        "slack",
+        "email",
+        "webhook",
+        "pagerduty"
+      ],
+      "correctAnswer": "slack"
+    },
+    {
+      "id": 5,
+      "options": [
+        "timezone_id",
+        "timezone",
+        "tz",
+        "time_zone"
+      ],
+      "correctAnswer": "timezone_id"
+    }
+  ],
+  "hints": [
+    "Parameters use colon prefix (:param_name) in Databricks SQL",
+    "We want items WHERE stock is BELOW the reorder point",
+    "Alert triggers when the query returns rows \u2014 GREATER_THAN 0 rows means items need reordering",
+    "15-minute checks balance freshness with cost",
+    "Slack integration sends alerts to a channel",
+    "timezone_id sets the cron schedule's timezone context"
+  ],
+  "learnings": [
+    "CREATE OR REPLACE VIEW creates named queries",
+    "Parameters use {{ parameter_name }} syntax",
+    "COALESCE handles NULL values in calculations",
+    "DATE_TRUNC groups timestamps by time period",
+    "FORMAT_NUMBER presents numbers readably"
+  ]
+}

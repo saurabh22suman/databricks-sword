@@ -1,0 +1,101 @@
+{
+  "instructions": "Build the Unity Catalog Hierarchy! Arrange components to show the three-level namespace (catalog.schema.table) and access control model.",
+  "components": [
+    {
+      "id": "metastore",
+      "label": "Metastore (Top Level)",
+      "icon": "server"
+    },
+    {
+      "id": "catalog",
+      "label": "Catalog (Domain)",
+      "icon": "folder"
+    },
+    {
+      "id": "schema",
+      "label": "Schema (Project)",
+      "icon": "layers"
+    },
+    {
+      "id": "table",
+      "label": "Tables & Views",
+      "icon": "table"
+    },
+    {
+      "id": "grants",
+      "label": "GRANT / REVOKE",
+      "icon": "shield"
+    }
+  ],
+  "dropZones": [
+    {
+      "id": "zone-1",
+      "label": "Root Governance",
+      "position": {
+        "x": 250,
+        "y": 30
+      }
+    },
+    {
+      "id": "zone-2",
+      "label": "Business Domain",
+      "position": {
+        "x": 250,
+        "y": 120
+      }
+    },
+    {
+      "id": "zone-3",
+      "label": "Data Stage",
+      "position": {
+        "x": 250,
+        "y": 210
+      }
+    },
+    {
+      "id": "zone-4",
+      "label": "Data Objects",
+      "position": {
+        "x": 250,
+        "y": 300
+      }
+    },
+    {
+      "id": "zone-5",
+      "label": "Access Control",
+      "position": {
+        "x": 500,
+        "y": 165
+      }
+    }
+  ],
+  "correctPlacements": [
+    {
+      "componentId": "metastore",
+      "zoneId": "zone-1"
+    },
+    {
+      "componentId": "catalog",
+      "zoneId": "zone-2"
+    },
+    {
+      "componentId": "schema",
+      "zoneId": "zone-3"
+    },
+    {
+      "componentId": "table",
+      "zoneId": "zone-4"
+    },
+    {
+      "componentId": "grants",
+      "zoneId": "zone-5"
+    }
+  ],
+  "learnings": [
+    "Metastore: The top-level container - one per region, governs all catalogs",
+    "Catalog: Organizes data by business domain (e.g., marketing, finance)",
+    "Schema: Groups related tables and views within a catalog",
+    "Tables & Views: The actual data objects with column-level lineage",
+    "GRANT/REVOKE: Fine-grained permissions from metastore down to column level"
+  ]
+}

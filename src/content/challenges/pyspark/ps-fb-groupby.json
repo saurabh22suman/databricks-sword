@@ -1,0 +1,51 @@
+{
+  "id": "ps-fb-groupby",
+  "title": "Complete the GroupBy Aggregation",
+  "category": "pyspark",
+  "difficulty": "B",
+  "format": "fill-blank",
+  "description": "Fill in the blanks to compute average order amount grouped by customer region.",
+  "hints": [
+    "Use groupBy() to group rows by a column",
+    "agg() accepts aggregation expressions",
+    "avg() computes the average of a column"
+  ],
+  "xpReward": 75,
+  "optimalSolution": "result = df.groupBy('region').agg(avg('order_amount').alias('avg_amount'))",
+  "explanation": "groupBy() creates groups of rows sharing the same key values. agg() applies one or more aggregate functions. alias() renames the result column for clarity.",
+  "fillBlank": {
+    "codeTemplate": "result = df.__BLANK_0__('region').__BLANK_1__(avg('order_amount').__BLANK_2__('avg_amount'))",
+    "blanks": [
+      {
+        "id": 0,
+        "correctAnswer": "groupBy",
+        "options": [
+          "groupBy",
+          "partitionBy",
+          "orderBy",
+          "sortBy"
+        ]
+      },
+      {
+        "id": 1,
+        "correctAnswer": "agg",
+        "options": [
+          "agg",
+          "apply",
+          "transform",
+          "reduce"
+        ]
+      },
+      {
+        "id": 2,
+        "correctAnswer": "alias",
+        "options": [
+          "alias",
+          "rename",
+          "as",
+          "withColumnRenamed"
+        ]
+      }
+    ]
+  }
+}

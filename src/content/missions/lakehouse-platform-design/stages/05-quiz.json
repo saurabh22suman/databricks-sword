@@ -1,0 +1,96 @@
+{
+  "questions": [
+    {
+      "id": "q1",
+      "question": "What is the recommended workspace topology for a large enterprise?",
+      "options": [
+        "Hub-and-spoke: central platform workspace with domain-specific workspaces per business unit",
+        "Single workspace for the entire company",
+        "One workspace per individual user",
+        "Separate workspaces per data table"
+      ],
+      "correctAnswer": "Hub-and-spoke: central platform workspace with domain-specific workspaces per business unit",
+      "explanation": "Hub-and-spoke gives domain teams autonomy while maintaining centralized governance. The platform hub provides shared services, monitoring, and cross-cutting infrastructure."
+    },
+    {
+      "id": "q2",
+      "question": "How should Unity Catalog's namespace be organized for data mesh?",
+      "options": [
+        "Catalog-per-domain (finance, marketing, etc.) with schemas for data layers",
+        "One catalog for everything",
+        "Schema-per-domain under a single catalog",
+        "Table-per-domain with no catalog structure"
+      ],
+      "correctAnswer": "Catalog-per-domain (finance, marketing, etc.) with schemas for data layers",
+      "explanation": "Each domain gets its own catalog (organizational ownership), with schemas for layers (bronze, silver, gold) or sub-domains. This maps naturally to data mesh's domain ownership principle."
+    },
+    {
+      "id": "q3",
+      "question": "What is a cluster policy?",
+      "options": [
+        "Configuration rules that restrict what clusters users can create (size, type, timeout)",
+        "A policy for deleting old clusters",
+        "A scheduling algorithm for jobs",
+        "A security certificate for clusters"
+      ],
+      "correctAnswer": "Configuration rules that restrict what clusters users can create (size, type, timeout)",
+      "explanation": "Cluster policies define guardrails: max workers, allowed instance types, auto-termination timeouts. They prevent cost overruns and enforce security standards across all workspaces."
+    },
+    {
+      "id": "q4",
+      "question": "What is DEEP CLONE used for in disaster recovery?",
+      "options": [
+        "Creates a full independent copy of a Delta table in another region",
+        "Creates a lightweight reference to the original table",
+        "Deletes duplicate records",
+        "Compresses table data"
+      ],
+      "correctAnswer": "Creates a full independent copy of a Delta table in another region",
+      "explanation": "DEEP CLONE copies both data and metadata, creating an independent table. For DR, you DEEP CLONE critical Gold tables to a secondary region so they're available during an outage."
+    },
+    {
+      "id": "q5",
+      "question": "[Recall: Medallion] In a data mesh, who owns the Silver and Gold layers?",
+      "options": [
+        "Domain teams own their Silver/Gold data, platform team manages shared Bronze infrastructure",
+        "The platform team owns everything",
+        "A single DBA manages all layers",
+        "End users own Gold tables"
+      ],
+      "correctAnswer": "Domain teams own their Silver/Gold data, platform team manages shared Bronze infrastructure",
+      "explanation": "Recall from Medallion Architecture: Data mesh decentralizes ownership. Platform team handles common infrastructure (Bronze ingestion, security), while domain teams own their domain-specific Silver cleaning and Gold business logic."
+    },
+    {
+      "id": "q6",
+      "question": "[Recall: Performance] What is the primary benefit of serverless SQL warehouses?",
+      "options": [
+        "Pay-per-query with no idle compute costs, instant startup",
+        "They run faster than standard clusters",
+        "They have unlimited memory",
+        "They support more languages"
+      ],
+      "correctAnswer": "Pay-per-query with no idle compute costs, instant startup",
+      "explanation": "Recall from Performance Tuning: Serverless SQL warehouses start instantly and you pay only for queries executed. There are no idle costs, making them ideal for ad-hoc analytics."
+    },
+    {
+      "id": "q7",
+      "question": "[Recall: Production] Why is pipeline parameterization essential for platform design?",
+      "options": [
+        "Same pipeline code runs across dev/staging/prod by switching configuration, not code",
+        "It makes pipelines run faster",
+        "It reduces storage requirements",
+        "It's only needed for testing"
+      ],
+      "correctAnswer": "Same pipeline code runs across dev/staging/prod by switching configuration, not code",
+      "explanation": "Recall from Production Pipelines: Parameterized pipelines use spark.conf.get('pipeline.env') to switch catalogs, paths, and settings. This enables a single codebase promoted through environments via CI/CD."
+    }
+  ],
+  "passingScore": 70,
+  "learnings": [
+    "Multi-workspace design isolates environments",
+    "Unity Catalog provides cross-workspace governance",
+    "Delta Sharing enables secure data exchange",
+    "Cost management controls cloud spending",
+    "Policies enforce organizational standards"
+  ]
+}

@@ -1,0 +1,65 @@
+{
+  "questions": [
+    {
+      "id": "optimizer-1",
+      "question": "What is 'predicate pushdown' in query optimization?",
+      "options": [
+        "Moving calculations to a faster server",
+        "Filtering data as early as possible, ideally at the data source, to reduce I/O",
+        "Pushing queries to a queue for later execution",
+        "Converting SQL to Python"
+      ],
+      "correctAnswer": 1,
+      "explanation": "Predicate pushdown moves WHERE clause filters down to the data source (e.g., Parquet files, Delta tables). This reduces the amount of data read from storage—especially powerful with columnar formats that support column pruning."
+    },
+    {
+      "id": "optimizer-2",
+      "question": "What does the Catalyst optimizer's 'constant folding' optimization do?",
+      "options": [
+        "Compresses constant values",
+        "Evaluates constant expressions at compile time rather than runtime",
+        "Removes duplicate constants",
+        "Converts constants to variables"
+      ],
+      "correctAnswer": 1,
+      "explanation": "Constant folding evaluates expressions like '1 + 1' or 'CURRENT_DATE()' once during query planning, not for every row. This eliminates redundant computation during execution."
+    },
+    {
+      "id": "optimizer-3",
+      "question": "Why does Spark SQL prefer 'broadcast hash join' for small tables?",
+      "options": [
+        "It uses less memory",
+        "The small table is sent to all executors, avoiding a shuffle of the large table",
+        "It's required for ANSI SQL compliance",
+        "It produces more accurate results"
+      ],
+      "correctAnswer": 1,
+      "explanation": "Broadcast joins copy the small table to every executor. Each executor can then join its partition of the large table locally, completely avoiding the expensive shuffle of the large table across the network."
+    },
+    {
+      "id": "optimizer-4",
+      "question": "What is Adaptive Query Execution (AQE) in Spark 3.x?",
+      "options": [
+        "A debugging tool",
+        "Runtime optimization that adjusts the query plan based on actual data statistics during execution",
+        "A query caching mechanism",
+        "A visualization feature"
+      ],
+      "correctAnswer": 1,
+      "explanation": "AQE re-optimizes queries at runtime based on shuffle statistics. It can dynamically coalesce small partitions, convert sort-merge joins to broadcast joins if data is small enough, and handle skewed joins—all automatically."
+    },
+    {
+      "id": "optimizer-5",
+      "question": "How can you view the optimized query plan in Spark SQL?",
+      "options": [
+        "Run SHOW PLAN",
+        "Use df.explain(True) or EXPLAIN EXTENDED for SQL",
+        "Check the Spark UI only",
+        "Query plans are not accessible"
+      ],
+      "correctAnswer": 1,
+      "explanation": "df.explain(True) shows the parsed, analyzed, optimized, and physical plans. For SQL, use EXPLAIN or EXPLAIN EXTENDED. Understanding these plans helps identify optimization opportunities and troubleshoot performance issues."
+    }
+  ],
+  "passingScore": 60
+}

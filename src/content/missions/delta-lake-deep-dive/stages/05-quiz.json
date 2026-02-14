@@ -1,0 +1,96 @@
+{
+  "questions": [
+    {
+      "id": "q1",
+      "question": "What is the purpose of the Delta Lake transaction log (_delta_log)?",
+      "options": [
+        "Records every change to the table for ACID guarantees and versioning",
+        "Stores backup copies of data",
+        "Caches query results",
+        "Manages user permissions"
+      ],
+      "correctAnswer": "Records every change to the table for ACID guarantees and versioning",
+      "explanation": "The transaction log is a series of JSON files that record every commit (INSERT, UPDATE, DELETE). It enables ACID transactions, time travel, and concurrent read/write access."
+    },
+    {
+      "id": "q2",
+      "question": "What does OPTIMIZE do to a Delta table?",
+      "options": [
+        "Compacts many small files into fewer, larger files for better performance",
+        "Deletes unused columns",
+        "Rebuilds the table from scratch",
+        "Compresses data with a new codec"
+      ],
+      "correctAnswer": "Compacts many small files into fewer, larger files for better performance",
+      "explanation": "OPTIMIZE merges small Parquet files into larger ones (target ~1GB). This improves read performance by reducing file overhead and enables better data skipping."
+    },
+    {
+      "id": "q3",
+      "question": "What does Z-ORDER do?",
+      "options": [
+        "Co-locates related data within files so queries can skip irrelevant files",
+        "Sorts data alphabetically",
+        "Compresses files using Z-algorithm",
+        "Creates a secondary index"
+      ],
+      "correctAnswer": "Co-locates related data within files so queries can skip irrelevant files",
+      "explanation": "Z-ORDER arranges data within files so that values of the specified columns are clustered together. This enables data skipping — queries that filter by Z-ordered columns can skip entire files."
+    },
+    {
+      "id": "q4",
+      "question": "Why should VACUUM retention be set to at least 7 days?",
+      "options": [
+        "To avoid deleting files needed by running queries or streaming checkpoints",
+        "For compliance requirements",
+        "To save more storage space",
+        "To match the log retention period"
+      ],
+      "correctAnswer": "To avoid deleting files needed by running queries or streaming checkpoints",
+      "explanation": "Long-running queries and streaming jobs may reference older file versions. Vacuuming with too short a retention could remove files still being read, causing query failures."
+    },
+    {
+      "id": "q5",
+      "question": "How do you query a Delta table as it existed at version 42?",
+      "options": [
+        "SELECT * FROM table VERSION AS OF 42",
+        "SELECT * FROM table AT VERSION 42",
+        "SELECT * FROM table WHERE version = 42",
+        "SELECT * FROM table@42"
+      ],
+      "correctAnswer": "SELECT * FROM table VERSION AS OF 42",
+      "explanation": "Time travel syntax uses VERSION AS OF or TIMESTAMP AS OF to query historical snapshots. Each commit creates a new version, allowing you to view the table's state at any point."
+    },
+    {
+      "id": "q6",
+      "question": "[Recall: Lakehouse] What file format does Delta Lake store data in?",
+      "options": [
+        "Parquet",
+        "ORC",
+        "Avro",
+        "JSON"
+      ],
+      "correctAnswer": "Parquet",
+      "explanation": "Recall from Lakehouse Fundamentals: Delta Lake stores data in Parquet format (columnar, compressed), with a JSON transaction log on top for ACID guarantees."
+    },
+    {
+      "id": "q7",
+      "question": "[Recall: Ingestion] What is Auto Loader's advantage over COPY INTO?",
+      "options": [
+        "Incremental streaming — processes only new files automatically",
+        "Faster file reading",
+        "Better compression",
+        "More file format support"
+      ],
+      "correctAnswer": "Incremental streaming — processes only new files automatically",
+      "explanation": "Recall from Data Ingestion: Auto Loader tracks processed files and streams only new ones. COPY INTO requires manual re-execution for new files."
+    }
+  ],
+  "passingScore": 70,
+  "learnings": [
+    "Transaction log provides atomicity and versioning",
+    "Time travel enables querying historical versions",
+    "OPTIMIZE compacts small files for better performance",
+    "Z-ORDER colocates data for efficient data skipping",
+    "VACUUM removes old files respecting retention"
+  ]
+}

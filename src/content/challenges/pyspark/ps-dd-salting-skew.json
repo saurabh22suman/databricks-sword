@@ -1,0 +1,41 @@
+{
+  "id": "ps-dd-salting-skew",
+  "title": "Handle Data Skew with Salting",
+  "category": "pyspark",
+  "difficulty": "A",
+  "format": "drag-drop",
+  "description": "Arrange the PySpark code blocks to implement salting, a technique for handling data skew in joins by distributing skewed keys across multiple partitions.",
+  "hints": [
+    "First add a salt (random number) to the skewed DataFrame keys",
+    "Then expand the other DataFrame to have rows for each salt value",
+    "Finally join on the salted keys"
+  ],
+  "xpReward": 125,
+  "optimalSolution": "salt_count = 10\nskewed_df = skewed_df.withColumn('salted_key', concat(col('key'), lit('_'), (rand() * salt_count).cast('int')))\nother_df = other_df.crossJoin(spark.range(salt_count).withColumnRenamed('id', 'salt'))\nother_df = other_df.withColumn('salted_key', concat(col('key'), lit('_'), col('salt')))\nresult = skewed_df.join(other_df, 'salted_key')",
+  "explanation": "Data skew occurs when some keys have far more rows than others, causing stragglers. Salting adds a random suffix to keys to distribute them across partitions. The other table is expanded to match all salt values. This converts a skewed join into an even join, at the cost of multiplying the smaller table's rows.",
+  "dragDrop": {
+    "blocks": [
+      {
+        "id": "b1",
+        "code": "salt_count = 10"
+      },
+      {
+        "id": "b2",
+        "code": "skewed_df = skewed_df.withColumn('salted_key', concat(col('key'), lit('_'), (rand() * salt_count).cast('int')))"
+      },
+      {
+        "id": "b3",
+        "code": "other_df = other_df.crossJoin(spark.range(salt_count).withColumnRenamed('id', 'salt'))"
+      },
+      {
+        "id": "b4",
+        "code": "other_df = other_df.withColumn('salted_key', concat(col('key'), lit('_'), col('salt')))"
+      },
+      {
+        "id": "b5",
+        "code": "result = skewed_df.join(other_df, 'salted_key')"
+      }
+    ],
+    "correctOrder": ["b1", "b2", "b3", "b4", "b5"]
+  }
+}

@@ -1,0 +1,96 @@
+{
+  "questions": [
+    {
+      "id": "q1",
+      "question": "What is the main advantage of Auto Loader over manual file processing scripts?",
+      "options": [
+        "Incremental processing - only processes new files since last run",
+        "Faster file reading speed",
+        "Better data compression",
+        "Automatic data validation"
+      ],
+      "correctAnswer": "Incremental processing - only processes new files since last run",
+      "explanation": "Auto Loader tracks which files have been processed and only loads new files, making it highly efficient for continuous ingestion. Manual scripts typically re-scan entire directories."
+    },
+    {
+      "id": "q2",
+      "question": "What does schema inference do in Auto Loader?",
+      "options": [
+        "Automatically detects column names and data types from sample files",
+        "Validates data quality",
+        "Compresses data files",
+        "Encrypts sensitive columns"
+      ],
+      "correctAnswer": "Automatically detects column names and data types from sample files",
+      "explanation": "Schema inference analyzes a sample of files to automatically determine the schema (column names and types), eliminating the need to manually define schemas for JSON/CSV files."
+    },
+    {
+      "id": "q3",
+      "question": "What happens when Auto Loader encounters a new column in incoming data?",
+      "options": [
+        "With schemaEvolutionMode='addNewColumns', it automatically adds the column",
+        "It throws an error and stops processing",
+        "It ignores the new column",
+        "It overwrites the existing schema"
+      ],
+      "correctAnswer": "With schemaEvolutionMode='addNewColumns', it automatically adds the column",
+      "explanation": "Schema evolution allows Auto Loader to adapt to schema changes. The 'addNewColumns' mode automatically adds new columns to the target table when they appear in source files."
+    },
+    {
+      "id": "q4",
+      "question": "What is the purpose of a checkpoint location in Auto Loader?",
+      "options": [
+        "Stores processing state to enable exactly-once processing and recovery",
+        "Backs up source files",
+        "Encrypts data in transit",
+        "Compresses checkpoint data"
+      ],
+      "correctAnswer": "Stores processing state to enable exactly-once processing and recovery",
+      "explanation": "The checkpoint location stores metadata about processed files and stream state. This enables Auto Loader to resume from where it left off after cluster restarts without reprocessing files."
+    },
+    {
+      "id": "q5",
+      "question": "When should you use COPY INTO instead of Auto Loader?",
+      "options": [
+        "One-time historical loads or simple batch ingestion",
+        "Real-time streaming data",
+        "Complex data transformations",
+        "Large files that don't fit in memory"
+      ],
+      "correctAnswer": "One-time historical loads or simple batch ingestion",
+      "explanation": "COPY INTO is ideal for one-time data migration or simple batch loads where you don't need ongoing incremental processing. Auto Loader is better for continuous, streaming ingestion."
+    },
+    {
+      "id": "q6",
+      "question": "What file format does Auto Loader use internally to track processed files?",
+      "options": [
+        "Delta Lake transaction log",
+        "JSON metadata files",
+        "CSV tracking files",
+        "Parquet state files"
+      ],
+      "correctAnswer": "Delta Lake transaction log",
+      "explanation": "Auto Loader leverages Delta Lake's transaction log to maintain exactly-once semantics and track which files have been processed, ensuring no duplicates or missing data."
+    },
+    {
+      "id": "q7",
+      "question": "What does the 'cloudFiles' format refer to in Auto Loader?",
+      "options": [
+        "Databricks' cloud-optimized file ingestion format",
+        "A specific file extension",
+        "A compression algorithm",
+        "A cloud storage provider"
+      ],
+      "correctAnswer": "Databricks' cloud-optimized file ingestion format",
+      "explanation": "The 'cloudFiles' format is Auto Loader's streaming source that's optimized for cloud object storage, providing incremental processing, schema inference, and exactly-once guarantees."
+    }
+  ],
+  "passingScore": 70,
+  "learnings": [
+    "Auto Loader incrementally processes new files",
+    "Schema enforcement catches data quality issues early",
+    "Schema evolution handles changing source schemas",
+    "Checkpointing enables exactly-once ingestion",
+    "Rescue columns capture malformed records"
+  ]
+}

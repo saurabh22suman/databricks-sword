@@ -1,0 +1,51 @@
+{
+  "id": "sql-fb-pivot",
+  "title": "Pivot Monthly Sales Data",
+  "category": "sql",
+  "difficulty": "A",
+  "format": "fill-blank",
+  "description": "Fill in the blanks to pivot monthly sales data so that each month becomes a column showing total revenue per product.",
+  "hints": [
+    "PIVOT rotates rows into columns",
+    "The aggregate function inside PIVOT determines how values are combined",
+    "FOR specifies which column's values become the new column names"
+  ],
+  "xpReward": 125,
+  "optimalSolution": "SELECT *\nFROM (\n  SELECT product_name, month, revenue\n  FROM monthly_sales\n)\nPIVOT (\n  SUM(revenue)\n  FOR month IN ('Jan', 'Feb', 'Mar', 'Apr', 'May', 'Jun')\n)",
+  "explanation": "PIVOT transforms unique values from one column into multiple columns in the output. It requires an aggregate function (SUM, AVG, COUNT, etc.) and a FOR clause specifying which column to pivot. Databricks SQL supports PIVOT natively. The subquery should only include the grouping column, pivot column, and value column \u2014 extra columns create unwanted groups.",
+  "fillBlank": {
+    "codeTemplate": "SELECT *\nFROM (\n  SELECT product_name, month, revenue\n  FROM monthly_sales\n)\n__BLANK_0__ (\n  __BLANK_1__(revenue)\n  __BLANK_2__ month IN ('Jan', 'Feb', 'Mar', 'Apr', 'May', 'Jun')\n)",
+    "blanks": [
+      {
+        "id": 0,
+        "correctAnswer": "PIVOT",
+        "options": [
+          "PIVOT",
+          "UNPIVOT",
+          "LATERAL",
+          "CROSS APPLY"
+        ]
+      },
+      {
+        "id": 1,
+        "correctAnswer": "SUM",
+        "options": [
+          "SUM",
+          "COUNT",
+          "COLLECT_LIST",
+          "FIRST"
+        ]
+      },
+      {
+        "id": 2,
+        "correctAnswer": "FOR",
+        "options": [
+          "FOR",
+          "ON",
+          "BY",
+          "USING"
+        ]
+      }
+    ]
+  }
+}

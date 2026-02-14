@@ -1,0 +1,363 @@
+---
+title: "Delta Lake Essentials: ACID Transactions for Data Lakes"
+description: "Learn the fundamentals of Delta Lake — ACID transactions, time travel, schema enforcement, and more — for building reliable data lakehouses."
+author: "Databricks Sword"
+tags:
+  - delta-lake
+  - lakehouse
+  - acid
+  - data-engineering
+category: "deep-dive"
+publishedAt: "2025-01-20"
+featured: true
+---
+
+# Delta Lake Essentials: ACID Transactions for Data Lakes
+
+Delta Lake is the foundation of the modern lakehouse architecture. It brings reliability, quality, and governance to data lakes that were previously only available in traditional data warehouses.
+
+This guide covers the core concepts you need to master Delta Lake.
+
+---
+
+## What is Delta Lake?
+
+Delta Lake is an open-source storage layer that brings **ACID transactions** to Apache Spark and data lakes. It extends Parquet files with a transaction log that tracks all changes to your data.
+
+### Key Benefits
+
+- **ACID Transactions** — Atomicity, Consistency, Isolation, Durability
+- **Schema Enforcement** — Prevent bad data from entering your tables
+- **Time Travel** — Query previous versions of your data
+- **Unified Batch & Streaming** — Same table for both workloads
+- **Efficient Upserts** — MERGE operations for incremental updates
+
+### Why It Matters
+
+Traditional data lakes suffer from several problems:
+
+| Problem | Delta Lake Solution |
+|---------|---------------------|
+| Failed writes leave partial data | Atomic commit – all or nothing |
+| Concurrent writes cause corruption | MVCC isolation with optimistic concurrency |
+| No way to fix mistakes | Time travel to recover previous versions |
+| Schema drift breaks pipelines | Schema enforcement and evolution |
+| Updates require full rewrites | Efficient MERGE and UPDATE operations |
+
+---
+
+## Delta Lake Architecture
+
+Every Delta table consists of two parts:
+
+1. **Data files** — Parquet files stored in your cloud storage
+2. **Transaction log** — JSON files in the `_delta_log/` directory
+
+```
+my_table/
+├── _delta_log/
+│   ├── 00000000000000000000.json  # Version 0
+│   ├── 00000000000000000001.json  # Version 1
+│   ├── 00000000000000000002.json  # Version 2
+│   └── ...
+├── part-00000-...snappy.parquet
+├── part-00001-...snappy.parquet
+└── ...
+```
+
+The transaction log records every operation:
+- **add** — New files added
+- **remove** — Files logically deleted
+- **metaData** — Schema and configuration changes
+- **commitInfo** — Who made the change and when
+
+---
+
+## Creating Delta Tables
+
+### From Scratch
+
+```python
+# Create empty table with schema
+spark.sql("""
+CREATE TABLE sales (
+    sale_id BIGINT,
+    product_id STRING,
+    quantity INT,
+    sale_date DATE,
+    amount DECIMAL(10, 2)
+)
+USING DELTA
+""")
+```
+
+### From a DataFrame
+
+```python
+df = spark.createDataFrame([
+    (1, "PROD-001", 5, "2024-01-15", 125.50),
+    (2, "PROD-002", 3, "2024-01-15", 89.99),
+], ["sale_id", "product_id", "quantity", "sale_date", "amount"])
+
+# Write as Delta table
+df.write.format("delta").mode("overwrite").saveAsTable("sales")
+
+# Or to a path
+df.write.format("delta").mode("overwrite").save("/data/sales")
+```
+
+### Converting Existing Data
+
+```python
+# Convert Parquet to Delta
+spark.sql("CONVERT TO DELTA parquet.`/path/to/parquet/`")
+
+# Or from a DataFrame
+parquet_df = spark.read.parquet("/path/to/parquet/")
+parquet_df.write.format("delta").mode("overwrite").save("/path/to/delta/")
+```
+
+---
+
+## Schema Enforcement
+
+Delta Lake validates every write against the table schema. Writes that don't match are rejected.
+
+### Schema Enforcement in Action
+
+```python
+# Original schema has: sale_id, product_id, quantity, sale_date, amount
+
+# This will FAIL - extra column 'discount'
+bad_df = spark.createDataFrame([
+    (3, "PROD-003", 2, "2024-01-16", 45.00, 5.00),
+], ["sale_id", "product_id", "quantity", "sale_date", "amount", "discount"])
+
+bad_df.write.format("delta").mode("append").saveAsTable("sales")
+# AnalysisException: A schema mismatch detected when writing to Delta table
+```
+
+### Schema Evolution
+
+When your schema needs to change, use `mergeSchema`:
+
+```python
+# Add new column automatically
+df_with_discount = spark.createDataFrame([
+    (3, "PROD-003", 2, "2024-01-16", 45.00, 5.00),
+], ["sale_id", "product_id", "quantity", "sale_date", "amount", "discount"])
+
+df_with_discount.write \
+    .format("delta") \
+    .mode("append") \
+    .option("mergeSchema", "true") \
+    .saveAsTable("sales")
+
+# New column 'discount' added to schema
+```
+
+---
+
+## Time Travel
+
+Every write creates a new version. Query any previous version:
+
+### By Version Number
+
+```python
+# Read version 5
+df = spark.read.format("delta") \
+    .option("versionAsOf", 5) \
+    .load("/data/sales")
+
+# SQL syntax
+spark.sql("SELECT * FROM sales VERSION AS OF 5")
+```
+
+### By Timestamp
+
+```python
+# Read data as of yesterday
+df = spark.read.format("delta") \
+    .option("timestampAsOf", "2024-01-14") \
+    .load("/data/sales")
+
+# SQL syntax
+spark.sql("SELECT * FROM sales TIMESTAMP AS OF '2024-01-14 12:00:00'")
+```
+
+### Viewing History
+
+```python
+from delta.tables import DeltaTable
+
+deltaTable = DeltaTable.forPath(spark, "/data/sales")
+deltaTable.history().show()
+
+# Output:
+# +-------+--------------------+------+--------+
+# |version|timestamp           |userId|operation|
+# +-------+--------------------+------+--------+
+# |3      |2024-01-16 10:30:00 |user1 |MERGE   |
+# |2      |2024-01-15 14:22:00 |user1 |WRITE   |
+# |1      |2024-01-15 09:15:00 |user1 |WRITE   |
+# |0      |2024-01-14 16:00:00 |user1 |CREATE  |
+# +-------+--------------------+------+--------+
+```
+
+### Restoring Previous Versions
+
+```python
+# Restore to version 2
+deltaTable.restoreToVersion(2)
+
+# Or restore to timestamp
+deltaTable.restoreToTimestamp("2024-01-15")
+```
+
+---
+
+## MERGE (Upsert) Operations
+
+MERGE allows you to update, insert, and delete in a single atomic operation:
+
+```python
+from delta.tables import DeltaTable
+
+deltaTable = DeltaTable.forPath(spark, "/data/sales")
+
+# Source data with updates and new records
+updates_df = spark.createDataFrame([
+    (1, "PROD-001", 10, "2024-01-15", 250.00),  # Update: quantity 5 → 10
+    (4, "PROD-004", 1, "2024-01-17", 199.99),   # New record
+], ["sale_id", "product_id", "quantity", "sale_date", "amount"])
+
+# Perform MERGE
+deltaTable.alias("target").merge(
+    updates_df.alias("source"),
+    "target.sale_id = source.sale_id"
+).whenMatchedUpdate(set={
+    "quantity": "source.quantity",
+    "amount": "source.amount"
+}).whenNotMatchedInsert(values={
+    "sale_id": "source.sale_id",
+    "product_id": "source.product_id",
+    "quantity": "source.quantity",
+    "sale_date": "source.sale_date",
+    "amount": "source.amount"
+}).execute()
+```
+
+### SQL MERGE Syntax
+
+```sql
+MERGE INTO sales AS target
+USING updates AS source
+ON target.sale_id = source.sale_id
+WHEN MATCHED THEN
+    UPDATE SET 
+        quantity = source.quantity,
+        amount = source.amount
+WHEN NOT MATCHED THEN
+    INSERT (sale_id, product_id, quantity, sale_date, amount)
+    VALUES (source.sale_id, source.product_id, source.quantity, 
+            source.sale_date, source.amount)
+```
+
+---
+
+## Optimizing Delta Tables
+
+### OPTIMIZE
+
+Compacts small files into larger ones for better read performance:
+
+```sql
+-- Optimize entire table
+OPTIMIZE sales
+
+-- Optimize specific partitions
+OPTIMIZE sales WHERE sale_date >= '2024-01-01'
+```
+
+### Z-ORDER
+
+Colocates related data for faster queries on frequently filtered columns:
+
+```sql
+-- Z-order by commonly filtered columns
+OPTIMIZE sales ZORDER BY (product_id, sale_date)
+```
+
+### VACUUM
+
+Removes old files not referenced by the transaction log:
+
+```sql
+-- Remove files older than 7 days (default)
+VACUUM sales
+
+-- Remove files older than 24 hours (use with caution)
+VACUUM sales RETAIN 24 HOURS
+```
+
+> **Warning:** After VACUUM, you can't time travel to versions older than the retention period.
+
+---
+
+## Best Practices
+
+### 1. Choose the Right Partitioning
+
+- Partition by columns used in most queries (often date)
+- Avoid over-partitioning (don't partition by high-cardinality columns)
+- Aim for 1GB+ per partition
+
+```python
+df.write.format("delta") \
+    .partitionBy("sale_date") \
+    .mode("overwrite") \
+    .save("/data/sales")
+```
+
+### 2. Use Liquid Clustering (Databricks)
+
+Replace partitioning + Z-ordering with adaptive clustering:
+
+```sql
+CREATE TABLE sales (...) 
+CLUSTER BY (sale_date, product_id)
+```
+
+### 3. Enable Change Data Feed
+
+Track row-level changes for CDC pipelines:
+
+```sql
+ALTER TABLE sales SET TBLPROPERTIES (delta.enableChangeDataFeed = true)
+```
+
+### 4. Set Appropriate Retention
+
+Balance time travel needs with storage costs:
+
+```sql
+ALTER TABLE sales SET TBLPROPERTIES (
+    delta.logRetentionDuration = 'interval 30 days',
+    delta.deletedFileRetentionDuration = 'interval 7 days'
+)
+```
+
+---
+
+## Practice with Databricks Sword
+
+Ready to put these concepts into action? Try these missions:
+
+- **Delta Lake Basics** — Create tables, write data, basic operations
+- **Time Travel & Recovery** — Query history and restore versions
+- **MERGE Patterns** — Implement upserts and SCD Type 2
+
+Each mission simulates a real Databricks environment — no cloud costs required.
+
+**Start your Delta Lake journey!** ⚔️

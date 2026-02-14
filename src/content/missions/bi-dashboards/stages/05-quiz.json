@@ -1,0 +1,72 @@
+{
+  "questions": [
+    {
+      "id": "q1",
+      "question": "What is the key advantage of Serverless SQL Warehouses over Pro SQL Warehouses for ad-hoc queries?",
+      "options": [
+        "Instant startup with zero idle cost — you only pay for queries executed",
+        "They are faster for all query types",
+        "They support more concurrent users",
+        "They have better caching"
+      ],
+      "correctAnswer": "Instant startup with zero idle cost — you only pay for queries executed",
+      "explanation": "Serverless SQL Warehouses start instantly and cost nothing when idle. Pro warehouses have warm-up time and incur cost while running, but offer predictive caching for repeated dashboard queries."
+    },
+    {
+      "id": "q2",
+      "question": "How do query parameters work in Databricks SQL dashboards?",
+      "options": [
+        "Users select values (dates, regions) that filter the SQL query at runtime using :param_name syntax",
+        "Parameters are hardcoded in the SQL query",
+        "Parameters are set once and cannot be changed",
+        "Parameters only work with Python, not SQL"
+      ],
+      "correctAnswer": "Users select values (dates, regions) that filter the SQL query at runtime using :param_name syntax",
+      "explanation": "Query parameters (`:date_start`, `:region`) create interactive widgets on dashboards. Users select values, and the SQL query re-executes with those values, providing self-service analytics without custom dashboards per team."
+    },
+    {
+      "id": "q3",
+      "question": "What triggers a SQL Alert notification?",
+      "options": [
+        "When a scheduled query returns results matching a configured condition (e.g., row count > 0)",
+        "When a dashboard is viewed",
+        "When a SQL Warehouse starts",
+        "When any query fails"
+      ],
+      "correctAnswer": "When a scheduled query returns results matching a configured condition (e.g., row count > 0)",
+      "explanation": "SQL Alerts run a query on a schedule and evaluate a condition. If the condition is met (e.g., low inventory items exist), it sends a notification to Slack, email, or webhook."
+    },
+    {
+      "id": "q4",
+      "question": "What is Lakeview?",
+      "options": [
+        "Databricks-native dashboard builder that uses SQL queries as the data source for visualizations",
+        "A third-party BI tool",
+        "A data lake file browser",
+        "A monitoring dashboard for cluster metrics"
+      ],
+      "correctAnswer": "Databricks-native dashboard builder that uses SQL queries as the data source for visualizations",
+      "explanation": "Lakeview is the built-in Databricks dashboard experience. Every chart is backed by a SQL query, supporting parameters, auto-refresh, sharing, and embedding."
+    },
+    {
+      "id": "q5",
+      "question": "[Recall: SQL Analytics Intro] What clause is used to filter grouped results in a SQL query?",
+      "options": [
+        "HAVING",
+        "WHERE",
+        "FILTER",
+        "LIMIT"
+      ],
+      "correctAnswer": "HAVING",
+      "explanation": "Recall from SQL Analytics Intro: WHERE filters individual rows before grouping, while HAVING filters groups after GROUP BY aggregation. For example, HAVING SUM(revenue) > 10000 filters low-revenue groups."
+    }
+  ],
+  "passingScore": 70,
+  "learnings": [
+    "SQL warehouses scale automatically for users",
+    "Parameterized queries enable interactivity",
+    "Lakeview provides native dashboard creation",
+    "Cross-filtering connects dashboard widgets",
+    "Alerts automate metric monitoring"
+  ]
+}

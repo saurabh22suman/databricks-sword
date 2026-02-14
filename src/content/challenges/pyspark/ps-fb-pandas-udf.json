@@ -1,0 +1,51 @@
+{
+  "id": "ps-fb-udf-types",
+  "title": "Complete the Pandas UDF Definition",
+  "category": "pyspark",
+  "difficulty": "A",
+  "format": "fill-blank",
+  "description": "Fill in the blanks to create a Pandas UDF (vectorized UDF) that computes the z-score normalization of a column.",
+  "hints": [
+    "Pandas UDFs use the pandas_udf decorator",
+    "Series to Series is the most common pattern",
+    "Return type annotation uses pd.Series"
+  ],
+  "xpReward": 125,
+  "optimalSolution": "import pandas as pd\nfrom pyspark.sql.functions import pandas_udf\n\n@pandas_udf('double')\ndef zscore(s: pd.Series) -> pd.Series:\n    return (s - s.mean()) / s.std()\n\nresult = df.withColumn('score_normalized', zscore(df.score))",
+  "explanation": "Pandas UDFs (vectorized UDFs) operate on batches using Apache Arrow, making them 10-100x faster than row-at-a-time Python UDFs. The Series-to-Series pattern is most common for element-wise transformations.",
+  "fillBlank": {
+    "codeTemplate": "import pandas as pd\nfrom pyspark.sql.functions import __BLANK_0__\n\n@__BLANK_1__('double')\ndef zscore(s: __BLANK_2__) -> pd.Series:\n    return (s - s.mean()) / s.std()",
+    "blanks": [
+      {
+        "id": 0,
+        "correctAnswer": "pandas_udf",
+        "options": [
+          "pandas_udf",
+          "udf",
+          "vectorized_udf",
+          "arrow_udf"
+        ]
+      },
+      {
+        "id": 1,
+        "correctAnswer": "pandas_udf",
+        "options": [
+          "pandas_udf",
+          "udf",
+          "vectorize",
+          "apply"
+        ]
+      },
+      {
+        "id": 2,
+        "correctAnswer": "pd.Series",
+        "options": [
+          "pd.Series",
+          "list",
+          "np.array",
+          "Column"
+        ]
+      }
+    ]
+  }
+}

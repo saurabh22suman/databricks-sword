@@ -1,0 +1,51 @@
+{
+  "id": "uc-fb-delta-sharing",
+  "title": "Set Up Delta Sharing",
+  "category": "unity-catalog",
+  "difficulty": "A",
+  "format": "fill-blank",
+  "description": "Fill in the blanks to create a Delta Share and share a table with an external recipient using Unity Catalog's Delta Sharing feature.",
+  "hints": [
+    "Shares are containers for tables you want to share externally",
+    "ADD TABLE grants access to specific tables within a share",
+    "Recipients represent external parties who can access shares"
+  ],
+  "xpReward": 100,
+  "optimalSolution": "CREATE SHARE customer_analytics;\nALTER SHARE customer_analytics ADD TABLE catalog.schema.customer_metrics;\nCREATE RECIPIENT acme_corp;\nGRANT SELECT ON SHARE customer_analytics TO RECIPIENT acme_corp;",
+  "explanation": "Delta Sharing is an open protocol for secure data sharing. Shares are logical containers holding references to tables. Recipients represent external consumers who receive activation links to access shared data. This enables sharing data across organizations without copying - recipients query data in place with their own compute.",
+  "fillBlank": {
+    "codeTemplate": "-- Create a share\n__BLANK_0__ SHARE customer_analytics;\n\n-- Add a table to the share\nALTER SHARE customer_analytics __BLANK_1__ TABLE catalog.schema.customer_metrics;\n\n-- Create a recipient\nCREATE __BLANK_2__ acme_corp;\n\n-- Grant access to the recipient\nGRANT SELECT ON SHARE customer_analytics TO RECIPIENT acme_corp;",
+    "blanks": [
+      {
+        "id": 0,
+        "correctAnswer": "CREATE",
+        "options": [
+          "CREATE",
+          "ADD",
+          "MAKE",
+          "NEW"
+        ]
+      },
+      {
+        "id": 1,
+        "correctAnswer": "ADD",
+        "options": [
+          "ADD",
+          "INCLUDE",
+          "INSERT",
+          "ATTACH"
+        ]
+      },
+      {
+        "id": 2,
+        "correctAnswer": "RECIPIENT",
+        "options": [
+          "RECIPIENT",
+          "USER",
+          "CONSUMER",
+          "SUBSCRIBER"
+        ]
+      }
+    ]
+  }
+}

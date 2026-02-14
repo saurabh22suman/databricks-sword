@@ -1,0 +1,96 @@
+{
+  "questions": [
+    {
+      "id": "q1",
+      "question": "How does Structured Streaming treat a data stream?",
+      "options": [
+        "As an unbounded table that continuously grows with new data",
+        "As a sequence of RDDs",
+        "As a message queue",
+        "As a file system watcher"
+      ],
+      "correctAnswer": "As an unbounded table that continuously grows with new data",
+      "explanation": "Structured Streaming models streams as unbounded tables. New data arriving on the stream is like new rows being appended to the table, enabling the same DataFrame operations as batch."
+    },
+    {
+      "id": "q2",
+      "question": "What is the purpose of watermarking in streaming?",
+      "options": [
+        "Defines how long to wait for late-arriving data before dropping it",
+        "Encrypts data in transit",
+        "Compresses stream data",
+        "Sets the batch interval size"
+      ],
+      "correctAnswer": "Defines how long to wait for late-arriving data before dropping it",
+      "explanation": "Watermarks tell Spark how long to keep state for late data. Events arriving after the watermark threshold are dropped, preventing unbounded state growth."
+    },
+    {
+      "id": "q3",
+      "question": "Which output mode should you use for windowed aggregations that update over time?",
+      "options": [
+        "update",
+        "append",
+        "complete",
+        "overwrite"
+      ],
+      "correctAnswer": "update",
+      "explanation": "Update mode outputs only the rows that changed since the last trigger. It's ideal for aggregations where results update as new data arrives. Complete mode outputs the entire result table each time."
+    },
+    {
+      "id": "q4",
+      "question": "What does checkpointLocation provide?",
+      "options": [
+        "Exactly-once processing guarantees by tracking progress",
+        "Faster query performance",
+        "Data compression",
+        "Schema enforcement"
+      ],
+      "correctAnswer": "Exactly-once processing guarantees by tracking progress",
+      "explanation": "The checkpoint directory stores the streaming query's progress (offsets processed, state). On failure, the query restarts from the checkpoint, ensuring each record is processed exactly once."
+    },
+    {
+      "id": "q5",
+      "question": "What trigger mode processes all available data then stops?",
+      "options": [
+        "Trigger.AvailableNow",
+        "Trigger.Once",
+        "Trigger.ProcessingTime",
+        "Trigger.Continuous"
+      ],
+      "correctAnswer": "Trigger.AvailableNow",
+      "explanation": "Trigger.AvailableNow processes all available data in multiple micro-batches, then stops. It replaced Trigger.Once (which used a single batch) and is ideal for testing and cost-controlled production runs."
+    },
+    {
+      "id": "q6",
+      "question": "[Recall: Ingestion] What format does Auto Loader use for streaming file ingestion?",
+      "options": [
+        "cloudFiles",
+        "autoLoader",
+        "streamFiles",
+        "fileStream"
+      ],
+      "correctAnswer": "cloudFiles",
+      "explanation": "Recall from Data Ingestion Pipeline: Auto Loader uses the 'cloudFiles' format with readStream to incrementally process new files as they arrive in cloud storage."
+    },
+    {
+      "id": "q7",
+      "question": "[Recall: Transformations] What PySpark function creates a new column from a computation?",
+      "options": [
+        "withColumn",
+        "addColumn",
+        "createColumn",
+        "mapColumn"
+      ],
+      "correctAnswer": "withColumn",
+      "explanation": "Recall from Advanced Transformations: df.withColumn('new_col', expression) adds or replaces a column. This works identically in both batch and streaming DataFrames."
+    }
+  ],
+  "passingScore": 70,
+  "learnings": [
+    "Structured Streaming processes data incrementally",
+    "Watermarks define how long to wait for late data",
+    "Checkpoints enable exactly-once processing semantics",
+    "Output modes control how results are written",
+    "Triggers determine when micro-batches execute"
+  ]
+}

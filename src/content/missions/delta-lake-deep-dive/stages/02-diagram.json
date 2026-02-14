@@ -1,0 +1,101 @@
+{
+  "instructions": "Map the Delta Lake Architecture! Place components to show how Delta Lake provides ACID transactions on data lakes through its storage and optimization layers.",
+  "components": [
+    {
+      "id": "parquet-files",
+      "label": "Parquet Data Files",
+      "icon": "file"
+    },
+    {
+      "id": "transaction-log",
+      "label": "Transaction Log (_delta_log)",
+      "icon": "file-text"
+    },
+    {
+      "id": "optimize-engine",
+      "label": "OPTIMIZE (Compaction)",
+      "icon": "settings"
+    },
+    {
+      "id": "zorder-index",
+      "label": "Z-ORDER (Data Skipping)",
+      "icon": "grid"
+    },
+    {
+      "id": "vacuum-cleanup",
+      "label": "VACUUM (Cleanup)",
+      "icon": "trash-2"
+    }
+  ],
+  "dropZones": [
+    {
+      "id": "zone-1",
+      "label": "Storage Files",
+      "position": {
+        "x": 50,
+        "y": 150
+      }
+    },
+    {
+      "id": "zone-2",
+      "label": "Metadata Layer",
+      "position": {
+        "x": 250,
+        "y": 150
+      }
+    },
+    {
+      "id": "zone-3",
+      "label": "File Compaction",
+      "position": {
+        "x": 450,
+        "y": 80
+      }
+    },
+    {
+      "id": "zone-4",
+      "label": "Query Acceleration",
+      "position": {
+        "x": 450,
+        "y": 220
+      }
+    },
+    {
+      "id": "zone-5",
+      "label": "Storage Management",
+      "position": {
+        "x": 250,
+        "y": 300
+      }
+    }
+  ],
+  "correctPlacements": [
+    {
+      "componentId": "parquet-files",
+      "zoneId": "zone-1"
+    },
+    {
+      "componentId": "transaction-log",
+      "zoneId": "zone-2"
+    },
+    {
+      "componentId": "optimize-engine",
+      "zoneId": "zone-3"
+    },
+    {
+      "componentId": "zorder-index",
+      "zoneId": "zone-4"
+    },
+    {
+      "componentId": "vacuum-cleanup",
+      "zoneId": "zone-5"
+    }
+  ],
+  "learnings": [
+    "Parquet Files: The actual data files stored in your cloud storage - columnar format for analytics",
+    "Transaction Log: The _delta_log folder tracks all changes with atomic commits",
+    "OPTIMIZE: Compacts small files into larger ones for better query performance",
+    "Z-ORDER: Colocates related data for improved data skipping during queries",
+    "VACUUM: Cleans up old files no longer referenced by the transaction log"
+  ]
+}

@@ -1,0 +1,454 @@
+---
+title: "PySpark Performance: 10 Optimization Tips for Data Engineers"
+description: "Master PySpark performance optimization with these essential tips covering partitioning, caching, joins, and avoiding common pitfalls."
+author: "Databricks Sword"
+tags:
+  - pyspark
+  - performance
+  - optimization
+  - data-engineering
+category: "tutorials"
+publishedAt: "2025-01-25"
+featured: false
+---
+
+# PySpark Performance: 10 Optimization Tips for Data Engineers
+
+Writing PySpark code that works is one thing. Writing PySpark code that runs *fast* at scale is another. This guide covers the optimization techniques that separate junior data engineers from senior ones.
+
+---
+
+## 1. Understand Lazy Evaluation
+
+Spark transformations are **lazy** — they don't execute until an action is called. Spark builds a DAG (Directed Acyclic Graph) of transformations and optimizes it before execution.
+
+### Why It Matters
+
+```python
+# All these transformations are lazy (no computation yet)
+df = spark.read.parquet("/data/events")
+df_filtered = df.filter(col("event_type") == "purchase")
+df_selected = df_filtered.select("user_id", "amount")
+df_grouped = df_selected.groupBy("user_id").sum("amount")
+
+# NOW everything executes (triggered by show() action)
+df_grouped.show()
+```
+
+### Common Actions That Trigger Execution
+
+| Action | Description |
+|--------|-------------|
+| `show()` | Display first N rows |
+| `collect()` | Return all data to driver |
+| `count()` | Count rows |
+| `take(n)` | Return first N rows |
+| `write()` | Write to storage |
+| `foreach()` | Apply function to each row |
+
+### Tip: Use `explain()` to See the Plan
+
+```python
+df_grouped.explain(mode="extended")
+# Shows logical plan, optimized plan, and physical plan
+```
+
+---
+
+## 2. Avoid `collect()` on Large DataFrames
+
+`collect()` brings **all data** to the driver node. This causes:
+- Out of memory errors
+- Network bottlenecks
+- Complete loss of parallelism
+
+### Bad Practice
+
+```python
+# DON'T do this with large DataFrames
+all_data = df.collect()  # Pulls millions of rows to driver
+for row in all_data:
+    process(row)
+```
+
+### Good Practice
+
+```python
+# Process in parallel on workers
+df.foreach(process_function)
+
+# Or use Pandas on small aggregations only
+small_result = df.groupBy("category").count()
+pandas_df = small_result.toPandas()  # OK - result is small
+
+# Or use limit() before collect()
+sample = df.limit(100).collect()  # Only 100 rows
+```
+
+---
+
+## 3. Use the Right Join Strategy
+
+Joins are often the most expensive operations. Choose the right strategy:
+
+### Broadcast Join (Small + Large)
+
+When one table is small (< 10MB by default), broadcast it to all workers:
+
+```python
+from pyspark.sql.functions import broadcast
+
+# Explicit broadcast for small dimension table
+result = large_facts.join(
+    broadcast(small_dims),
+    "dim_id"
+)
+```
+
+This avoids shuffling the large table entirely.
+
+### Increase Broadcast Threshold
+
+```python
+# Increase threshold to 50MB
+spark.conf.set("spark.sql.autoBroadcastJoinThreshold", 50 * 1024 * 1024)
+```
+
+### Sort-Merge Join (Large + Large)
+
+For large-large joins, ensure both tables are partitioned on the join key:
+
+```python
+# Pre-partition both tables
+df1 = df1.repartition(200, "join_key")
+df2 = df2.repartition(200, "join_key")
+
+# Join will be faster (less shuffle)
+result = df1.join(df2, "join_key")
+```
+
+### Verify Join Strategy
+
+```python
+result.explain()
+# Look for: BroadcastHashJoin (good for small table)
+#           SortMergeJoin (good for large-large)
+#           ShuffleHashJoin (can be slow)
+```
+
+---
+
+## 4. Prefer Built-in Functions Over UDFs
+
+User Defined Functions (UDFs) serialize data between JVM and Python, causing huge overhead.
+
+### Performance Comparison
+
+```python
+from pyspark.sql.functions import udf, upper
+from pyspark.sql.types import StringType
+
+# SLOW: Python UDF (avoid)
+@udf(StringType())
+def upper_udf(s):
+    return s.upper() if s else None
+
+df.select(upper_udf(col("name")))  # Slow - serialization overhead
+
+# FAST: Built-in function (prefer)
+df.select(upper(col("name")))  # Fast - native JVM execution
+```
+
+### When You Must Use UDFs: Use Pandas UDFs
+
+```python
+from pyspark.sql.functions import pandas_udf
+import pandas as pd
+
+# Vectorized UDF - much faster than regular UDF
+@pandas_udf(StringType())
+def upper_pandas(s: pd.Series) -> pd.Series:
+    return s.str.upper()
+
+df.select(upper_pandas(col("name")))  # Uses Arrow for fast transfer
+```
+
+### Performance Ranking
+
+1. **Built-in functions** — Always prefer these
+2. **Pandas UDFs** — Use when no built-in exists
+3. **Python UDFs** — Last resort only
+
+---
+
+## 5. Optimize DataFrame Caching
+
+Caching stores a DataFrame in memory/disk to avoid recomputation. But cache incorrectly and you'll hurt performance.
+
+### When to Cache
+
+- DataFrame is used **multiple times**
+- Recomputing is expensive (complex transformations, joins)
+- Data fits in cluster memory
+
+### When NOT to Cache
+
+- DataFrame used only once
+- Data doesn't fit in memory
+- Simple transformations (Spark is already efficient)
+
+### Caching Best Practices
+
+```python
+# Cache after expensive operations
+df_processed = (
+    df.filter(col("status") == "active")
+      .join(broadcast(dim_table), "dim_id")
+      .groupBy("category")
+      .agg(sum("amount").alias("total"))
+)
+
+# Cache and trigger materialization
+df_processed.cache()
+df_processed.count()  # Force cache to materialize
+
+# Now use multiple times (fast)
+df_processed.show()
+df_processed.write.parquet("/output")
+
+# Clean up when done
+df_processed.unpersist()
+```
+
+### Cache Storage Levels
+
+```python
+from pyspark import StorageLevel
+
+# Memory only (fastest, may spill)
+df.persist(StorageLevel.MEMORY_ONLY)
+
+# Memory + disk (default for cache())
+df.persist(StorageLevel.MEMORY_AND_DISK)
+
+# Memory serialized (more compact, slower access)
+df.persist(StorageLevel.MEMORY_ONLY_SER)
+```
+
+---
+
+## 6. Control Partition Count
+
+Partitions determine parallelism. Too few = underutilization. Too many = scheduling overhead.
+
+### Check Current Partitions
+
+```python
+print(f"Partitions: {df.rdd.getNumPartitions()}")
+```
+
+### Rules of Thumb
+
+- **2-4 partitions per CPU core** in the cluster
+- **128MB - 1GB** per partition for most workloads
+- Smaller for memory-intensive operations
+
+### Repartition vs Coalesce
+
+```python
+# Repartition: Full shuffle (expensive, but even distribution)
+df = df.repartition(100)  # Use for increasing or redistributing
+
+# Coalesce: Minimize shuffle (cheaper, but uneven)
+df = df.coalesce(10)  # Use for decreasing only
+```
+
+### Partition by Column
+
+```python
+# Partition by column value (for write operations)
+df.write.partitionBy("date").parquet("/output")
+
+# Repartition by column (for upcoming joins/aggregations)
+df = df.repartition("customer_id")
+```
+
+---
+
+## 7. Filter Early, Project Early
+
+Reduce data volume as early as possible in your pipeline.
+
+### Filter Early
+
+```python
+# GOOD: Filter first
+df_filtered = df.filter(col("date") >= "2024-01-01")
+df_joined = df_filtered.join(other_df, "id")
+
+# BAD: Join then filter
+df_joined = df.join(other_df, "id")  # Joins ALL data
+df_filtered = df_joined.filter(col("date") >= "2024-01-01")
+```
+
+### Project Early (Select Needed Columns)
+
+```python
+# GOOD: Select only needed columns
+df = df.select("id", "name", "amount", "date")
+df_processed = df.groupBy("name").sum("amount")
+
+# BAD: Carry all 50 columns through pipeline
+df_processed = df.groupBy("name").sum("amount")  # Still reads/shuffles extra columns
+```
+
+### Predicate Pushdown
+
+Spark pushes filters down to the data source when possible:
+
+```python
+# This filter is pushed to Parquet reader - very efficient
+df = spark.read.parquet("/data").filter(col("date") == "2024-01-15")
+# Only reads partitions where date = 2024-01-15
+```
+
+---
+
+## 8. Handle Data Skew
+
+Data skew occurs when some partitions have much more data than others, causing slow "straggler" tasks.
+
+### Detect Skew
+
+1. Look at Spark UI — Stage tasks with vastly different durations
+2. Check key distribution:
+
+```python
+df.groupBy("key_column").count().orderBy(col("count").desc()).show(20)
+# Look for keys with 10-100x more rows than average
+```
+
+### Enable Adaptive Query Execution (AQE)
+
+AQE automatically handles many skew scenarios:
+
+```python
+spark.conf.set("spark.sql.adaptive.enabled", "true")
+spark.conf.set("spark.sql.adaptive.skewJoin.enabled", "true")
+```
+
+### Manual Skew Handling: Salting
+
+```python
+from pyspark.sql.functions import concat, lit, rand
+
+# Add salt to skewed key
+salt_count = 10
+df_salted = df.withColumn(
+    "salted_key",
+    concat(col("join_key"), lit("_"), (rand() * salt_count).cast("int"))
+)
+
+# Expand dimension table to match salt
+dim_expanded = dim_df.crossJoin(
+    spark.range(salt_count).withColumnRenamed("id", "salt")
+).withColumn(
+    "salted_key",
+    concat(col("join_key"), lit("_"), col("salt"))
+)
+
+# Join on salted key
+result = df_salted.join(dim_expanded, "salted_key")
+```
+
+---
+
+## 9. Use Column Pruning and Partition Pruning
+
+Spark can skip reading unnecessary data. Help it by:
+
+### Partition Pruning
+
+```python
+# Data is partitioned by date
+# This query only reads partition date=2024-01-15
+df = spark.read.parquet("/data/events") \
+    .filter(col("date") == "2024-01-15")
+```
+
+### Column Pruning
+
+```python
+# Only read columns you need
+df = spark.read.parquet("/data/events") \
+    .select("user_id", "event_type", "timestamp")
+# Other columns are never read from disk
+```
+
+### Check What's Being Pruned
+
+```python
+df.explain(mode="extended")
+# Look for: PushedFilters and ReadSchema in the physical plan
+```
+
+---
+
+## 10. Monitor with Spark UI
+
+The Spark UI is your best friend for optimization. Key things to check:
+
+### Jobs Tab
+- Duration of each job
+- Number of stages
+
+### Stages Tab
+- Task distribution (look for skew)
+- Shuffle read/write sizes
+- Duration percentiles (p50, p75, p99)
+
+### Storage Tab
+- Cached DataFrames
+- Memory usage
+
+### SQL Tab
+- Query plans
+- Time spent in each operation
+
+### Signs of Problems
+
+| Symptom | Likely Cause |
+|---------|--------------|
+| Few tasks running | Not enough partitions |
+| One task much slower | Data skew |
+| High GC time | Memory pressure, reduce cache |
+| Large shuffle | Optimize joins, filter earlier |
+| Spilling to disk | Increase memory or partitions |
+
+---
+
+## Quick Reference Checklist
+
+Before submitting your PySpark job:
+
+- [ ] Filtered data as early as possible
+- [ ] Selected only needed columns
+- [ ] Used broadcast joins for small tables
+- [ ] Avoided Python UDFs (used built-in functions)
+- [ ] Checked partition count (2-4 per core)
+- [ ] Cached only reused DataFrames
+- [ ] Reviewed explain plan for unexpected shuffles
+- [ ] Enabled AQE for adaptive optimization
+- [ ] Verified no data skew in Spark UI
+
+---
+
+## Practice with Databricks Sword
+
+Put these optimization skills to the test:
+
+- **Spark Fundamentals** — Understand transformations vs actions
+- **Join Optimization** — Master broadcast and merge strategies
+- **Performance Tuning** — Real scenarios with skew and caching
+
+**Level up your PySpark skills!** ⚔️

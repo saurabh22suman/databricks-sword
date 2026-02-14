@@ -1,0 +1,96 @@
+{
+  "questions": [
+    {
+      "id": "q1",
+      "question": "What is the main advantage of the lakehouse architecture over traditional data warehouses?",
+      "options": [
+        "Lakehouse combines data lake flexibility with warehouse performance",
+        "Lakehouse is always faster than warehouses",
+        "Lakehouse only stores structured data",
+        "Lakehouse requires less storage space"
+      ],
+      "correctAnswer": "Lakehouse combines data lake flexibility with warehouse performance",
+      "explanation": "Lakehouse architecture provides the flexibility to store all data types (structured, semi-structured, unstructured) like a data lake, while also offering ACID transactions, schema enforcement, and query performance like a data warehouse."
+    },
+    {
+      "id": "q2",
+      "question": "What does Delta Lake add to Parquet files to enable ACID transactions?",
+      "options": [
+        "Transaction log",
+        "Schema registry",
+        "Binary indexes",
+        "Compression codec"
+      ],
+      "correctAnswer": "Transaction log",
+      "explanation": "Delta Lake uses a transaction log (stored as JSON files in _delta_log directory) to track all changes to the table. This log provides atomicity, consistency, isolation, and durability (ACID) guarantees on cloud object storage."
+    },
+    {
+      "id": "q3",
+      "question": "Which SQL keyword is required to create a Delta Lake table in Databricks?",
+      "options": [
+        "USING DELTA",
+        "FORMAT DELTA",
+        "ENGINE DELTA",
+        "TYPE DELTA"
+      ],
+      "correctAnswer": "USING DELTA",
+      "explanation": "The USING DELTA clause specifies that the table should use the Delta Lake format. Without this, Databricks defaults to Parquet format without ACID guarantees."
+    },
+    {
+      "id": "q4",
+      "question": "What happens when you run UPDATE on a Delta Lake table?",
+      "options": [
+        "New Parquet files are created with updated records, old files remain for time travel",
+        "Existing Parquet files are modified in-place",
+        "A temporary copy of the table is created",
+        "The entire table is locked for writes"
+      ],
+      "correctAnswer": "New Parquet files are created with updated records, old files remain for time travel",
+      "explanation": "Delta Lake uses copy-on-write semantics. UPDATEs create new Parquet files containing the modified rows, while old files are marked as invalid in the transaction log but retained for time travel queries."
+    },
+    {
+      "id": "q5",
+      "question": "Which of the following is NOT a layer in the lakehouse architecture?",
+      "options": [
+        "Caching layer",
+        "Storage layer",
+        "Compute layer",
+        "Serving layer"
+      ],
+      "correctAnswer": "Caching layer",
+      "explanation": "The three main layers are: Storage Layer (cloud object storage), Compute Layer (Spark/Photon), and Serving Layer (SQL Warehouse, Notebooks, ML). While caching exists, it's a feature within compute, not a separate architectural layer."
+    },
+    {
+      "id": "q6",
+      "question": "What is the purpose of the LOCATION clause in a CREATE TABLE statement?",
+      "options": [
+        "Specifies where Parquet files are stored in cloud storage",
+        "Defines the table's geographic region for compliance",
+        "Sets the table's network location for faster access",
+        "Indicates which database the table belongs to"
+      ],
+      "correctAnswer": "Specifies where Parquet files are stored in cloud storage",
+      "explanation": "The LOCATION clause specifies the cloud storage path (S3, ADLS, GCS) where the table's Parquet data files and Delta transaction log will be stored. This allows external tools to access the data."
+    },
+    {
+      "id": "q7",
+      "question": "How does Delta Lake maintain ACID guarantees on cloud object storage (which is eventually consistent)?",
+      "options": [
+        "Uses optimistic concurrency control with transaction log commits",
+        "Locks the entire table during writes",
+        "Replicates data across multiple storage accounts",
+        "Requires a separate database for metadata"
+      ],
+      "correctAnswer": "Uses optimistic concurrency control with transaction log commits",
+      "explanation": "Delta Lake uses optimistic concurrency control: transactions read the latest log version, make changes, then atomically commit a new log entry. If another transaction committed first, the operation retries. This avoids locking while ensuring consistency."
+    }
+  ],
+  "passingScore": 70,
+  "learnings": [
+    "Lakehouse combines data lake flexibility with warehouse performance",
+    "Delta Lake uses transaction logs for ACID guarantees on object storage",
+    "USING DELTA clause specifies the Delta Lake table format",
+    "Copy-on-write creates new files for updates, enabling time travel",
+    "The three core layers are Storage, Compute, and Serving"
+  ]
+}

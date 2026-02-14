@@ -1,0 +1,57 @@
+# Mission Briefing: Lakehouse Fundamentals
+
+## The Situation
+
+You've just joined **TechCorp**, a high-growth SaaS company with 10,000 enterprise customers. The data team is in crisis.
+
+Their **data warehouse** (running on a traditional MPP system) is buckling under pressure:
+- **Query times:** 15 minutes for simple analytics (used to be 2 minutes last year)
+- **Storage costs:** $47K/month and climbing 30% every quarter
+- **Schema changes:** 3-week turnaround due to rigid schema enforcement
+- **Data freshness:** 24-hour lag between transaction and analytics
+
+The CEO is furious. Marketing can't run campaigns. Product can't analyze user behavior. The CFO is threatening to pull the plug on the entire data stack.
+
+## The Opportunity
+
+The VP of Engineering has been researching **lakehouse architecture** — a new paradigm that combines:
+- **Data lake flexibility:** Store structured, semi-structured, and unstructured data
+- **Data warehouse performance:** ACID transactions, indexing, query optimization
+- **Open formats:** Parquet + Delta Lake = portability and vendor independence
+
+**Databricks** pioneered the lakehouse with **Delta Lake**, an open-source storage layer that brings ACID transactions to data lakes.
+
+Early adopters are seeing major wins:
+- **Stitch Fix:** 70% cost reduction vs traditional warehouse
+- **Riot Games:** Real-time analytics on 1.4B events/day
+- **Comcast:** Unified streaming and batch processing in one platform
+
+## Your Mission
+
+Prove the lakehouse concept by building a **production-grade Delta Lake table**:
+
+1. **Create** a Delta table for customer transaction data
+2. **Insert** records using SQL
+3. **Update** and **delete** rows with ACID guarantees
+4. **Query** data with sub-second latency
+5. **Understand** the lakehouse architecture layers
+
+## Success Criteria
+
+- **Working Delta table** with proper schema
+- **CRUD operations** executed successfully
+- **Data integrity** verified after transactions
+- **Architecture understanding** demonstrated in quiz
+
+## The Stakes
+
+If this pilot succeeds, TechCorp will migrate their entire data warehouse (250+ tables, 80TB) to Databricks. This would:
+- **Cut costs by 60%** ($28K/month savings)
+- **Reduce query time by 90%** (2-minute avg → 12-second avg)
+- **Enable real-time analytics** (24-hour lag → 5-minute lag)
+
+This is your chance to modernize a legacy system and unlock data-driven decision-making.
+
+---
+
+**Next Step:** Architecture Diagram — Understand the lakehouse layers

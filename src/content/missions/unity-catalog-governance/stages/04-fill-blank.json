@@ -1,0 +1,82 @@
+{
+  "description": "Complete the Unity Catalog governance SQL commands.",
+  "expectedOutput": "When completed correctly, this code will:\n1. Create a catalog for the federal_data domain\n2. Create a schema for citizen_records within the catalog\n3. Grant USE SCHEMA to allow schema navigation\n4. Grant SELECT for read access to specific tables\n5. Audit permissions with SHOW GRANTS",
+  "codeTemplate": "-- Create a catalog for the health department\nCREATE __BLANK_0__ IF NOT EXISTS health_dept;\n\n-- Create a schema for patient data\nCREATE SCHEMA IF NOT EXISTS health_dept.__BLANK_1__;\n\n-- Grant a group permission to use the schema\n__BLANK_2__ USE SCHEMA ON SCHEMA health_dept.patient_data TO doctors_group;\n\n-- Grant SELECT on a specific table\nGRANT __BLANK_3__ ON TABLE health_dept.patient_data.records TO doctors_group;\n\n-- Create a dynamic view for row-level security\nCREATE VIEW health_dept.patient_data.my_patients AS\nSELECT * FROM health_dept.patient_data.records\nWHERE assigned_doctor = __BLANK_4__;\n\n-- Column masking: hide SSN for non-admin users\nCREATE VIEW health_dept.patient_data.masked_records AS\nSELECT\n    patient_id,\n    name,\n    CASE WHEN __BLANK_5__('admin_group') THEN ssn ELSE '***-**-****' END AS ssn\nFROM health_dept.patient_data.records;",
+  "blanks": [
+    {
+      "id": 0,
+      "options": [
+        "CATALOG",
+        "DATABASE",
+        "NAMESPACE",
+        "DOMAIN"
+      ],
+      "correctAnswer": "CATALOG"
+    },
+    {
+      "id": 1,
+      "options": [
+        "patient_data",
+        "default",
+        "public",
+        "main"
+      ],
+      "correctAnswer": "patient_data"
+    },
+    {
+      "id": 2,
+      "options": [
+        "GRANT",
+        "ALLOW",
+        "PERMIT",
+        "ENABLE"
+      ],
+      "correctAnswer": "GRANT"
+    },
+    {
+      "id": 3,
+      "options": [
+        "SELECT",
+        "READ",
+        "VIEW",
+        "ACCESS"
+      ],
+      "correctAnswer": "SELECT"
+    },
+    {
+      "id": 4,
+      "options": [
+        "current_user()",
+        "session_user()",
+        "auth_user()",
+        "logged_in_user()"
+      ],
+      "correctAnswer": "current_user()"
+    },
+    {
+      "id": 5,
+      "options": [
+        "is_member",
+        "in_group",
+        "has_role",
+        "belongs_to"
+      ],
+      "correctAnswer": "is_member"
+    }
+  ],
+  "hints": [
+    "CREATE CATALOG is the top-level container in Unity Catalog",
+    "Schema names should be descriptive of the data domain",
+    "GRANT is the SQL command for giving privileges",
+    "SELECT is the standard privilege for reading data",
+    "current_user() returns the current user's email for row-level security",
+    "is_member() checks if a user belongs to a group"
+  ],
+  "learnings": [
+    "Three-level namespace: catalog.schema.table",
+    "GRANT SELECT allows read access to objects",
+    "GRANT USAGE is required to access catalogs/schemas",
+    "DENY overrides any GRANT at the same level",
+    "INFORMATION_SCHEMA queries show current permissions"
+  ]
+}

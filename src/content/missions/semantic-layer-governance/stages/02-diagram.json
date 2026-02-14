@@ -1,0 +1,101 @@
+{
+  "instructions": "Build the Semantic Layer! Arrange components to show how curated data becomes governed data products with AI-powered access.",
+  "components": [
+    {
+      "id": "gold-tables",
+      "label": "Gold Tables (Source)",
+      "icon": "database"
+    },
+    {
+      "id": "metric-layer",
+      "label": "Metric Layer (SQL Views)",
+      "icon": "calculator"
+    },
+    {
+      "id": "data-product",
+      "label": "Published Data Products",
+      "icon": "package"
+    },
+    {
+      "id": "genie",
+      "label": "AI/BI Genie",
+      "icon": "message-circle"
+    },
+    {
+      "id": "rls",
+      "label": "Row-Level Security",
+      "icon": "shield"
+    }
+  ],
+  "dropZones": [
+    {
+      "id": "zone-1",
+      "label": "Curated Data",
+      "position": {
+        "x": 60,
+        "y": 50
+      }
+    },
+    {
+      "id": "zone-2",
+      "label": "Business Definitions",
+      "position": {
+        "x": 250,
+        "y": 50
+      }
+    },
+    {
+      "id": "zone-3",
+      "label": "Governed Catalog",
+      "position": {
+        "x": 440,
+        "y": 50
+      }
+    },
+    {
+      "id": "zone-4",
+      "label": "Natural Language",
+      "position": {
+        "x": 160,
+        "y": 200
+      }
+    },
+    {
+      "id": "zone-5",
+      "label": "Access Control",
+      "position": {
+        "x": 350,
+        "y": 200
+      }
+    }
+  ],
+  "correctPlacements": [
+    {
+      "componentId": "gold-tables",
+      "zoneId": "zone-1"
+    },
+    {
+      "componentId": "metric-layer",
+      "zoneId": "zone-2"
+    },
+    {
+      "componentId": "data-product",
+      "zoneId": "zone-3"
+    },
+    {
+      "componentId": "genie",
+      "zoneId": "zone-4"
+    },
+    {
+      "componentId": "rls",
+      "zoneId": "zone-5"
+    }
+  ],
+  "learnings": [
+    "Gold Tables: Curated, business-ready data as the foundation",
+    "Metric Layer: Standardized business definitions in SQL views",
+    "Data Products: Published, discoverable assets in Unity Catalog",
+    "AI/BI Genie: Natural language queries powered by your semantic layer",
+    "Row-Level Security: Dynamic access control based on user attributes"
+  ]
+}

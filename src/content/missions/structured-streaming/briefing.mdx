@@ -1,0 +1,31 @@
+# Mission Briefing: Structured Streaming
+
+## Situation Report
+
+**Client:** NovaPay — a digital payments network processing 50,000 transactions per second across 12 countries. Their legacy batch pipeline has a 4-hour delay, meaning fraud detection happens long after the damage is done.
+
+## Your Mission
+
+NovaPay needs you to build a real-time streaming pipeline that processes payment transactions as they arrive. The pipeline must detect suspicious patterns within seconds, not hours.
+
+## Objectives
+
+1. **Understand Structured Streaming fundamentals** — how Spark treats streams as unbounded tables
+2. **Configure trigger modes** — choose between micro-batch and continuous processing
+3. **Implement watermarking** — handle late-arriving data gracefully
+4. **Build stream-static joins** — enrich streaming events with reference data
+5. **Write streaming output** — configure sinks, checkpoints, and output modes
+
+## Key Intelligence
+
+- Structured Streaming uses the same DataFrame API as batch processing
+- The `readStream` / `writeStream` pattern replaces `read` / `write`
+- Watermarks define how long to wait for late data before dropping it
+- Checkpointing enables exactly-once processing guarantees
+- Trigger modes control the trade-off between latency and throughput
+
+## Stakes
+
+Without real-time processing, NovaPay loses $2.3M per month to undetected fraud. Every hour of delay means more compromised accounts and regulatory penalties.
+
+> "A stream is just a table that never stops growing." — Spark Documentation

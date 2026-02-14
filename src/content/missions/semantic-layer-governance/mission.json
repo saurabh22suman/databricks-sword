@@ -1,0 +1,74 @@
+{
+  "id": "semantic-layer-governance",
+  "title": "Semantic Layer & Governance",
+  "subtitle": "Build governed data products with AI/BI Genie, metric layers, and data contracts",
+  "description": "Design the semantic layer for enterprise BI: create governed data products, configure AI/BI Genie for natural language analytics, establish metric definitions with data contracts, and implement row/column-level security for multi-tenant dashboards.",
+  "industry": "enterprise",
+  "rank": "S",
+  "xpRequired": 4000,
+  "xpReward": 750,
+  "estimatedMinutes": 65,
+  "primaryFeatures": [
+    "Data Products",
+    "AI/BI Genie",
+    "Metric Layer",
+    "Data Contracts",
+    "Row-Level Security"
+  ],
+  "prerequisites": [
+    "unity-catalog-governance",
+    "advanced-sql-analytics"
+  ],
+  "databricksEnabled": false,
+  "stages": [
+    {
+      "id": "briefing",
+      "title": "Mission Briefing",
+      "type": "briefing",
+      "configFile": "stages/01-briefing.json",
+      "xpReward": 0,
+      "estimatedMinutes": 5
+    },
+    {
+      "id": "diagram",
+      "title": "Semantic Layer Architecture",
+      "type": "diagram",
+      "configFile": "stages/02-diagram.json",
+      "xpReward": 75,
+      "estimatedMinutes": 12
+    },
+    {
+      "id": "drag-drop-pipeline",
+      "title": "Build Governed Data Product",
+      "type": "drag-drop",
+      "configFile": "stages/03-drag-drop.json",
+      "xpReward": 100,
+      "estimatedMinutes": 15
+    },
+    {
+      "id": "fill-blank-semantic",
+      "title": "Configure Semantic Layer & Security",
+      "type": "fill-blank",
+      "configFile": "stages/04-fill-blank.json",
+      "xpReward": 100,
+      "estimatedMinutes": 15
+    },
+    {
+      "id": "quiz",
+      "title": "Knowledge Check",
+      "type": "quiz",
+      "configFile": "stages/05-quiz.json",
+      "xpReward": 75,
+      "estimatedMinutes": 10
+    },
+    {
+      "id": "debrief",
+      "title": "Mission Debrief",
+      "type": "debrief",
+      "configFile": "stages/06-debrief.json",
+      "xpReward": 0,
+      "estimatedMinutes": 5
+    }
+  ],
+  "sideQuests": []
+}

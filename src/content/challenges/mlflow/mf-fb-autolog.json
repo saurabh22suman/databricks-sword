@@ -1,0 +1,51 @@
+{
+  "id": "mf-fb-autolog",
+  "title": "Complete the MLflow Autolog Setup",
+  "category": "mlflow",
+  "difficulty": "B",
+  "format": "fill-blank",
+  "description": "Fill in the blanks to enable MLflow autologging for scikit-learn, configure logging behavior, and train a model with automatic tracking.",
+  "hints": [
+    "autolog() enables automatic tracking for ML frameworks",
+    "log_input_examples captures sample input data",
+    "exclusive=True means only autolog metrics are tracked"
+  ],
+  "xpReward": 75,
+  "optimalSolution": "import mlflow\nmlflow.sklearn.autolog(log_input_examples=True, log_model_signatures=True)\nwith mlflow.start_run():\n    model = RandomForestClassifier().fit(X_train, y_train)",
+  "explanation": "MLflow autologging automatically captures parameters, metrics, and artifacts for supported ML frameworks. This reduces boilerplate code while ensuring comprehensive experiment tracking. Optionally log input examples and model signatures for better documentation.",
+  "fillBlank": {
+    "codeTemplate": "import mlflow\nmlflow.sklearn.__BLANK_0__(__BLANK_1__=True, log_model_signatures=True)\nwith mlflow.__BLANK_2__():\n    model = RandomForestClassifier().fit(X_train, y_train)",
+    "blanks": [
+      {
+        "id": 0,
+        "correctAnswer": "autolog",
+        "options": [
+          "autolog",
+          "enable_logging",
+          "track",
+          "auto_track"
+        ]
+      },
+      {
+        "id": 1,
+        "correctAnswer": "log_input_examples",
+        "options": [
+          "log_input_examples",
+          "capture_inputs",
+          "log_samples",
+          "save_examples"
+        ]
+      },
+      {
+        "id": 2,
+        "correctAnswer": "start_run",
+        "options": [
+          "start_run",
+          "new_run",
+          "begin_experiment",
+          "create_run"
+        ]
+      }
+    ]
+  }
+}

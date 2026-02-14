@@ -1,0 +1,20 @@
+{
+  "id": "ps-ft-complex-types",
+  "title": "Work with Complex Data Types",
+  "category": "pyspark",
+  "difficulty": "S",
+  "format": "free-text",
+  "description": "Write PySpark code to process a DataFrame with nested JSON data. Extract values from structs, explode arrays, and transform maps. The input has a 'user' struct, 'events' array, and 'properties' map.",
+  "hints": [
+    "Use dot notation to access struct fields: df.user.name",
+    "explode() flattens arrays into rows",
+    "map_keys() and map_values() extract map components"
+  ],
+  "xpReward": 150,
+  "optimalSolution": "from pyspark.sql.functions import col, explode, map_keys, map_values\n\n# Extract struct fields\ndf_flat = df.select(\n    col('user.id').alias('user_id'),\n    col('user.name').alias('user_name'),\n    col('events'),\n    col('properties')\n)\n\n# Explode array to rows\ndf_events = df_flat.select(\n    'user_id',\n    'user_name',\n    explode('events').alias('event'),\n    'properties'\n)\n\n# Extract event details\ndf_final = df_events.select(\n    'user_id',\n    'user_name',\n    col('event.type').alias('event_type'),\n    col('event.timestamp').alias('event_time'),\n    map_keys('properties').alias('prop_keys'),\n    map_values('properties').alias('prop_values')\n)",
+  "explanation": "Complex types (structs, arrays, maps) are common in JSON/semi-structured data. Structs are accessed with dot notation. Arrays are flattened with explode(). Maps use map_keys/map_values or element_at for specific keys. Understanding these operations is essential for data engineering.",
+  "freeText": {
+    "validationRegex": "explode|map_keys|map_values|col\\(['\"].*\\..*['\"]\\)|struct|array",
+    "sampleAnswer": "from pyspark.sql.functions import explode, col\ndf.select(col('user.name'), explode('events').alias('e')).select('name', 'e.type')"
+  }
+}

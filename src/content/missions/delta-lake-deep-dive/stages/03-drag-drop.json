@@ -1,0 +1,59 @@
+{
+  "description": "Arrange Delta Lake optimization operations in the correct order to fix a degraded table.",
+  "instructions": "Think about the optimization workflow: What do you need to understand about a table before you can fix it? Which steps compact data versus clean up old versions? Consider: diagnose \u2192 compact \u2192 reorganize \u2192 update stats \u2192 cleanup \u2192 verify.",
+  "blocks": [
+    {
+      "id": "describe-history",
+      "code": "DESCRIBE HISTORY patients",
+      "label": "View Table History"
+    },
+    {
+      "id": "optimize-table",
+      "code": "OPTIMIZE patients",
+      "label": "Compact Small Files"
+    },
+    {
+      "id": "zorder-table",
+      "code": "OPTIMIZE patients ZORDER BY (patient_id, admission_date)",
+      "label": "Z-ORDER by Query Columns"
+    },
+    {
+      "id": "analyze-table",
+      "code": "ANALYZE TABLE patients COMPUTE STATISTICS FOR ALL COLUMNS",
+      "label": "Update Statistics"
+    },
+    {
+      "id": "vacuum-table",
+      "code": "VACUUM patients RETAIN 168 HOURS",
+      "label": "Clean Old Versions"
+    },
+    {
+      "id": "verify-performance",
+      "code": "SELECT * FROM patients WHERE patient_id = 'P12345'",
+      "label": "Verify Performance"
+    }
+  ],
+  "correctOrder": [
+    "describe-history",
+    "optimize-table",
+    "zorder-table",
+    "analyze-table",
+    "vacuum-table",
+    "verify-performance"
+  ],
+  "hints": [
+    "Check table history first to understand the current state",
+    "OPTIMIZE before Z-ORDER to compact files first",
+    "Z-ORDER co-locates data by specified columns for faster filtering",
+    "ANALYZE computes column statistics for the query optimizer",
+    "VACUUM after optimization to clean up old versions",
+    "Test with a real query to verify performance improvement"
+  ],
+  "learnings": [
+    "Time travel queries use VERSION AS OF or TIMESTAMP AS OF syntax",
+    "OPTIMIZE compacts small files for better query performance",
+    "VACUUM removes old files but respects the retention period",
+    "Z-ORDER colocates related data for efficient data skipping",
+    "DESCRIBE HISTORY shows all operations on a Delta table"
+  ]
+}

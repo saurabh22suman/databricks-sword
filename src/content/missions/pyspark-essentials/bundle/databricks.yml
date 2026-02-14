@@ -1,0 +1,38 @@
+# Databricks Asset Bundle Configuration
+# Mission: PySpark Essentials
+# Learn DataFrame transformations and Spark execution model
+
+bundle:
+  name: dbsword-pyspark-essentials
+
+targets:
+  dev:
+    mode: development
+    default: true
+    workspace:
+      root_path: /Workspace/Users/${workspace.current_user.userName}/dbsword-pyspark-essentials
+
+resources:
+  schemas:
+    pyspark_essentials:
+      catalog_name: main
+      name: dbsword_pyspark_essentials
+      comment: "Databricks Sword - PySpark Essentials mission schema"
+
+  volumes:
+    data_volume:
+      catalog_name: main
+      schema_name: dbsword_pyspark_essentials
+      name: data
+      volume_type: MANAGED
+      comment: "Sample data for PySpark Essentials exercises"
+
+sync:
+  include:
+    - notebooks/**
+    - data/**
+
+artifacts:
+  notebooks:
+    path: notebooks
+    deploy_to: /Workspace/Users/${workspace.current_user.userName}/dbsword-pyspark-essentials/notebooks

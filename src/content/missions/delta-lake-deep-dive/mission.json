@@ -1,0 +1,77 @@
+{
+  "id": "delta-lake-deep-dive",
+  "title": "Delta Lake Deep Dive",
+  "subtitle": "Master time travel, OPTIMIZE, Z-ORDER, and Delta Lake internals",
+  "description": "Learn advanced Delta Lake features: time travel, table optimization, Z-ordering, VACUUM, and Change Data Capture (CDC).",
+  "industry": "healthcare",
+  "rank": "A",
+  "xpRequired": 500,
+  "xpReward": 500,
+  "estimatedMinutes": 55,
+  "databricksEnabled": false,
+  "prerequisites": [
+    "lakehouse-fundamentals",
+    "data-ingestion-pipeline"
+  ],
+  "primaryFeatures": [
+    "Time travel",
+    "OPTIMIZE",
+    "Z-ORDER",
+    "VACUUM",
+    "Change Data Capture"
+  ],
+  "achievements": [
+    "delta-devotee"
+  ],
+  "stages": [
+    {
+      "id": "01-briefing",
+      "type": "briefing",
+      "title": "Mission Briefing",
+      "file": "stages/01-briefing.json"
+    },
+    {
+      "id": "02-diagram",
+      "type": "diagram",
+      "title": "Delta Lake Internals",
+      "file": "stages/02-diagram.json"
+    },
+    {
+      "id": "03-drag-drop",
+      "type": "drag-drop",
+      "title": "Optimization Pipeline",
+      "file": "stages/03-drag-drop.json"
+    },
+    {
+      "id": "04-fill-blank",
+      "type": "fill-blank",
+      "title": "Delta Commands",
+      "file": "stages/04-fill-blank.json"
+    },
+    {
+      "id": "05-quiz",
+      "type": "quiz",
+      "title": "Knowledge Check",
+      "file": "stages/05-quiz.json"
+    },
+    {
+      "id": "06-debrief",
+      "type": "debrief",
+      "title": "Mission Debrief",
+      "file": "stages/06-debrief.json"
+    }
+  ],
+  "sideQuests": [
+    {
+      "id": "liquid-clustering-internals",
+      "title": "Deep Dive: Liquid Clustering",
+      "ossProject": "Delta Lake",
+      "trigger": "after",
+      "parentStageId": "03-drag-drop",
+      "type": "quiz",
+      "configFile": "side-quests/liquid-clustering-internals.json",
+      "xpBonus": 75,
+      "optional": true
+    }
+  ]
+}

@@ -1,0 +1,20 @@
+{
+  "id": "sql-ft-recursive-cte",
+  "title": "Traverse an Org Chart with Recursive CTE",
+  "category": "sql",
+  "difficulty": "S",
+  "format": "free-text",
+  "description": "Write a recursive CTE that traverses an employee hierarchy table (columns: employee_id, name, manager_id) to find all reports (direct and indirect) under a given manager. Include the level of depth from the root manager.",
+  "hints": [
+    "Recursive CTEs have an anchor member (base case) and a recursive member joined with UNION ALL",
+    "The anchor selects the root manager, the recursive part joins back to the CTE",
+    "Add a 'level' column starting at 0 and incrementing each recursion"
+  ],
+  "xpReward": 150,
+  "optimalSolution": "WITH RECURSIVE org_tree AS (\n  -- Anchor: the root manager\n  SELECT employee_id, name, manager_id, 0 AS level\n  FROM employees\n  WHERE employee_id = 1\n  \n  UNION ALL\n  \n  -- Recursive: find direct reports\n  SELECT e.employee_id, e.name, e.manager_id, ot.level + 1\n  FROM employees e\n  JOIN org_tree ot ON e.manager_id = ot.employee_id\n)\nSELECT employee_id, name, level\nFROM org_tree\nORDER BY level, name",
+  "explanation": "Recursive CTEs solve hierarchical and graph traversal problems in SQL. The anchor member defines the starting point (here, a specific manager). The recursive member references the CTE itself, joining employees back to their managers already found. Each iteration adds one level of depth. Databricks SQL supports recursive CTEs with the RECURSIVE keyword. Always ensure a termination condition (the join naturally stops when no more children exist).",
+  "freeText": {
+    "validationRegex": "WITH\\s+RECURSIVE.*UNION\\s+ALL.*JOIN.*org_tree|recursive.*union\\s+all.*join",
+    "sampleAnswer": "WITH RECURSIVE org_tree AS (\n  SELECT employee_id, name, manager_id, 0 AS level\n  FROM employees WHERE employee_id = 1\n  UNION ALL\n  SELECT e.employee_id, e.name, e.manager_id, ot.level + 1\n  FROM employees e JOIN org_tree ot ON e.manager_id = ot.employee_id\n)\nSELECT * FROM org_tree ORDER BY level"
+  }
+}

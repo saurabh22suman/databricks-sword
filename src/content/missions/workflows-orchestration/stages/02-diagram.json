@@ -1,0 +1,101 @@
+{
+  "instructions": "Design the Workflow Architecture! Arrange components to show how Databricks Workflows orchestrates multi-task jobs with dependencies.",
+  "components": [
+    {
+      "id": "trigger",
+      "label": "Schedule / File Trigger",
+      "icon": "clock"
+    },
+    {
+      "id": "job-cluster",
+      "label": "Job Cluster (Ephemeral)",
+      "icon": "cpu"
+    },
+    {
+      "id": "ingest-task",
+      "label": "Task: Ingest Data",
+      "icon": "download"
+    },
+    {
+      "id": "transform-task",
+      "label": "Task: Transform",
+      "icon": "zap"
+    },
+    {
+      "id": "report-task",
+      "label": "Task: Generate Report",
+      "icon": "file-text"
+    }
+  ],
+  "dropZones": [
+    {
+      "id": "zone-1",
+      "label": "Initiation",
+      "position": {
+        "x": 50,
+        "y": 150
+      }
+    },
+    {
+      "id": "zone-2",
+      "label": "Compute",
+      "position": {
+        "x": 200,
+        "y": 50
+      }
+    },
+    {
+      "id": "zone-3",
+      "label": "Step 1",
+      "position": {
+        "x": 200,
+        "y": 250
+      }
+    },
+    {
+      "id": "zone-4",
+      "label": "Step 2",
+      "position": {
+        "x": 400,
+        "y": 150
+      }
+    },
+    {
+      "id": "zone-5",
+      "label": "Step 3",
+      "position": {
+        "x": 550,
+        "y": 150
+      }
+    }
+  ],
+  "correctPlacements": [
+    {
+      "componentId": "trigger",
+      "zoneId": "zone-1"
+    },
+    {
+      "componentId": "job-cluster",
+      "zoneId": "zone-2"
+    },
+    {
+      "componentId": "ingest-task",
+      "zoneId": "zone-3"
+    },
+    {
+      "componentId": "transform-task",
+      "zoneId": "zone-4"
+    },
+    {
+      "componentId": "report-task",
+      "zoneId": "zone-5"
+    }
+  ],
+  "learnings": [
+    "Trigger: Schedule-based or file-arrival triggers start workflow execution",
+    "Job Cluster: Ephemeral clusters created for the job then terminated after",
+    "Tasks: Individual units of work (notebooks, JARs, SQL, dbt) with dependencies",
+    "Task Dependencies: Create DAGs with sequential or parallel task execution",
+    "This pattern enables reliable, observable, and cost-effective data pipelines"
+  ]
+}

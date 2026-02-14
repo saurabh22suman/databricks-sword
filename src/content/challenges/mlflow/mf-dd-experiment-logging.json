@@ -1,0 +1,52 @@
+{
+  "id": "mf-dd-experiment-logging",
+  "title": "Order MLflow Experiment Logging Steps",
+  "category": "mlflow",
+  "difficulty": "B",
+  "format": "drag-drop",
+  "description": "Arrange the MLflow experiment tracking steps in the correct order to set up an experiment, log parameters, train a model, and log metrics.",
+  "hints": [
+    "Start by setting up the experiment context",
+    "Parameters are logged before training begins",
+    "Metrics are computed after the model runs"
+  ],
+  "xpReward": 75,
+  "optimalSolution": "mlflow.set_experiment('/experiments/my_model')\nwith mlflow.start_run():\n    mlflow.log_param('learning_rate', 0.01)\n    model = train_model(data, learning_rate=0.01)\n    mlflow.log_metric('accuracy', accuracy)",
+  "explanation": "MLflow experiment tracking follows a logical flow: set experiment \u2192 start run \u2192 log parameters \u2192 train \u2192 log metrics. This order ensures reproducibility since parameters are captured before training and metrics after evaluation.",
+  "dragDrop": {
+    "blocks": [
+      {
+        "id": "set_exp",
+        "code": "mlflow.set_experiment('/experiments/my_model')",
+        "label": "Set Experiment"
+      },
+      {
+        "id": "start_run",
+        "code": "with mlflow.start_run():",
+        "label": "Start Run"
+      },
+      {
+        "id": "log_param",
+        "code": "    mlflow.log_param('learning_rate', 0.01)",
+        "label": "Log Parameters"
+      },
+      {
+        "id": "train",
+        "code": "    model = train_model(data, learning_rate=0.01)",
+        "label": "Train Model"
+      },
+      {
+        "id": "log_metric",
+        "code": "    mlflow.log_metric('accuracy', accuracy)",
+        "label": "Log Metrics"
+      }
+    ],
+    "correctOrder": [
+      "set_exp",
+      "start_run",
+      "log_param",
+      "train",
+      "log_metric"
+    ]
+  }
+}

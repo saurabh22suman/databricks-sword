@@ -1,0 +1,74 @@
+{
+  "id": "unity-catalog-governance",
+  "title": "Unity Catalog Governance",
+  "subtitle": "Data Access Control & Compliance",
+  "description": "Master Unity Catalog's three-level namespace, fine-grained permissions, data lineage, and audit logging for enterprise governance.",
+  "industry": "government",
+  "rank": "A",
+  "xpRequired": 500,
+  "xpReward": 450,
+  "estimatedMinutes": 50,
+  "databricksEnabled": false,
+  "prerequisites": [
+    "sql-analytics-intro",
+    "delta-lake-deep-dive"
+  ],
+  "primaryFeatures": [
+    "Unity Catalog",
+    "Three-Level Namespace",
+    "GRANT/REVOKE",
+    "Data Lineage",
+    "Row/Column Filters"
+  ],
+  "stages": [
+    {
+      "id": "briefing",
+      "type": "briefing",
+      "title": "Mission Briefing",
+      "configFile": "stages/01-briefing.json",
+      "xpReward": 0,
+      "estimatedMinutes": 5
+    },
+    {
+      "id": "diagram",
+      "type": "diagram",
+      "title": "Catalog Architecture",
+      "configFile": "stages/02-diagram.json",
+      "xpReward": 50,
+      "estimatedMinutes": 10
+    },
+    {
+      "id": "drag-drop",
+      "type": "drag-drop",
+      "title": "Configure Governance",
+      "configFile": "stages/03-drag-drop.json",
+      "xpReward": 75,
+      "estimatedMinutes": 12
+    },
+    {
+      "id": "fill-blank",
+      "type": "fill-blank",
+      "title": "Permission Commands",
+      "configFile": "stages/04-fill-blank.json",
+      "xpReward": 75,
+      "estimatedMinutes": 12
+    },
+    {
+      "id": "quiz",
+      "type": "quiz",
+      "title": "Knowledge Check",
+      "configFile": "stages/05-quiz.json",
+      "xpReward": 50,
+      "estimatedMinutes": 8
+    },
+    {
+      "id": "debrief",
+      "type": "debrief",
+      "title": "Mission Debrief",
+      "configFile": "stages/06-debrief.json",
+      "xpReward": 0,
+      "estimatedMinutes": 3
+    }
+  ],
+  "sideQuests": []
+}

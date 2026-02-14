@@ -1,0 +1,47 @@
+# Mission Briefing: ML Foundations
+
+## The Situation
+
+You've just joined **QuantFin Capital**, a quantitative hedge fund managing $2.3B in assets. The ML team has a problem: **experiment chaos.**
+
+Over the past 6 months, the team has trained **427 different models** for credit risk prediction, each with different hyperparameters, feature sets, and evaluation metrics. But there's no central tracking system.
+
+When asked "Which model performed best last month?", it takes **3 days** of manual log diving to answer. When a model gets deployed to production, **nobody knows which hyperparameters were used.** Reproducibility is impossible.
+
+## The Opportunity
+
+The lead ML engineer discovered **MLflow** — an open-source platform for managing the ML lifecycle. It can track:
+- **Experiments** — Group related training runs
+- **Parameters** — Hyperparameters like learning rate, model rank
+- **Metrics** — Accuracy, RMSE, training time
+- **Artifacts** — Trained models, plots, data samples
+
+Your team needs someone to **prove the concept** before rolling it out company-wide.
+
+## Your Mission
+
+Build a **recommendation model** with **full MLflow experiment tracking**:
+
+1. **Load** synthetic user-item rating data
+2. **Track experiments** using MLflow (parameters, metrics, artifacts)
+3. **Train** an ALS model to predict ratings
+4. **Log results** for reproducibility and comparison
+5. **Visualize** metrics across multiple runs
+
+## Success Criteria
+
+- **All runs logged** with parameters, metrics, and model artifacts
+- **RMSE < 1.0** on test data
+- **Experiment UI** shows clear comparison of hyperparameter effects
+- **Model reproducible** from logged artifacts
+
+## The Stakes
+
+If MLflow works for this pilot, QuantFin will adopt it for all 23 ML models in production. This would save **40 hours/month** of debugging time and prevent costly production bugs from untracked experiments.
+
+This is your chance to establish **ML engineering best practices** from day one.
+
+---
+
+**Next Step:** Architecture Diagram — Understand the ML pipeline with MLflow tracking
+

@@ -1,0 +1,101 @@
+{
+  "instructions": "Design the Enterprise Lakehouse! Arrange components to show how a multi-workspace platform enables governance and sharing at scale.",
+  "components": [
+    {
+      "id": "workspace-hub",
+      "label": "Platform Hub Workspace",
+      "icon": "server"
+    },
+    {
+      "id": "domain-workspaces",
+      "label": "Domain Workspaces",
+      "icon": "grid"
+    },
+    {
+      "id": "unity-catalog",
+      "label": "Unity Catalog (Metastore)",
+      "icon": "shield"
+    },
+    {
+      "id": "delta-sharing",
+      "label": "Delta Sharing Protocol",
+      "icon": "share-2"
+    },
+    {
+      "id": "cost-governance",
+      "label": "Cost & Security Policies",
+      "icon": "lock"
+    }
+  ],
+  "dropZones": [
+    {
+      "id": "zone-1",
+      "label": "Central Infrastructure",
+      "position": {
+        "x": 250,
+        "y": 30
+      }
+    },
+    {
+      "id": "zone-2",
+      "label": "Team Environments",
+      "position": {
+        "x": 100,
+        "y": 150
+      }
+    },
+    {
+      "id": "zone-3",
+      "label": "Governance Layer",
+      "position": {
+        "x": 400,
+        "y": 150
+      }
+    },
+    {
+      "id": "zone-4",
+      "label": "Cross-Team Sharing",
+      "position": {
+        "x": 100,
+        "y": 280
+      }
+    },
+    {
+      "id": "zone-5",
+      "label": "Policy Enforcement",
+      "position": {
+        "x": 400,
+        "y": 280
+      }
+    }
+  ],
+  "correctPlacements": [
+    {
+      "componentId": "workspace-hub",
+      "zoneId": "zone-1"
+    },
+    {
+      "componentId": "domain-workspaces",
+      "zoneId": "zone-2"
+    },
+    {
+      "componentId": "unity-catalog",
+      "zoneId": "zone-3"
+    },
+    {
+      "componentId": "delta-sharing",
+      "zoneId": "zone-4"
+    },
+    {
+      "componentId": "cost-governance",
+      "zoneId": "zone-5"
+    }
+  ],
+  "learnings": [
+    "Platform Hub: Central workspace for shared infrastructure and DevOps",
+    "Domain Workspaces: Isolated environments for each team/business unit",
+    "Unity Catalog: Single governance layer spanning all workspaces",
+    "Delta Sharing: Cross-organization data sharing without copying",
+    "Cost & Security Policies: Centralized guardrails for compliance and budgets"
+  ]
+}

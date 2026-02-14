@@ -1,0 +1,102 @@
+{
+  "description": "Complete the Auto Loader and COPY INTO configurations for ingesting data into the lakehouse bronze layer.",
+  "expectedOutput": "When completed correctly, this code will:\n1. Configure Auto Loader to read JSON files incrementally\n2. Infer and evolve schema automatically as new fields appear\n3. Add ingestion metadata (timestamp and source file name)\n4. Write to bronze table with checkpoint for exactly-once processing\n5. Start a continuous streaming job that processes new files",
+  "codeTemplate": "# Auto Loader streaming configuration\ndf = spark.readStream.__BLANK_0__(\"cloudFiles\")\n  .option(\"cloudFiles.format\", \"__BLANK_1__\")\n  .option(\"cloudFiles.schemaLocation\", \"/mnt/schemas/bronze\")\n  .option(\"cloudFiles.schemaEvolutionMode\", \"__BLANK_2__\")\n  .load(\"/mnt/data/raw/\")\n\n# Write streaming data to bronze table\ndf.writeStream\n  .format(\"__BLANK_3__\")\n  .option(\"checkpointLocation\", \"/mnt/checkpoints/bronze_events\")\n  .outputMode(\"__BLANK_4__\")\n  .__BLANK_5__(\"bronze.raw_events\")\n  .start()\n\n# COPY INTO for batch historical load\n__BLANK_6__ bronze.historical_events\nFROM '/mnt/archive/events/'\nFILETYPE = PARQUET\nFORMAT_OPTIONS ('mergeSchema' = '__BLANK_7__');",
+  "blanks": [
+    {
+      "id": 0,
+      "options": [
+        "format",
+        "option",
+        "schema",
+        "load"
+      ],
+      "correctAnswer": "format"
+    },
+    {
+      "id": 1,
+      "options": [
+        "json",
+        "parquet",
+        "csv",
+        "delta"
+      ],
+      "correctAnswer": "json"
+    },
+    {
+      "id": 2,
+      "options": [
+        "addNewColumns",
+        "rescue",
+        "strict",
+        "none"
+      ],
+      "correctAnswer": "addNewColumns"
+    },
+    {
+      "id": 3,
+      "options": [
+        "delta",
+        "parquet",
+        "json",
+        "table"
+      ],
+      "correctAnswer": "delta"
+    },
+    {
+      "id": 4,
+      "options": [
+        "append",
+        "complete",
+        "update",
+        "overwrite"
+      ],
+      "correctAnswer": "append"
+    },
+    {
+      "id": 5,
+      "options": [
+        "table",
+        "save",
+        "write",
+        "option"
+      ],
+      "correctAnswer": "table"
+    },
+    {
+      "id": 6,
+      "options": [
+        "COPY INTO",
+        "INSERT INTO",
+        "LOAD DATA",
+        "IMPORT"
+      ],
+      "correctAnswer": "COPY INTO"
+    },
+    {
+      "id": 7,
+      "options": [
+        "true",
+        "false",
+        "auto",
+        "strict"
+      ],
+      "correctAnswer": "true"
+    }
+  ],
+  "hints": [
+    "Auto Loader uses 'cloudFiles' format for streaming file ingestion",
+    "addNewColumns mode automatically adds new columns as schema evolves",
+    "append mode adds new records without changing existing data",
+    "table() writes directly to a Delta table by name",
+    "COPY INTO is the SQL command for batch file ingestion",
+    "mergeSchema='true' handles schema evolution in COPY INTO"
+  ],
+  "learnings": [
+    "cloudFiles uses Auto Loader for incremental ingestion",
+    "mergeSchema handles schema evolution",
+    "rescuedDataColumn captures malformed records",
+    "checkpointLocation enables exactly-once processing",
+    "trigger.availableNow processes all available data"
+  ]
+}

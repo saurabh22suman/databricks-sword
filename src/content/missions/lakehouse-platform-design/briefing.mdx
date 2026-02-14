@@ -1,0 +1,31 @@
+# Mission Briefing: Lakehouse Platform Design
+
+## Situation Report
+
+**Client:** NexaCorp Industries — a Fortune 100 conglomerate with 12 business units, 500+ data engineers, and 50PB of data. They're migrating from a fragmented data infrastructure (separate warehouses, data lakes, and ML platforms per business unit) to a unified Databricks Lakehouse.
+
+## Your Mission
+
+This is the capstone mission. Design NexaCorp's enterprise Lakehouse platform from scratch — workspace topology, Unity Catalog governance, medallion architecture across business units, cost management, security, and disaster recovery.
+
+## Objectives
+
+1. **Design workspace topology** — how many workspaces, how they map to business units
+2. **Plan Unity Catalog hierarchy** — metastores, catalogs, schemas across the enterprise
+3. **Architect cross-team medallion layers** — shared Bronze, domain Silver, purpose-built Gold
+4. **Implement cost management** — cluster policies, budgets, chargebacks
+5. **Design disaster recovery** — multi-region replication, backup strategies
+
+## Key Intelligence
+
+- A single metastore governs multiple workspaces (one metastore per cloud region)
+- Workspace-per-team vs workspace-per-environment is a critical design decision
+- Shared data mesh: domain teams own their data products, platform team provides common infrastructure
+- Cluster policies enforce compute guardrails (max workers, instance types, auto-termination)
+- Unity Catalog enables cross-workspace data sharing via Delta Sharing protocol
+
+## Stakes
+
+NexaCorp's migration budget is $15M. A poorly designed platform will cascade into technical debt that compounds for years. Getting the architecture right from the start is worth $100M+ in avoided rework.
+
+> "Architecture is the decisions you wish you could get right the first time."

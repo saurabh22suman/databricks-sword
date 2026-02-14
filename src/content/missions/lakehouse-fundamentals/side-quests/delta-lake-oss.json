@@ -1,0 +1,65 @@
+{
+  "questions": [
+    {
+      "id": "delta-oss-1",
+      "question": "What is the primary purpose of Delta Lake's transaction log (_delta_log)?",
+      "options": [
+        "Store the actual data files",
+        "Track every change made to the table for ACID guarantees",
+        "Cache query results for faster reads",
+        "Store user authentication information"
+      ],
+      "correctAnswer": 1,
+      "explanation": "The _delta_log directory contains JSON files that track every transaction (write, update, delete) made to the table. This is the foundation of Delta Lake's ACID compliance and time travel capabilities."
+    },
+    {
+      "id": "delta-oss-2",
+      "question": "What open-source file format does Delta Lake use to store the actual data?",
+      "options": [
+        "Avro",
+        "ORC",
+        "Parquet",
+        "CSV"
+      ],
+      "correctAnswer": 2,
+      "explanation": "Delta Lake uses Parquet as its underlying data format. Parquet is a columnar storage format optimized for analytics workloads with excellent compression and encoding support."
+    },
+    {
+      "id": "delta-oss-3",
+      "question": "What happens when a checkpoint file is created in the transaction log?",
+      "options": [
+        "All data files are backed up",
+        "A snapshot of the table state is saved in Parquet format for faster reads",
+        "The table is locked for maintenance",
+        "Old data is permanently deleted"
+      ],
+      "correctAnswer": 1,
+      "explanation": "Checkpoints are created periodically (default: every 10 commits) to consolidate the transaction log into a single Parquet file. This enables faster table state reconstruction without reading all JSON log files."
+    },
+    {
+      "id": "delta-oss-4",
+      "question": "Which feature allows Delta Lake to 'undo' a bad write by reading a previous table version?",
+      "options": [
+        "VACUUM",
+        "OPTIMIZE",
+        "Time Travel",
+        "Z-ORDER"
+      ],
+      "correctAnswer": 2,
+      "explanation": "Time Travel leverages the transaction log to reconstruct any previous table state. You can query historical data using VERSION AS OF or TIMESTAMP AS OF syntax, or RESTORE a table to a prior version."
+    },
+    {
+      "id": "delta-oss-5",
+      "question": "Delta Lake was originally created at which company before becoming open-source?",
+      "options": [
+        "Google",
+        "AWS",
+        "Databricks",
+        "Netflix"
+      ],
+      "correctAnswer": 2,
+      "explanation": "Delta Lake was created by Databricks and open-sourced in 2019. It was accepted into the Linux Foundation in 2021, making it a vendor-neutral open standard for lakehouse storage."
+    }
+  ],
+  "passingScore": 60
+}

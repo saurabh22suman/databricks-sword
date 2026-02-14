@@ -1,0 +1,20 @@
+{
+  "id": "arch-ft-cost-optimization",
+  "title": "Design a Cost Optimization Strategy",
+  "category": "architecture",
+  "difficulty": "S",
+  "format": "free-text",
+  "description": "Write a comprehensive cost optimization strategy for a Databricks lakehouse. Include recommendations for compute sizing, spot instances, auto-scaling, job scheduling, storage tiering, and monitoring dashboards.",
+  "hints": [
+    "Spot instances can reduce compute costs by 60-90%",
+    "Auto-termination prevents idle cluster charges",
+    "Photon accelerates SQL workloads without code changes"
+  ],
+  "xpReward": 150,
+  "optimalSolution": "# Cost Optimization Strategy\n\n1. **Compute Optimization**\n   - Use spot instances for fault-tolerant jobs (e.g., batch ETL)\n   - Enable auto-termination (10 min for interactive, 0 for jobs)\n   - Right-size clusters: start small, scale based on metrics\n   - Use Photon for SQL workloads (2-8x performance)\n   - Schedule jobs during off-peak hours\n\n2. **Auto-Scaling**\n   - Min workers = peak concurrent queries / parallelism\n   - Max workers = 2x min for burst capacity\n   - Use autoscale for variable workloads\n\n3. **Storage Tiering**\n   - Hot: Delta tables for active queries\n   - Warm: OPTIMIZE + VACUUM older partitions\n   - Cold: Move to object storage with lifecycle policies\n\n4. **Monitoring**\n   - Dashboard: DBUs by cluster, tag, and user\n   - Alerts: clusters running > 4 hours\n   - Weekly cost review meetings",
+  "explanation": "Cost optimization in Databricks combines compute efficiency (spot instances, auto-scaling), storage management (compaction, tiering), and operational practices (monitoring, scheduling). A 40-60% cost reduction is achievable with disciplined implementation.",
+  "freeText": {
+    "validationRegex": "spot|auto-.*terminat|auto.*scal|Photon|cost|optimization|VACUUM|storage",
+    "sampleAnswer": "Use spot instances, auto-termination, and auto-scaling. Enable Photon. Schedule jobs off-peak. VACUUM and OPTIMIZE old tables. Set up cost monitoring dashboards."
+  }
+}

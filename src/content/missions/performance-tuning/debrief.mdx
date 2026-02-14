@@ -1,0 +1,47 @@
+# Mission Debrief: Performance Tuning
+
+## Mission Complete
+
+TitanGames' queries now complete in under 5 minutes — a 9x improvement. Compute costs dropped 55% through intelligent optimization rather than cluster scaling.
+
+## What You Learned
+
+### Adaptive Query Execution (AQE)
+- **Dynamic partition coalescing** — merges small shuffle partitions at runtime
+- **Dynamic join strategy switching** — converts sort-merge to broadcast when one side is small
+- **Skew join optimization** — splits skewed partitions for balanced processing
+- Enabled by default: `spark.sql.adaptive.enabled = true`
+
+### Photon Engine
+- C++ vectorized execution engine optimized for Delta Lake
+- 2-8x faster for scans, filters, aggregations, and joins on Delta tables
+- Enabled by selecting Photon-accelerated runtimes
+- Best for: wide tables, complex aggregations, Delta file operations
+
+### Partitioning Strategies
+- **Liquid Clustering** (preferred) — automatic, adaptive clustering for Delta tables
+- **Z-ORDER** — multi-column ordering for data skipping
+- **Hive-style partitioning** — for high-cardinality filter columns (use sparingly)
+- Rule: partition by columns used in WHERE clauses, avoid over-partitioning
+
+### Caching
+- **Delta Cache** — automatically caches remote storage data on local SSD
+- **Spark SQL Cache** — `CACHE TABLE` for frequently accessed tables
+- **Result Cache** — Databricks caches query results across notebooks
+
+### Join Optimization
+- **Broadcast join** — `broadcast(small_df)` eliminates shuffle for small tables
+- **Broadcast threshold** — `spark.sql.autoBroadcastJoinThreshold` (default 10MB)
+- **Skew hints** — `/*+ SKEW('table', 'column') */` for known skewed columns
+
+## Key Takeaways
+
+1. Always check the Spark UI before optimizing — find the actual bottleneck
+2. AQE handles most runtime optimization automatically
+3. Z-ORDER / Liquid Clustering has the highest ROI for Delta table performance
+4. Broadcast joins are the fastest join type — use when one table fits in memory
+5. Profile before tuning: EXPLAIN EXTENDED shows the query plan
+
+## Next Steps
+
+Your performance skills combine with workflows and quality to unlock **Production Pipelines** — building battle-tested, production-grade data systems.

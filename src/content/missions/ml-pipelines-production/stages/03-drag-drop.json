@@ -1,0 +1,59 @@
+{
+  "description": "Arrange the production ML pipeline steps in the correct order.",
+  "instructions": "Think about the MLOps lifecycle: What must exist before training? What must be registered before serving? Pattern: features \u2192 training \u2192 registration \u2192 deployment \u2192 A/B testing \u2192 monitoring.",
+  "blocks": [
+    {
+      "id": "features",
+      "code": "Create Feature Store table with online serving enabled",
+      "label": "Set Up Feature Store"
+    },
+    {
+      "id": "training",
+      "code": "Train model using Feature Store features, log to MLflow",
+      "label": "Train with Feature Lookup"
+    },
+    {
+      "id": "register",
+      "code": "Register best model in Unity Catalog Model Registry",
+      "label": "Register Model"
+    },
+    {
+      "id": "endpoint",
+      "code": "Create serverless serving endpoint with Champion model",
+      "label": "Deploy Serving Endpoint"
+    },
+    {
+      "id": "challenger",
+      "code": "Add Challenger model with 10% traffic routing",
+      "label": "Set Up A/B Test"
+    },
+    {
+      "id": "monitor",
+      "code": "Configure drift monitoring, threshold alerts, auto-retrain trigger",
+      "label": "Enable Monitoring"
+    }
+  ],
+  "correctOrder": [
+    "features",
+    "training",
+    "register",
+    "endpoint",
+    "challenger",
+    "monitor"
+  ],
+  "hints": [
+    "Features must be defined before training can use them",
+    "Training uses Feature Store lookups for consistent features",
+    "Models must be registered before serving",
+    "The Champion endpoint must exist before adding a Challenger",
+    "A/B testing routes a percentage of traffic to the new model",
+    "Monitoring is the final safety net for production models"
+  ],
+  "learnings": [
+    "Feature Store centralizes feature definitions",
+    "Model training uses features from the store",
+    "Model Registry versions and stages models",
+    "Model Serving deploys for real-time inference",
+    "Monitoring detects drift and triggers retraining"
+  ]
+}

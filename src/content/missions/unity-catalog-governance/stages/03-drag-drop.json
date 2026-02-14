@@ -1,0 +1,59 @@
+{
+  "description": "Arrange the Unity Catalog governance setup steps in the correct order.",
+  "instructions": "Think about the Unity Catalog hierarchy: What's the top-level container (domain)? What organizes objects within a domain? Pattern: catalog \u2192 schema \u2192 table \u2192 schema access \u2192 data access \u2192 audit.",
+  "blocks": [
+    {
+      "id": "create-catalog",
+      "code": "CREATE CATALOG IF NOT EXISTS federal_data;",
+      "label": "Create Catalog"
+    },
+    {
+      "id": "create-schema",
+      "code": "CREATE SCHEMA IF NOT EXISTS federal_data.citizen_records;",
+      "label": "Create Schema"
+    },
+    {
+      "id": "create-table",
+      "code": "CREATE TABLE federal_data.citizen_records.demographics (...);",
+      "label": "Create Table"
+    },
+    {
+      "id": "grant-schema",
+      "code": "GRANT USE SCHEMA ON SCHEMA federal_data.citizen_records TO analysts;",
+      "label": "Grant Schema Access"
+    },
+    {
+      "id": "grant-select",
+      "code": "GRANT SELECT ON TABLE federal_data.citizen_records.demographics TO analysts;",
+      "label": "Grant Read Access"
+    },
+    {
+      "id": "show-grants",
+      "code": "SHOW GRANTS ON TABLE federal_data.citizen_records.demographics;",
+      "label": "Audit Permissions"
+    }
+  ],
+  "correctOrder": [
+    "create-catalog",
+    "create-schema",
+    "create-table",
+    "grant-schema",
+    "grant-select",
+    "show-grants"
+  ],
+  "hints": [
+    "Create the catalog (domain container) first",
+    "Create the schema (project/stage) within the catalog",
+    "Create the table within the schema",
+    "Users need USE SCHEMA to access objects in a schema",
+    "GRANT SELECT gives read access to a specific table",
+    "SHOW GRANTS audits who has what permissions"
+  ],
+  "learnings": [
+    "CREATE CATALOG defines the top-level namespace",
+    "CREATE SCHEMA organizes tables within catalogs",
+    "GRANT assigns permissions at any level of the hierarchy",
+    "Permissions cascade down unless explicitly overridden",
+    "SHOW GRANTS verifies the current access control setup"
+  ]
+}

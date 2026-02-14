@@ -1,0 +1,74 @@
+{
+  "id": "ml-foundations",
+  "title": "ML Foundations",
+  "subtitle": "Master MLflow experiment tracking and model training basics",
+  "description": "Learn the fundamentals of machine learning on Databricks. Understand MLflow for experiment tracking, train your first model, and establish best practices for ML workflows.",
+  "industry": "finance",
+  "rank": "B",
+  "xpRequired": 0,
+  "xpReward": 300,
+  "estimatedMinutes": 60,
+  "primaryFeatures": [
+    "MLflow",
+    "Model Training",
+    "Experiment Tracking",
+    "DataFrame Transformations"
+  ],
+  "prerequisites": ["pyspark-essentials", "advanced-transformations"],
+  "databricksEnabled": false,
+  "stages": [
+    {
+      "id": "briefing",
+      "title": "Mission Briefing",
+      "type": "briefing",
+      "configFile": "stages/01-briefing.json",
+      "xpReward": 0,
+      "estimatedMinutes": 5
+    },
+    {
+      "id": "diagram",
+      "title": "ML Pipeline Architecture",
+      "type": "diagram",
+      "configFile": "stages/02-diagram.json",
+      "xpReward": 30,
+      "estimatedMinutes": 10
+    },
+    {
+      "id": "drag-drop-pipeline",
+      "title": "Build ML Pipeline",
+      "type": "drag-drop",
+      "configFile": "stages/03-drag-drop.json",
+      "xpReward": 50,
+      "estimatedMinutes": 12
+    },
+    {
+      "id": "fill-blank-mlflow",
+      "title": "Configure MLflow Tracking",
+      "type": "fill-blank",
+      "configFile": "stages/04-fill-blank.json",
+      "xpReward": 50,
+      "estimatedMinutes": 15
+    },
+    {
+      "id": "quiz",
+      "title": "Knowledge Check",
+      "type": "quiz",
+      "configFile": "stages/05-quiz.json",
+      "xpReward": 40,
+      "estimatedMinutes": 10
+    },
+    {
+      "id": "debrief",
+      "title": "Mission Debrief",
+      "type": "debrief",
+      "configFile": "stages/06-debrief.json",
+      "xpReward": 30,
+      "estimatedMinutes": 8
+    }
+  ],
+  "sideQuests": [],
+  "achievements": [
+    "first-mission-complete",
+    "mlflow-fundamentals"
+  ]
+}

@@ -1,0 +1,34 @@
+# Mission Complete: Advanced Transformations
+
+## What You Accomplished
+
+You built **advanced transformation pipelines** using window functions, UDFs, and complex joins. MegaRetail now has:
+
+- **Customer rankings** by spend within each category
+- **Rolling 7-day averages** for demand forecasting
+- **Custom loyalty tier UDFs** applied across 50M customer records
+- **Pivot reports** for cross-category analysis
+
+## What You Learned
+
+### Window Functions
+- **ROW_NUMBER():** Sequential numbering within partitions
+- **RANK() / DENSE_RANK():** Ranking with gap handling
+- **LAG() / LEAD():** Access previous/next row values
+- **SUM() OVER:** Running totals and moving aggregates
+
+### UDFs (User-Defined Functions)
+- Python UDFs for custom business logic
+- Pandas UDFs for vectorized performance (100x faster)
+- SQL UDFs for reusable query components
+
+### Best Practices
+- **Prefer built-in functions** over UDFs (10-100x faster)
+- **Use Pandas UDFs** when custom logic is unavoidable
+- **Partition window functions** properly to avoid full shuffles
+- **Broadcast small tables** in joins (<200MB)
+
+---
+
+**Mission Status:** ✅ **COMPLETE**  
+**XP Earned:** +350

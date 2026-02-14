@@ -1,0 +1,65 @@
+{
+  "questions": [
+    {
+      "id": "dbt-1",
+      "question": "What is dbt (data build tool) primarily used for?",
+      "options": [
+        "Data ingestion from external sources",
+        "SQL-based data transformation with testing, documentation, and lineage",
+        "Real-time streaming",
+        "Machine learning model deployment"
+      ],
+      "correctAnswer": 1,
+      "explanation": "dbt transforms raw data into analytics-ready datasets using SQL SELECT statements. It adds software engineering practices to analytics: version control, testing, documentation, and dependency management—all in a SQL-first workflow."
+    },
+    {
+      "id": "dbt-2",
+      "question": "What is a dbt 'model'?",
+      "options": [
+        "A machine learning algorithm",
+        "A SQL SELECT statement that defines a transformation; dbt materializes it as a table or view",
+        "A data visualization",
+        "A schema definition"
+      ],
+      "correctAnswer": 1,
+      "explanation": "In dbt, a model is a .sql file containing a SELECT statement. When you run dbt, it compiles the SQL, resolves dependencies (using ref() functions), and materializes the result as a table, view, or incremental table in your data warehouse."
+    },
+    {
+      "id": "dbt-3",
+      "question": "How does dbt handle dependencies between transformations?",
+      "options": [
+        "Manual ordering in config files",
+        "The ref() function creates explicit dependencies; dbt builds a DAG automatically",
+        "Alphabetical ordering of files",
+        "Dependencies are not supported"
+      ],
+      "correctAnswer": 1,
+      "explanation": "When you use {{ ref('upstream_model') }} in your SQL, dbt knows that your model depends on upstream_model. It builds a DAG from all ref() calls and runs models in the correct order automatically."
+    },
+    {
+      "id": "dbt-4",
+      "question": "What are dbt 'tests' and why are they important?",
+      "options": [
+        "Performance benchmarks",
+        "Assertions about your data that run automatically to catch quality issues",
+        "User acceptance tests",
+        "Load tests"
+      ],
+      "correctAnswer": 1,
+      "explanation": "dbt tests validate data quality: unique, not_null, accepted_values, and relationships tests come built-in. Custom tests can check business rules. Running dbt test after dbt run catches data issues before they propagate downstream."
+    },
+    {
+      "id": "dbt-5",
+      "question": "How does dbt integrate with Databricks?",
+      "options": [
+        "dbt cannot run on Databricks",
+        "dbt-databricks adapter allows dbt to run transformations on Databricks SQL or Spark",
+        "Databricks has replaced dbt entirely",
+        "Only dbt Cloud works with Databricks"
+      ],
+      "correctAnswer": 1,
+      "explanation": "The dbt-databricks adapter connects dbt to Databricks, running transformations on Unity Catalog tables via Databricks SQL or Spark. You get dbt's transformation framework with Databricks' compute—popular for medallion architecture implementations."
+    }
+  ],
+  "passingScore": 60
+}

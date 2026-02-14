@@ -1,0 +1,59 @@
+{
+  "description": "Arrange the medallion architecture pipeline steps for StreamVerse's event data processing.",
+  "instructions": "Think about data quality progression: What layer captures raw data? What layer cleans and deduplicates? What layer enriches with business context? Pattern: Bronze (raw) \u2192 Silver (clean + enrich) \u2192 Gold (aggregate) \u2192 CDC (dimensions).",
+  "blocks": [
+    {
+      "id": "ingest-auto-loader",
+      "code": "@dlt.table\ndef bronze_events():\n    return spark.readStream.format('cloudFiles').load('/raw/events')",
+      "label": "Bronze: Auto Loader Ingestion"
+    },
+    {
+      "id": "silver-dedup",
+      "code": "@dlt.table\ndef silver_events():\n    return dlt.read_stream('bronze_events').dropDuplicates(['event_id'])",
+      "label": "Silver: Deduplicate Events"
+    },
+    {
+      "id": "silver-enrich",
+      "code": "return deduped.join(dlt.read('dim_users'), 'user_id')",
+      "label": "Silver: Enrich with User Data"
+    },
+    {
+      "id": "gold-daily",
+      "code": "@dlt.table\ndef gold_daily_metrics():\n    return dlt.read('silver_events').groupBy('date').agg(count('*'))",
+      "label": "Gold: Daily Aggregation"
+    },
+    {
+      "id": "gold-features",
+      "code": "@dlt.table\ndef gold_user_features():\n    return dlt.read('silver_events').groupBy('user_id').agg(features...)",
+      "label": "Gold: ML Feature Table"
+    },
+    {
+      "id": "cdc-apply",
+      "code": "dlt.apply_changes(target='silver_users', source='cdc_raw', keys=['user_id'])",
+      "label": "CDC: Apply User Updates"
+    }
+  ],
+  "correctOrder": [
+    "ingest-auto-loader",
+    "silver-dedup",
+    "silver-enrich",
+    "gold-daily",
+    "gold-features",
+    "cdc-apply"
+  ],
+  "hints": [
+    "Bronze always comes first \u2014 raw append-only ingestion",
+    "Deduplicate before enrichment to avoid join amplification",
+    "Enrich silver with dimension tables from the clean layer",
+    "Gold aggregations serve BI dashboards",
+    "Feature tables serve ML models",
+    "CDC handles slowly-changing dimensions separately"
+  ],
+  "learnings": [
+    "Bronze layer ingests raw data with minimal transformation",
+    "Silver layer cleanses, validates, and enriches the data",
+    "Gold layer creates business-level aggregations and KPIs",
+    "Each layer builds on the previous with increasing quality",
+    "This pattern enables data replay and debugging"
+  ]
+}

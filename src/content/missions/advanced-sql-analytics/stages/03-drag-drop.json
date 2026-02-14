@@ -1,0 +1,59 @@
+{
+  "description": "Arrange the steps for building an optimized analytics query.",
+  "instructions": "Think about query optimization strategy: What helps the optimizer make good decisions? How do CTEs build on each other? When do you apply window functions? Pattern: gather stats \u2192 define base CTE \u2192 chain CTEs \u2192 add windows \u2192 materialize \u2192 optimize storage.",
+  "blocks": [
+    {
+      "id": "analyze",
+      "code": "ANALYZE TABLE gold.viewing_events COMPUTE STATISTICS FOR ALL COLUMNS",
+      "label": "Collect Table Statistics"
+    },
+    {
+      "id": "cte-base",
+      "code": "WITH daily_views AS (\n  SELECT user_id, content_id, DATE(view_ts) AS view_date, watch_minutes\n  FROM gold.viewing_events\n)",
+      "label": "Define Base CTE"
+    },
+    {
+      "id": "cte-agg",
+      "code": ", user_summary AS (\n  SELECT user_id, SUM(watch_minutes) AS total_minutes,\n         COUNT(DISTINCT content_id) AS unique_titles\n  FROM daily_views GROUP BY user_id\n)",
+      "label": "Chain Aggregation CTE"
+    },
+    {
+      "id": "window",
+      "code": "SELECT *, RANK() OVER (ORDER BY total_minutes DESC) AS engagement_rank\nFROM user_summary",
+      "label": "Apply Window Function"
+    },
+    {
+      "id": "mat-view",
+      "code": "CREATE MATERIALIZED VIEW gold.top_viewers AS\n  <full query above>",
+      "label": "Create Materialized View"
+    },
+    {
+      "id": "zorder",
+      "code": "OPTIMIZE gold.viewing_events ZORDER BY (user_id, view_date)",
+      "label": "Optimize Storage Layout"
+    }
+  ],
+  "correctOrder": [
+    "analyze",
+    "cte-base",
+    "cte-agg",
+    "window",
+    "mat-view",
+    "zorder"
+  ],
+  "hints": [
+    "Statistics help the optimizer choose the best execution plan",
+    "Base CTEs extract and clean the raw data",
+    "Aggregation CTEs build on base CTEs with GROUP BY",
+    "Window functions add rankings without reducing rows",
+    "Materialized views cache the expensive query result",
+    "Z-ORDER co-locates related data for faster access"
+  ],
+  "learnings": [
+    "CTEs break complex queries into manageable parts",
+    "Recursive CTEs handle hierarchical data",
+    "Window functions enable row-relative calculations",
+    "Materialized views cache expensive computations",
+    "Query optimization requires understanding execution plans"
+  ]
+}

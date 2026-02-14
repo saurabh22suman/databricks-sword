@@ -1,0 +1,46 @@
+{
+  "id": "dl-dd-optimize-vacuum",
+  "title": "Order Delta Lake Maintenance Operations",
+  "category": "delta-lake",
+  "difficulty": "B",
+  "format": "drag-drop",
+  "description": "Arrange Delta Lake maintenance operations in the recommended order when performing table maintenance.",
+  "hints": [
+    "Compaction (OPTIMIZE) should run before cleanup",
+    "Z-ORDER is part of optimization",
+    "VACUUM removes files no longer referenced"
+  ],
+  "xpReward": 75,
+  "optimalSolution": "OPTIMIZE \u2192 OPTIMIZE with Z-ORDER \u2192 ANALYZE \u2192 VACUUM",
+  "explanation": "Delta Lake maintenance follows a logical order. OPTIMIZE compacts small files. Z-ORDER clusters data for query performance. ANALYZE updates statistics. VACUUM removes old files (only after retention period). Always OPTIMIZE before VACUUM to avoid removing files still being compacted.",
+  "dragDrop": {
+    "blocks": [
+      {
+        "id": "optimize",
+        "code": "OPTIMIZE delta_table",
+        "label": "Compact Small Files"
+      },
+      {
+        "id": "zorder",
+        "code": "OPTIMIZE delta_table ZORDER BY (region, date)",
+        "label": "Z-Order Clustering"
+      },
+      {
+        "id": "analyze",
+        "code": "ANALYZE TABLE delta_table COMPUTE STATISTICS",
+        "label": "Update Statistics"
+      },
+      {
+        "id": "vacuum",
+        "code": "VACUUM delta_table RETAIN 168 HOURS",
+        "label": "Remove Old Files"
+      }
+    ],
+    "correctOrder": [
+      "optimize",
+      "zorder",
+      "analyze",
+      "vacuum"
+    ]
+  }
+}

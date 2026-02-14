@@ -1,0 +1,73 @@
+---
+title: "ML Pipelines in Production"
+subtitle: "Production ML systems with serving, monitoring, and governance"
+---
+
+# MISSION BRIEFING: Operation Neural Fortress
+
+**OPERATIVE CLASSIFICATION:** S-Rank — ML Track (Capstone)
+
+---
+
+## SITUATION REPORT
+
+**Client:** QuantumRisk Analytics — returning from your previous MLflow mission. They successfully implemented experiment tracking, and now the CEO wants real-time fraud detection.
+
+**Crisis:** Their batch-scoring model catches fraud 6 hours after it happens. By then, fraudulent transactions have already cleared. The board demands real-time inference — sub-100ms predictions on every transaction, with automated model updates when fraud patterns shift.
+
+**Your Mission:** Build the complete production ML pipeline: Feature Store for real-time features, model serving endpoint for inference, Champion/Challenger A/B testing, and drift monitoring to detect when the model degrades.
+
+---
+
+## INTELLIGENCE BRIEFING
+
+### The Production ML Stack
+
+Moving from notebook experimentation to production requires four critical systems:
+
+**Feature Store** — Centralized feature management:
+- Features computed once, shared across models and teams
+- Point-in-time correctness prevents data leakage
+- Online tables for real-time serving (sub-ms lookups)
+- Unity Catalog integration for governance
+
+**Model Serving** — Real-time inference endpoints:
+- Serverless endpoints with auto-scaling (0 to 1000+ QPS)
+- GPU support for deep learning models
+- Custom preprocessing via MLflow PyFunc
+- Traffic routing for A/B tests
+
+**Champion/Challenger** — Safe model updates:
+- Champion: Current production model (90% traffic)
+- Challenger: New model being tested (10% traffic)
+- Automated traffic shifting based on metric comparison
+- Rollback if Challenger underperforms
+
+**Drift Monitoring** — Model health surveillance:
+- Data drift: Input feature distributions changing
+- Concept drift: Relationship between features and target changing
+- Performance monitoring: Real-time accuracy tracking
+- Alerting: Slack/PagerDuty when thresholds breach
+
+### Why This Matters
+
+A model without monitoring is a ticking time bomb:
+- Fraud patterns evolve — a model trained in January is stale by March
+- Feature pipelines can break silently — garbage in, garbage out
+- Without A/B testing, bad models go to 100% traffic instantly
+- Regulatory requirements demand explainability and audit trails
+
+---
+
+## MISSION OBJECTIVES
+
+1. **Map the production ML architecture** — Feature Store → Training → Serving → Monitoring
+2. **Build the end-to-end pipeline** — From feature engineering to real-time serving
+3. **Implement serving and monitoring code** — Endpoints, traffic routing, drift detection
+4. **Validate mastery** — Prove you can design production ML systems
+
+---
+
+*"A model in a notebook is a prototype. A model behind a serving endpoint with monitoring — that's a weapon. Build me a weapon."*
+
+**— Director Sato, QuantumRisk Board**

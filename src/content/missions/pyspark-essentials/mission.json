@@ -1,0 +1,76 @@
+{
+  "id": "pyspark-essentials",
+  "title": "PySpark Essentials",
+  "subtitle": "Master DataFrame transformations and the Spark execution model",
+  "description": "Learn PySpark fundamentals: DataFrame API, transformations vs actions, lazy evaluation, and distributed data processing.",
+  "industry": "technology",
+  "rank": "B",
+  "xpRequired": 200,
+  "xpReward": 375,
+  "estimatedMinutes": 50,
+  "databricksEnabled": false,
+  "prerequisites": [
+    "lakehouse-fundamentals"
+  ],
+  "primaryFeatures": [
+    "DataFrame API",
+    "Transformations vs actions",
+    "Lazy evaluation",
+    "Spark execution model",
+    "Read/write operations"
+  ],
+  "achievements": [
+    "pyspark-practitioner"
+  ],
+  "stages": [
+    {
+      "id": "01-briefing",
+      "type": "briefing",
+      "title": "Mission Briefing",
+      "file": "stages/01-briefing.json"
+    },
+    {
+      "id": "02-diagram",
+      "type": "diagram",
+      "title": "Spark Execution Model",
+      "file": "stages/02-diagram.json"
+    },
+    {
+      "id": "03-drag-drop",
+      "type": "drag-drop",
+      "title": "DataFrame Transformation Pipeline",
+      "file": "stages/03-drag-drop.json"
+    },
+    {
+      "id": "04-fill-blank",
+      "type": "fill-blank",
+      "title": "PySpark DataFrame Operations",
+      "file": "stages/04-fill-blank.json"
+    },
+    {
+      "id": "05-quiz",
+      "type": "quiz",
+      "title": "Knowledge Check",
+      "file": "stages/05-quiz.json"
+    },
+    {
+      "id": "06-debrief",
+      "type": "debrief",
+      "title": "Mission Debrief",
+      "file": "stages/06-debrief.json"
+    }
+  ],
+  "sideQuests": [
+    {
+      "id": "spark-internals",
+      "title": "Inside Apache Spark",
+      "ossProject": "Apache Spark",
+      "trigger": "after",
+      "parentStageId": "02-diagram",
+      "type": "quiz",
+      "configFile": "side-quests/spark-internals.json",
+      "xpBonus": 50,
+      "optional": true
+    }
+  ]
+}

@@ -1,0 +1,42 @@
+{
+  "id": "st-dd-structured-streaming",
+  "title": "Build a Structured Streaming Pipeline",
+  "category": "streaming",
+  "difficulty": "A",
+  "format": "drag-drop",
+  "description": "Arrange the PySpark code blocks to create a complete structured streaming pipeline that reads from Kafka, parses JSON events, aggregates by window, and writes to a Delta table with a checkpoint.",
+  "hints": [
+    "readStream sets up the source; writeStream sets up the sink",
+    "The Kafka value column is binary \u2014 cast it to string first",
+    "checkpointLocation is required for exactly-once guarantees"
+  ],
+  "xpReward": 125,
+  "optimalSolution": "raw_stream = spark.readStream.format('kafka').option('subscribe', 'events').load()\n\nparsed = raw_stream.select(from_json(col('value').cast('string'), schema).alias('data')).select('data.*')\n\naggregated = parsed.groupBy(window(col('event_time'), '5 minutes')).count()\n\nquery = aggregated.writeStream.format('delta').outputMode('complete').option('checkpointLocation', '/checkpoints/events').start('/delta/event_counts')",
+  "explanation": "Structured Streaming treats a live data stream as an unbounded table. The pipeline has three stages: Source (readStream from Kafka/files/etc.), Transformation (parsing, aggregation using the same DataFrame API as batch), and Sink (writeStream to Delta/console/etc.). The checkpoint location stores progress metadata for fault tolerance and exactly-once processing. Output modes: 'append' for new rows only, 'complete' for full result table, 'update' for changed rows.",
+  "dragDrop": {
+    "blocks": [
+      {
+        "id": "b1",
+        "content": "raw_stream = spark.readStream.format('kafka').option('subscribe', 'events').load()"
+      },
+      {
+        "id": "b2",
+        "content": "parsed = raw_stream.select(from_json(col('value').cast('string'), schema).alias('data')).select('data.*')"
+      },
+      {
+        "id": "b3",
+        "content": "aggregated = parsed.groupBy(window(col('event_time'), '5 minutes')).count()"
+      },
+      {
+        "id": "b4",
+        "content": "query = aggregated.writeStream.format('delta').outputMode('complete').option('checkpointLocation', '/checkpoints/events').start('/delta/event_counts')"
+      }
+    ],
+    "correctOrder": [
+      "b1",
+      "b2",
+      "b3",
+      "b4"
+    ]
+  }
+}

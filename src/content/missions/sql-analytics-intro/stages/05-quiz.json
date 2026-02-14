@@ -1,0 +1,96 @@
+{
+  "questions": [
+    {
+      "id": "q1",
+      "question": "What is a SQL Warehouse in Databricks?",
+      "options": [
+        "A serverless SQL compute engine for querying Delta Lake",
+        "A storage system for SQL backups",
+        "A traditional OLAP database",
+        "A cluster management tool"
+      ],
+      "correctAnswer": "A serverless SQL compute engine for querying Delta Lake",
+      "explanation": "SQL Warehouses (formerly SQL Endpoints) are serverless compute clusters optimized for SQL queries on Delta Lake tables. They auto-scale, support BI tools, and use the Photon engine for faster queries."
+    },
+    {
+      "id": "q2",
+      "question": "What is the main advantage of serverless SQL Warehouses over dedicated clusters?",
+      "options": [
+        "No cluster management, instant-on, automatic shutdown",
+        "Faster query performance",
+        "More storage capacity",
+        "Better data security"
+      ],
+      "correctAnswer": "No cluster management, instant-on, automatic shutdown",
+      "explanation": "Serverless SQL Warehouses eliminate cluster management overhead. They start instantly, auto-scale based on workload, and shut down automatically when idle, saving costs and reducing operational complexity."
+    },
+    {
+      "id": "q3",
+      "question": "What is the difference between WHERE and HAVING clauses in SQL?",
+      "options": [
+        "WHERE filters rows before aggregation, HAVING filters after aggregation",
+        "WHERE is faster than HAVING",
+        "HAVING only works with GROUP BY",
+        "WHERE applies to SELECT, HAVING applies to FROM"
+      ],
+      "correctAnswer": "WHERE filters rows before aggregation, HAVING filters after aggregation",
+      "explanation": "WHERE filters individual rows before grouping (e.g., WHERE amount > 100). HAVING filters aggregated results after grouping (e.g., HAVING SUM(amount) > 1000). Both can be used in the same query."
+    },
+    {
+      "id": "q4",
+      "question": "What type of JOIN returns all rows from the left table, even if there's no match in the right table?",
+      "options": [
+        "LEFT JOIN",
+        "INNER JOIN",
+        "RIGHT JOIN",
+        "FULL OUTER JOIN"
+      ],
+      "correctAnswer": "LEFT JOIN",
+      "explanation": "LEFT JOIN (or LEFT OUTER JOIN) returns all rows from the left table and matching rows from the right table. If no match exists, NULL values appear for right table columns."
+    },
+    {
+      "id": "q5",
+      "question": "What is a VIEW in SQL?",
+      "options": [
+        "A saved query that can be queried like a table (no data duplication)",
+        "A materialized copy of query results",
+        "A temporary table",
+        "A backup of table data"
+      ],
+      "correctAnswer": "A saved query that can be queried like a table (no data duplication)",
+      "explanation": "A VIEW is a virtual table defined by a SELECT query. It doesn't store data (queries run on-demand). Views encapsulate complex logic, enable reusability, and support security by exposing only specific columns."
+    },
+    {
+      "id": "q6",
+      "question": "What does the Photon engine do in SQL Warehouses?",
+      "options": [
+        "Accelerates query execution with vectorized processing (3-12x faster)",
+        "Caches query results",
+        "Compresses data",
+        "Manages cluster autoscaling"
+      ],
+      "correctAnswer": "Accelerates query execution with vectorized processing (3-12x faster)",
+      "explanation": "Photon is Databricks' next-gen query engine written in C++. It uses SIMD vectorization and columnar processing to execute queries 3-12x faster than standard Spark SQL, especially for large scans and aggregations."
+    },
+    {
+      "id": "q7",
+      "question": "When should you use PySpark instead of SQL for data transformations?",
+      "options": [
+        "Complex ETL pipelines with UDFs, ML feature engineering, and streaming",
+        "Simple aggregations and reports",
+        "Ad-hoc analytics queries",
+        "BI dashboard queries"
+      ],
+      "correctAnswer": "Complex ETL pipelines with UDFs, ML feature engineering, and streaming",
+      "explanation": "PySpark excels at complex programmatic transformations: custom UDFs, ML pipelines, streaming, and testable ETL code. SQL is better for ad-hoc analytics, aggregations, and BI queries. Use SQL for analytics, PySpark for engineering."
+    }
+  ],
+  "passingScore": 70,
+  "learnings": [
+    "SQL warehouses provide serverless compute for queries",
+    "Photon engine accelerates SQL workloads up to 10x",
+    "CTEs improve query readability and maintainability",
+    "Window functions calculate across related rows",
+    "Query profiling identifies optimization opportunities"
+  ]
+}

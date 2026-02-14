@@ -1,0 +1,43 @@
+# Mission Debrief: Structured Streaming
+
+## Mission Complete
+
+You've built NovaPay's real-time fraud detection pipeline. Transactions are now analyzed within seconds of arrival, not hours.
+
+## What You Learned
+
+### Core Streaming Concepts
+- **Unbounded tables** — Structured Streaming treats streams as tables that grow continuously
+- **readStream / writeStream** — The streaming API mirrors batch operations
+- **Trigger modes** — `processingTime`, `availableNow`, `continuous` for different latency needs
+
+### Late Data Handling
+- **Watermarks** — `withWatermark("event_time", "10 minutes")` defines the threshold for late data
+- **Window aggregations** — `window("event_time", "5 minutes")` groups streaming data into time windows
+- **State management** — Spark maintains state for aggregations across micro-batches
+
+### Stream Enrichment
+- **Stream-static joins** — Join streaming data against slowly-changing reference tables
+- **Stream-stream joins** — Join two streams together with watermark-based conditions
+
+### Production Patterns
+- **Checkpointing** — Write-ahead logs ensure exactly-once semantics
+- **Output modes** — `append`, `complete`, `update` control what's written to the sink
+- **Delta Lake as sink** — Streaming writes to Delta tables with ACID guarantees
+
+## Databricks-Specific Features
+- **Auto Loader** — `cloudFiles` format for streaming file ingestion
+- **Delta Live Tables** — Declarative streaming pipelines with automatic dependency resolution
+- **Trigger.AvailableNow** — Process all available data in a single micro-batch (great for testing)
+
+## Key Takeaways
+
+1. Start with `Trigger.ProcessingTime("10 seconds")` for most use cases
+2. Always set watermarks when using window aggregations
+3. Checkpoint location must be unique per streaming query
+4. Use Delta Lake as your streaming sink for reliability
+5. Monitor streaming queries with `query.lastProgress` and Spark UI
+
+## Next Steps
+
+Your streaming skills unlock **Workflows & Orchestration** — where you'll learn to schedule and monitor these pipelines in production.

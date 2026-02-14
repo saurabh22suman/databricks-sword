@@ -1,0 +1,51 @@
+{
+  "id": "sql-fb-lateral-view",
+  "title": "Complete the LATERAL VIEW Query",
+  "category": "sql",
+  "difficulty": "A",
+  "format": "fill-blank",
+  "description": "Fill in the blanks to use LATERAL VIEW and EXPLODE to flatten an array column and compute aggregates.",
+  "hints": [
+    "LATERAL VIEW creates virtual rows for each array element",
+    "EXPLODE turns array into rows",
+    "The alias after EXPLODE names the temporary table and column"
+  ],
+  "xpReward": 125,
+  "optimalSolution": "SELECT customer_id, tag, COUNT(*) as tag_count\nFROM orders\nLATERAL VIEW EXPLODE(tags) t AS tag\nGROUP BY customer_id, tag\nORDER BY tag_count DESC",
+  "explanation": "LATERAL VIEW EXPLODE is Spark SQL's way to flatten arrays. Each array element becomes a row, enabling GROUP BY aggregations. The alias 't AS tag' names the virtual table and column for readability.",
+  "fillBlank": {
+    "codeTemplate": "SELECT customer_id, tag, COUNT(*) as tag_count\nFROM orders\n__BLANK_0__ VIEW __BLANK_1__(tags) t __BLANK_2__ tag\nGROUP BY customer_id, tag",
+    "blanks": [
+      {
+        "id": 0,
+        "correctAnswer": "LATERAL",
+        "options": [
+          "LATERAL",
+          "CROSS",
+          "OUTER",
+          "INNER"
+        ]
+      },
+      {
+        "id": 1,
+        "correctAnswer": "EXPLODE",
+        "options": [
+          "EXPLODE",
+          "UNNEST",
+          "FLATTEN",
+          "EXPAND"
+        ]
+      },
+      {
+        "id": 2,
+        "correctAnswer": "AS",
+        "options": [
+          "AS",
+          "INTO",
+          "TO",
+          "WITH"
+        ]
+      }
+    ]
+  }
+}

@@ -1,0 +1,51 @@
+{
+  "id": "uc-fb-lineage-tracking",
+  "title": "Complete the Lineage Query",
+  "category": "unity-catalog",
+  "difficulty": "B",
+  "format": "fill-blank",
+  "description": "Fill in the blanks to query the Unity Catalog lineage system to find upstream and downstream dependencies of a table.",
+  "hints": [
+    "system.access.table_lineage contains lineage information",
+    "source_table_full_name is the upstream table",
+    "target_table_full_name is the downstream table"
+  ],
+  "xpReward": 75,
+  "optimalSolution": "-- Find upstream dependencies\nSELECT source_table_full_name\nFROM system.access.table_lineage\nWHERE target_table_full_name = 'main.sales.orders';\n\n-- Find downstream dependencies\nSELECT target_table_full_name\nFROM system.access.table_lineage\nWHERE source_table_full_name = 'main.sales.orders';",
+  "explanation": "Unity Catalog automatically tracks data lineage across tables, views, and notebooks. The table_lineage view shows how data flows between tables, enabling impact analysis and compliance auditing.",
+  "fillBlank": {
+    "codeTemplate": "-- Find upstream dependencies\nSELECT source_table_full_name\nFROM __BLANK_0__.access.__BLANK_1__\nWHERE __BLANK_2__ = 'main.sales.orders';",
+    "blanks": [
+      {
+        "id": 0,
+        "correctAnswer": "system",
+        "options": [
+          "system",
+          "catalog",
+          "information_schema",
+          "metadata"
+        ]
+      },
+      {
+        "id": 1,
+        "correctAnswer": "table_lineage",
+        "options": [
+          "table_lineage",
+          "lineage",
+          "dependencies",
+          "data_flow"
+        ]
+      },
+      {
+        "id": 2,
+        "correctAnswer": "target_table_full_name",
+        "options": [
+          "target_table_full_name",
+          "downstream_table",
+          "destination",
+          "to_table"
+        ]
+      }
+    ]
+  }
+}

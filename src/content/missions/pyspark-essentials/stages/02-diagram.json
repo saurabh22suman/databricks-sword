@@ -1,0 +1,101 @@
+{
+  "instructions": "Build the Spark Architecture! Place each component in its correct layer. Spark uses a driver-executor model where the driver coordinates work and executors process data in parallel.",
+  "components": [
+    {
+      "id": "spark-session",
+      "label": "SparkSession (Driver)",
+      "icon": "settings"
+    },
+    {
+      "id": "dag-builder",
+      "label": "DAG Builder",
+      "icon": "git-branch"
+    },
+    {
+      "id": "task-scheduler",
+      "label": "Task Scheduler",
+      "icon": "calendar"
+    },
+    {
+      "id": "executor-1",
+      "label": "Executor 1 (Worker)",
+      "icon": "cpu"
+    },
+    {
+      "id": "executor-2",
+      "label": "Executor 2 (Worker)",
+      "icon": "cpu"
+    }
+  ],
+  "dropZones": [
+    {
+      "id": "zone-1",
+      "label": "Driver Node",
+      "position": {
+        "x": 100,
+        "y": 80
+      }
+    },
+    {
+      "id": "zone-2",
+      "label": "Planning (Driver)",
+      "position": {
+        "x": 300,
+        "y": 80
+      }
+    },
+    {
+      "id": "zone-3",
+      "label": "Scheduling (Driver)",
+      "position": {
+        "x": 500,
+        "y": 80
+      }
+    },
+    {
+      "id": "zone-4",
+      "label": "Worker Node 1",
+      "position": {
+        "x": 200,
+        "y": 250
+      }
+    },
+    {
+      "id": "zone-5",
+      "label": "Worker Node 2",
+      "position": {
+        "x": 450,
+        "y": 250
+      }
+    }
+  ],
+  "correctPlacements": [
+    {
+      "componentId": "spark-session",
+      "zoneId": "zone-1"
+    },
+    {
+      "componentId": "dag-builder",
+      "zoneId": "zone-2"
+    },
+    {
+      "componentId": "task-scheduler",
+      "zoneId": "zone-3"
+    },
+    {
+      "componentId": "executor-1",
+      "zoneId": "zone-4"
+    },
+    {
+      "componentId": "executor-2",
+      "zoneId": "zone-5"
+    }
+  ],
+  "learnings": [
+    "SparkSession: The entry point to Spark - your driver program that coordinates all operations",
+    "DAG Builder: Transforms your code into a directed acyclic graph of stages and tasks",
+    "Task Scheduler: Distributes tasks across executors for parallel processing",
+    "Executors: Worker processes that run tasks and cache data - the workhorses of Spark",
+    "This architecture enables distributed processing across a cluster, handling petabytes of data"
+  ]
+}

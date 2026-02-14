@@ -1,0 +1,65 @@
+{
+  "questions": [
+    {
+      "id": "spark-internals-1",
+      "question": "What is an RDD (Resilient Distributed Dataset) in Apache Spark?",
+      "options": [
+        "A SQL database table",
+        "An immutable, partitioned collection of elements that can be operated on in parallel",
+        "A file format for storing data",
+        "A type of Spark cluster"
+      ],
+      "correctAnswer": 1,
+      "explanation": "RDDs are the fundamental data abstraction in Spark. They are fault-tolerant (resilient), split across cluster nodes (distributed), and immutable (dataset). While DataFrames are now preferred, understanding RDDs helps grasp Spark's core mechanics."
+    },
+    {
+      "id": "spark-internals-2",
+      "question": "What does the Catalyst optimizer do in Spark SQL?",
+      "options": [
+        "Manages cluster memory allocation",
+        "Transforms and optimizes logical query plans into efficient physical plans",
+        "Handles user authentication",
+        "Compresses data files"
+      ],
+      "correctAnswer": 1,
+      "explanation": "Catalyst is Spark's extensible query optimizer. It takes your DataFrame/SQL operations, builds a logical plan, applies rule-based and cost-based optimizations, then generates an efficient physical execution plan."
+    },
+    {
+      "id": "spark-internals-3",
+      "question": "What is the difference between a 'transformation' and an 'action' in Spark?",
+      "options": [
+        "Transformations modify data, actions read data",
+        "Transformations are lazy and build the plan; actions trigger actual computation",
+        "Transformations run on the driver; actions run on workers",
+        "There is no difference"
+      ],
+      "correctAnswer": 1,
+      "explanation": "Transformations (map, filter, join) are lazy - they define what to do but don't execute. Actions (collect, count, write) trigger the actual computation of the entire lineage of transformations."
+    },
+    {
+      "id": "spark-internals-4",
+      "question": "What is 'Tungsten' in the context of Apache Spark?",
+      "options": [
+        "A distributed file system",
+        "A machine learning library",
+        "A memory management and code generation engine for improved performance",
+        "A visualization tool"
+      ],
+      "correctAnswer": 2,
+      "explanation": "Project Tungsten (introduced in Spark 1.4+) focuses on memory management and CPU efficiency. It uses off-heap memory, cache-aware computation, and whole-stage code generation to dramatically improve execution speed."
+    },
+    {
+      "id": "spark-internals-5",
+      "question": "What does a 'shuffle' operation do in Spark, and why is it expensive?",
+      "options": [
+        "It sorts data alphabetically within a partition",
+        "It redistributes data across partitions based on a key, requiring network I/O",
+        "It caches data to disk",
+        "It removes duplicate rows"
+      ],
+      "correctAnswer": 1,
+      "explanation": "Shuffle operations (groupBy, join, repartition) redistribute data across executors based on keys. This requires serialization, network transfer, and deserialization - the most expensive operations in distributed computing."
+    }
+  ],
+  "passingScore": 60
+}

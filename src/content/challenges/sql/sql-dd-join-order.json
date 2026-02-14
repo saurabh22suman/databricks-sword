@@ -1,0 +1,47 @@
+{
+  "id": "sql-dd-join-order",
+  "title": "Build a Multi-Table JOIN Query",
+  "category": "sql",
+  "difficulty": "B",
+  "format": "drag-drop",
+  "description": "Arrange the SQL clauses in the correct order to join orders with customers and products, then filter for high-value orders.",
+  "hints": [
+    "SELECT comes first, then FROM, then JOINs, then WHERE",
+    "Each JOIN needs an ON clause immediately after it",
+    "The WHERE clause filters the combined result set"
+  ],
+  "xpReward": 75,
+  "optimalSolution": "SELECT o.order_id, c.name, p.product_name, o.total\nFROM orders o\nJOIN customers c ON o.customer_id = c.customer_id\nJOIN products p ON o.product_id = p.product_id\nWHERE o.total > 1000",
+  "explanation": "SQL query execution follows a logical order: FROM determines the base table, JOINs combine related tables using ON conditions, WHERE filters rows, and SELECT chooses columns. The optimizer may reorder joins internally for performance, but the written order should be logically clear.",
+  "dragDrop": {
+    "blocks": [
+      {
+        "id": "b1",
+        "content": "SELECT o.order_id, c.name, p.product_name, o.total"
+      },
+      {
+        "id": "b2",
+        "content": "FROM orders o"
+      },
+      {
+        "id": "b3",
+        "content": "JOIN customers c ON o.customer_id = c.customer_id"
+      },
+      {
+        "id": "b4",
+        "content": "JOIN products p ON o.product_id = p.product_id"
+      },
+      {
+        "id": "b5",
+        "content": "WHERE o.total > 1000"
+      }
+    ],
+    "correctOrder": [
+      "b1",
+      "b2",
+      "b3",
+      "b4",
+      "b5"
+    ]
+  }
+}

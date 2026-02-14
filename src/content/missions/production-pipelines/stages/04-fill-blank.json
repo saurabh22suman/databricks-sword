@@ -1,0 +1,82 @@
+{
+  "description": "Complete the production DLT pipeline code for MegaMart's order processing.",
+  "expectedOutput": "When completed correctly, this code will:\n1. Parameterize the pipeline for dev/staging/prod environments\n2. Configure Auto Loader for bronze ingestion\n3. Apply CDC with apply_changes() for silver updates\n4. Enforce quality checks before gold layer\n5. Route failures to a dead letter queue",
+  "codeTemplate": "import dlt\nfrom pyspark.sql.functions import *\n\n# Environment parameterization\nenv = spark.conf.get('__BLANK_0__', 'dev')\n\n# CDC: Track order status changes\ndlt.__BLANK_1__(\n    target='silver_orders',\n    source='bronze_order_events',\n    keys=['order_id'],\n    __BLANK_2__='updated_at',\n    apply_as_deletes=expr(\"operation = 'DELETE'\"),\n    apply_as_truncates=expr(\"operation = 'TRUNCATE'\")\n)\n\n# Gold: Order summary with freshness tracking\n@dlt.table(\n    comment='Aggregated order metrics with SLA tracking'\n)\ndef gold_order_metrics():\n    return (\n        dlt.__BLANK_3__('silver_orders')\n        .groupBy('order_status', window('updated_at', '1 hour'))\n        .agg(\n            count('*').alias('order_count'),\n            sum('total_amount').alias('revenue'),\n            __BLANK_4__('updated_at').alias('latest_update')\n        )\n    )\n\n# Dead letter queue for failed records\n@dlt.table\ndef __BLANK_5__():\n    return (\n        dlt.read_stream('bronze_order_events')\n        .filter('order_id IS NULL OR total_amount < 0')\n        .withColumn('failure_reason',\n            when(col('order_id').isNull(), 'missing_order_id')\n            .otherwise('negative_amount')\n        )\n    )",
+  "blanks": [
+    {
+      "id": 0,
+      "options": [
+        "pipeline.env",
+        "spark.env",
+        "databricks.env",
+        "config.environment"
+      ],
+      "correctAnswer": "pipeline.env"
+    },
+    {
+      "id": 1,
+      "options": [
+        "apply_changes",
+        "merge_into",
+        "upsert",
+        "cdc_process"
+      ],
+      "correctAnswer": "apply_changes"
+    },
+    {
+      "id": 2,
+      "options": [
+        "sequence_by",
+        "order_by",
+        "sort_by",
+        "timestamp_col"
+      ],
+      "correctAnswer": "sequence_by"
+    },
+    {
+      "id": 3,
+      "options": [
+        "read",
+        "read_stream",
+        "load",
+        "query"
+      ],
+      "correctAnswer": "read"
+    },
+    {
+      "id": 4,
+      "options": [
+        "max",
+        "min",
+        "last",
+        "first"
+      ],
+      "correctAnswer": "max"
+    },
+    {
+      "id": 5,
+      "options": [
+        "dead_letter_orders",
+        "quarantine_orders",
+        "failed_records",
+        "error_log"
+      ],
+      "correctAnswer": "dead_letter_orders"
+    }
+  ],
+  "hints": [
+    "pipeline.env is the standard DLT configuration parameter",
+    "apply_changes is DLT's CDC operator",
+    "sequence_by ensures events are applied in chronological order",
+    "Gold aggregations use dlt.read() (batch) not read_stream()",
+    "max(updated_at) tracks data freshness in Gold tables",
+    "dead_letter naming convention makes it clear these are error records"
+  ],
+  "learnings": [
+    "APPLY CHANGES INTO handles CDC operations",
+    "KEYS specifies the merge key columns",
+    "SEQUENCE BY orders changes by timestamp",
+    "STORED AS SCD TYPE controls history tracking",
+    "expect_or_quarantine routes failures"
+  ]
+}

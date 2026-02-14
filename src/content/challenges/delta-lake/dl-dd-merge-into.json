@@ -1,0 +1,47 @@
+{
+  "id": "dl-dd-merge-into",
+  "title": "Build a MERGE INTO Upsert",
+  "category": "delta-lake",
+  "difficulty": "B",
+  "format": "drag-drop",
+  "description": "Arrange the SQL clauses to perform an upsert (insert or update) from a staging table into a target Delta table using MERGE INTO.",
+  "hints": [
+    "MERGE INTO specifies the target table first",
+    "USING introduces the source table with a join condition",
+    "WHEN MATCHED handles updates, WHEN NOT MATCHED handles inserts"
+  ],
+  "xpReward": 75,
+  "optimalSolution": "MERGE INTO target_customers AS t\nUSING staging_customers AS s\nON t.customer_id = s.customer_id\nWHEN MATCHED THEN UPDATE SET t.name = s.name, t.email = s.email\nWHEN NOT MATCHED THEN INSERT (customer_id, name, email) VALUES (s.customer_id, s.name, s.email)",
+  "explanation": "MERGE INTO is Delta Lake's most powerful DML command. It atomically matches source rows against target rows using a condition, then applies different actions for matched (UPDATE/DELETE) and unmatched (INSERT) rows. This is the standard pattern for implementing slowly changing dimensions (SCD Type 1) and CDC ingestion pipelines.",
+  "dragDrop": {
+    "blocks": [
+      {
+        "id": "b1",
+        "content": "MERGE INTO target_customers AS t"
+      },
+      {
+        "id": "b2",
+        "content": "USING staging_customers AS s"
+      },
+      {
+        "id": "b3",
+        "content": "ON t.customer_id = s.customer_id"
+      },
+      {
+        "id": "b4",
+        "content": "WHEN MATCHED THEN UPDATE SET t.name = s.name, t.email = s.email"
+      },
+      {
+        "id": "b5",
+        "content": "WHEN NOT MATCHED THEN INSERT (customer_id, name, email) VALUES (s.customer_id, s.name, s.email)"
+      }
+    ],
+    "correctOrder": [
+      "b1",
+      "b2",
+      "b3",
+      "b4",
+      "b5"
+    ]
+  }
+}

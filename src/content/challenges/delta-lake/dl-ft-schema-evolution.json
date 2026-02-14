@@ -1,0 +1,20 @@
+{
+  "id": "dl-ft-schema-evolution",
+  "title": "Handle Schema Evolution in a Delta Pipeline",
+  "category": "delta-lake",
+  "difficulty": "S",
+  "format": "free-text",
+  "description": "Write PySpark code that appends a DataFrame with new columns (loyalty_tier, last_login) to an existing Delta table, automatically evolving the schema. Then write a SQL ALTER TABLE statement to add a column comment and set a table property for column mapping.",
+  "hints": [
+    "Use option('mergeSchema', 'true') when writing to enable automatic schema evolution",
+    "ALTER TABLE ... SET TBLPROPERTIES enables advanced Delta features",
+    "Column mapping mode allows renaming and dropping columns"
+  ],
+  "xpReward": 150,
+  "optimalSolution": "# PySpark: Append with schema evolution\nnew_data_df.write \\\n  .format('delta') \\\n  .mode('append') \\\n  .option('mergeSchema', 'true') \\\n  .saveAsTable('customers')\n\n# SQL: Add column comments and enable column mapping\nALTER TABLE customers ALTER COLUMN loyalty_tier COMMENT 'Bronze, Silver, Gold, Platinum';\nALTER TABLE customers SET TBLPROPERTIES (\n  'delta.columnMapping.mode' = 'name',\n  'delta.minReaderVersion' = '2',\n  'delta.minWriterVersion' = '5'\n);",
+  "explanation": "Delta Lake schema evolution allows tables to adapt as data structures change. With mergeSchema=true, new columns are automatically added during writes. Without it, schema mismatches cause errors. Column mapping mode ('name') enables advanced operations like column renaming and dropping. It changes how Delta references columns (by name instead of ordinal position), requiring reader v2 and writer v5.",
+  "freeText": {
+    "validationRegex": "mergeSchema.*true|merge_schema.*true",
+    "sampleAnswer": "new_data_df.write.format('delta').mode('append').option('mergeSchema', 'true').saveAsTable('customers')\n\nALTER TABLE customers SET TBLPROPERTIES ('delta.columnMapping.mode' = 'name')"
+  }
+}

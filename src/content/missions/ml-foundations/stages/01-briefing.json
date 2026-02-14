@@ -1,0 +1,20 @@
+{
+  "narrative": "Welcome to **ShopSmart**, one of the fastest-growing e-commerce platforms in North America. With over 50 million users and 500,000 products, we're drowning in customer interaction data but struggling to turn it into actionable insights.\n\nOur current recommendation system is rule-based and only suggests \"people also bought\" items. Meanwhile, competitors like Amazon and Alibaba are using advanced machine learning to predict what customers want *before they even search for it*.\n\nYour mission: Build a **collaborative filtering recommendation engine** using Apache Spark MLlib that can process 100+ million customer ratings and generate personalized product recommendations for every user in our system.",
+  "objective": "Build a production-grade collaborative filtering model using PySpark MLlib's ALS (Alternating Least Squares) algorithm to generate personalized product recommendations.",
+  "learningGoals": [
+    "Understand collaborative filtering and matrix factorization",
+    "Load and transform large-scale ratings data with PySpark",
+    "Train an ALS model with hyperparameter tuning",
+    "Generate top-N recommendations for users",
+    "Evaluate recommendation quality with RMSE metrics"
+  ],
+  "industryContext": {
+    "domain": "E-Commerce & Retail",
+    "realWorldApplication": "Companies like Amazon, Netflix, and Spotify use collaborative filtering to power their recommendation engines, driving 35% of Amazon's revenue and 80% of Netflix viewing hours.",
+    "keyStakeholders": [
+      "Product Team (needs personalized recommendations)",
+      "Data Science Team (owns ML models)",
+      "Engineering Team (deploys to production)"
+    ]
+  }
+}

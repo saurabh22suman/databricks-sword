@@ -1,0 +1,31 @@
+# Mission Briefing: Data Quality Framework
+
+## Situation Report
+
+**Client:** PharmaCore Labs — a pharmaceutical company running 300+ clinical trials. Bad data in clinical results has twice caused delays in FDA submissions. One data quality issue pushed a drug approval back 18 months, costing $450M.
+
+## Your Mission
+
+Build a data quality framework using Delta Live Tables (DLT) expectations that validates clinical trial data at every stage of the pipeline. Invalid records must be quarantined — never silently dropped or passed through.
+
+## Objectives
+
+1. **Understand DLT expectations** — EXPECT, EXPECT OR DROP, EXPECT OR FAIL
+2. **Design quality rules** — null checks, range validation, referential integrity
+3. **Implement quarantine patterns** — route invalid records for review
+4. **Monitor quality metrics** — track violation rates over time
+5. **Apply schema enforcement** — prevent schema drift from breaking pipelines
+
+## Key Intelligence
+
+- Delta Live Tables (DLT) provides declarative pipeline definitions with built-in quality enforcement
+- Three expectation levels: warn (EXPECT), drop invalid (EXPECT OR DROP), fail pipeline (EXPECT OR FAIL)
+- Expectations are defined as SQL boolean expressions
+- Quality metrics are automatically tracked in the DLT event log
+- Quarantine tables capture invalid records with failure reason metadata
+
+## Stakes
+
+In pharmaceutical data, a single invalid record in a clinical trial dataset could invalidate the entire study. Data quality is not just a technical concern — it's a regulatory requirement.
+
+> "Quality is never an accident; it is always the result of intelligent effort." — John Ruskin

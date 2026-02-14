@@ -1,0 +1,82 @@
+{
+  "description": "Complete the production ML pipeline configuration.",
+  "expectedOutput": "When completed correctly, this code will:\n1. Define a Feature Store table with online serving\n2. Create feature lookups for training data\n3. Register the trained model in Unity Catalog\n4. Deploy a serving endpoint with the Champion model\n5. Configure A/B testing with 10% traffic to Challenger",
+  "codeTemplate": "from databricks.feature_store import FeatureStoreClient\nfrom databricks.sdk import WorkspaceClient\n\nfs = FeatureStoreClient()\n\n# Create a Feature Store table with online serving\nfs.__BLANK_0__(\n    name='fraud_detection.features.transaction_features',\n    primary_keys=['transaction_id'],\n    timestamp_keys=['event_timestamp'],\n    description='Real-time transaction features'\n)\n\n# Train model using Feature Store lookups\ntraining_set = fs.create_training_set(\n    df=labels_df,\n    feature_lookups=[\n        FeatureLookup(\n            table_name='fraud_detection.features.transaction_features',\n            lookup_key=['transaction_id']\n        )\n    ],\n    label='__BLANK_1__'\n)\n\n# Deploy model serving endpoint\nendpoint_config = {\n    'name': 'fraud-detection-endpoint',\n    'config': {\n        'served_entities': [\n            {\n                'entity_name': 'fraud_detection.models.fraud_classifier',\n                'entity_version': '3',\n                'workload_size': 'Small',\n                'scale_to_zero_enabled': __BLANK_2__\n            }\n        ],\n        '__BLANK_3__': {\n            'routes': [\n                {'served_model_name': 'champion', 'traffic_percentage': 90},\n                {'served_model_name': 'challenger', 'traffic_percentage': 10}\n            ]\n        }\n    }\n}\n\n# Configure drift monitoring\nmonitor = create_monitor(\n    table_name='fraud_detection.monitoring.predictions',\n    profile_type=__BLANK_4__,\n    slicing_exprs=['transaction_type', 'merchant_category'],\n    __BLANK_5__=['prediction', 'probability']\n)",
+  "blanks": [
+    {
+      "id": 0,
+      "options": [
+        "create_table",
+        "register_table",
+        "define_table",
+        "init_table"
+      ],
+      "correctAnswer": "create_table"
+    },
+    {
+      "id": 1,
+      "options": [
+        "is_fraud",
+        "label",
+        "target",
+        "prediction"
+      ],
+      "correctAnswer": "is_fraud"
+    },
+    {
+      "id": 2,
+      "options": [
+        "true",
+        "false",
+        "None",
+        "auto"
+      ],
+      "correctAnswer": "true"
+    },
+    {
+      "id": 3,
+      "options": [
+        "traffic_config",
+        "routing_config",
+        "load_balancer",
+        "endpoint_routing"
+      ],
+      "correctAnswer": "traffic_config"
+    },
+    {
+      "id": 4,
+      "options": [
+        "InferenceLog",
+        "TimeSeries",
+        "Snapshot",
+        "ProfileType"
+      ],
+      "correctAnswer": "InferenceLog"
+    },
+    {
+      "id": 5,
+      "options": [
+        "output_schema_columns",
+        "prediction_columns",
+        "monitor_columns",
+        "target_columns"
+      ],
+      "correctAnswer": "output_schema_columns"
+    }
+  ],
+  "hints": [
+    "create_table creates a new Feature Store table",
+    "The label column is what the model predicts \u2014 is this transaction fraud?",
+    "Scale-to-zero saves costs when the endpoint is idle",
+    "traffic_config defines how requests are split between model versions",
+    "InferenceLog profile type monitors model prediction tables",
+    "output_schema_columns specifies which columns to monitor for drift"
+  ],
+  "learnings": [
+    "FeatureLookup retrieves features from Feature Store",
+    "create_training_set joins features with labels",
+    "log_model saves both model and feature specs",
+    "serve_model deploys to Model Serving endpoint",
+    "monitor_model tracks prediction metrics"
+  ]
+}

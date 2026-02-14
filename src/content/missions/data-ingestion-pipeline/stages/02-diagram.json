@@ -1,0 +1,101 @@
+{
+  "instructions": "Build the Ingestion Pipeline! Arrange components to show how Auto Loader incrementally processes new files with schema evolution support.",
+  "components": [
+    {
+      "id": "source-files",
+      "label": "Source Files (S3/ADLS/GCS)",
+      "icon": "file"
+    },
+    {
+      "id": "auto-loader",
+      "label": "Auto Loader (Schema Inference)",
+      "icon": "rotate-cw"
+    },
+    {
+      "id": "schema-registry",
+      "label": "Schema Registry/Evolution",
+      "icon": "database"
+    },
+    {
+      "id": "bronze-table",
+      "label": "Bronze Delta Table",
+      "icon": "layers"
+    },
+    {
+      "id": "copy-into",
+      "label": "COPY INTO (Batch Load)",
+      "icon": "upload"
+    }
+  ],
+  "dropZones": [
+    {
+      "id": "zone-1",
+      "label": "Source Layer",
+      "position": {
+        "x": 50,
+        "y": 100
+      }
+    },
+    {
+      "id": "zone-2",
+      "label": "Ingestion Engine",
+      "position": {
+        "x": 250,
+        "y": 100
+      }
+    },
+    {
+      "id": "zone-3",
+      "label": "Schema Management",
+      "position": {
+        "x": 450,
+        "y": 100
+      }
+    },
+    {
+      "id": "zone-4",
+      "label": "Bronze Layer",
+      "position": {
+        "x": 350,
+        "y": 250
+      }
+    },
+    {
+      "id": "zone-5",
+      "label": "Batch Alternative",
+      "position": {
+        "x": 150,
+        "y": 250
+      }
+    }
+  ],
+  "correctPlacements": [
+    {
+      "componentId": "source-files",
+      "zoneId": "zone-1"
+    },
+    {
+      "componentId": "auto-loader",
+      "zoneId": "zone-2"
+    },
+    {
+      "componentId": "schema-registry",
+      "zoneId": "zone-3"
+    },
+    {
+      "componentId": "bronze-table",
+      "zoneId": "zone-4"
+    },
+    {
+      "componentId": "copy-into",
+      "zoneId": "zone-5"
+    }
+  ],
+  "learnings": [
+    "Source Files: Raw data landing in cloud storage (S3, ADLS, GCS)",
+    "Auto Loader: Incrementally processes new files with exactly-once guarantees",
+    "Schema Registry: Handles schema inference and evolution automatically",
+    "Bronze Table: Stores raw data with metadata columns (_rescued_data, _metadata)",
+    "COPY INTO: Alternative batch command for one-time or scheduled loads"
+  ]
+}

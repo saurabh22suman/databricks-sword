@@ -1,0 +1,31 @@
+# Mission Briefing: Production Pipelines
+
+## Situation Report
+
+**Client:** MegaMart Global — an e-commerce giant processing 5M orders daily across 30 countries. They've prototyped their data pipelines in notebooks, but promoting to production keeps failing: inconsistent environments, no error handling, and zero monitoring.
+
+## Your Mission
+
+Transform MegaMart's prototype pipelines into production-grade systems using Delta Live Tables. Implement CDC for order updates, comprehensive error handling, automated monitoring, and SLA guarantees.
+
+## Objectives
+
+1. **Production DLT patterns** — parameterized pipelines, environment promotion
+2. **CDC implementation** — APPLY CHANGES for order status tracking
+3. **Error handling** — dead letter queues, retry logic, graceful degradation
+4. **Pipeline monitoring** — DLT event logs, custom metrics, alerting
+5. **SLA management** — latency tracking, freshness monitoring, incident response
+
+## Key Intelligence
+
+- DLT pipelines should be parameterized for dev/staging/prod environments
+- APPLY CHANGES INTO handles CDC with automatic ordering by sequence column
+- Dead letter queues capture records that fail processing without blocking the pipeline
+- DLT event logs provide built-in monitoring (pipeline start/stop, quality metrics, errors)
+- SLA monitoring tracks data freshness — how old is the latest data in Gold tables
+
+## Stakes
+
+MegaMart loses $50K per hour when data pipelines fail. Every missed SLA means incorrect pricing, delayed fraud detection, or wrong inventory counts. Production reliability is not optional.
+
+> "In production, everything that can go wrong will go wrong. Plan for it."

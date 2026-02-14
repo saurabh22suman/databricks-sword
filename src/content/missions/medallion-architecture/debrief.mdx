@@ -1,0 +1,47 @@
+# Mission Debrief: Medallion Architecture
+
+## Mission Complete
+
+StreamVerse Media now has a clean, three-layer medallion architecture. Analysts find curated data in Gold tables in seconds, not hours.
+
+## What You Learned
+
+### Bronze Layer (Raw)
+- **Append-only ingestion** — never modify raw data, preserve the full history
+- **Schema enforcement** — reject malformed records at ingestion
+- **Auto Loader** — efficiently track and process new files incrementally
+- **Partitioning** — by ingestion date for efficient cleanup
+
+### Silver Layer (Validated)
+- **Deduplication** — remove duplicate events using `dropDuplicates()` or `MERGE`
+- **Schema conformance** — standardize column names, types, and formats
+- **Data enrichment** — join with reference tables (user profiles, content catalog)
+- **Quality rules** — DLT expectations filter invalid records
+
+### Gold Layer (Business)
+- **Pre-aggregated metrics** — daily/weekly/monthly rollups for fast dashboards
+- **Feature tables** — ML-ready features (user engagement scores, content popularity)
+- **Business entities** — one table per business concept (users, content, subscriptions)
+- **Optimized for consumers** — Z-ORDERed by common query patterns
+
+### CDC Through Medallion
+- **APPLY CHANGES INTO** — DLT's CDC operator for propagating updates
+- **Type 1 SCD** — overwrite current values (latest state)
+- **Type 2 SCD** — preserve historical versions with effective dates
+
+### Design Decisions
+- Streaming Bronze + Silver for low-latency updates
+- Batch Gold for cost-efficient aggregations
+- Separate DLT pipelines per domain for independent scaling
+
+## Key Takeaways
+
+1. Keep Bronze append-only — never delete or modify raw data
+2. Silver is where most of the engineering effort goes (cleaning, deduplication, enrichment)
+3. Gold tables should be designed backward from consumer needs
+4. Use DLT for automatic dependency management between layers
+5. Monitor pipeline health with DLT event logs and quality metrics
+
+## Next Steps
+
+Your architecture skills unlock **Performance Tuning** — where you'll optimize these pipelines for maximum throughput and minimum cost.

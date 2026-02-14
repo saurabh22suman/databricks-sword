@@ -1,0 +1,52 @@
+{
+  "id": "uc-dd-namespace-hierarchy",
+  "title": "Arrange Unity Catalog Namespace Hierarchy",
+  "category": "unity-catalog",
+  "difficulty": "B",
+  "format": "drag-drop",
+  "description": "Arrange the Unity Catalog namespace objects in order from top-level to most granular.",
+  "hints": [
+    "Start with the broadest organizational container",
+    "Schemas (databases) contain tables",
+    "Columns are the most granular element"
+  ],
+  "xpReward": 75,
+  "optimalSolution": "Metastore \u2192 Catalog \u2192 Schema \u2192 Table \u2192 Column",
+  "explanation": "Unity Catalog uses a three-level namespace: catalog.schema.table. The metastore is the top-level container that holds catalogs. This hierarchy enables fine-grained access control at every level.",
+  "dragDrop": {
+    "blocks": [
+      {
+        "id": "metastore",
+        "code": "Metastore",
+        "label": "Metastore (top)"
+      },
+      {
+        "id": "catalog",
+        "code": "Catalog",
+        "label": "Catalog"
+      },
+      {
+        "id": "schema",
+        "code": "Schema",
+        "label": "Schema (Database)"
+      },
+      {
+        "id": "table",
+        "code": "Table",
+        "label": "Table"
+      },
+      {
+        "id": "column",
+        "code": "Column",
+        "label": "Column (bottom)"
+      }
+    ],
+    "correctOrder": [
+      "metastore",
+      "catalog",
+      "schema",
+      "table",
+      "column"
+    ]
+  }
+}

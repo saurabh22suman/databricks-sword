@@ -1,0 +1,38 @@
+# Databricks Asset Bundle Configuration
+# Mission: SQL Analytics Intro
+# Learn SQL Warehouse, JOINs, and aggregations
+
+bundle:
+  name: dbsword-sql-analytics-intro
+
+targets:
+  dev:
+    mode: development
+    default: true
+    workspace:
+      root_path: /Workspace/Users/${workspace.current_user.userName}/dbsword-sql-analytics-intro
+
+resources:
+  schemas:
+    sql_analytics:
+      catalog_name: main
+      name: dbsword_sql_analytics
+      comment: "Databricks Sword - SQL Analytics Intro mission schema"
+
+  volumes:
+    data_volume:
+      catalog_name: main
+      schema_name: dbsword_sql_analytics
+      name: data
+      volume_type: MANAGED
+      comment: "Sample data for SQL Analytics exercises"
+
+sync:
+  include:
+    - notebooks/**
+    - data/**
+
+artifacts:
+  notebooks:
+    path: notebooks
+    deploy_to: /Workspace/Users/${workspace.current_user.userName}/dbsword-sql-analytics-intro/notebooks

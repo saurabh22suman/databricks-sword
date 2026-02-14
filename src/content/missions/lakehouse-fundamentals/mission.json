@@ -1,0 +1,129 @@
+{
+  "id": "lakehouse-fundamentals",
+  "title": "Lakehouse Fundamentals",
+  "subtitle": "Build your first Delta Lake table and understand the lakehouse architecture",
+  "description": "Learn the core concepts of the lakehouse paradigm, Delta Lake storage, and how to create, query, and manage tables in Databricks.",
+  "industry": "technology",
+  "rank": "B",
+  "xpRequired": 0,
+  "xpReward": 300,
+  "estimatedMinutes": 45,
+  "databricksEnabled": false,
+  "prerequisites": [],
+  "primaryFeatures": [
+    "Delta Lake table creation",
+    "Lakehouse architecture",
+    "CRUD operations",
+    "SQL DDL and DML",
+    "ACID guarantees"
+  ],
+  "achievements": [
+    "lakehouse-pioneer"
+  ],
+  "stages": [
+    {
+      "id": "01-briefing",
+      "type": "briefing",
+      "title": "Mission Briefing",
+      "file": "stages/01-briefing.json"
+    },
+    {
+      "id": "02-diagram",
+      "type": "diagram",
+      "title": "Lakehouse Architecture",
+      "file": "stages/02-diagram.json"
+    },
+    {
+      "id": "03-drag-drop",
+      "type": "drag-drop",
+      "title": "Delta Lake CRUD Operations",
+      "file": "stages/03-drag-drop.json"
+    },
+    {
+      "id": "04-fill-blank",
+      "type": "fill-blank",
+      "title": "SQL DDL and DML",
+      "file": "stages/04-fill-blank.json"
+    },
+    {
+      "id": "05-quiz",
+      "type": "quiz",
+      "title": "Knowledge Check",
+      "file": "stages/05-quiz.json"
+    },
+    {
+      "id": "06-debrief",
+      "type": "debrief",
+      "title": "Mission Debrief",
+      "file": "stages/06-debrief.json"
+    }
+  ],
+  "sideQuests": [
+    {
+      "id": "delta-lake-oss",
+      "title": "Delta Lake: The Open Source Engine",
+      "ossProject": "Delta Lake",
+      "trigger": "after",
+      "parentStageId": "02-diagram",
+      "type": "quiz",
+      "configFile": "side-quests/delta-lake-oss.json",
+      "xpBonus": 50,
+      "optional": true
+    }
+  ],
+  "concepts": [
+    {
+      "question": "What is a lakehouse architecture?",
+      "answer": "A data management architecture that combines the low-cost, open-format storage of a data lake with the reliability and performance of a data warehouse.",
+      "difficulty": "B",
+      "type": "concept",
+      "tags": [
+        "architecture",
+        "lakehouse"
+      ]
+    },
+    {
+      "question": "What is Delta Lake?",
+      "answer": "An open-source storage framework that provides ACID transactions, scalable metadata handling, and schema enforcement on top of data lakes.",
+      "hint": "Think of it as adding warehouse-like reliability to a data lake.",
+      "difficulty": "B",
+      "type": "concept",
+      "tags": [
+        "delta-lake",
+        "storage"
+      ]
+    },
+    {
+      "question": "What is the Unity Catalog in Databricks?",
+      "answer": "A unified governance solution for all data and AI assets in a Databricks workspace, providing centralized access control, auditing, lineage, and data discovery.",
+      "difficulty": "B",
+      "type": "concept",
+      "tags": [
+        "unity-catalog",
+        "governance"
+      ]
+    },
+    {
+      "question": "How do you read a Delta table in PySpark?",
+      "answer": "spark.read.format(\"delta\").load(\"/path/to/delta/table\") or spark.read.table(\"catalog.schema.table\")",
+      "codeExample": "df = spark.read.format(\"delta\").load(\"/mnt/data/my_table\")",
+      "difficulty": "B",
+      "type": "code",
+      "tags": [
+        "pyspark",
+        "delta-lake"
+      ]
+    },
+    {
+      "question": "What are the three layers of the medallion architecture?",
+      "answer": "Bronze (raw ingestion), Silver (cleaned/validated), and Gold (business-level aggregates).",
+      "hint": "Named after metals of increasing value.",
+      "difficulty": "B",
+      "type": "concept",
+      "tags": [
+        "architecture",
+        "medallion"
+      ]
+    }
+  ]
+}

@@ -1,0 +1,58 @@
+{
+  "id": "arch-dd-medallion-design",
+  "title": "Arrange Medallion Architecture Data Flow",
+  "category": "architecture",
+  "difficulty": "A",
+  "format": "drag-drop",
+  "description": "Arrange the data processing steps in a medallion architecture from raw data ingestion through to business aggregates.",
+  "hints": [
+    "Bronze layer stores raw data as-is",
+    "Silver layer applies cleansing and standardization",
+    "Gold layer contains business-level aggregates"
+  ],
+  "xpReward": 125,
+  "optimalSolution": "Ingest raw JSON from Kafka \u2192 Bronze (append-only) \u2192 Apply schema validation \u2192 Silver (cleansed) \u2192 Join with dimensions \u2192 Gold (aggregated)",
+  "explanation": "The medallion architecture provides a logical organization for data lakes. Bronze preserves raw data for auditability. Silver applies quality rules. Gold delivers business value. This layered approach enables incremental processing and data quality enforcement.",
+  "dragDrop": {
+    "blocks": [
+      {
+        "id": "ingest",
+        "code": "Ingest raw JSON from Kafka",
+        "label": "Source Ingestion"
+      },
+      {
+        "id": "bronze",
+        "code": "Bronze: Store raw events (append-only)",
+        "label": "Bronze Layer"
+      },
+      {
+        "id": "validate",
+        "code": "Apply schema validation and deduplication",
+        "label": "Data Quality"
+      },
+      {
+        "id": "silver",
+        "code": "Silver: Cleansed, typed, deduplicated data",
+        "label": "Silver Layer"
+      },
+      {
+        "id": "enrich",
+        "code": "Join with dimension tables (customers, products)",
+        "label": "Enrichment"
+      },
+      {
+        "id": "gold",
+        "code": "Gold: Business aggregates (daily_sales, etc.)",
+        "label": "Gold Layer"
+      }
+    ],
+    "correctOrder": [
+      "ingest",
+      "bronze",
+      "validate",
+      "silver",
+      "enrich",
+      "gold"
+    ]
+  }
+}

@@ -1,0 +1,41 @@
+{
+  "id": "dl-fb-liquid-clustering",
+  "title": "Configure Liquid Clustering",
+  "category": "delta-lake",
+  "difficulty": "A",
+  "format": "fill-blank",
+  "description": "Fill in the blanks to create a Delta table with liquid clustering, which provides adaptive data layout without traditional partitioning.",
+  "hints": [
+    "CLUSTER BY specifies columns for liquid clustering",
+    "Liquid clustering replaces both PARTITIONED BY and ZORDER BY",
+    "You can cluster on high-cardinality columns unlike partitioning"
+  ],
+  "xpReward": 100,
+  "optimalSolution": "CREATE TABLE events (\n  event_id BIGINT,\n  user_id STRING,\n  event_type STRING,\n  event_timestamp TIMESTAMP\n)\nCLUSTER BY (user_id, event_type)",
+  "explanation": "Liquid clustering is a modern alternative to partitioning that automatically organizes data based on specified columns. Unlike partitioning, you can change clustering columns without rewriting data, and it handles high-cardinality columns efficiently. Use OPTIMIZE to apply clustering incrementally.",
+  "fillBlank": {
+    "codeTemplate": "CREATE TABLE events (\n  event_id BIGINT,\n  user_id STRING,\n  event_type STRING,\n  event_timestamp TIMESTAMP\n)\n__BLANK_0__ __BLANK_1__ (user_id, event_type)",
+    "blanks": [
+      {
+        "id": 0,
+        "correctAnswer": "CLUSTER",
+        "options": [
+          "CLUSTER",
+          "PARTITION",
+          "ORDER",
+          "INDEX"
+        ]
+      },
+      {
+        "id": 1,
+        "correctAnswer": "BY",
+        "options": [
+          "BY",
+          "ON",
+          "WITH",
+          "USING"
+        ]
+      }
+    ]
+  }
+}

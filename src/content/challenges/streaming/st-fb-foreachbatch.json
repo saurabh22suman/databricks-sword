@@ -1,0 +1,51 @@
+{
+  "id": "st-fb-foreachbatch",
+  "title": "Complete the foreachBatch Sink",
+  "category": "streaming",
+  "difficulty": "B",
+  "format": "fill-blank",
+  "description": "Fill in the blanks to use foreachBatch to write streaming data to multiple destinations (Delta table and API endpoint).",
+  "hints": [
+    "foreachBatch receives a DataFrame and batch ID",
+    "The function signature is (df, batch_id)",
+    "You can use any DataFrame operations inside"
+  ],
+  "xpReward": 75,
+  "optimalSolution": "def process_batch(df, batch_id):\n    # Write to Delta\n    df.write.mode('append').saveAsTable('silver.events')\n    # Send to API\n    send_to_api(df.collect())\n\nstream_df.writeStream \\\n    .foreachBatch(process_batch) \\\n    .start()",
+  "explanation": "foreachBatch allows applying any DataFrame operation to each micro-batch, enabling multi-destination writes, custom sinks, and complex transformations not possible with standard streaming sinks.",
+  "fillBlank": {
+    "codeTemplate": "def process_batch(df, __BLANK_0__):\n    df.write.mode('append').saveAsTable('silver.events')\n    send_to_api(df.collect())\n\nstream_df.__BLANK_1__ \\\n    .__BLANK_2__(process_batch) \\\n    .start()",
+    "blanks": [
+      {
+        "id": 0,
+        "correctAnswer": "batch_id",
+        "options": [
+          "batch_id",
+          "epoch_id",
+          "batch_num",
+          "sequence_id"
+        ]
+      },
+      {
+        "id": 1,
+        "correctAnswer": "writeStream",
+        "options": [
+          "writeStream",
+          "write",
+          "stream",
+          "sink"
+        ]
+      },
+      {
+        "id": 2,
+        "correctAnswer": "foreachBatch",
+        "options": [
+          "foreachBatch",
+          "forEach",
+          "applyBatch",
+          "processBatch"
+        ]
+      }
+    ]
+  }
+}

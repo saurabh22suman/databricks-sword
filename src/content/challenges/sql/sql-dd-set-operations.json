@@ -1,0 +1,46 @@
+{
+  "id": "sql-dd-set-operations",
+  "title": "Order Set Operations by Result",
+  "category": "sql",
+  "difficulty": "B",
+  "format": "drag-drop",
+  "description": "Given two sets A={1,2,3,4} and B={3,4,5,6}, arrange the set operations in order of decreasing result size.",
+  "hints": [
+    "UNION combines both sets (removing duplicates)",
+    "INTERSECT keeps only common elements",
+    "EXCEPT keeps elements in A but not in B"
+  ],
+  "xpReward": 75,
+  "optimalSolution": "UNION (6 elements) \u2192 A UNION ALL B (8 elements with dupes) \u2192 EXCEPT (2 elements) \u2192 INTERSECT (2 elements)",
+  "explanation": "Set operations: UNION combines unique rows from both. UNION ALL keeps duplicates. INTERSECT returns common rows. EXCEPT (MINUS) returns rows in the first set but not the second.",
+  "dragDrop": {
+    "blocks": [
+      {
+        "id": "union_all",
+        "code": "SELECT * FROM A UNION ALL SELECT * FROM B -- Result: 8 rows (with dupes)",
+        "label": "UNION ALL (8 rows)"
+      },
+      {
+        "id": "union",
+        "code": "SELECT * FROM A UNION SELECT * FROM B -- Result: {1,2,3,4,5,6}",
+        "label": "UNION (6 rows)"
+      },
+      {
+        "id": "except",
+        "code": "SELECT * FROM A EXCEPT SELECT * FROM B -- Result: {1,2}",
+        "label": "EXCEPT (2 rows)"
+      },
+      {
+        "id": "intersect",
+        "code": "SELECT * FROM A INTERSECT SELECT * FROM B -- Result: {3,4}",
+        "label": "INTERSECT (2 rows)"
+      }
+    ],
+    "correctOrder": [
+      "union_all",
+      "union",
+      "except",
+      "intersect"
+    ]
+  }
+}

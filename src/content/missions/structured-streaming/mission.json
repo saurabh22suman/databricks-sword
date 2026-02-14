@@ -1,0 +1,74 @@
+{
+  "id": "structured-streaming",
+  "title": "Structured Streaming",
+  "subtitle": "Real-Time Data Processing at Scale",
+  "description": "Build real-time pipelines using Spark Structured Streaming with triggers, watermarks, and exactly-once guarantees.",
+  "industry": "fintech",
+  "rank": "A",
+  "xpRequired": 500,
+  "xpReward": 450,
+  "estimatedMinutes": 50,
+  "databricksEnabled": false,
+  "prerequisites": [
+    "data-ingestion-pipeline",
+    "advanced-transformations"
+  ],
+  "primaryFeatures": [
+    "Structured Streaming",
+    "Triggers",
+    "Watermarks",
+    "Checkpointing",
+    "Stream-Static Joins"
+  ],
+  "stages": [
+    {
+      "id": "briefing",
+      "type": "briefing",
+      "title": "Mission Briefing",
+      "configFile": "stages/01-briefing.json",
+      "xpReward": 0,
+      "estimatedMinutes": 5
+    },
+    {
+      "id": "diagram",
+      "type": "diagram",
+      "title": "Streaming Architecture",
+      "configFile": "stages/02-diagram.json",
+      "xpReward": 50,
+      "estimatedMinutes": 10
+    },
+    {
+      "id": "drag-drop",
+      "type": "drag-drop",
+      "title": "Build the Pipeline",
+      "configFile": "stages/03-drag-drop.json",
+      "xpReward": 75,
+      "estimatedMinutes": 12
+    },
+    {
+      "id": "fill-blank",
+      "type": "fill-blank",
+      "title": "Complete the Code",
+      "configFile": "stages/04-fill-blank.json",
+      "xpReward": 75,
+      "estimatedMinutes": 12
+    },
+    {
+      "id": "quiz",
+      "type": "quiz",
+      "title": "Knowledge Check",
+      "configFile": "stages/05-quiz.json",
+      "xpReward": 50,
+      "estimatedMinutes": 8
+    },
+    {
+      "id": "debrief",
+      "type": "debrief",
+      "title": "Mission Debrief",
+      "configFile": "stages/06-debrief.json",
+      "xpReward": 0,
+      "estimatedMinutes": 3
+    }
+  ],
+  "sideQuests": []
+}

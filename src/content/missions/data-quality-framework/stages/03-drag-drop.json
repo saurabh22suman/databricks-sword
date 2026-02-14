@@ -1,0 +1,59 @@
+{
+  "description": "Arrange the DLT quality pipeline steps in the correct order for clinical trial data validation.",
+  "instructions": "Consider data quality enforcement levels: What comes first\u2014the data or the rules? Which expectations just warn versus drop records versus fail the pipeline? Pattern: ingest raw \u2192 apply soft constraints \u2192 apply hard constraints \u2192 define output \u2192 capture failures.",
+  "blocks": [
+    {
+      "id": "ingest-raw",
+      "code": "@dlt.table\ndef raw_trials():\n  return spark.read.format('csv').load('/data/trials')",
+      "label": "Define Raw Table"
+    },
+    {
+      "id": "expect-not-null",
+      "code": "@dlt.expect('patient_id_not_null', 'patient_id IS NOT NULL')",
+      "label": "Add Null Check (Warn)"
+    },
+    {
+      "id": "expect-drop-invalid",
+      "code": "@dlt.expect_or_drop('valid_age', 'age BETWEEN 18 AND 120')",
+      "label": "Drop Invalid Ages"
+    },
+    {
+      "id": "expect-fail-critical",
+      "code": "@dlt.expect_or_fail('valid_trial_id', 'trial_id IS NOT NULL')",
+      "label": "Fail on Missing Trial ID"
+    },
+    {
+      "id": "clean-table",
+      "code": "@dlt.table\ndef clean_trials():\n  return dlt.read('raw_trials')",
+      "label": "Define Clean Table"
+    },
+    {
+      "id": "quarantine",
+      "code": "@dlt.table\ndef quarantined_trials():\n  return dlt.read('raw_trials').filter('NOT (age BETWEEN 18 AND 120)')",
+      "label": "Route to Quarantine"
+    }
+  ],
+  "correctOrder": [
+    "ingest-raw",
+    "expect-not-null",
+    "expect-drop-invalid",
+    "expect-fail-critical",
+    "clean-table",
+    "quarantine"
+  ],
+  "hints": [
+    "Start with the raw data ingestion table",
+    "Apply non-critical expectations first (warn)",
+    "Drop records with invalid non-critical fields",
+    "Fail the pipeline for critical field violations",
+    "Define the clean output table after expectations",
+    "Quarantine captures records that were dropped"
+  ],
+  "learnings": [
+    "Define expectations before data enters the pipeline",
+    "EXPECT logs violations but allows data through",
+    "EXPECT OR DROP silently removes invalid records",
+    "EXPECT OR FAIL stops the pipeline on violations",
+    "Quarantine tables capture rejected records for review"
+  ]
+}

@@ -1,0 +1,58 @@
+{
+  "description": "Arrange the window function query components in the correct order to calculate running totals and rankings.",
+  "instructions": "Think about window function usage: What must you import first? What defines HOW the window operates (partition and order)? Different window specs can serve different purposes (running totals vs rankings). Pattern: imports \u2192 define window(s) \u2192 apply functions \u2192 write results.",
+  "blocks": [
+    {
+      "id": "import",
+      "code": "from pyspark.sql.window import Window\nfrom pyspark.sql.functions import row_number, sum, lag",
+      "label": "Import Window Functions"
+    },
+    {
+      "id": "define-window",
+      "code": "window_spec = Window.partitionBy(\"category\").orderBy(\"sale_date\")",
+      "label": "Define Window Spec"
+    },
+    {
+      "id": "running-total",
+      "code": "df = df.withColumn(\"running_total\",\n  sum(\"amount\").over(window_spec))",
+      "label": "Calculate Running Total"
+    },
+    {
+      "id": "rank",
+      "code": "rank_spec = Window.partitionBy(\"category\").orderBy(col(\"amount\").desc())\ndf = df.withColumn(\"rank\", row_number().over(rank_spec))",
+      "label": "Add Rankings"
+    },
+    {
+      "id": "lag-calc",
+      "code": "df = df.withColumn(\"prev_amount\",\n  lag(\"amount\", 1).over(window_spec))",
+      "label": "Calculate Previous Value"
+    },
+    {
+      "id": "write",
+      "code": "df.write.format(\"delta\").mode(\"overwrite\")\n  .save(\"/mnt/data/ranked_sales\")",
+      "label": "Write Results"
+    }
+  ],
+  "correctOrder": [
+    "import",
+    "define-window",
+    "running-total",
+    "rank",
+    "lag-calc",
+    "write"
+  ],
+  "hints": [
+    "Import window-related functions first",
+    "Define the window specification before applying functions",
+    "Running totals use sum().over(window)",
+    "Rankings require desc() ordering within partitions",
+    "lag() accesses the previous row's value"
+  ],
+  "learnings": [
+    "Window specifications define the frame for calculations",
+    "Partition by groups rows for independent calculations",
+    "Order by determines the sequence for running totals",
+    "Frame bounds (ROWS BETWEEN) control calculation scope",
+    "Window functions preserve row-level detail unlike GROUP BY"
+  ]
+}

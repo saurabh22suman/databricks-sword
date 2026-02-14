@@ -1,0 +1,45 @@
+# Mission Debrief: Data Quality Framework
+
+## Mission Complete
+
+PharmaCore Labs now has an automated data quality framework. Every clinical trial record is validated at ingestion, transformation, and aggregation stages. Invalid records are quarantined with full audit trails.
+
+## What You Learned
+
+### DLT Expectation Levels
+- **EXPECT** — log a warning but keep the record (for monitoring)
+- **EXPECT OR DROP** — silently remove invalid records (for non-critical fields)
+- **EXPECT OR FAIL** — halt the pipeline on violation (for critical fields)
+
+### Quality Rule Patterns
+- **Null checks** — `EXPECT ("patient_id IS NOT NULL")`
+- **Range validation** — `EXPECT ("age BETWEEN 18 AND 120")`
+- **Format validation** — `EXPECT ("email RLIKE '^[^@]+@[^@]+$'")`
+- **Referential integrity** — cross-table lookups for valid foreign keys
+
+### Quarantine Architecture
+- Invalid records routed to `_quarantine` tables with failure metadata
+- Quarantine tables include: original record, rule violated, timestamp, pipeline run ID
+- Analysts review and fix quarantined records, then replay them
+
+### Quality Monitoring
+- DLT event log captures expectation violation counts per batch
+- Build dashboards showing quality trends over time
+- Alert when violation rates exceed thresholds
+
+### Schema Enforcement
+- Delta Lake schema enforcement rejects writes that don't match the table schema
+- Schema evolution (`mergeSchema`) allows controlled schema changes
+- DLT automatically validates schema between pipeline stages
+
+## Key Takeaways
+
+1. Use EXPECT OR FAIL for fields where invalid data could cause regulatory issues
+2. Use EXPECT OR DROP for non-critical fields that can be filtered
+3. Always quarantine dropped records — never silently discard data
+4. Monitor violation rates as leading indicators of upstream data issues
+5. Combine DLT expectations with Delta Lake constraints for defense in depth
+
+## Next Steps
+
+Your data quality skills combine with your other A-rank capabilities to unlock S-rank missions — starting with **Medallion Architecture**.

@@ -1,0 +1,52 @@
+{
+  "id": "sql-dd-query-optimization",
+  "title": "Order Query Optimization Techniques",
+  "category": "sql",
+  "difficulty": "A",
+  "format": "drag-drop",
+  "description": "Arrange Spark SQL query optimization techniques from highest to lowest impact for large-scale joins.",
+  "hints": [
+    "Reducing data early has the biggest impact",
+    "Broadcast joins avoid shuffles for small tables",
+    "Statistics help the optimizer make better decisions"
+  ],
+  "xpReward": 125,
+  "optimalSolution": "Filter early (predicate pushdown) \u2192 Broadcast small tables \u2192 Partition pruning \u2192 Bucketing \u2192 Collect statistics",
+  "explanation": "Query optimization follows a hierarchy of impact. Filter pushdown reduces data volume earliest. Broadcast joins eliminate shuffles. Partition pruning skips irrelevant files. Bucketing pre-sorts for joins. Statistics enable cost-based optimization.",
+  "dragDrop": {
+    "blocks": [
+      {
+        "id": "filter",
+        "code": "WHERE date >= '2024-01-01' -- Filter early",
+        "label": "Predicate Pushdown"
+      },
+      {
+        "id": "broadcast",
+        "code": "/*+ BROADCAST(dim) */ -- Broadcast small table",
+        "label": "Broadcast Join"
+      },
+      {
+        "id": "partition",
+        "code": "PARTITIONED BY (date) -- Partition pruning",
+        "label": "Partition Pruning"
+      },
+      {
+        "id": "bucket",
+        "code": "CLUSTERED BY (id) INTO 100 BUCKETS",
+        "label": "Bucketing"
+      },
+      {
+        "id": "stats",
+        "code": "ANALYZE TABLE fact COMPUTE STATISTICS",
+        "label": "Collect Statistics"
+      }
+    ],
+    "correctOrder": [
+      "filter",
+      "broadcast",
+      "partition",
+      "bucket",
+      "stats"
+    ]
+  }
+}

@@ -1,0 +1,82 @@
+{
+  "description": "Complete the Spark performance tuning configuration and queries.",
+  "expectedOutput": "When completed correctly, this code will:\n1. Enable Adaptive Query Execution (AQE) for runtime optimization\n2. Use broadcast hint for small table joins\n3. Apply Z-ORDER clustering on frequently filtered columns\n4. Cache hot tables in memory\n5. Set shuffle partitions based on data size",
+  "codeTemplate": "-- Enable Adaptive Query Execution\nSET spark.sql.adaptive.__BLANK_0__ = true;\n\n-- Set broadcast join threshold (10 MB)\nSET spark.sql.autoBroadcastJoinThreshold = __BLANK_1__;\n\n-- Optimize the player events table with Z-ORDER\n__BLANK_2__ player_events ZORDER BY (player_id, event_date);\n\n-- Enable Liquid Clustering (alternative to Z-ORDER)\nALTER TABLE player_events CLUSTER BY (__BLANK_3__);\n\n-- Cache a frequently used dimension table\n__BLANK_4__ TABLE game_dimensions;\n\n-- Use broadcast hint for small table join\nSELECT /*+ __BLANK_5__(game_dimensions) */\n  pe.player_id,\n  pe.event_type,\n  gd.game_name\nFROM player_events pe\nJOIN game_dimensions gd ON pe.game_id = gd.game_id;",
+  "blanks": [
+    {
+      "id": 0,
+      "options": [
+        "enabled",
+        "active",
+        "on",
+        "start"
+      ],
+      "correctAnswer": "enabled"
+    },
+    {
+      "id": 1,
+      "options": [
+        "10485760",
+        "1048576",
+        "104857600",
+        "1024"
+      ],
+      "correctAnswer": "10485760"
+    },
+    {
+      "id": 2,
+      "options": [
+        "OPTIMIZE",
+        "COMPACT",
+        "REWRITE",
+        "DEFRAG"
+      ],
+      "correctAnswer": "OPTIMIZE"
+    },
+    {
+      "id": 3,
+      "options": [
+        "player_id, event_date",
+        "player_id",
+        "event_date, player_id, game_id",
+        "game_id"
+      ],
+      "correctAnswer": "player_id, event_date"
+    },
+    {
+      "id": 4,
+      "options": [
+        "CACHE",
+        "STORE",
+        "SAVE",
+        "PRELOAD"
+      ],
+      "correctAnswer": "CACHE"
+    },
+    {
+      "id": 5,
+      "options": [
+        "BROADCAST",
+        "MAPJOIN",
+        "REPLICATE",
+        "DISTRIBUTE"
+      ],
+      "correctAnswer": "BROADCAST"
+    }
+  ],
+  "hints": [
+    "spark.sql.adaptive.enabled is the AQE config key",
+    "10485760 bytes = 10 MB (the default broadcast threshold)",
+    "OPTIMIZE is the Delta Lake file compaction command",
+    "Cluster by columns most used in WHERE clauses",
+    "CACHE TABLE loads data into memory for faster access",
+    "BROADCAST hint tells Spark to broadcast the smaller table"
+  ],
+  "learnings": [
+    "spark.conf.set() configures Spark parameters",
+    "cache() persists DataFrame in memory",
+    "repartition() changes partition count",
+    "broadcast() hints for small table joins",
+    "explain() shows the query execution plan"
+  ]
+}

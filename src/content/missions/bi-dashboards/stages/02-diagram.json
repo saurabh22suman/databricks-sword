@@ -1,0 +1,101 @@
+{
+  "instructions": "Build the BI Stack! Arrange components to show how Databricks SQL powers interactive dashboards with parameters and alerts.",
+  "components": [
+    {
+      "id": "sql-warehouse",
+      "label": "SQL Warehouse (Pro)",
+      "icon": "server"
+    },
+    {
+      "id": "queries",
+      "label": "SQL Queries",
+      "icon": "code"
+    },
+    {
+      "id": "dashboard",
+      "label": "Lakeview Dashboard",
+      "icon": "layout-dashboard"
+    },
+    {
+      "id": "parameters",
+      "label": "Query Parameters",
+      "icon": "sliders"
+    },
+    {
+      "id": "alerts",
+      "label": "SQL Alerts",
+      "icon": "bell"
+    }
+  ],
+  "dropZones": [
+    {
+      "id": "zone-1",
+      "label": "Compute Layer",
+      "position": {
+        "x": 225,
+        "y": 30
+      }
+    },
+    {
+      "id": "zone-2",
+      "label": "Data Access",
+      "position": {
+        "x": 100,
+        "y": 160
+      }
+    },
+    {
+      "id": "zone-3",
+      "label": "Visualization",
+      "position": {
+        "x": 350,
+        "y": 160
+      }
+    },
+    {
+      "id": "zone-4",
+      "label": "Interactivity",
+      "position": {
+        "x": 100,
+        "y": 290
+      }
+    },
+    {
+      "id": "zone-5",
+      "label": "Monitoring",
+      "position": {
+        "x": 350,
+        "y": 290
+      }
+    }
+  ],
+  "correctPlacements": [
+    {
+      "componentId": "sql-warehouse",
+      "zoneId": "zone-1"
+    },
+    {
+      "componentId": "queries",
+      "zoneId": "zone-2"
+    },
+    {
+      "componentId": "dashboard",
+      "zoneId": "zone-3"
+    },
+    {
+      "componentId": "parameters",
+      "zoneId": "zone-4"
+    },
+    {
+      "componentId": "alerts",
+      "zoneId": "zone-5"
+    }
+  ],
+  "learnings": [
+    "SQL Warehouse: Serverless compute with auto-scaling for concurrent users",
+    "SQL Queries: Parameterized queries that power dashboard visualizations",
+    "Lakeview Dashboard: Native dashboards with cross-filtering and drill-down",
+    "Query Parameters: Enable interactivity - users filter without code changes",
+    "SQL Alerts: Automated monitoring with notifications when metrics cross thresholds"
+  ]
+}

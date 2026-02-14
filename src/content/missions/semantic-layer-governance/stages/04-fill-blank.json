@@ -1,0 +1,82 @@
+{
+  "description": "Complete the semantic layer and row-level security configuration.",
+  "expectedOutput": "When completed correctly, this code will:\n1. Create a curated Gold table as the data product foundation\n2. Define standard metrics (net_revenue, customer_ltv, churn_rate)\n3. Implement row-level security for data access control\n4. Establish data contracts with freshness SLAs\n5. Configure AI/BI Genie for natural language queries",
+  "codeTemplate": "-- Define standard revenue metric as a governed SQL view\nCREATE OR REPLACE VIEW analytics.metrics.net_revenue AS\nSELECT\n    business_unit,\n    DATE_TRUNC('month', order_date) AS month,\n    SUM(order_total) - SUM(__BLANK_0__) - SUM(returns_amount) AS net_revenue\nFROM gold.orders\nGROUP BY business_unit, month\n__BLANK_1__ 'Standard net revenue: gross minus discounts minus returns';\n\n-- Row-level security via dynamic view\nCREATE OR REPLACE VIEW analytics.secured.revenue_by_unit AS\nSELECT * FROM analytics.metrics.net_revenue\nWHERE business_unit = __BLANK_2__('business_unit');\n\n-- Column masking for sensitive data\nCREATE OR REPLACE FUNCTION analytics.mask_salary(salary DOUBLE)\nRETURNS DOUBLE\nRETURN __BLANK_3__(\n    IS_ACCOUNT_GROUP_MEMBER('hr_team'), salary, NULL\n);\n\nALTER TABLE gold.employees ALTER COLUMN salary\nSET __BLANK_4__ analytics.mask_salary;\n\n-- Data contract: table expectations\nALTER TABLE gold.orders SET TBLPROPERTIES (\n    'delta.dataContract.enforced' = 'true',\n    'delta.__BLANK_5__' = 'additive'\n);",
+  "blanks": [
+    {
+      "id": 0,
+      "options": [
+        "discount_amount",
+        "tax_amount",
+        "shipping_cost",
+        "margin"
+      ],
+      "correctAnswer": "discount_amount"
+    },
+    {
+      "id": 1,
+      "options": [
+        "COMMENT",
+        "DESCRIBE",
+        "LABEL",
+        "ANNOTATE"
+      ],
+      "correctAnswer": "COMMENT"
+    },
+    {
+      "id": 2,
+      "options": [
+        "current_user_attribute",
+        "session_user",
+        "current_user",
+        "user_property"
+      ],
+      "correctAnswer": "current_user_attribute"
+    },
+    {
+      "id": 3,
+      "options": [
+        "IF",
+        "CASE",
+        "WHEN",
+        "IIF"
+      ],
+      "correctAnswer": "IF"
+    },
+    {
+      "id": 4,
+      "options": [
+        "MASK",
+        "FILTER",
+        "TRANSFORM",
+        "REDACT"
+      ],
+      "correctAnswer": "MASK"
+    },
+    {
+      "id": 5,
+      "options": [
+        "columnMapping.mode",
+        "schemaEvolution",
+        "appendOnly",
+        "autoOptimize"
+      ],
+      "correctAnswer": "columnMapping.mode"
+    }
+  ],
+  "hints": [
+    "Net revenue = gross orders minus discounts minus returns",
+    "COMMENT adds documentation to views, tables, and columns in UC",
+    "current_user_attribute reads custom attributes set on the user's identity",
+    "IF(condition, true_value, false_value) is the conditional function in SQL",
+    "SET MASK applies a column masking function to sensitive columns",
+    "columnMapping.mode = 'additive' allows only additive schema changes (new columns)"
+  ],
+  "learnings": [
+    "CREATE METRIC defines reusable calculations",
+    "CREATE FUNCTION encapsulates business logic",
+    "ROW FILTER controls row-level access",
+    "COLUMN MASK hides sensitive data",
+    "APPLY TAG adds metadata for discovery"
+  ]
+}

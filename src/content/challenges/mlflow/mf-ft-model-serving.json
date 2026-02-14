@@ -1,0 +1,20 @@
+{
+  "id": "mf-ft-model-serving",
+  "title": "Deploy a Model Serving Endpoint",
+  "category": "mlflow",
+  "difficulty": "S",
+  "format": "free-text",
+  "description": "Write code to deploy a registered MLflow model to a Databricks Model Serving endpoint. Create the endpoint configuration with auto-scaling, enable the endpoint, and make a test prediction request.",
+  "hints": [
+    "Use the Databricks SDK or REST API for endpoint management",
+    "Endpoint config includes served_models with model name and version",
+    "Scale to zero is supported for cost optimization"
+  ],
+  "xpReward": 150,
+  "optimalSolution": "from databricks.sdk import WorkspaceClient\nfrom databricks.sdk.service.serving import EndpointCoreConfigInput, ServedModelInput\n\nw = WorkspaceClient()\n\nconfig = EndpointCoreConfigInput(\n    name='my-model-endpoint',\n    served_models=[\n        ServedModelInput(\n            model_name='my_classifier',\n            model_version='1',\n            workload_size='Small',\n            scale_to_zero_enabled=True\n        )\n    ]\n)\n\nw.serving_endpoints.create_and_wait(name='my-model-endpoint', config=config)\n\n# Test prediction\nimport requests\nresponse = requests.post(\n    url=f'{w.config.host}/serving-endpoints/my-model-endpoint/invocations',\n    headers={'Authorization': f'Bearer {w.config.token}'},\n    json={'dataframe_records': [{'feature1': 1.0, 'feature2': 2.0}]}\n)",
+  "explanation": "Databricks Model Serving provides real-time inference endpoints for MLflow models. Endpoints auto-scale based on traffic and can scale to zero when idle to minimize costs. The serving infrastructure handles load balancing, versioning, and A/B testing automatically.",
+  "freeText": {
+    "validationRegex": "serving.*endpoint|ServedModel|create.*endpoint|invocations",
+    "sampleAnswer": "from databricks.sdk import WorkspaceClient\nw = WorkspaceClient()\n\nw.serving_endpoints.create(name='my-endpoint', config={\n    'served_models': [{'model_name': 'classifier', 'model_version': '1'}]\n})"
+  }
+}

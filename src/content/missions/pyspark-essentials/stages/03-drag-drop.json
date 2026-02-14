@@ -1,0 +1,58 @@
+{
+  "description": "Arrange the PySpark DataFrame operations in the correct order to build a transformation pipeline that analyzes user events.",
+  "instructions": "Follow the data transformation flow: Where does data come from first? Which operations reduce data volume (do those early!)? Which operations combine datasets? Remember that transformations are lazy in Spark—what actually triggers execution? Think: load → filter → transform → aggregate → enrich → persist.",
+  "blocks": [
+    {
+      "id": "read-data",
+      "code": "events_df = spark.read.format(\"delta\").load(\"/mnt/data/user_events\")",
+      "label": "Read from Delta"
+    },
+    {
+      "id": "filter-events",
+      "code": "filtered_df = events_df.filter(col(\"event_type\").isin([\"page_view\", \"click\", \"purchase\"]))",
+      "label": "Filter Events"
+    },
+    {
+      "id": "add-column",
+      "code": "enriched_df = filtered_df.withColumn(\"event_date\", to_date(col(\"timestamp\")))",
+      "label": "Add Date Column"
+    },
+    {
+      "id": "group-by",
+      "code": "aggregated_df = enriched_df.groupBy(\"user_id\", \"event_date\").agg(\n    count(\"*\").alias(\"event_count\"),\n    sum(when(col(\"event_type\") == \"purchase\", 1).otherwise(0)).alias(\"purchases\")\n)",
+      "label": "Group and Aggregate"
+    },
+    {
+      "id": "join-customers",
+      "code": "customers_df = spark.read.format(\"delta\").load(\"/mnt/data/customers\")\nresult_df = aggregated_df.join(customers_df, \"user_id\", \"inner\")",
+      "label": "Join with Customers"
+    },
+    {
+      "id": "write-results",
+      "code": "result_df.write.format(\"delta\").mode(\"overwrite\").save(\"/mnt/data/user_activity\")",
+      "label": "Write to Delta"
+    }
+  ],
+  "correctOrder": [
+    "read-data",
+    "filter-events",
+    "add-column",
+    "group-by",
+    "join-customers",
+    "write-results"
+  ],
+  "hints": [
+    "Start by reading the source data from Delta Lake",
+    "Filter early to reduce data volume before expensive operations",
+    "Add derived columns before aggregation",
+    "Perform aggregation before joins (smaller dataset to join)",
+    "Write is the action that triggers computation"
+  ],
+  "learnings": [
+    "Read operations must come first - you cannot transform data you have not loaded",
+    "Filter early to reduce data volume before expensive operations",
+    "Transformations are lazy - they only execute when an action is called",
+    "Select/project columns to reduce memory footprint",
+    "Write operations trigger the entire execution plan"
+  ]
+}

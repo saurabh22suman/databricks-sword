@@ -1,0 +1,52 @@
+{
+  "id": "mf-dd-model-versioning",
+  "title": "Arrange Model Version Lifecycle",
+  "category": "mlflow",
+  "difficulty": "A",
+  "format": "drag-drop",
+  "description": "Arrange the model versioning steps in the correct order to train, register, test in staging, and deploy to production.",
+  "hints": [
+    "Training comes before registration",
+    "Staging is for testing before production",
+    "Archiving the old version happens after the new one is in production"
+  ],
+  "xpReward": 125,
+  "optimalSolution": "# Train and log model\nmlflow.sklearn.log_model(model, 'model')\n# Register to create version 2\nmlflow.register_model(model_uri, 'classifier')\n# Move to staging for testing\nclient.transition_model_version_stage('classifier', 2, 'Staging')\n# Promote to production after testing\nclient.transition_model_version_stage('classifier', 2, 'Production')\n# Archive old version\nclient.transition_model_version_stage('classifier', 1, 'Archived')",
+  "explanation": "Model versioning in MLflow follows a controlled promotion path. New versions start in Staging for testing before being promoted to Production. Old versions are archived to maintain history while keeping the registry clean.",
+  "dragDrop": {
+    "blocks": [
+      {
+        "id": "log",
+        "code": "mlflow.sklearn.log_model(model, 'model')",
+        "label": "Log Model"
+      },
+      {
+        "id": "register",
+        "code": "mlflow.register_model(model_uri, 'classifier')",
+        "label": "Register Version"
+      },
+      {
+        "id": "staging",
+        "code": "client.transition_model_version_stage('classifier', 2, 'Staging')",
+        "label": "Move to Staging"
+      },
+      {
+        "id": "production",
+        "code": "client.transition_model_version_stage('classifier', 2, 'Production')",
+        "label": "Deploy to Production"
+      },
+      {
+        "id": "archive",
+        "code": "client.transition_model_version_stage('classifier', 1, 'Archived')",
+        "label": "Archive Old Version"
+      }
+    ],
+    "correctOrder": [
+      "log",
+      "register",
+      "staging",
+      "production",
+      "archive"
+    ]
+  }
+}

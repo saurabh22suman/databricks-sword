@@ -1,0 +1,82 @@
+{
+  "description": "Complete the advanced SQL analytics queries.",
+  "expectedOutput": "When completed correctly, this code will:\n1. Collect table statistics for query optimization\n2. Create CTEs for modular query building\n3. Apply window functions for rankings and running totals\n4. Use QUALIFY to filter windowed results\n5. Create a materialized view for query caching",
+  "codeTemplate": "-- CTE-based content performance analysis\n__BLANK_0__ daily_views AS (\n    SELECT\n        content_id,\n        DATE_TRUNC('day', view_timestamp) AS view_date,\n        COUNT(*) AS views,\n        AVG(watch_duration_sec) AS avg_duration\n    FROM gold.viewing_events\n    GROUP BY content_id, view_date\n),\ncontent_ranked AS (\n    SELECT\n        *,\n        __BLANK_1__() OVER (\n            PARTITION BY view_date\n            ORDER BY views DESC\n        ) AS daily_rank,\n        __BLANK_2__(views, 1) OVER (\n            PARTITION BY content_id\n            ORDER BY view_date\n        ) AS prev_day_views\n    FROM daily_views\n)\nSELECT\n    content_id,\n    view_date,\n    views,\n    daily_rank,\n    views - prev_day_views AS views_change,\n    ROUND((views - prev_day_views) * 100.0 / prev_day_views, 2) AS pct_change\nFROM content_ranked\nWHERE daily_rank <= 10\nORDER BY view_date DESC, daily_rank;\n\n-- Create a materialized view for dashboard performance\nCREATE __BLANK_3__ VIEW weekly_content_summary AS\nSELECT\n    content_id,\n    DATE_TRUNC('week', view_timestamp) AS week,\n    COUNT(*) AS total_views,\n    COUNT(DISTINCT user_id) AS unique_viewers,\n    __BLANK_4__(watch_duration_sec) AS p50_duration\nFROM gold.viewing_events\nGROUP BY content_id, week;\n\n-- Optimize the base table for common query patterns\nOPTIMIZE gold.viewing_events\n__BLANK_5__ BY (content_id, view_timestamp);",
+  "blanks": [
+    {
+      "id": 0,
+      "options": [
+        "WITH",
+        "CREATE",
+        "SELECT",
+        "FROM"
+      ],
+      "correctAnswer": "WITH"
+    },
+    {
+      "id": 1,
+      "options": [
+        "ROW_NUMBER",
+        "COUNT",
+        "SUM",
+        "RANK"
+      ],
+      "correctAnswer": "ROW_NUMBER"
+    },
+    {
+      "id": 2,
+      "options": [
+        "LAG",
+        "LEAD",
+        "FIRST_VALUE",
+        "NTH_VALUE"
+      ],
+      "correctAnswer": "LAG"
+    },
+    {
+      "id": 3,
+      "options": [
+        "MATERIALIZED",
+        "TEMPORARY",
+        "CACHED",
+        "INDEXED"
+      ],
+      "correctAnswer": "MATERIALIZED"
+    },
+    {
+      "id": 4,
+      "options": [
+        "PERCENTILE_APPROX",
+        "AVG",
+        "MEDIAN",
+        "MODE"
+      ],
+      "correctAnswer": "PERCENTILE_APPROX"
+    },
+    {
+      "id": 5,
+      "options": [
+        "ZORDER",
+        "ORDER",
+        "CLUSTER",
+        "SORT"
+      ],
+      "correctAnswer": "ZORDER"
+    }
+  ],
+  "hints": [
+    "CTEs begin with the WITH keyword",
+    "ROW_NUMBER assigns unique sequential numbers, RANK allows ties",
+    "LAG looks at the PREVIOUS row, LEAD looks at the NEXT row",
+    "MATERIALIZED VIEW pre-computes and stores query results",
+    "PERCENTILE_APPROX calculates approximate percentiles efficiently",
+    "ZORDER co-locates related data for faster multi-column filtering"
+  ],
+  "learnings": [
+    "RECURSIVE CTE enables hierarchical queries",
+    "CREATE MATERIALIZED VIEW caches results",
+    "REFRESH MATERIALIZED VIEW updates the cache",
+    "ANALYZE TABLE computes statistics",
+    "OPTIMIZE hints guide the query optimizer"
+  ]
+}

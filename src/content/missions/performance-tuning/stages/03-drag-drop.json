@@ -1,0 +1,59 @@
+{
+  "description": "Arrange the performance tuning steps from diagnosis to optimization for TitanGames' slow analytics queries.",
+  "instructions": "Follow the performance tuning methodology: What do you check FIRST before making changes? What shows the execution strategy? Pattern: diagnose \u2192 analyze plan \u2192 optimize storage \u2192 enable runtime features \u2192 tune queries \u2192 cache.",
+  "blocks": [
+    {
+      "id": "check-ui",
+      "code": "-- Check Spark UI for stage bottlenecks\n-- Look at: task duration, shuffle read/write, spill",
+      "label": "Diagnose with Spark UI"
+    },
+    {
+      "id": "explain-query",
+      "code": "EXPLAIN EXTENDED SELECT * FROM player_events WHERE game_id = 'TITAN-42'",
+      "label": "Analyze Query Plan"
+    },
+    {
+      "id": "optimize-table",
+      "code": "OPTIMIZE player_events ZORDER BY (game_id, player_id)",
+      "label": "Z-ORDER the Table"
+    },
+    {
+      "id": "enable-aqe",
+      "code": "SET spark.sql.adaptive.enabled = true;\nSET spark.sql.adaptive.coalescePartitions.enabled = true;",
+      "label": "Enable AQE"
+    },
+    {
+      "id": "broadcast-join",
+      "code": "SELECT /*+ BROADCAST(games) */ * FROM player_events e JOIN games g ON e.game_id = g.id",
+      "label": "Use Broadcast Join"
+    },
+    {
+      "id": "cache-hot-table",
+      "code": "CACHE TABLE player_events",
+      "label": "Cache Frequently Used Table"
+    }
+  ],
+  "correctOrder": [
+    "check-ui",
+    "explain-query",
+    "optimize-table",
+    "enable-aqe",
+    "broadcast-join",
+    "cache-hot-table"
+  ],
+  "hints": [
+    "Always diagnose before optimizing \u2014 check Spark UI first",
+    "EXPLAIN shows the query plan before execution",
+    "Z-ORDER improves data skipping for filtered queries",
+    "AQE optimizes at runtime \u2014 enable before running queries",
+    "Broadcast joins eliminate expensive shuffles",
+    "Cache hot tables after other optimizations are in place"
+  ],
+  "learnings": [
+    "Analyze query plans with EXPLAIN to find bottlenecks",
+    "Partitioning reduces data scan for filtered queries",
+    "Caching speeds up repeated access to the same data",
+    "Broadcast joins are efficient for small dimension tables",
+    "AQE automatically optimizes at runtime"
+  ]
+}

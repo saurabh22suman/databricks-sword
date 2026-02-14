@@ -1,0 +1,20 @@
+{
+  "id": "arch-ft-disaster-recovery",
+  "title": "Design a Disaster Recovery Plan",
+  "category": "architecture",
+  "difficulty": "S",
+  "format": "free-text",
+  "description": "Design a disaster recovery plan for a Databricks lakehouse. Address RTO/RPO requirements, Delta table recovery strategies, Unity Catalog backup, cross-region replication, and failover procedures.",
+  "hints": [
+    "Delta's time travel enables point-in-time recovery",
+    "Unity Catalog metastore can be replicated across regions",
+    "Deep Clone creates independent copies for DR"
+  ],
+  "xpReward": 150,
+  "optimalSolution": "# Disaster Recovery Plan\n\n## Recovery Objectives\n- RPO (Recovery Point Objective): 1 hour\n- RTO (Recovery Time Objective): 4 hours\n\n## Data Layer\n1. **Delta Tables**\n   - Enable extended retention: `delta.logRetentionDuration = 30 days`\n   - Use Deep Clone for DR copies: `CREATE TABLE dr.table DEEP CLONE prod.table`\n   - Cross-region storage replication (S3 CRR / ADLS GRS)\n\n2. **Unity Catalog**\n   - Metastore backup via workspace export API\n   - Replicate storage credentials and external locations\n   - Document permission grants for replay\n\n## Compute Layer\n- Cluster configs as Infrastructure as Code (Terraform)\n- Job definitions exported via Jobs API / DAB\n- Workspace notebooks synced to Git (Repos)\n\n## Failover Procedure\n1. Validate DR region storage is current (check replication lag)\n2. Restore Unity Catalog metastore\n3. Deploy compute via Terraform\n4. Update DNS/load balancer to DR endpoint\n5. Run validation queries on critical tables\n6. Notify stakeholders of failover completion",
+  "explanation": "Disaster recovery for lakehouses combines Delta's native capabilities (time travel, cloning) with cloud storage replication and Unity Catalog backup. Infrastructure as Code ensures compute can be recreated quickly. Regular DR drills validate the plan works.",
+  "freeText": {
+    "validationRegex": "RPO|RTO|Deep Clone|time travel|replication|failover|disaster|recovery",
+    "sampleAnswer": "RPO: 1hr, RTO: 4hr. Use Delta time travel + Deep Clone. Cross-region storage replication. Unity Catalog metastore backup. Terraform for compute. Documented failover procedure."
+  }
+}

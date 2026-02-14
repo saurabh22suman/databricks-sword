@@ -1,0 +1,64 @@
+# Mission Briefing: Data Ingestion Pipeline
+
+## The Situation
+
+TechCorp's lakehouse is operational, and teams are querying data successfully. Now the data sources are multiplying.
+
+The engineering team needs to ingest data from **12 different systems**:
+- **Application logs** (JSON, 500K files/day landing in S3)
+- **Customer database** (CDC feeds, Parquet, hourly dumps)
+- **Clickstream events** (CSV, real-time uploads)
+- **Third-party APIs** (JSON, varying schemas)
+
+The current approach is **manual Python scripts** that:
+- Run on cron schedules (batch processing only)
+- Re-process entire datasets (expensive, slow)
+- Break when schemas change (no schema inference)
+- Require 40+ hours/month of maintenance
+
+The VP of Engineering wants **automated incremental ingestion** with minimal operational overhead.
+
+## The Opportunity
+
+Databricks provides two ingestion tools:
+
+**Auto Loader** (recommended for most cases):
+- **Incremental streaming** — processes only new files since last run
+- **Schema inference** — auto-detects column types, handles evolution
+- **Exactly-once semantics** — no duplicates, no missing data
+- **Scalable** — 100K+ files/hour with automatic parallelization
+
+**COPY INTO** (for simple batch loads):  
+- **Idempotent** — re-run safe, skips already loaded files
+- **SQL-based** — simple syntax for batch ingestion
+- **Manual schema** — you define the schema explicitly
+
+Industry adoption:
+- **Coinbase:** Auto Loader ingests 50M blockchain events/minute
+- **Rivian:** Real-time telemetry from 100K+ vehicles via Auto Loader
+- **Adobe:** 800TB/day ingested with Auto Loader schema inference
+
+## Your Mission
+
+Build **streaming and batch ingestion pipelines** into the lakehouse bronze layer:
+
+1. **Configure** Auto Loader for JSON/CSV/Parquet files
+2. **Enable** schema inference and evolution
+3. **Write** data to bronze Delta tables
+4. **Implement** COPY INTO for batch historical loads
+5. **Understand** batch vs streaming tradeoffs
+
+## Success Criteria
+
+- **Auto Loader pipeline** running in streaming mode
+- **Schema inference** handling evolving data sources
+- **Bronze tables** populated with raw data
+- **COPY INTO** used for historical batch load
+
+## The Stakes
+
+If Auto Loader works, Tech Corp eliminates manual ingestion scripts, saving **40 hours/month** of engineer time ($8K/month) and enabling **real-time analytics** (5-minute data latency vs 24-hour batch delays).
+
+---
+
+**Next Step:** Diagram — Understand the ingestion architecture

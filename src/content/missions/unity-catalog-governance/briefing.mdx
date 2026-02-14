@@ -1,0 +1,31 @@
+# Mission Briefing: Unity Catalog & Governance
+
+## Situation Report
+
+**Client:** Federal DataVault — a government data agency managing 200+ datasets across 15 departments. Each department has different clearance levels, and audit compliance requires full lineage tracking for every data asset.
+
+## Your Mission
+
+Federal DataVault is migrating from legacy Hive metastores to Unity Catalog. You must design the governance framework: namespaces, access controls, and lineage tracking that satisfies both operational needs and audit requirements.
+
+## Objectives
+
+1. **Understand the three-level namespace** — catalog.schema.table hierarchy
+2. **Configure fine-grained access** — GRANT/REVOKE permissions at every level
+3. **Implement row and column-level security** — protect sensitive fields
+4. **Track data lineage** — automated lineage from Unity Catalog
+5. **Apply governance best practices** — least privilege, separation of duties
+
+## Key Intelligence
+
+- Unity Catalog provides centralized governance across all Databricks workspaces
+- The three-level namespace: `catalog.schema.table` replaces the flat Hive model
+- Permissions cascade down: granting on a catalog flows to all schemas and tables within
+- Dynamic views enable row-level and column-level security
+- Data lineage is automatically captured for tables, notebooks, and pipelines
+
+## Stakes
+
+Without proper governance, a data breach in a government system means regulatory fines, compromised citizen data, and public trust erosion. Every permission must be justified and auditable.
+
+> "Security is not a feature — it's the foundation everything else is built on."

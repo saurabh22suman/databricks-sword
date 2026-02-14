@@ -1,0 +1,73 @@
+{
+  "id": "bi-dashboards",
+  "title": "BI Dashboards",
+  "subtitle": "Build interactive dashboards with Databricks SQL and Lakeview",
+  "description": "Learn to create production-ready BI dashboards using Databricks SQL. Master SQL Warehouse configuration, Lakeview dashboards, parameters for interactivity, alerts for monitoring, and scheduled query refreshes.",
+  "industry": "retail",
+  "rank": "A",
+  "xpRequired": 500,
+  "xpReward": 500,
+  "estimatedMinutes": 50,
+  "primaryFeatures": [
+    "SQL Warehouses",
+    "Lakeview Dashboards",
+    "Query Parameters",
+    "SQL Alerts",
+    "Scheduled Refreshes"
+  ],
+  "prerequisites": [
+    "sql-analytics-intro"
+  ],
+  "databricksEnabled": false,
+  "stages": [
+    {
+      "id": "briefing",
+      "title": "Mission Briefing",
+      "type": "briefing",
+      "configFile": "stages/01-briefing.json",
+      "xpReward": 0,
+      "estimatedMinutes": 5
+    },
+    {
+      "id": "diagram",
+      "title": "BI Dashboard Architecture",
+      "type": "diagram",
+      "configFile": "stages/02-diagram.json",
+      "xpReward": 50,
+      "estimatedMinutes": 10
+    },
+    {
+      "id": "drag-drop-pipeline",
+      "title": "Build Dashboard Workflow",
+      "type": "drag-drop",
+      "configFile": "stages/03-drag-drop.json",
+      "xpReward": 75,
+      "estimatedMinutes": 12
+    },
+    {
+      "id": "fill-blank-dashboard",
+      "title": "Configure Dashboards & Alerts",
+      "type": "fill-blank",
+      "configFile": "stages/04-fill-blank.json",
+      "xpReward": 75,
+      "estimatedMinutes": 12
+    },
+    {
+      "id": "quiz",
+      "title": "Knowledge Check",
+      "type": "quiz",
+      "configFile": "stages/05-quiz.json",
+      "xpReward": 50,
+      "estimatedMinutes": 8
+    },
+    {
+      "id": "debrief",
+      "title": "Mission Debrief",
+      "type": "debrief",
+      "configFile": "stages/06-debrief.json",
+      "xpReward": 0,
+      "estimatedMinutes": 3
+    }
+  ],
+  "sideQuests": []
+}
