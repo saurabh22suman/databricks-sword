@@ -9,8 +9,12 @@ import { ConfettiCanvas } from "../gamification/ConfettiCanvas";
  * ChallengeCompleteCelebration Props
  */
 export type ChallengeCompleteCelebrationProps = {
-  /** XP earned from the challenge */
+  /** XP earned from the challenge (final amount with multiplier) */
   xpEarned: number;
+  /** Base XP before multiplier */
+  baseXp?: number;
+  /** Streak multiplier applied */
+  multiplier?: number;
   /** Whether XP was maxed (already earned max from this challenge) */
   xpMaxed?: boolean;
   /** Auto-dismiss after ms */
@@ -29,6 +33,8 @@ export type ChallengeCompleteCelebrationProps = {
  */
 export function ChallengeCompleteCelebration({
   xpEarned,
+  baseXp,
+  multiplier,
   xpMaxed = false,
   autoDismiss = 2800,
   onDismiss,
@@ -76,8 +82,21 @@ export function ChallengeCompleteCelebration({
         </h2>
 
         {xpEarned > 0 && !xpMaxed ? (
-          <div className="text-2xl font-mono font-bold text-anime-accent animate-xp-count-pop">
-            +{xpEarned} XP
+          <div className="animate-xp-count-pop">
+            {multiplier && multiplier > 1 && baseXp ? (
+              <>
+                <div className="text-lg font-mono text-anime-400 mb-1">
+                  {baseXp} XP × {multiplier}x streak
+                </div>
+                <div className="text-2xl font-mono font-bold text-anime-accent">
+                  +{xpEarned} XP
+                </div>
+              </>
+            ) : (
+              <div className="text-2xl font-mono font-bold text-anime-accent">
+                +{xpEarned} XP
+              </div>
+            )}
           </div>
         ) : xpMaxed ? (
           <div className="text-sm text-anime-yellow mt-1">

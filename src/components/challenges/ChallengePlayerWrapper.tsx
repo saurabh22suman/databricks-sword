@@ -30,6 +30,7 @@ export function ChallengePlayerWrapper({
   const [xpMaxed, setXpMaxed] = useState(false)
   const [celebrating, setCelebrating] = useState(false)
   const [lastXpEarned, setLastXpEarned] = useState(0)
+  const [lastMultiplier, setLastMultiplier] = useState(1)
 
   useEffect(() => {
     const sandbox = loadSandbox()
@@ -48,6 +49,7 @@ export function ChallengePlayerWrapper({
       setXpMaxed(true)
     }
     setLastXpEarned(event.amount)
+    setLastMultiplier(event.multiplier)
     setCelebrating(true)
   }
 
@@ -61,6 +63,8 @@ export function ChallengePlayerWrapper({
       {celebrating && (
         <ChallengeCompleteCelebration
           xpEarned={lastXpEarned}
+          baseXp={challenge.xpReward}
+          multiplier={lastMultiplier}
           xpMaxed={xpMaxed}
           onDismiss={handleCelebrationDismiss}
           autoDismiss={2800}

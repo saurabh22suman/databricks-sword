@@ -1,7 +1,7 @@
 "use client";
 
 import { useSettings } from "@/lib/settings";
-import { useEffect, useRef, useCallback } from "react";
+import { useCallback, useEffect, useRef } from "react";
 
 /**
  * ConfettiCanvas Props
