@@ -6,6 +6,7 @@ import type { Achievement } from "@/lib/gamification/types";
 import { playSound } from "@/lib/sound";
 import { cn } from "@/lib/utils";
 import { useEffect } from "react";
+import { ConfettiCanvas } from "./ConfettiCanvas";
 
 /**
  * AchievementToast Props
@@ -60,10 +61,18 @@ export function AchievementToast({
         "fixed top-4 right-4 z-40 max-w-sm",
         "bg-anime-900/95 border border-anime-yellow backdrop-blur-sm",
         "rounded-lg p-4 shadow-neon-yellow",
-        showAnimation && "animate-slide-in",
+        showAnimation && "animate-slide-in animate-achievement-shimmer shimmer-border",
         className
       )}
     >
+      {/* Confetti Canvas — smaller, golden burst for achievements */}
+      {showAnimation && (
+        <ConfettiCanvas
+          particleCount={60}
+          duration={2500}
+          colors={["#ffcc00", "#ff3366", "#9933ff", "#00ffff", "#ffffff"]}
+        />
+      )}
       {/* Close Button */}
       {onDismiss && (
         <button

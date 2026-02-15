@@ -84,7 +84,7 @@ export function XpAward({
         "relative overflow-hidden rounded-lg bg-anime-900/95 border border-anime-cyan",
         "backdrop-blur-sm shadow-neon-cyan p-4",
         "flex flex-col items-center justify-center gap-2",
-        showAnimation && "animate-particle-burst",
+        showAnimation && "animate-particle-burst animate-xp-glow-pulse shimmer-border shimmer-border-cyan",
         className
       )}
     >
@@ -107,7 +107,8 @@ export function XpAward({
       {/* XP Amount */}
       <div className={cn(
         "font-mono font-bold text-anime-accent",
-        xpTextSize
+        xpTextSize,
+        showAnimation && "animate-xp-count-pop"
       )}>
         +{xpEvent.amount} XP
       </div>

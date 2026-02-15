@@ -5,6 +5,7 @@ import type { Rank } from "@/lib/gamification/types";
 import { playSound } from "@/lib/sound";
 import { cn } from "@/lib/utils";
 import { useEffect } from "react";
+import { ConfettiCanvas } from "./ConfettiCanvas";
 import { RankBadge } from "./RankBadge";
 
 /**
@@ -99,6 +100,11 @@ export function RankUpCelebration({
 
       {/* Scan Lines Effect */}
       <div className="scan-lines absolute inset-0 pointer-events-none" />
+
+      {/* Confetti Canvas */}
+      {showAnimation && (
+        <ConfettiCanvas particleCount={150} duration={4000} />
+      )}
 
       {/* Particle Burst Effect */}
       {showAnimation && (

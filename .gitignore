@@ -68,3 +68,5 @@ docker-compose-prod-exp.yml
 
 # Playwright MCP
 .playwright-mcp/
+test-results/
+e2e/screenshots/

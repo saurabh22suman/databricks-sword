@@ -11,6 +11,7 @@ import { loadSandbox, MAX_CHALLENGE_XP_COMPLETIONS } from "@/lib/sandbox"
 import { playSound } from "@/lib/sound"
 import { useRouter } from "next/navigation"
 import React, { useEffect, useState } from "react"
+import { ChallengeCompleteCelebration } from "./ChallengeCompleteCelebration"
 import { ChallengePlayer } from "./ChallengePlayer"
 
 export type ChallengePlayerWrapperProps = {
@@ -27,6 +28,8 @@ export function ChallengePlayerWrapper({
 }: ChallengePlayerWrapperProps): React.ReactElement {
   const router = useRouter()
   const [xpMaxed, setXpMaxed] = useState(false)
+  const [celebrating, setCelebrating] = useState(false)
+  const [lastXpEarned, setLastXpEarned] = useState(0)
 
   useEffect(() => {
     const sandbox = loadSandbox()
@@ -44,11 +47,25 @@ export function ChallengePlayerWrapper({
     if (event.amount === 0) {
       setXpMaxed(true)
     }
+    setLastXpEarned(event.amount)
+    setCelebrating(true)
+  }
+
+  const handleCelebrationDismiss = (): void => {
+    setCelebrating(false)
     router.push("/challenges")
   }
 
   return (
     <div>
+      {celebrating && (
+        <ChallengeCompleteCelebration
+          xpEarned={lastXpEarned}
+          xpMaxed={xpMaxed}
+          onDismiss={handleCelebrationDismiss}
+          autoDismiss={2800}
+        />
+      )}
       {xpMaxed && (
         <div className="mb-4 px-4 py-3 rounded border border-anime-yellow/30 bg-anime-yellow/5 text-anime-yellow text-sm flex items-center gap-2">
           <span className="text-lg">⚡</span>
