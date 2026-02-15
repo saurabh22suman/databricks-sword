@@ -186,26 +186,26 @@ describe("XP Event Service", () => {
       )
     })
 
-    it("awards XP on second completion (within cap)", () => {
-      // First completion
+    it("awards 0 XP on second completion (cap at 1)", () => {
+      // First completion earns XP
       awardChallengeXp("challenge-1", 75)
-      // Second completion
+      // Second completion should earn 0 XP (cap reached)
       const event = awardChallengeXp("challenge-1", 75)
-      expect(event.amount).toBe(75)
-      // xpEarned should be cumulative: 75 + 75 = 150
-      expect(sandbox.challengeResults["challenge-1"].xpEarned).toBe(150)
+      expect(event.amount).toBe(0)
+      // xpEarned stays at 75 (not 150)
+      expect(sandbox.challengeResults["challenge-1"].xpEarned).toBe(75)
       expect(sandbox.challengeResults["challenge-1"].completionCount).toBe(2)
     })
 
-    it("awards 0 XP after max completions (cap at 2)", () => {
-      // First and second completions earn XP
+    it("awards 0 XP on third completion (cap at 1)", () => {
+      // First completion earns XP
       awardChallengeXp("challenge-1", 75)
+      // Second and third completions should earn 0 XP
       awardChallengeXp("challenge-1", 75)
-      // Third completion should earn 0 XP
       const event = awardChallengeXp("challenge-1", 75)
       expect(event.amount).toBe(0)
-      // xpEarned stays at 150 (not 225)
-      expect(sandbox.challengeResults["challenge-1"].xpEarned).toBe(150)
+      // xpEarned stays at 75
+      expect(sandbox.challengeResults["challenge-1"].xpEarned).toBe(75)
       expect(sandbox.challengeResults["challenge-1"].completionCount).toBe(3)
     })
 

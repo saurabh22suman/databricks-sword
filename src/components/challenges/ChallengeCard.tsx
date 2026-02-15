@@ -98,25 +98,16 @@ export function ChallengeCard({
         )}
       </div>
 
-      {/* Completion count bar */}
+      {/* Completion indicator */}
       {completionCount > 0 && (
         <div className="mt-3 pt-3 border-t border-anime-800 flex items-center justify-between text-xs">
-          <span className="text-anime-500">
-            Completed {completionCount}/{MAX_CHALLENGE_XP_COMPLETIONS}
+          <span className="text-anime-green flex items-center gap-1.5">
+            <span className="w-4 h-4 rounded-full bg-anime-green/20 flex items-center justify-center text-[10px]">✓</span>
+            Completed
           </span>
-          <div className="flex gap-1">
-            {Array.from({ length: MAX_CHALLENGE_XP_COMPLETIONS }).map((_, i) => (
-              <div
-                key={i}
-                className={cn(
-                  "w-2 h-2 rounded-full",
-                  i < completionCount
-                    ? "bg-anime-green shadow-[0_0_4px_rgba(0,255,102,0.5)]"
-                    : "bg-anime-800"
-                )}
-              />
-            ))}
-          </div>
+          {!xpMaxed && (
+            <span className="text-anime-500">Practice anytime</span>
+          )}
         </div>
       )}
     </article>

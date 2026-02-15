@@ -70,8 +70,8 @@ export const MissionProgressSchema = z.object({
   deployedAt: z.string().optional(),
 })
 
-/** Maximum number of challenge completions that award XP */
-export const MAX_CHALLENGE_XP_COMPLETIONS = 2
+/** Maximum number of challenge completions that award XP (only first completion) */
+export const MAX_CHALLENGE_XP_COMPLETIONS = 1
 
 /**
  * Challenge attempt result.
