@@ -5,9 +5,8 @@
 
 "use client"
 
-import { CATEGORY_ICON_MAP } from "@/lib/challenges/categoryIcons"
-import type { ChallengeCategory } from "@/lib/challenges/types"
 import { cn } from "@/lib/utils"
+import { ChevronDown } from "lucide-react"
 import React from "react"
 
 export type ChallengeFiltersProps = {
@@ -26,16 +25,20 @@ export type ChallengeFiltersProps = {
 }
 
 const CATEGORIES = [
-  "pyspark",
-  "sql",
-  "delta-lake",
-  "streaming",
-  "mlflow",
-  "unity-catalog",
-  "architecture",
+  { value: "pyspark", label: "PySpark" },
+  { value: "sql", label: "SQL" },
+  { value: "delta-lake", label: "Delta Lake" },
+  { value: "streaming", label: "Streaming" },
+  { value: "mlflow", label: "MLflow" },
+  { value: "unity-catalog", label: "Unity Catalog" },
+  { value: "architecture", label: "Architecture" },
 ] as const
 
-const DIFFICULTIES = ["B", "A", "S"] as const
+const DIFFICULTIES = [
+  { value: "B", label: "B — Beginner" },
+  { value: "A", label: "A — Intermediate" },
+  { value: "S", label: "S — Advanced" },
+] as const
 
 const STATUSES = [
   { value: "not-started", label: "Not Started" },
@@ -43,7 +46,7 @@ const STATUSES = [
 ] as const
 
 /**
- * ChallengeFilters renders category and difficulty filter buttons.
+ * ChallengeFilters renders category, difficulty, and status filter dropdowns.
  */
 export function ChallengeFilters({
   selectedCategory,
@@ -54,103 +57,95 @@ export function ChallengeFilters({
   onStatusChange,
 }: ChallengeFiltersProps): React.ReactElement {
   return (
-    <div className="space-y-4">
-      {/* Category Filters */}
-      <div className="flex flex-wrap gap-2">
-        <button
-          onClick={() => onCategoryChange(null)}
-          className={cn(
-            "px-3 py-1.5 rounded text-sm font-medium transition-colors",
-            selectedCategory === null
-              ? "bg-anime-cyan/20 text-anime-cyan border border-anime-cyan"
-              : "bg-anime-800 text-anime-500 border border-anime-700 hover:text-anime-300"
-          )}
-        >
-          All
-        </button>
-        {CATEGORIES.map((category) => (
-          <button
-            key={category}
-            onClick={() => onCategoryChange(category)}
+    <div className="flex flex-wrap gap-4">
+      {/* Category Dropdown */}
+      <div className="relative">
+        <label className="block text-xs text-anime-500 uppercase tracking-wider mb-1.5">
+          Category
+        </label>
+        <div className="relative">
+          <select
+            value={selectedCategory ?? ""}
+            onChange={(e) => onCategoryChange(e.target.value || null)}
             className={cn(
-              "px-3 py-1.5 rounded text-sm font-medium transition-colors flex items-center gap-1.5",
-              selectedCategory === category
-                ? "bg-anime-cyan/20 text-anime-cyan border border-anime-cyan"
-                : "bg-anime-800 text-anime-500 border border-anime-700 hover:text-anime-300"
+              "appearance-none w-48 px-4 py-2.5 pr-10 rounded-sm",
+              "bg-anime-900 border border-anime-700",
+              "text-anime-100 text-sm font-medium",
+              "focus:outline-none focus:border-anime-cyan focus:ring-1 focus:ring-anime-cyan/50",
+              "transition-colors cursor-pointer",
+              selectedCategory && "border-anime-cyan text-anime-cyan"
             )}
           >
-            <img
-              src={CATEGORY_ICON_MAP[category as ChallengeCategory]}
-              alt=""
-              className="w-4 h-4 opacity-70"
-            />
-            {category}
-          </button>
-        ))}
+            <option value="">All Categories</option>
+            {CATEGORIES.map((cat) => (
+              <option key={cat.value} value={cat.value}>
+                {cat.label}
+              </option>
+            ))}
+          </select>
+          <ChevronDown className="absolute right-3 top-1/2 -translate-y-1/2 w-4 h-4 text-anime-500 pointer-events-none" />
+        </div>
       </div>
 
-      {/* Difficulty Filters */}
-      <div className="flex gap-2">
-        <button
-          onClick={() => onDifficultyChange(null)}
-          className={cn(
-            "px-3 py-1.5 rounded text-sm font-heading font-bold transition-colors",
-            selectedDifficulty === null
-              ? "bg-anime-cyan/20 text-anime-cyan border border-anime-cyan"
-              : "bg-anime-800 text-anime-500 border border-anime-700 hover:text-anime-300"
-          )}
-        >
-          All
-        </button>
-        {DIFFICULTIES.map((diff) => (
-          <button
-            key={diff}
-            onClick={() => onDifficultyChange(diff)}
+      {/* Difficulty Dropdown */}
+      <div className="relative">
+        <label className="block text-xs text-anime-500 uppercase tracking-wider mb-1.5">
+          Difficulty
+        </label>
+        <div className="relative">
+          <select
+            value={selectedDifficulty ?? ""}
+            onChange={(e) => onDifficultyChange(e.target.value || null)}
             className={cn(
-              "px-3 py-1.5 rounded text-sm font-heading font-bold transition-colors",
-              selectedDifficulty === diff
-                ? diff === "S"
-                  ? "bg-anime-accent/20 text-anime-accent border border-anime-accent"
-                  : diff === "A"
-                    ? "bg-anime-purple/20 text-anime-purple border border-anime-purple"
-                    : "bg-anime-cyan/20 text-anime-cyan border border-anime-cyan"
-                : "bg-anime-800 text-anime-500 border border-anime-700 hover:text-anime-300"
+              "appearance-none w-44 px-4 py-2.5 pr-10 rounded-sm",
+              "bg-anime-900 border border-anime-700",
+              "text-anime-100 text-sm font-medium",
+              "focus:outline-none focus:border-anime-cyan focus:ring-1 focus:ring-anime-cyan/50",
+              "transition-colors cursor-pointer",
+              selectedDifficulty === "S" && "border-anime-accent text-anime-accent",
+              selectedDifficulty === "A" && "border-anime-purple text-anime-purple",
+              selectedDifficulty === "B" && "border-anime-cyan text-anime-cyan"
             )}
           >
-            {diff}
-          </button>
-        ))}
+            <option value="">All Levels</option>
+            {DIFFICULTIES.map((diff) => (
+              <option key={diff.value} value={diff.value}>
+                {diff.label}
+              </option>
+            ))}
+          </select>
+          <ChevronDown className="absolute right-3 top-1/2 -translate-y-1/2 w-4 h-4 text-anime-500 pointer-events-none" />
+        </div>
       </div>
 
-      {/* Status Filters */}
-      <div className="flex gap-2">
-        <button
-          onClick={() => onStatusChange(null)}
-          className={cn(
-            "px-3 py-1.5 rounded text-sm font-medium transition-colors",
-            selectedStatus === null
-              ? "bg-anime-cyan/20 text-anime-cyan border border-anime-cyan"
-              : "bg-anime-800 text-anime-500 border border-anime-700 hover:text-anime-300"
-          )}
-        >
-          All
-        </button>
-        {STATUSES.map((status) => (
-          <button
-            key={status.value}
-            onClick={() => onStatusChange(status.value)}
+      {/* Status Dropdown */}
+      <div className="relative">
+        <label className="block text-xs text-anime-500 uppercase tracking-wider mb-1.5">
+          Status
+        </label>
+        <div className="relative">
+          <select
+            value={selectedStatus ?? ""}
+            onChange={(e) => onStatusChange(e.target.value || null)}
             className={cn(
-              "px-3 py-1.5 rounded text-sm font-medium transition-colors",
-              selectedStatus === status.value
-                ? status.value === "completed"
-                  ? "bg-anime-green/20 text-anime-green border border-anime-green"
-                  : "bg-anime-yellow/20 text-anime-yellow border border-anime-yellow"
-                : "bg-anime-800 text-anime-500 border border-anime-700 hover:text-anime-300"
+              "appearance-none w-40 px-4 py-2.5 pr-10 rounded-sm",
+              "bg-anime-900 border border-anime-700",
+              "text-anime-100 text-sm font-medium",
+              "focus:outline-none focus:border-anime-cyan focus:ring-1 focus:ring-anime-cyan/50",
+              "transition-colors cursor-pointer",
+              selectedStatus === "completed" && "border-anime-green text-anime-green",
+              selectedStatus === "not-started" && "border-anime-yellow text-anime-yellow"
             )}
           >
-            {status.label}
-          </button>
-        ))}
+            <option value="">All</option>
+            {STATUSES.map((status) => (
+              <option key={status.value} value={status.value}>
+                {status.label}
+              </option>
+            ))}
+          </select>
+          <ChevronDown className="absolute right-3 top-1/2 -translate-y-1/2 w-4 h-4 text-anime-500 pointer-events-none" />
+        </div>
       </div>
     </div>
   )
