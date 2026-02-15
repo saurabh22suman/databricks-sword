@@ -1,10 +1,15 @@
 import { BlogSection } from "@/components/landing/BlogSection"
+import type { BlogSectionPost } from "@/components/landing/BlogSection"
 import { FAQ } from "@/components/landing/FAQ"
 import { FeaturedMissions } from "@/components/landing/FeaturedMissions"
 import { Hero } from "@/components/landing/Hero"
 import { InteractiveSyllabus } from "@/components/landing/InteractiveSyllabus"
+import { blogPosts, getDb } from "@/lib/db"
+import { getContentFiles } from "@/lib/mdx/content"
+import { blogFrontmatterSchema } from "@/lib/mdx/schema"
 import { getAllMissions } from "@/lib/missions"
 import { StructuredData, getCourseStructuredData } from "@/lib/seo/structured-data"
+import { eq } from "drizzle-orm"
 import type { Metadata } from "next"
 
 export const metadata: Metadata = {
@@ -25,6 +30,43 @@ export const metadata: Metadata = {
  */
 export default async function HomePage(): Promise<React.ReactElement> {
   const missions = await getAllMissions()
+
+  // --- Fetch latest 3 blog posts for System Logs section ---
+  let blogSectionPosts: BlogSectionPost[] = []
+  try {
+    // DB posts
+    const db = getDb()
+    const dbRows = await db
+      .select()
+      .from(blogPosts)
+      .where(eq(blogPosts.status, "published"))
+    const dbFormatted: BlogSectionPost[] = dbRows.map((p) => ({
+      slug: p.slug,
+      category: p.category,
+      title: p.title,
+      publishedAt: p.publishedAt?.toISOString().split("T")[0] ?? "",
+      readTimeMinutes: Math.ceil((p.content?.length ?? 0) / 1500) || 5,
+    }))
+
+    // MDX posts
+    const mdxFiles = await getContentFiles("blog", blogFrontmatterSchema)
+    const dbSlugs = new Set(dbFormatted.map((p) => p.slug))
+    const mdxFormatted: BlogSectionPost[] = mdxFiles
+      .filter((p) => !dbSlugs.has(p.slug))
+      .map((p) => ({
+        slug: p.slug,
+        category: p.frontmatter.category,
+        title: p.frontmatter.title,
+        publishedAt: p.frontmatter.publishedAt,
+        readTimeMinutes: Math.ceil(p.content.length / 1500) || 5,
+      }))
+
+    const all = [...dbFormatted, ...mdxFormatted]
+    all.sort((a, b) => new Date(b.publishedAt).getTime() - new Date(a.publishedAt).getTime())
+    blogSectionPosts = all.slice(0, 3)
+  } catch (error) {
+    console.error("Failed to load blog posts for landing page:", error)
+  }
 
   // Pick 4 featured missions for the Active Campaigns section
   const featuredIds = [
@@ -49,7 +91,7 @@ export default async function HomePage(): Promise<React.ReactElement> {
         <FeaturedMissions missions={featuredMissions} />
         <InteractiveSyllabus missions={missions} />
         <FAQ />
-        <BlogSection />
+        <BlogSection posts={blogSectionPosts} />
       </main>
     </div>
   )

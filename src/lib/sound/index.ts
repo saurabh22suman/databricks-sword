@@ -15,7 +15,7 @@
  * ```
  */
 
-export type { SoundId, MusicState } from "./types"
+export type { MusicState, SoundId } from "./types"
 import { cyberSoundEngine } from "./engine"
 import { ambientMusic } from "./music"
 import type { MusicState, SoundId } from "./types"

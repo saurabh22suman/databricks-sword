@@ -39,6 +39,8 @@ export function BackgroundMusic(): null {
   const musicStarted = useRef(false)
   /** Tracks whether music was paused because the user entered a mission */
   const pausedForMission = useRef(false)
+  /** Tracks whether music was paused because the tab lost focus */
+  const pausedForTabHidden = useRef(false)
 
   const onMissionStage = isMissionStageRoute(pathname)
 
@@ -114,6 +116,33 @@ export function BackgroundMusic(): null {
     if (!hasInteracted.current) return
     setMusicVolume(settings.musicVolume)
   }, [settings.musicVolume])
+
+  // Pause when tab loses focus, resume when tab regains focus
+  useEffect(() => {
+    const handleVisibility = (): void => {
+      if (!hasInteracted.current) return
+      if (!settings.musicEnabled) return
+
+      if (document.hidden) {
+        const state = getMusicState()
+        if (state === "playing" || state === "fading-in") {
+          stopMusic()
+          pausedForTabHidden.current = true
+        }
+      } else if (pausedForTabHidden.current) {
+        pausedForTabHidden.current = false
+        // Only resume if not on a mission stage
+        if (!isMissionStageRoute(window.location.pathname)) {
+          startMusic()
+        }
+      }
+    }
+
+    document.addEventListener("visibilitychange", handleVisibility)
+    return () => {
+      document.removeEventListener("visibilitychange", handleVisibility)
+    }
+  }, [settings.musicEnabled])
 
   // Clean up on unmount
   useEffect(() => {
