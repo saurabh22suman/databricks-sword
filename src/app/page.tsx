@@ -86,6 +86,17 @@ export default async function HomePage(): Promise<React.ReactElement> {
       <div className="fixed inset-0 bg-cyber-grid bg-[size:40px_40px] opacity-20 pointer-events-none animate-pulse-fast" />
       <div className="fixed top-0 left-0 w-full h-32 bg-gradient-to-b from-anime-accent/10 to-transparent pointer-events-none z-0" />
       
+      {/* Beta Banner */}
+      <div className="relative z-20 flex justify-center pt-2">
+        <div className="inline-flex items-center gap-2 px-4 py-1.5 rounded-full bg-anime-purple/20 border border-anime-purple/40 text-anime-purple text-sm font-medium backdrop-blur-sm">
+          <span className="relative flex h-2 w-2">
+            <span className="animate-ping absolute inline-flex h-full w-full rounded-full bg-anime-purple opacity-75" />
+            <span className="relative inline-flex rounded-full h-2 w-2 bg-anime-purple" />
+          </span>
+          Currently in Beta — Active Development
+        </div>
+      </div>
+
       <main className="relative z-10">
         <Hero />
         <FeaturedMissions missions={featuredMissions} />
