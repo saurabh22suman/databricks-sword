@@ -55,6 +55,11 @@ export function Footer(): React.ReactElement {
                   Updates
                 </Link>
               </li>
+              <li>
+                <Link href="/feedback" className="hover:text-anime-accent hover:pl-2 transition-all">
+                  Feedback
+                </Link>
+              </li>
             </ul>
           </div>
         </div>
