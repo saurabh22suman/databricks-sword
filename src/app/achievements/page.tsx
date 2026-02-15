@@ -225,46 +225,160 @@ export default function AchievementsPage(): React.ReactElement {
 
         {/* Ranks Progression Footer */}
         <div className="mt-16">
-          <div className="text-center mb-6">
-            <h2 className="font-heading text-2xl font-bold text-anime-cyan">
+          <div className="text-center mb-8">
+            <h2 className="font-heading text-3xl font-black text-anime-cyan tracking-wider">
               RANK PROGRESSION
             </h2>
-            <p className="text-anime-400 text-sm mt-1">
-              Earn XP to advance through the ranks
+            <p className="text-anime-500 text-sm mt-2 font-mono tracking-wide">
+              // advance through the ranks
             </p>
           </div>
 
-          <div className="bg-anime-900 border border-anime-700 rounded-lg p-6 cut-corner">
-            <div className="grid grid-cols-2 sm:grid-cols-4 lg:grid-cols-8 gap-4">
-              {RANKS.map((r) => {
-                const isCurrentOrPast = r.minXp <= totalXp
+          {/* Horizontal progression track */}
+          <div className="relative overflow-x-auto pb-4 px-4">
+            <div className="flex items-start gap-0 min-w-max mx-auto justify-center px-2">
+              {RANKS.map((r, idx) => {
+                const isAchieved = r.minXp <= totalXp
+                const isCurrent = r.id === rank.id
+                const isNext = idx > 0 && RANKS[idx - 1].id === rank.id
+
                 return (
-                  <div
-                    key={r.id}
-                    className={cn(
-                      "text-center p-3 rounded-lg border transition-all duration-300",
-                      isCurrentOrPast
-                        ? "border-anime-cyan/50 bg-anime-800"
-                        : "border-anime-700/30 bg-anime-950/50 opacity-40",
+                  <div key={r.id} className="flex items-start">
+                    {/* Connector line (not for first rank) */}
+                    {idx > 0 && (
+                      <div className="flex items-center pt-8 -mx-1">
+                        <div
+                          className={cn(
+                            "h-0.5 w-4 sm:w-8 lg:w-10 transition-all duration-500",
+                            isAchieved
+                              ? "bg-gradient-to-r from-anime-cyan to-anime-cyan shadow-[0_0_8px_rgba(0,255,255,0.5)]"
+                              : isNext
+                                ? "bg-gradient-to-r from-anime-cyan/60 to-anime-700/40"
+                                : "bg-anime-700/30",
+                          )}
+                        />
+                      </div>
                     )}
-                  >
-                    <div className="mb-2 flex justify-center">
-                      <RankBadge rank={r} size={32} />
-                    </div>
+
+                    {/* Rank node */}
                     <div
                       className={cn(
-                        "text-xs font-bold",
-                        isCurrentOrPast ? "text-anime-cyan" : "text-anime-700",
+                        "flex flex-col items-center text-center w-18 sm:w-22 lg:w-24 group transition-all duration-500",
+                        !isAchieved && !isNext && "opacity-35",
                       )}
                     >
-                      {r.title}
-                    </div>
-                    <div className="text-[10px] text-anime-400 font-mono mt-0.5">
-                      {r.minXp.toLocaleString()} XP
+                      {/* Badge container */}
+                      <div
+                        className={cn(
+                          "relative rounded-full p-1 transition-all duration-500",
+                          isCurrent && "ring-2 ring-anime-cyan ring-offset-2 ring-offset-anime-950 animate-pulse-fast",
+                          isAchieved && !isCurrent && "ring-1 ring-anime-cyan/30",
+                          !isAchieved && "ring-1 ring-anime-700/20",
+                        )}
+                      >
+                        {/* Glow backdrop for achieved ranks */}
+                        {isAchieved && (
+                          <div
+                            className={cn(
+                              "absolute inset-0 rounded-full blur-md -z-10",
+                              isCurrent
+                                ? "bg-anime-cyan/30"
+                                : "bg-anime-cyan/10",
+                            )}
+                          />
+                        )}
+
+                        <div
+                          className={cn(
+                            "relative overflow-hidden rounded-full border-2 transition-all duration-300",
+                            "group-hover:scale-110",
+                            isCurrent
+                              ? "border-anime-cyan bg-anime-800 shadow-[0_0_20px_rgba(0,255,255,0.4)]"
+                              : isAchieved
+                                ? "border-anime-cyan/40 bg-anime-900"
+                                : "border-anime-700/30 bg-anime-950 grayscale",
+                          )}
+                          style={{ width: "48px", height: "48px" }}
+                        >
+                          <img
+                            src={r.badge.src}
+                            alt={r.badge.alt}
+                            className="w-full h-full object-contain"
+                          />
+                        </div>
+
+                        {/* Current rank indicator dot */}
+                        {isCurrent && (
+                          <div className="absolute -bottom-1 left-1/2 -translate-x-1/2 w-3 h-3 rounded-full bg-anime-cyan shadow-[0_0_10px_rgba(0,255,255,0.8)] border-2 border-anime-950" />
+                        )}
+
+                        {/* Lock icon for unachieved */}
+                        {!isAchieved && (
+                          <div className="absolute inset-0 rounded-full flex items-center justify-center bg-anime-950/60">
+                            <Lock className="w-4 h-4 text-anime-700" />
+                          </div>
+                        )}
+                      </div>
+
+                      {/* Rank title */}
+                      <div
+                        className={cn(
+                          "mt-3 text-xs font-bold uppercase tracking-wider transition-colors duration-300",
+                          isCurrent
+                            ? "text-anime-cyan"
+                            : isAchieved
+                              ? "text-anime-400"
+                              : "text-anime-700",
+                        )}
+                      >
+                        {r.title}
+                      </div>
+
+                      {/* XP threshold */}
+                      <div
+                        className={cn(
+                          "text-[10px] font-mono mt-0.5 transition-colors duration-300",
+                          isCurrent
+                            ? "text-anime-cyan/70"
+                            : isAchieved
+                              ? "text-anime-500"
+                              : "text-anime-700/60",
+                        )}
+                      >
+                        {r.minXp.toLocaleString()} XP
+                      </div>
+
+                      {/* Current rank label */}
+                      {isCurrent && (
+                        <div className="mt-2 px-2 py-0.5 rounded-full bg-anime-cyan/10 border border-anime-cyan/30">
+                          <span className="text-[9px] font-mono text-anime-cyan uppercase tracking-widest">
+                            Current
+                          </span>
+                        </div>
+                      )}
                     </div>
                   </div>
                 )
               })}
+            </div>
+
+            {/* XP progress bar spanning the full width */}
+            <div className="mt-8 mx-auto max-w-2xl">
+              <div className="flex items-center justify-between text-[10px] font-mono text-anime-500 mb-1">
+                <span>0 XP</span>
+                <span className="text-anime-cyan font-bold">
+                  {totalXp.toLocaleString()} XP
+                </span>
+                <span>25,000 XP</span>
+              </div>
+              <div className="h-1.5 bg-anime-800 rounded-full overflow-hidden border border-anime-700/30">
+                <div
+                  className="h-full rounded-full bg-gradient-to-r from-anime-cyan via-anime-purple to-anime-accent transition-all duration-1000 ease-out shadow-[0_0_10px_rgba(0,255,255,0.4)]"
+                  style={{
+                    width: `${Math.min((totalXp / 25000) * 100, 100)}%`,
+                  }}
+                />
+              </div>
             </div>
           </div>
         </div>

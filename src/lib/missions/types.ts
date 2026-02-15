@@ -93,6 +93,21 @@ export type Stage = {
   estimatedMinutes: number
 }
 
+/**
+ * Convention-based stage config file path lookup.
+ * Maps stage type to its default config file path when configFile is not specified.
+ */
+const STAGE_TYPE_CONFIG_MAP: Record<string, string> = {
+  "briefing": "stages/01-briefing.json",
+  "diagram": "stages/02-diagram.json",
+  "drag-drop": "stages/03-drag-drop.json",
+  "fill-blank": "stages/04-fill-blank.json",
+  "quiz": "stages/05-quiz.json",
+  "debrief": "stages/06-debrief.json",
+  "free-text": "stages/04-free-text.json",
+  "compare": "stages/05-compare.json",
+}
+
 export const StageSchema = z
   .object({
     id: z.string(),
@@ -107,7 +122,7 @@ export const StageSchema = z
     id: data.id,
     title: data.title,
     type: data.type,
-    configFile: data.configFile ?? data.file ?? "",
+    configFile: data.configFile ?? data.file ?? STAGE_TYPE_CONFIG_MAP[data.type] ?? "",
     xpReward: data.xpReward,
     estimatedMinutes: data.estimatedMinutes,
   }))

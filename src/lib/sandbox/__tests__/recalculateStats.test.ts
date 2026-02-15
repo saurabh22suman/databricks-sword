@@ -50,6 +50,7 @@ describe("recalculateStats", () => {
       xpEarned: 75,
       hintsUsed: 0,
       attempts: 1,
+      completionCount: 1,
     }
     sandbox.challengeResults["challenge-2"] = {
       attempted: true,
@@ -57,6 +58,7 @@ describe("recalculateStats", () => {
       xpEarned: 50,
       hintsUsed: 2,
       attempts: 3,
+      completionCount: 1,
     }
     sandbox.challengeResults["challenge-3"] = {
       attempted: true,
@@ -64,6 +66,7 @@ describe("recalculateStats", () => {
       xpEarned: 0,
       hintsUsed: 1,
       attempts: 1,
+      completionCount: 0,
     }
 
     const result = recalculateStats(sandbox)
@@ -91,6 +94,7 @@ describe("recalculateStats", () => {
       xpEarned: 50,
       hintsUsed: 0,
       attempts: 1,
+      completionCount: 1,
     }
 
     const result = recalculateStats(sandbox)

@@ -6,6 +6,7 @@
 "use client";
 
 import type { QuizConfig } from "@/lib/missions";
+import { playSound } from "@/lib/sound";
 import React, { useMemo } from "react";
 
 /**
@@ -130,8 +131,11 @@ export function MissionQuiz({
     const correctIndex = resolveCorrectIndex(currentQuestion);
     
     if (selectedOriginalIndex === correctIndex) {
+      playSound("quiz-correct")
       scoreRef.current += 1; // Update ref synchronously
       setScore((prev) => prev + 1);
+    } else {
+      playSound("quiz-incorrect")
     }
   }, [selectedAnswer, shuffledOptions, currentQuestion]);
 
@@ -144,6 +148,7 @@ export function MissionQuiz({
       // Quiz complete - use scoreRef for accurate count (not affected by async state)
       setIsComplete(true);
       setFinalScore(scoreRef.current);
+      playSound("quiz-complete")
     }
   }, [currentIndex, quizQuestions.length]);
 

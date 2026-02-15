@@ -2,6 +2,7 @@
 
 import { LottieAnimation } from "@/components/ui/LottieAnimation";
 import type { Rank } from "@/lib/gamification/types";
+import { playSound } from "@/lib/sound";
 import { cn } from "@/lib/utils";
 import { useEffect } from "react";
 import { RankBadge } from "./RankBadge";
@@ -48,6 +49,11 @@ export function RankUpCelebration({
       return () => clearTimeout(timer)
     }
   }, [autoDismiss, onDismiss])
+
+  // Play sound on mount
+  useEffect(() => {
+    playSound("rank-up")
+  }, [])
 
   // Escape key handler
   useEffect(() => {

@@ -7,6 +7,7 @@
 
 import type { Challenge } from "@/lib/challenges"
 import { loadSandbox } from "@/lib/sandbox"
+import type { ChallengeResult } from "@/lib/sandbox/types"
 import { useRouter } from "next/navigation"
 import React, { useEffect, useMemo, useState } from "react"
 import { ChallengeCard } from "./ChallengeCard"
@@ -28,6 +29,7 @@ export function ChallengeGridClient({
   const [selectedDifficulty, setSelectedDifficulty] = useState<string | null>(null)
   const [selectedStatus, setSelectedStatus] = useState<string | null>(null)
   const [completedIds, setCompletedIds] = useState<Set<string>>(new Set())
+  const [challengeResults, setChallengeResults] = useState<Record<string, ChallengeResult>>({})
 
   useEffect(() => {
     const sandbox = loadSandbox()
@@ -38,6 +40,7 @@ export function ChallengeGridClient({
           .map(([id]) => id),
       )
       setCompletedIds(ids)
+      setChallengeResults(sandbox.challengeResults)
     }
   }, [])
 
@@ -77,6 +80,7 @@ export function ChallengeGridClient({
             <ChallengeCard
               key={challenge.id}
               challenge={challenge}
+              completionCount={challengeResults[challenge.id]?.completionCount ?? 0}
               onClick={() => router.push(`/challenges/${challenge.id}`)}
             />
           ))}

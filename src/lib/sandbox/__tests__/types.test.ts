@@ -127,6 +127,7 @@ describe("Sandbox Types", () => {
         xpEarned: 100,
         hintsUsed: 0,
         attempts: 2,
+        completionCount: 2,
         bestScore: 95,
         completedAt: "2026-02-12T10:00:00Z",
       }
@@ -141,6 +142,7 @@ describe("Sandbox Types", () => {
         xpEarned: 0,
         hintsUsed: 2,
         attempts: 5,
+        completionCount: 0,
       }
 
       expect(() => ChallengeResultSchema.parse(result)).not.toThrow()
@@ -238,6 +240,7 @@ describe("Sandbox Types", () => {
             xpEarned: 100,
             hintsUsed: 0,
             attempts: 1,
+            completionCount: 1,
             completedAt: "2026-02-12T12:00:00Z",
           },
         },

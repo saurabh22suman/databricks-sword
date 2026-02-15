@@ -185,6 +185,40 @@ describe("XP Event Service", () => {
         }),
       )
     })
+
+    it("awards XP on second completion (within cap)", () => {
+      // First completion
+      awardChallengeXp("challenge-1", 75)
+      // Second completion
+      const event = awardChallengeXp("challenge-1", 75)
+      expect(event.amount).toBe(75)
+      // xpEarned should be cumulative: 75 + 75 = 150
+      expect(sandbox.challengeResults["challenge-1"].xpEarned).toBe(150)
+      expect(sandbox.challengeResults["challenge-1"].completionCount).toBe(2)
+    })
+
+    it("awards 0 XP after max completions (cap at 2)", () => {
+      // First and second completions earn XP
+      awardChallengeXp("challenge-1", 75)
+      awardChallengeXp("challenge-1", 75)
+      // Third completion should earn 0 XP
+      const event = awardChallengeXp("challenge-1", 75)
+      expect(event.amount).toBe(0)
+      // xpEarned stays at 150 (not 225)
+      expect(sandbox.challengeResults["challenge-1"].xpEarned).toBe(150)
+      expect(sandbox.challengeResults["challenge-1"].completionCount).toBe(3)
+    })
+
+    it("increments completionCount on every completion", () => {
+      awardChallengeXp("challenge-1", 75)
+      expect(sandbox.challengeResults["challenge-1"].completionCount).toBe(1)
+
+      awardChallengeXp("challenge-1", 75)
+      expect(sandbox.challengeResults["challenge-1"].completionCount).toBe(2)
+
+      awardChallengeXp("challenge-1", 75)
+      expect(sandbox.challengeResults["challenge-1"].completionCount).toBe(3)
+    })
   })
 
   describe("achievement unlocking", () => {

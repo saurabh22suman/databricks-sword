@@ -7,6 +7,7 @@
 
 import { LottieAnimation } from "@/components/ui/LottieAnimation";
 import type { DebriefConfig } from "@/lib/missions";
+import { playSound } from "@/lib/sound";
 import { cn } from "@/lib/utils";
 import React from "react";
 
@@ -45,6 +46,11 @@ export function MissionDebrief({
   completionStats,
   onComplete,
 }: MissionDebriefProps): React.ReactElement {
+  // Play mission-complete sound on mount
+  React.useEffect(() => {
+    playSound("mission-complete")
+  }, [])
+
   const handleContinue = () => {
     if (onComplete) {
       onComplete({

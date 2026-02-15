@@ -24,32 +24,38 @@
     {
       "id": "briefing",
       "type": "briefing",
-      "title": "Mission Briefing"
+      "title": "Mission Briefing",
+      "configFile": "stages/01-briefing.json"
     },
     {
       "id": "diagram",
       "type": "diagram",
-      "title": "Medallion Layers"
+      "title": "Medallion Layers",
+      "configFile": "stages/02-diagram.json"
     },
     {
       "id": "drag-drop",
       "type": "drag-drop",
-      "title": "Design the Pipeline"
+      "title": "Design the Pipeline",
+      "configFile": "stages/03-drag-drop.json"
     },
     {
       "id": "fill-blank",
       "type": "fill-blank",
-      "title": "Build DLT Pipeline"
+      "title": "Build DLT Pipeline",
+      "configFile": "stages/04-fill-blank.json"
     },
     {
       "id": "quiz",
       "type": "quiz",
-      "title": "Knowledge Check"
+      "title": "Knowledge Check",
+      "configFile": "stages/05-quiz.json"
     },
     {
       "id": "debrief",
       "type": "debrief",
-      "title": "Mission Debrief"
+      "title": "Mission Debrief",
+      "configFile": "stages/06-debrief.json"
     }
   ],
   "sideQuests": [

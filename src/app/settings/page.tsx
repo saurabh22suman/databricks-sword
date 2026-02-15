@@ -15,6 +15,7 @@ import {
     EyeOff,
     HardDrive,
     Monitor,
+    Music,
     Shield,
     Trash2,
     Upload,
@@ -191,6 +192,40 @@ export default function SettingsPage(): React.ReactElement {
               enabled={settings.sfxEnabled}
               onChange={(v) => updateSetting("sfxEnabled", v)}
             />
+            <ToggleRow
+              icon={<Music className="w-4 h-4" />}
+              label="Background Music"
+              description="Ambient cyberpunk soundtrack"
+              enabled={settings.musicEnabled}
+              onChange={(v) => updateSetting("musicEnabled", v)}
+            />
+            {settings.musicEnabled && (
+              <div className="flex items-center gap-4 px-6 py-4 bg-anime-950/30">
+                <div className="text-anime-cyan">
+                  <Volume2 className="w-4 h-4" />
+                </div>
+                <div className="flex-1">
+                  <div className="text-sm font-bold text-anime-100">Music Volume</div>
+                  <div className="text-xs text-anime-400">Adjust ambient music level</div>
+                </div>
+                <div className="flex items-center gap-3">
+                  <VolumeX className="w-3 h-3 text-anime-500" />
+                  <input
+                    type="range"
+                    min={0}
+                    max={100}
+                    step={1}
+                    value={settings.musicVolume}
+                    onChange={(e) => updateSetting("musicVolume", Number(e.target.value))}
+                    className="w-28 accent-anime-cyan"
+                  />
+                  <Volume2 className="w-3 h-3 text-anime-500" />
+                  <span className="text-sm font-mono text-anime-cyan w-8 text-right">
+                    {settings.musicVolume}
+                  </span>
+                </div>
+              </div>
+            )}
             <ToggleRow
               icon={<Zap className="w-4 h-4" />}
               label="Animations"

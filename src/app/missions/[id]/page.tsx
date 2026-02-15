@@ -7,6 +7,7 @@ import { MissionStartWrapper } from "@/components/missions/MissionStartWrapper"
 import { PrerequisiteGate } from "@/components/missions/PrerequisiteGate"
 import type { BriefingConfig } from "@/lib/missions"
 import { getMission, getStageConfig } from "@/lib/missions"
+import { getUserCompletedMissions } from "@/lib/missions/serverHelpers"
 import type { Metadata } from "next"
 import { notFound } from "next/navigation"
 
@@ -94,9 +95,8 @@ export default async function MissionPage({
   // First stage ID for navigation
   const firstStageId = mission.stages[0].id
 
-  // TODO: Get completed missions from database when auth is enabled
-  // For now, assume no missions are completed (unlocked mode)
-  const completedMissions: string[] = []
+  // Get completed missions from the user's server-side sandbox snapshot
+  const completedMissions = await getUserCompletedMissions()
 
   return (
     <PrerequisiteGate

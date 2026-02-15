@@ -391,9 +391,14 @@ export async function getStageConfig<T>(
   missionSlug: string,
   configPath: string,
 ): Promise<T> {
+  if (!configPath || configPath.trim() === "") {
+    throw new Error(`Empty configFile path for mission: ${missionSlug}`)
+  }
+
   const fullPath = path.join(MISSIONS_DIR, missionSlug, configPath)
 
-  if (!fs.existsSync(fullPath)) {
+  // Guard against directory reads (EISDIR)
+  if (!fs.existsSync(fullPath) || fs.statSync(fullPath).isDirectory()) {
     throw new Error(`Stage config not found: ${missionSlug}/${configPath}`)
   }
 

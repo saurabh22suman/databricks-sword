@@ -69,4 +69,23 @@ describe("ChallengeCard", () => {
     render(<ChallengeCard challenge={sRankChallenge} />)
     expect(screen.getByText("S")).toBeInTheDocument()
   })
+
+  it("shows XP reward when completionCount is 0", () => {
+    render(<ChallengeCard challenge={mockChallenge} completionCount={0} />)
+    expect(screen.getByText(/50.*XP/i)).toBeInTheDocument()
+    expect(screen.queryByText(/XP Maxed/i)).not.toBeInTheDocument()
+  })
+
+  it("shows completion progress when completionCount is 1", () => {
+    render(<ChallengeCard challenge={mockChallenge} completionCount={1} />)
+    expect(screen.getByText(/50.*XP/i)).toBeInTheDocument()
+    expect(screen.getByText(/Completed 1\/2/)).toBeInTheDocument()
+  })
+
+  it("shows XP Maxed when completionCount reaches max", () => {
+    render(<ChallengeCard challenge={mockChallenge} completionCount={2} />)
+    expect(screen.queryByText(/50.*XP/i)).not.toBeInTheDocument()
+    expect(screen.getByText(/XP Maxed/i)).toBeInTheDocument()
+    expect(screen.getByText(/Completed 2\/2/)).toBeInTheDocument()
+  })
 })

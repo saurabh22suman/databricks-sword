@@ -48,9 +48,10 @@ describe("Footer", () => {
       "href",
       "/#projects",
     )
-    // Note: There are two "Intel" links - one in Sector 01 (anchor) and one in System (full page)
-    const intelLinks = screen.getAllByRole("link", { name: "Intel" })
-    expect(intelLinks[0]).toHaveAttribute("href", "/#interview-prep")
+    expect(screen.getByRole("link", { name: "Intel" })).toHaveAttribute(
+      "href",
+      "/intel",
+    )
   })
 
   it("renders system navigation links", () => {
@@ -59,9 +60,14 @@ describe("Footer", () => {
       "href",
       "/missions",
     )
-    // Note: There are two "Intel" links - one in Sector 01 (anchor) and one in System (full page)
-    const intelLinks = screen.getAllByRole("link", { name: "Intel" })
-    expect(intelLinks[1]).toHaveAttribute("href", "/intel")
+    expect(screen.getByRole("link", { name: "Challenges" })).toHaveAttribute(
+      "href",
+      "/challenges",
+    )
+    expect(screen.getByRole("link", { name: "Updates" })).toHaveAttribute(
+      "href",
+      "/updates",
+    )
   })
 
   it("renders copyright text with current year", () => {

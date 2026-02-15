@@ -35,6 +35,7 @@ import type {
     QuizConfig,
 } from "@/lib/missions";
 import { updateSandbox } from "@/lib/sandbox";
+import { playSound } from "@/lib/sound";
 import { useRouter } from "next/navigation";
 import React, { useCallback, useState } from "react";
 
@@ -129,6 +130,9 @@ export function StagePlayerClient({
 
   /** Check for "after" side quests for the current stage, or navigate */
   const handleComplete = useCallback((_result?: unknown): void => {
+    // Play stage completion sound
+    playSound("stage-complete")
+
     // Award XP for stage completion
     if (stageXpReward > 0) {
       awardStageXp(missionId, stageId, stageXpReward);
@@ -182,6 +186,7 @@ export function StagePlayerClient({
 
   /** Side quest completed — award XP and continue */
   const handleSideQuestComplete = useCallback((xpAwarded: number): void => {
+    playSound("stage-complete")
     void xpAwarded; // XP already awarded to sandbox in side quest component
     setActiveSideQuest(null);
     navigateNext();

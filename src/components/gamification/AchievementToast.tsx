@@ -3,6 +3,7 @@
 import { LottieAnimation } from "@/components/ui/LottieAnimation";
 import { getAchievementIconPath } from "@/lib/gamification/achievementIcons";
 import type { Achievement } from "@/lib/gamification/types";
+import { playSound } from "@/lib/sound";
 import { cn } from "@/lib/utils";
 import { useEffect } from "react";
 
@@ -45,6 +46,11 @@ export function AchievementToast({
       return () => clearTimeout(timer)
     }
   }, [autoDismiss, onDismiss])
+
+  // Play sound on mount
+  useEffect(() => {
+    playSound("achievement-unlock")
+  }, [])
 
   return (
     <div 

@@ -1,46 +1,31 @@
-{{
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-}  ]    {"componentId": "monitoring", "zoneId": "zone-5"}    {"componentId": "serving", "zoneId": "zone-4"},    {"componentId": "registry", "zoneId": "zone-3"},    {"componentId": "training", "zoneId": "zone-2"},    {"componentId": "feature-store", "zoneId": "zone-1"},  "correctPlacements": [  ],    {"id": "zone-5", "label": "Observability", "position": {"x": 350, "y": 200}}    {"id": "zone-4", "label": "Real-Time Inference", "position": {"x": 160, "y": 200}},    {"id": "zone-3", "label": "Model Governance", "position": {"x": 440, "y": 50}},    {"id": "zone-2", "label": "Model Development", "position": {"x": 250, "y": 50}},    {"id": "zone-1", "label": "Feature Engineering", "position": {"x": 60, "y": 50}},  "dropZones": [  ],    {"id": "monitoring", "label": "Drift Monitor & Alerts", "icon": "activity"}    {"id": "serving", "label": "Model Serving Endpoint", "icon": "globe"},    {"id": "registry", "label": "Model Registry (UC)", "icon": "archive"},    {"id": "training", "label": "Model Training (MLflow)", "icon": "cpu"},    {"id": "feature-store", "label": "Feature Store (Online Tables)", "icon": "database"},  "components": [  "components": [
-    {"id": "feature-store", "label": "Feature Store (Online Tables)", "icon": "database"},
-    {"id": "training", "label": "Model Training Pipeline", "icon": "cpu"},
-    {"id": "registry", "label": "Model Registry", "icon": "archive"},
-    {"id": "serving", "label": "Model Serving Endpoint", "icon": "globe"},
-    {"id": "monitoring", "label": "Drift Monitor & Alerts", "icon": "activity"}
+{
+  "instructions": "Build the Production ML Architecture! Drag each component to its correct layer in the end-to-end machine learning pipeline — from feature engineering to real-time inference and monitoring.",
+  "components": [
+    { "id": "feature-store", "label": "Feature Store (Online Tables)", "icon": "database" },
+    { "id": "training", "label": "Model Training (MLflow)", "icon": "cpu" },
+    { "id": "registry", "label": "Model Registry (UC)", "icon": "archive" },
+    { "id": "serving", "label": "Model Serving Endpoint", "icon": "globe" },
+    { "id": "monitoring", "label": "Drift Monitor & Alerts", "icon": "activity" }
   ],
   "dropZones": [
-    {"id": "zone-1", "label": "Feature Engineering", "position": {"x": 80, "y": 60}},
-    {"id": "zone-2", "label": "Model Development", "position": {"x": 330, "y": 60}},
-    {"id": "zone-3", "label": "Version Management", "position": {"x": 80, "y": 200}},
-    {"id": "zone-4", "label": "Real-Time Inference", "position": {"x": 330, "y": 200}},
-    {"id": "zone-5", "label": "Observability", "position": {"x": 200, "y": 330}}
+    { "id": "zone-1", "label": "Feature Engineering", "position": { "x": 60, "y": 50 } },
+    { "id": "zone-2", "label": "Model Development", "position": { "x": 250, "y": 50 } },
+    { "id": "zone-3", "label": "Model Governance", "position": { "x": 440, "y": 50 } },
+    { "id": "zone-4", "label": "Real-Time Inference", "position": { "x": 160, "y": 200 } },
+    { "id": "zone-5", "label": "Observability", "position": { "x": 350, "y": 200 } }
   ],
   "correctPlacements": [
-    {"componentId": "feature-store", "zoneId": "zone-1"},
-    {"componentId": "training", "zoneId": "zone-2"},
-    {"componentId": "registry", "zoneId": "zone-3"},
-    {"componentId": "serving", "zoneId": "zone-4"},
-    {"componentId": "monitoring", "zoneId": "zone-5"}
+    { "componentId": "feature-store", "zoneId": "zone-1" },
+    { "componentId": "training", "zoneId": "zone-2" },
+    { "componentId": "registry", "zoneId": "zone-3" },
+    { "componentId": "serving", "zoneId": "zone-4" },
+    { "componentId": "monitoring", "zoneId": "zone-5" }
+  ],
+  "learnings": [
+    "Feature Store: Databricks Feature Store provides centralized feature tables with point-in-time lookups, ensuring training/serving consistency and eliminating training-serving skew.",
+    "Model Training: MLflow Tracking logs experiments, parameters, metrics, and artifacts. AutoML and distributed training accelerate iteration cycles.",
+    "Model Registry (Unity Catalog): Models are registered as UC assets with stage transitions (None → Staging → Production), lineage tracking, and access controls.",
+    "Model Serving Endpoints: Serverless real-time endpoints with Champion/Challenger routing enable A/B testing and canary deployments with automatic scaling.",
+    "Drift Monitoring: Lakehouse Monitoring tracks feature drift, prediction drift, and data quality. Alerts trigger retraining pipelines when metrics breach thresholds."
   ]
 }

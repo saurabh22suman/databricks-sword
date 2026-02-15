@@ -70,6 +70,9 @@ export const MissionProgressSchema = z.object({
   deployedAt: z.string().optional(),
 })
 
+/** Maximum number of challenge completions that award XP */
+export const MAX_CHALLENGE_XP_COMPLETIONS = 2
+
 /**
  * Challenge attempt result.
  */
@@ -79,6 +82,8 @@ export type ChallengeResult = {
   xpEarned: number
   hintsUsed: number
   attempts: number
+  /** Number of times the challenge was successfully completed */
+  completionCount: number
   bestScore?: number // 0-100
   completedAt?: string // ISO timestamp
 }
@@ -92,6 +97,7 @@ export const ChallengeResultSchema = z.object({
   xpEarned: z.number().nonnegative(),
   hintsUsed: z.number().nonnegative().int(),
   attempts: z.number().nonnegative().int(),
+  completionCount: z.number().nonnegative().int().default(0),
   bestScore: z.number().min(0).max(100).optional(),
   completedAt: z.string().optional(),
 })

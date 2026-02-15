@@ -26,7 +26,7 @@ export function Footer(): React.ReactElement {
                 </Link>
               </li>
               <li>
-                <Link href="/#interview-prep" className="hover:text-anime-cyan hover:pl-2 transition-all">
+                <Link href="/intel" className="hover:text-anime-cyan hover:pl-2 transition-all">
                   Intel
                 </Link>
               </li>
@@ -53,11 +53,6 @@ export function Footer(): React.ReactElement {
               <li>
                 <Link href="/updates" className="hover:text-anime-accent hover:pl-2 transition-all">
                   Updates
-                </Link>
-              </li>
-              <li>
-                <Link href="/intel" className="hover:text-anime-accent hover:pl-2 transition-all">
-                  Intel
                 </Link>
               </li>
             </ul>

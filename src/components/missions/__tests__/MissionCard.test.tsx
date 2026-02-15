@@ -174,7 +174,7 @@ describe("MissionCard", () => {
 
     it("shows completion badge when progress is 100%", () => {
       render(<MissionCard mission={mockMission} progress={100} />);
-      expect(screen.getByText(/completed/i)).toBeInTheDocument();
+      expect(screen.getByText(/replay/i)).toBeInTheDocument();
     });
   });
 

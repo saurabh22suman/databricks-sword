@@ -12,7 +12,7 @@ export type {
 } from "./types"
 
 export {
-    ChallengeResultSchema, FlashcardProgressSchema, MissionProgressSchema, SandboxDataSchema, StageProgressSchema, SyncResultSchema, UserStatsSchema
+    ChallengeResultSchema, FlashcardProgressSchema, MAX_CHALLENGE_XP_COMPLETIONS, MissionProgressSchema, SandboxDataSchema, StageProgressSchema, SyncResultSchema, UserStatsSchema
 } from "./types"
 
 // Storage functions

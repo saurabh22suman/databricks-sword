@@ -2,6 +2,7 @@
 
 import { LottieAnimation } from "@/components/ui/LottieAnimation";
 import type { XpEvent } from "@/lib/gamification/types";
+import { playSound } from "@/lib/sound";
 import { cn } from "@/lib/utils";
 import { useEffect } from "react";
 
@@ -44,6 +45,11 @@ export function XpAward({
       return () => clearTimeout(timer)
     }
   }, [autoDismiss, onDismiss])
+
+  // Play sound on mount
+  useEffect(() => {
+    playSound("xp-gain")
+  }, [])
 
   // Get label based on event type
   const getEventLabel = (type: XpEvent["type"]): string => {

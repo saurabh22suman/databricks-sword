@@ -24,6 +24,10 @@ export interface MissionCardProps {
    */
   progress?: number;
   /**
+   * Whether the mission has been completed by the user
+   */
+  completed?: boolean;
+  /**
    * Click handler for card interaction
    */
   onClick?: () => void;
@@ -74,11 +78,12 @@ export function MissionCard({
   mission,
   userXp,
   progress,
+  completed,
   onClick,
 }: MissionCardProps): React.ReactElement {
   const isLocked = userXp !== undefined && userXp < mission.xpRequired;
   const isInProgress = progress !== undefined && progress > 0 && progress < 100;
-  const isCompleted = progress === 100;
+  const isCompleted = completed || progress === 100;
 
   const handleClick = () => {
     if (!isLocked && onClick) {
@@ -90,12 +95,27 @@ export function MissionCard({
     <div
       className={cn(
         "cut-corner bg-anime-900 border border-anime-700",
-        "flex flex-col p-6 transition-all duration-300",
+        "relative flex flex-col p-6 transition-all duration-300",
         "hover:border-anime-cyan hover:shadow-neon-cyan",
         isLocked && "opacity-50 cursor-not-allowed",
+        isCompleted && "border-anime-green/40",
         !isLocked && "cursor-pointer"
       )}
     >
+      {/* Completed stamp */}
+      {isCompleted && (
+        <div className="absolute top-4 right-4 z-10 flex items-center justify-center w-10 h-10 rounded-full bg-anime-green/20 border-2 border-anime-green shadow-[0_0_12px_rgba(0,255,102,0.4)]">
+          <svg
+            className="w-5 h-5 text-anime-green"
+            fill="none"
+            viewBox="0 0 24 24"
+            stroke="currentColor"
+            strokeWidth={3}
+          >
+            <path strokeLinecap="round" strokeLinejoin="round" d="M5 13l4 4L19 7" />
+          </svg>
+        </div>
+      )}
       {/* Header: Rank Badge + Industry */}
       <div className="flex items-center justify-between mb-5">
         <div className="flex items-center gap-3">
@@ -112,11 +132,6 @@ export function MissionCard({
             {getIndustryLabel(mission.industry)}
           </span>
         </div>
-
-        {/* Completion Badge */}
-        {isCompleted && (
-          <Badge variant="advanced">Completed</Badge>
-        )}
       </div>
 
       {/* Title + Subtitle */}
@@ -196,7 +211,7 @@ export function MissionCard({
               : "bg-anime-accent text-white hover:bg-anime-purple hover:shadow-neon-purple"
           )}
         >
-          {isLocked ? "Locked" : isInProgress ? "Continue" : "Start"}
+          {isLocked ? "Locked" : isCompleted ? "Replay" : isInProgress ? "Continue" : "Start"}
         </button>
       </div>
 

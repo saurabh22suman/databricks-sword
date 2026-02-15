@@ -6,6 +6,7 @@
 import type { Challenge } from "@/lib/challenges"
 import { CATEGORY_ICON_MAP } from "@/lib/challenges/categoryIcons"
 import type { ChallengeCategory } from "@/lib/challenges/types"
+import { MAX_CHALLENGE_XP_COMPLETIONS } from "@/lib/sandbox/types"
 import { cn } from "@/lib/utils"
 import React from "react"
 
@@ -14,6 +15,8 @@ export type ChallengeCardProps = {
   challenge: Challenge
   /** Click handler for navigation */
   onClick?: () => void
+  /** Number of times this challenge has been completed (for XP cap display) */
+  completionCount?: number
 }
 
 /** Maps difficulty rank to color classes */
@@ -36,7 +39,9 @@ const FORMAT_LABELS: Record<string, string> = {
 export function ChallengeCard({
   challenge,
   onClick,
+  completionCount = 0,
 }: ChallengeCardProps): React.ReactElement {
+  const xpMaxed = completionCount >= MAX_CHALLENGE_XP_COMPLETIONS
   return (
     <article
       role="article"
@@ -82,10 +87,38 @@ export function ChallengeCard({
         <span className="px-2 py-1 rounded bg-anime-800 text-anime-500 uppercase tracking-wider">
           {FORMAT_LABELS[challenge.format] ?? challenge.format}
         </span>
-        <span className="text-anime-cyan font-medium">
-          {challenge.xpReward} XP
-        </span>
+        {xpMaxed ? (
+          <span className="text-anime-yellow font-medium flex items-center gap-1">
+            <span>⚡</span> XP Maxed
+          </span>
+        ) : (
+          <span className="text-anime-cyan font-medium">
+            {challenge.xpReward} XP
+          </span>
+        )}
       </div>
+
+      {/* Completion count bar */}
+      {completionCount > 0 && (
+        <div className="mt-3 pt-3 border-t border-anime-800 flex items-center justify-between text-xs">
+          <span className="text-anime-500">
+            Completed {completionCount}/{MAX_CHALLENGE_XP_COMPLETIONS}
+          </span>
+          <div className="flex gap-1">
+            {Array.from({ length: MAX_CHALLENGE_XP_COMPLETIONS }).map((_, i) => (
+              <div
+                key={i}
+                className={cn(
+                  "w-2 h-2 rounded-full",
+                  i < completionCount
+                    ? "bg-anime-green shadow-[0_0_4px_rgba(0,255,102,0.5)]"
+                    : "bg-anime-800"
+                )}
+              />
+            ))}
+          </div>
+        </div>
+      )}
     </article>
   )
 }

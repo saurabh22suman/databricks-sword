@@ -10,6 +10,7 @@
 
 import { initializeSandbox, loadSandbox, updateSandbox } from "@/lib/sandbox/storage"
 import type { SandboxData } from "@/lib/sandbox/types"
+import { MAX_CHALLENGE_XP_COMPLETIONS } from "@/lib/sandbox/types"
 import { ACHIEVEMENTS, checkAchievement } from "./achievements"
 import { getRankForXp } from "./ranks"
 import { getStreakMultiplier } from "./streaks"
@@ -244,18 +245,24 @@ export function awardMissionXp(
 /**
  * Awards XP for completing a standalone challenge.
  * Applies streak multiplier. Records challenge result.
+ * XP is only awarded for the first {@link MAX_CHALLENGE_XP_COMPLETIONS} completions.
+ * After that the user can still practice but earns 0 XP.
  *
  * @param challengeId - The challenge identifier
  * @param baseXp - Base XP reward
- * @returns The XpEvent with final computed amount
+ * @returns The XpEvent with final computed amount (0 if XP cap reached)
  */
 export function awardChallengeXp(
   challengeId: string,
   baseXp: number,
 ): XpEvent {
   const sandbox = loadSandbox() ?? initializeSandbox()
+  const existing = sandbox.challengeResults[challengeId]
+  const completionCount = existing?.completionCount ?? 0
+  const xpMaxed = completionCount >= MAX_CHALLENGE_XP_COMPLETIONS
+
   const multiplier = getStreakMultiplier(sandbox.streakData.currentStreak)
-  const amount = Math.floor(baseXp * multiplier)
+  const amount = xpMaxed ? 0 : Math.floor(baseXp * multiplier)
 
   const event: XpEvent = {
     type: "challenge",
@@ -267,14 +274,15 @@ export function awardChallengeXp(
 
   updateSandbox((data) => {
     const challengeResults = { ...data.challengeResults }
-    const existing = challengeResults[challengeId]
+    const prev = challengeResults[challengeId]
 
     challengeResults[challengeId] = {
       attempted: true,
       completed: true,
-      xpEarned: amount,
-      hintsUsed: existing?.hintsUsed ?? 0,
-      attempts: (existing?.attempts ?? 0) + 1,
+      xpEarned: (prev?.xpEarned ?? 0) + amount,
+      hintsUsed: prev?.hintsUsed ?? 0,
+      attempts: (prev?.attempts ?? 0) + 1,
+      completionCount: (prev?.completionCount ?? 0) + 1,
       completedAt: event.timestamp,
     }
 
@@ -284,7 +292,9 @@ export function awardChallengeXp(
       userStats: {
         ...data.userStats,
         totalXp: data.userStats.totalXp + amount,
-        totalChallengesCompleted: data.userStats.totalChallengesCompleted + 1,
+        totalChallengesCompleted: prev?.completed
+          ? data.userStats.totalChallengesCompleted
+          : data.userStats.totalChallengesCompleted + 1,
       },
     }
   })

@@ -15,6 +15,7 @@ vi.mock("fs", () => ({
     readdirSync: vi.fn(),
     existsSync: vi.fn(),
     readFileSync: vi.fn(),
+    statSync: vi.fn(),
   },
 }))
 
@@ -488,6 +489,9 @@ describe("Mission Loader", () => {
       }
 
       vi.mocked(fs.default.existsSync).mockReturnValue(true)
+      vi.mocked(fs.default.statSync).mockReturnValue({
+        isDirectory: () => false,
+      } as unknown as ReturnType<typeof fs.default.statSync>)
       vi.mocked(fs.default.readFileSync).mockReturnValue(
         JSON.stringify(mockConfig),
       )
@@ -512,6 +516,9 @@ describe("Mission Loader", () => {
     it("throws error for invalid JSON", async () => {
       const fs = await import("fs")
       vi.mocked(fs.default.existsSync).mockReturnValue(true)
+      vi.mocked(fs.default.statSync).mockReturnValue({
+        isDirectory: () => false,
+      } as unknown as ReturnType<typeof fs.default.statSync>)
       vi.mocked(fs.default.readFileSync).mockReturnValue("invalid{{{")
 
       await expect(getStageConfig("mission-1", "invalid.json")).rejects.toThrow()

@@ -4,6 +4,7 @@ import type { Mission } from "@/lib/missions"
 import type { Track } from "@/lib/missions/tracks"
 import { TRACKS, getAllTracks, getTrackForMission } from "@/lib/missions/tracks"
 import { loadSandbox } from "@/lib/sandbox"
+import type { SandboxData } from "@/lib/sandbox/types"
 import { cn } from "@/lib/utils"
 import { useRouter } from "next/navigation"
 import { useEffect, useState } from "react"
@@ -25,12 +26,14 @@ export function MissionGrid({ missions, userXp = 0 }: MissionGridProps): React.R
   const router = useRouter()
   const [activeFilter, setActiveFilter] = useState<Track | "all">("all")
   const [resolvedXp, setResolvedXp] = useState(userXp)
+  const [sandboxData, setSandboxData] = useState<SandboxData | null>(null)
 
-  /** Load real XP from browser sandbox on mount */
+  /** Load real XP and progress from browser sandbox on mount */
   useEffect(() => {
     const sandbox = loadSandbox()
     if (sandbox) {
       setResolvedXp(sandbox.userStats.totalXp)
+      setSandboxData(sandbox)
     }
   }, [])
 
@@ -112,14 +115,19 @@ export function MissionGrid({ missions, userXp = 0 }: MissionGridProps): React.R
               </span>
             </div>
             <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
-              {trackMissions.map((mission) => (
-                <MissionCard
-                  key={mission.id}
-                  mission={mission}
-                  userXp={resolvedXp}
-                  onClick={() => router.push(`/missions/${mission.id}`)}
-                />
-              ))}
+              {trackMissions.map((mission) => {
+                const missionProgress = sandboxData?.missionProgress[mission.id]
+                const isCompleted = missionProgress?.completed ?? false
+                return (
+                  <MissionCard
+                    key={mission.id}
+                    mission={mission}
+                    userXp={resolvedXp}
+                    completed={isCompleted}
+                    onClick={() => router.push(`/missions/${mission.id}`)}
+                  />
+                )
+              })}
             </div>
           </section>
         )

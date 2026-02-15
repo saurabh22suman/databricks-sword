@@ -1,6 +1,8 @@
 import { SandboxSyncProvider, SessionProvider } from "@/components/auth"
+import { BackgroundMusic } from "@/components/layout/BackgroundMusic"
 import { Footer } from "@/components/layout/Footer"
 import { Header } from "@/components/layout/Header"
+import { RouteChangeSound } from "@/components/layout/RouteChangeSound"
 import { auth } from "@/lib/auth"
 import { MOCK_SESSION, isMockAuth } from "@/lib/auth/mockSession"
 import type { Metadata } from "next"
@@ -76,6 +78,8 @@ export default async function RootLayout({
         <SessionProvider session={session}>
           <SandboxSyncProvider>
             <Header />
+            <RouteChangeSound />
+            <BackgroundMusic />
             <main className="flex-1">{children}</main>
             <Footer />
           </SandboxSyncProvider>
