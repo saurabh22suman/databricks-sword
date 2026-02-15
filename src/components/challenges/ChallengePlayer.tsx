@@ -94,7 +94,7 @@ function renderFormat(
         return <p className="text-anime-accent">Missing drag-drop config</p>
       }
       const config: DragDropConfig = {
-        description: challenge.description,
+        description: "", // Already shown in header above
         blocks: [...challenge.dragDrop.blocks],
         correctOrder: [...challenge.dragDrop.correctOrder],
         hints: [...challenge.hints],
@@ -107,7 +107,7 @@ function renderFormat(
         return <p className="text-anime-accent">Missing fill-blank config</p>
       }
       const config: FillBlankConfig = {
-        description: challenge.description,
+        description: "", // Already shown in header above
         codeTemplate: challenge.fillBlank.codeTemplate,
         blanks: challenge.fillBlank.blanks.map((b) => ({
           id: b.id,
@@ -124,7 +124,7 @@ function renderFormat(
         return <p className="text-anime-accent">Missing free-text config</p>
       }
       const config: FreeTextConfig = {
-        description: challenge.description,
+        description: "", // Already shown in header above
         starterCode: challenge.freeText.starterCode,
         expectedPattern: challenge.freeText.expectedPattern,
         simulatedOutput: challenge.freeText.simulatedOutput,
