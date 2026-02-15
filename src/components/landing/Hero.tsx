@@ -89,6 +89,26 @@ export function Hero(): React.ReactElement {
               <span className="text-[10px] uppercase tracking-widest text-gray-500">System Rating</span>
             </div>
           </div>
+
+          {/* Work in Progress Banner */}
+          <div className="mt-8 relative">
+            <div className="inline-flex items-center gap-3 px-4 py-2 bg-anime-yellow/10 border border-dashed border-anime-yellow/50 text-anime-yellow text-xs font-mono uppercase tracking-wider">
+              <svg className="w-4 h-4 animate-bounce" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M19 21V5a2 2 0 00-2-2H7a2 2 0 00-2 2v16m14 0h2m-2 0h-5m-9 0H3m2 0h5M9 7h1m-1 4h1m4-4h1m-1 4h1m-5 10v-5a1 1 0 011-1h2a1 1 0 011 1v5m-4 0h4" />
+              </svg>
+              <span className="relative">
+                <span className="absolute -left-1 top-1/2 -translate-y-1/2 w-1 h-1 bg-anime-yellow rounded-full animate-pulse" />
+                Work in Progress — Beta v0.1
+              </span>
+              <div className="flex gap-0.5 ml-2">
+                <div className="w-1.5 h-3 bg-anime-yellow/60 animate-pulse" />
+                <div className="w-1.5 h-3 bg-anime-yellow/40 animate-pulse delay-75" />
+                <div className="w-1.5 h-3 bg-anime-yellow/20 animate-pulse delay-150" />
+              </div>
+            </div>
+            {/* Construction stripes accent */}
+            <div className="absolute -bottom-1 left-0 w-full h-0.5 bg-[repeating-linear-gradient(90deg,transparent,transparent_4px,rgb(255,204,0)_4px,rgb(255,204,0)_8px)] opacity-30" />
+          </div>
         </div>
 
         {/* Right Column: Mecha HUD Interface */}
