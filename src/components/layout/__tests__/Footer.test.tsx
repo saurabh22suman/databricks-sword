@@ -44,18 +44,6 @@ describe("Footer", () => {
 
   it("renders sector navigation links", () => {
     render(<Footer />)
-    expect(screen.getByRole("link", { name: "Projects" })).toHaveAttribute(
-      "href",
-      "/#projects",
-    )
-    expect(screen.getByRole("link", { name: "Intel" })).toHaveAttribute(
-      "href",
-      "/intel",
-    )
-  })
-
-  it("renders system navigation links", () => {
-    render(<Footer />)
     expect(screen.getByRole("link", { name: "Missions" })).toHaveAttribute(
       "href",
       "/missions",
@@ -64,9 +52,29 @@ describe("Footer", () => {
       "href",
       "/challenges",
     )
+    expect(screen.getByRole("link", { name: "Intel" })).toHaveAttribute(
+      "href",
+      "/intel",
+    )
+    expect(screen.getByRole("link", { name: "Logs" })).toHaveAttribute(
+      "href",
+      "/blog",
+    )
+  })
+
+  it("renders system navigation links", () => {
+    render(<Footer />)
     expect(screen.getByRole("link", { name: "Updates" })).toHaveAttribute(
       "href",
       "/updates",
+    )
+    expect(screen.getByRole("link", { name: "Feedback" })).toHaveAttribute(
+      "href",
+      "/feedback",
+    )
+    expect(screen.getByRole("link", { name: "Support" })).toHaveAttribute(
+      "href",
+      "https://buymeacoffee.com/saurabh.suman",
     )
   })
 

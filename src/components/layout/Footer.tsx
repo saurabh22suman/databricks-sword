@@ -21,8 +21,13 @@ export function Footer(): React.ReactElement {
             <h4 className="font-bold text-white mb-4 uppercase tracking-widest text-xs border-l-2 border-anime-cyan pl-3">Sector 01</h4>
             <ul className="space-y-2 text-gray-400 text-sm">
               <li>
-                <Link href="/#projects" className="hover:text-anime-cyan hover:pl-2 transition-all">
-                  Projects
+                <Link href="/missions" className="hover:text-anime-cyan hover:pl-2 transition-all">
+                  Missions
+                </Link>
+              </li>
+              <li>
+                <Link href="/challenges" className="hover:text-anime-cyan hover:pl-2 transition-all">
+                  Challenges
                 </Link>
               </li>
               <li>
@@ -41,16 +46,6 @@ export function Footer(): React.ReactElement {
             <h4 className="font-bold text-white mb-4 uppercase tracking-widest text-xs border-l-2 border-anime-accent pl-3">System</h4>
             <ul className="space-y-2 text-gray-400 text-sm">
               <li>
-                <Link href="/missions" className="hover:text-anime-accent hover:pl-2 transition-all">
-                  Missions
-                </Link>
-              </li>
-              <li>
-                <Link href="/challenges" className="hover:text-anime-accent hover:pl-2 transition-all">
-                  Challenges
-                </Link>
-              </li>
-              <li>
                 <Link href="/updates" className="hover:text-anime-accent hover:pl-2 transition-all">
                   Updates
                 </Link>
@@ -59,6 +54,16 @@ export function Footer(): React.ReactElement {
                 <Link href="/feedback" className="hover:text-anime-accent hover:pl-2 transition-all">
                   Feedback
                 </Link>
+              </li>
+              <li>
+                <a
+                  href="https://buymeacoffee.com/saurabh.suman"
+                  target="_blank"
+                  rel="noopener noreferrer"
+                  className="hover:text-anime-accent hover:pl-2 transition-all"
+                >
+                  Support
+                </a>
               </li>
             </ul>
           </div>
