@@ -12,11 +12,25 @@ import { useEffect, useState } from "react"
  */
 export function Hero(): React.ReactElement {
   const [scrollY, setScrollY] = useState(0)
+  const [unitsDeployed, setUnitsDeployed] = useState(10)
 
   useEffect(() => {
     const handleScroll = () => requestAnimationFrame(() => setScrollY(window.scrollY))
     window.addEventListener("scroll", handleScroll)
     return () => window.removeEventListener("scroll", handleScroll)
+  }, [])
+
+  useEffect(() => {
+    fetch("/api/stats")
+      .then((res) => res.json())
+      .then((data) => {
+        if (data.unitsDeployed) {
+          setUnitsDeployed(data.unitsDeployed)
+        }
+      })
+      .catch(() => {
+        // Keep default of 10
+      })
   }, [])
 
   return (
@@ -80,7 +94,7 @@ export function Hero(): React.ReactElement {
 
           <div className="mt-16 flex items-center gap-8 opacity-60">
             <div className="flex flex-col">
-              <span className="text-2xl font-black text-white">10k+</span>
+              <span className="text-2xl font-black text-white">{unitsDeployed}</span>
               <span className="text-[10px] uppercase tracking-widest text-gray-500">Units Deployed</span>
             </div>
             <div className="w-px h-8 bg-gray-700" />

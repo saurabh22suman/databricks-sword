@@ -1,5 +1,5 @@
-import { render, screen } from "@testing-library/react"
-import { describe, expect, it, vi } from "vitest"
+import { render, screen, waitFor } from "@testing-library/react"
+import { describe, expect, it, vi, beforeEach } from "vitest"
 import { Hero } from "../Hero"
 
 // Mock next/link
@@ -25,6 +25,15 @@ vi.mock("lucide-react", () => ({
   Play: () => <span data-testid="play" />,
   Cpu: () => <span data-testid="cpu" />,
 }))
+
+// Mock fetch for stats API
+beforeEach(() => {
+  global.fetch = vi.fn(() =>
+    Promise.resolve({
+      json: () => Promise.resolve({ userCount: 5, unitsDeployed: 15 }),
+    })
+  ) as unknown as typeof fetch
+})
 
 describe("Hero", () => {
   it("renders the main heading", () => {
@@ -52,12 +61,15 @@ describe("Hero", () => {
     expect(screen.getByText("System Online")).toBeInTheDocument()
   })
 
-  it("renders the stats section", () => {
+  it("renders the stats section with fetched units deployed", async () => {
     render(<Hero />)
-    expect(screen.getByText("10k+")).toBeInTheDocument()
     expect(screen.getByText("Units Deployed")).toBeInTheDocument()
     expect(screen.getByText("4.9")).toBeInTheDocument()
     expect(screen.getByText("System Rating")).toBeInTheDocument()
+    // Wait for fetch to complete and check the dynamic value
+    await waitFor(() => {
+      expect(screen.getByText("15")).toBeInTheDocument()
+    })
   })
 
   it("renders the Watch Trailer button", () => {
