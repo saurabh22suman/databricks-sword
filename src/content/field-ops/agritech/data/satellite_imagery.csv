@@ -1,0 +1,4 @@
+image_id,field_id,capture_date,latitude,longitude,band_4_red,band_8_nir,cloud_cover_pct
+IMG_001,FIELD_A,2024-01-15,39.7392,-104.9903,0.042,0.385,5.2
+IMG_002,FIELD_A,2024-01-16,39.7392,-104.9903,0.045,0.398,3.8
+IMG_003,FIELD_B,2024-01-15,39.7400,-104.9850,0.038,0.412,8.1

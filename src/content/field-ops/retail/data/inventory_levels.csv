@@ -1,0 +1,5 @@
+sku,product_name,current_stock,reorder_point,last_updated
+PROD123,Widget A,150,50,2024-01-16
+PROD456,Widget B,25,100,2024-01-16
+PROD789,Widget C,300,75,2024-01-16
+PROD123,Widget A,148,50,2024-01-16

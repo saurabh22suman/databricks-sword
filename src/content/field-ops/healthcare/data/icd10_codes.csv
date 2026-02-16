@@ -1,0 +1,4 @@
+icd10_code,description,fhir_code,fhir_system
+E11.9,Type 2 diabetes without complications,44054006,http://snomed.info/sct
+E11.65,Type 2 diabetes with hyperglycemia,44054006,http://snomed.info/sct
+I10,Essential hypertension,59621000,http://snomed.info/sct

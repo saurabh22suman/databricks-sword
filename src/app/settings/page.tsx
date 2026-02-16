@@ -41,6 +41,27 @@ export default function SettingsPage(): React.ReactElement {
     setSandbox(loadSandbox())
   }, [])
 
+  // Fetch existing Databricks connection on mount
+  useEffect(() => {
+    if (!session?.user?.id) return
+    
+    const fetchConnection = async (): Promise<void> => {
+      try {
+        const response = await fetch(`/api/databricks/status`)
+        if (response.ok) {
+          const data = await response.json()
+          if (data.connected && data.workspaceUrl) {
+            setDatabricksUrl(data.workspaceUrl)
+          }
+        }
+      } catch {
+        // Ignore errors - user just won't see connected status
+      }
+    }
+    
+    fetchConnection()
+  }, [session?.user?.id])
+
   const totalXp = sandbox?.userStats.totalXp ?? 0
   const rank = getRankForXp(totalXp)
 
@@ -297,6 +318,37 @@ export default function SettingsPage(): React.ReactElement {
               </p>
             )}
           </div>
+          
+          {/* Auto-cleanup toggle */}
+          {session?.user && (
+            <div className="mt-4 bg-anime-900 border border-anime-700 rounded-lg p-4 cut-corner">
+              <div className="flex items-center justify-between">
+                <div className="flex-1">
+                  <div className="text-sm font-bold text-anime-100 flex items-center gap-2">
+                    <Zap className="w-4 h-4 text-anime-cyan" />
+                    Auto-cleanup Deployments
+                  </div>
+                  <div className="text-xs text-anime-400 mt-1">
+                    Automatically clean up Field Operations deployments 24 hours after completion
+                  </div>
+                </div>
+                <button
+                  onClick={() => updateSetting("fieldOpsAutoCleanup", !settings.fieldOpsAutoCleanup)}
+                  className={cn(
+                    "relative inline-flex h-6 w-11 items-center rounded-full transition-colors",
+                    settings.fieldOpsAutoCleanup ? "bg-anime-cyan" : "bg-anime-700"
+                  )}
+                >
+                  <span
+                    className={cn(
+                      "inline-block h-4 w-4 transform rounded-full bg-white transition-transform",
+                      settings.fieldOpsAutoCleanup ? "translate-x-6" : "translate-x-1"
+                    )}
+                  />
+                </button>
+              </div>
+            </div>
+          )}
         </section>
 
         {/* Data Management Section */}

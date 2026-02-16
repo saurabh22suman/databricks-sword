@@ -1,0 +1,3 @@
+{"vehicle_id": "VIN001", "timestamp": "2024-01-15 10:30:00", "engine_temp_f": 195, "oil_pressure_psi": 35, "battery_voltage": 14.2, "speed_mph": 65, "rpm": 2500, "odometer": 45230, "latitude": 40.7128, "longitude": -74.0060}
+{"vehicle_id": "VIN001", "timestamp": "2024-01-15 10:35:00", "engine_temp_f": 225, "oil_pressure_psi": 18, "battery_voltage": 13.8, "speed_mph": 70, "rpm": 3000, "odometer": 45235, "latitude": 40.7200, "longitude": -74.0100}
+{"vehicle_id": "VIN002", "timestamp": "2024-01-15 11:00:00", "engine_temp_f": 200, "oil_pressure_psi": 40, "battery_voltage": 14.5, "speed_mph": 55, "rpm": 2200, "odometer": 38500, "latitude": 34.0522, "longitude": -118.2437}

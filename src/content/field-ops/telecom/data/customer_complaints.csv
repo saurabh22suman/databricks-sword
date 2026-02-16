@@ -1,0 +1,4 @@
+complaint_id,customer_id,timestamp,tower_id,issue_type,severity
+COMP_001,CUST_12345,2024-01-15 08:30:00,TOWER_001,slow_data,medium
+COMP_002,CUST_67890,2024-01-15 09:15:00,TOWER_002,dropped_call,high
+COMP_003,CUST_11111,2024-01-15 10:00:00,TOWER_001,no_signal,critical

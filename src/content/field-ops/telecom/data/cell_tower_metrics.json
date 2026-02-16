@@ -1,0 +1,6 @@
+[
+  {"tower_id": "TOWER_001", "timestamp": "2024-01-15T08:00:00Z", "region": "US-WEST", "latitude": 37.7749, "longitude": -122.4194, "active_connections": 1250, "avg_latency_ms": 42.5, "throughput_mbps": 845.2, "packet_loss_pct": 0.12},
+  {"tower_id": "TOWER_001", "timestamp": "2024-01-15T08:05:00Z", "region": "US-WEST", "latitude": 37.7749, "longitude": -122.4194, "active_connections": 1280, "avg_latency_ms": 45.1, "throughput_mbps": 852.7, "packet_loss_pct": 0.15},
+  {"tower_id": "TOWER_002", "timestamp": "2024-01-15T08:00:00Z", "region": "US-EAST", "latitude": 40.7128, "longitude": -74.0060, "active_connections": 2100, "avg_latency_ms": 38.2, "throughput_mbps": 1250.4, "packet_loss_pct": 0.08},
+  {"tower_id": "TOWER_002", "timestamp": "2024-01-15T08:05:00Z", "region": "US-EAST", "latitude": 40.7128, "longitude": -74.0060, "active_connections": 2150, "avg_latency_ms": 39.5, "throughput_mbps": 1275.8, "packet_loss_pct": 0.09}
+]

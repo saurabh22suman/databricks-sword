@@ -64,6 +64,7 @@ export type AchievementCondition =
   | { type: "rank-reached"; rankId: string }
   | { type: "side-quest-complete"; count: number }
   | { type: "challenge-complete"; category?: string; count: number }
+  | { type: "field-ops-complete"; industry: string }
 
 export const AchievementConditionSchema = z.discriminatedUnion("type", [
   z.object({
@@ -91,6 +92,10 @@ export const AchievementConditionSchema = z.discriminatedUnion("type", [
     type: z.literal("challenge-complete"),
     category: z.string().optional(),
     count: z.number().int().positive(),
+  }),
+  z.object({
+    type: z.literal("field-ops-complete"),
+    industry: z.string().min(1),
   }),
 ])
 
@@ -161,6 +166,8 @@ export type UserProfile = {
   perfectQuizzes: number
   /** Total number of side quests completed across all missions. */
   completedSideQuests: number
+  /** Industry IDs for completed Field Ops deployments. */
+  completedFieldOps: string[]
   createdAt: string
 }
 
@@ -176,6 +183,7 @@ export const UserProfileSchema = z.object({
   completedChallenges: z.array(z.string()),
   perfectQuizzes: z.number().int().min(0).default(0),
   completedSideQuests: z.number().int().min(0).default(0),
+  completedFieldOps: z.array(z.string()).default([]),
   createdAt: z.string().min(1), // ISO timestamp
 })
 

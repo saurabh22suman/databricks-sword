@@ -1,0 +1,54 @@
+{
+  "id": "gaming-player-analytics",
+  "industry": "gaming",
+  "title": "Gaming Player Analytics",
+  "subtitle": "Fix player retention pipeline",
+  "description": "Mobile game studio needs player retention analysis repaired urgently",
+  "scenario": "GameStudios launched a new mobile game 2 weeks ago. Their analytics pipeline broke yesterday, blocking critical retention metrics. The product team can't make data-driven decisions. The previous analytics engineer left broken session calculations and incomplete cohort analysis.",
+  "situation": "The pipeline has three issues:\n1. Player events are creating duplicate sessions\n2. Session duration calculation is wrong (negative values)\n3. Retention cohorts table is completely empty",
+  "objectives": [
+    "Ingest player_events into Bronze without duplicates",
+    "Calculate correct session metrics in Silver layer",
+    "Build 7-day retention cohorts in Gold layer",
+    "Validate session durations are positive",
+    "Pass all retention analysis checks"
+  ],
+  "dataFiles": [
+    "player_events.json",
+    "players.csv",
+    "game_items.csv"
+  ],
+  "notebooks": [
+    "01_ingest_events.py",
+    "02_session_metrics.py",
+    "03_retention_cohorts.py"
+  ],
+  "validations": [
+    {
+      "checkName": "Bronze events ingested",
+      "description": "Verify player_events table has data",
+      "query": "SELECT COUNT(*) as count FROM {catalog}.{schema_prefix}_bronze.player_events",
+      "expectedResult": "count",
+      "expectedValue": 1
+    },
+    {
+      "checkName": "Silver sessions calculated",
+      "description": "Verify session metrics exist with valid durations",
+      "query": "SELECT COUNT(*) as count FROM {catalog}.{schema_prefix}_silver.sessions WHERE session_duration_sec > 0",
+      "expectedResult": "count",
+      "expectedValue": 1
+    },
+    {
+      "checkName": "Gold retention cohorts exist",
+      "description": "Verify 7-day retention cohorts are calculated",
+      "query": "SELECT COUNT(DISTINCT cohort_date) as count FROM {catalog}.{schema_prefix}_gold.retention_cohorts",
+      "expectedResult": "count",
+      "expectedValue": 1
+    }
+  ],
+  "hints": [
+    "Events need sessionization with 30-minute timeout windows",
+    "Use LAG() to calculate time between events per player",
+    "Cohorts should group by install date and track Day 1, 3, 7 retention"
+  ]
+}

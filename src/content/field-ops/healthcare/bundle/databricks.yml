@@ -1,0 +1,56 @@
+# Databricks Asset Bundle Configuration
+# Field Ops Mission: Healthcare EHR Data Platform
+# Fix EHR data standardization pipeline for hospital system
+
+bundle:
+  name: dbsword-fo-healthcare-ehr
+
+variables:
+  catalog_name:
+    default: main
+    description: Unity Catalog name for deployment
+  schema_prefix:
+    default: dbsword_healthcare
+    description: Prefix for medallion schemas
+
+targets:
+  dev:
+    mode: development
+    default: true
+    workspace:
+      root_path: /Workspace/Users/${workspace.current_user.userName}/dbsword-fo-healthcare-ehr
+
+resources:
+  schemas:
+    bronze_layer:
+      catalog_name: ${var.catalog_name}
+      name: ${var.schema_prefix}_bronze
+      comment: "Databricks Sword - Healthcare EHR Bronze layer (raw ingestion)"
+
+    silver_layer:
+      catalog_name: ${var.catalog_name}
+      name: ${var.schema_prefix}_silver
+      comment: "Databricks Sword - Healthcare EHR Silver layer (deduplicated, standardized)"
+
+    gold_layer:
+      catalog_name: ${var.catalog_name}
+      name: ${var.schema_prefix}_gold
+      comment: "Databricks Sword - Healthcare EHR Gold layer (patient 360, analytics)"
+
+  volumes:
+    data_volume:
+      catalog_name: ${var.catalog_name}
+      schema_name: ${var.schema_prefix}_bronze
+      name: raw_data
+      volume_type: MANAGED
+      comment: "Raw EHR data files for healthcare mission"
+
+sync:
+  include:
+    - notebooks/**
+    - data/**
+
+artifacts:
+  notebooks:
+    path: notebooks
+    deploy_to: /Workspace/Users/${workspace.current_user.userName}/dbsword-fo-healthcare-ehr/notebooks

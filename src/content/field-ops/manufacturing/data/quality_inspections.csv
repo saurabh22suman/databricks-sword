@@ -1,0 +1,6 @@
+inspection_id,batch_id,inspection_time,defect_type,defect_count,inspector_id
+INSP_001,BATCH_001,2024-01-15 12:45:00,missing_contact,15,QA_01
+INSP_002,BATCH_001,2024-01-15 12:50:00,thickness_variance,8,QA_01
+INSP_003,BATCH_002,2024-01-15 13:15:00,alignment_error,22,QA_02
+INSP_004,BATCH_002,2024-01-15 13:20:00,contamination,5,QA_02
+INSP_005,BATCH_003,2024-01-15 18:00:00,missing_contact,12,QA_01

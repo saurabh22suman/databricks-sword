@@ -18,6 +18,8 @@ export type UserSettings = {
   codeEditorFontSize: number
   /** Whether hint buttons are shown in challenges */
   showHints: boolean
+  /** Whether to automatically clean up Field Ops deployments after completion */
+  fieldOpsAutoCleanup: boolean
 }
 
 /** localStorage key for user settings */
@@ -31,4 +33,5 @@ export const DEFAULT_SETTINGS: UserSettings = {
   animationsEnabled: true,
   codeEditorFontSize: 14,
   showHints: true,
+  fieldOpsAutoCleanup: true,
 }

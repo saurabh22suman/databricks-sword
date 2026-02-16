@@ -1,0 +1,4 @@
+item_id,item_name,item_type,price_usd
+ITEM001,Sword Upgrade,weapon,4.99
+ITEM002,Shield Pack,armor,2.99
+ITEM003,Energy Boost,consumable,0.99

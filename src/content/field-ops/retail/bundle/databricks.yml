@@ -1,0 +1,56 @@
+# Databricks Asset Bundle Configuration
+# Field Ops Mission: Retail Analytics Platform
+# Fix broken inventory pipeline for e-commerce company
+
+bundle:
+  name: dbsword-fo-retail-analytics
+
+variables:
+  catalog_name:
+    default: main
+    description: Unity Catalog name for deployment
+  schema_prefix:
+    default: dbsword_retail
+    description: Prefix for medallion schemas
+
+targets:
+  dev:
+    mode: development
+    default: true
+    workspace:
+      root_path: /Workspace/Users/${workspace.current_user.userName}/dbsword-fo-retail-analytics
+
+resources:
+  schemas:
+    bronze_layer:
+      catalog_name: ${var.catalog_name}
+      name: ${var.schema_prefix}_bronze
+      comment: "Databricks Sword - Retail Analytics Bronze layer"
+
+    silver_layer:
+      catalog_name: ${var.catalog_name}
+      name: ${var.schema_prefix}_silver
+      comment: "Databricks Sword - Retail Analytics Silver layer"
+
+    gold_layer:
+      catalog_name: ${var.catalog_name}
+      name: ${var.schema_prefix}_gold
+      comment: "Databricks Sword - Retail Analytics Gold layer"
+
+  volumes:
+    data_volume:
+      catalog_name: ${var.catalog_name}
+      schema_name: ${var.schema_prefix}_bronze
+      name: raw_data
+      volume_type: MANAGED
+      comment: "Raw CSV files for retail analytics mission"
+
+sync:
+  include:
+    - notebooks/**
+    - data/**
+
+artifacts:
+  notebooks:
+    path: notebooks
+    deploy_to: /Workspace/Users/${workspace.current_user.userName}/dbsword-fo-retail-analytics/notebooks

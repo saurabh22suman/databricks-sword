@@ -1,0 +1,56 @@
+# Databricks Asset Bundle Configuration
+# Field Ops Mission: Automotive IoT Predictive Maintenance
+# Fix vehicle telemetry and predictive maintenance pipeline
+
+bundle:
+  name: dbsword-fo-automotive-iot
+
+variables:
+  catalog_name:
+    default: main
+    description: Unity Catalog name for deployment
+  schema_prefix:
+    default: dbsword_automotive
+    description: Prefix for medallion schemas
+
+targets:
+  dev:
+    mode: development
+    default: true
+    workspace:
+      root_path: /Workspace/Users/${workspace.current_user.userName}/dbsword-fo-automotive-iot
+
+resources:
+  schemas:
+    bronze_layer:
+      catalog_name: ${var.catalog_name}
+      name: ${var.schema_prefix}_bronze
+      comment: "Databricks Sword - Automotive IoT Bronze layer (raw telemetry)"
+
+    silver_layer:
+      catalog_name: ${var.catalog_name}
+      name: ${var.schema_prefix}_silver
+      comment: "Databricks Sword - Automotive IoT Silver layer (cleaned, enriched)"
+
+    gold_layer:
+      catalog_name: ${var.catalog_name}
+      name: ${var.schema_prefix}_gold
+      comment: "Databricks Sword - Automotive IoT Gold layer (predictions, alerts)"
+
+  volumes:
+    data_volume:
+      catalog_name: ${var.catalog_name}
+      schema_name: ${var.schema_prefix}_bronze
+      name: raw_data
+      volume_type: MANAGED
+      comment: "Raw IoT telemetry data for automotive mission"
+
+sync:
+  include:
+    - notebooks/**
+    - data/**
+
+artifacts:
+  notebooks:
+    path: notebooks
+    deploy_to: /Workspace/Users/${workspace.current_user.userName}/dbsword-fo-automotive-iot/notebooks

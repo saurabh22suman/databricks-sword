@@ -1,0 +1,83 @@
+{
+  "industry": "manufacturing",
+  "title": "Smart Factory Quality Platform",
+  "description": "Deploy a Delta Live Tables pipeline for real-time quality monitoring in a semiconductor fab. Features include sensor fusion, SPC analysis, and Feature Store integration for ML-driven defect prediction.",
+  "difficulty": "advanced",
+  "estimatedMinutes": 90,
+  "xpReward": 2000,
+  "objectives": [
+    "Implement DLT bronze/silver/gold medallion architecture for manufacturing sensors",
+    "Fix broken expectations in DLT pipeline quality checks",
+    "Calculate Statistical Process Control (SPC) metrics with correct control limits",
+    "Register production feature table in Databricks Feature Store",
+    "Build defect prediction features with proper time-travel lookups"
+  ],
+  "technologies": [
+    "Delta Live Tables",
+    "Feature Store",
+    "Delta Lake Time Travel",
+    "Streaming",
+    "SPC Analysis"
+  ],
+  "scenario": {
+    "industry": "Semiconductor Manufacturing",
+    "challenge": "A chip fabrication plant has deployed thousands of IoT sensors across production lines but lacks real-time quality monitoring. Historical defect rates are 3.2% - above industry standards. Manual SPC charting is too slow to catch process drift. ML models are trained on outdated snapshots instead of live feature tables.",
+    "deployment": "4 DLT notebooks + 3 feature tables (sensor metrics, batch quality, equipment health)"
+  },
+  "validations": [
+    {
+      "id": "dlt_pipeline_running",
+      "name": "DLT Pipeline Health",
+      "query": "SELECT COUNT(*) as pipeline_count FROM system.livelinessMonitor WHERE pipeline_name = 'manufacturing_quality' AND state = 'RUNNING'",
+      "expected": 1,
+      "hint": "Check DLT pipeline definition - expectations might be causing failures"
+    },
+    {
+      "id": "bronze_sensor_data",
+      "name": "Bronze Sensor Ingestion",
+      "query": "SELECT COUNT(*) FROM manufacturing_bronze.sensor_readings WHERE timestamp_parsed IS NOT NULL",
+      "expected": 1000,
+      "hint": "Verify timestamp parsing logic in bronze layer"
+    },
+    {
+      "id": "silver_spc_metrics",
+      "name": "SPC Metrics Calculation",
+      "query": "SELECT COUNT(*) FROM manufacturing_silver.spc_metrics WHERE ucl IS NOT NULL AND lcl IS NOT NULL",
+      "expected": 50,
+      "hint": "Check control limit formulas - UCL/LCL should use 3-sigma rule correctly"
+    },
+    {
+      "id": "gold_batch_quality",
+      "name": "Batch Quality Aggregation",
+      "query": "SELECT AVG(defect_rate) as avg_defect_rate FROM manufacturing_gold.batch_quality_summary",
+      "expected": 0.032,
+      "hint": "Ensure defect rate calculation is (defects / total_units) * 100"
+    },
+    {
+      "id": "feature_store_table",
+      "name": "Feature Store Registration",
+      "query": "SELECT COUNT(*) FROM feature_store.manufacturing_features WHERE feature_table_name = 'production_metrics_features'",
+      "expected": 1,
+      "hint": "Feature table needs primary key (batch_id) and timestamp key (production_timestamp)"
+    }
+  ],
+  "hints": [
+    "DLT expectations: Use @expect_or_drop for quality checks, not @expect_or_fail",
+    "SPC Control Limits: UCL = mean + 3*sigma, LCL = mean - 3*sigma (not 2*sigma)",
+    "Feature Store: Must use create_table() with primary_keys and timestamp_keys parameters",
+    "Sensor fusion: Join temperature, pressure, vibration sensors with INNER join (not LEFT)",
+    "Time travel: Use VERSION AS OF or TIMESTAMP AS OF for point-in-time feature lookups"
+  ],
+  "dataFiles": [
+    "sensor_readings.json",
+    "production_batches.csv",
+    "quality_inspections.csv",
+    "equipment_logs.csv"
+  ],
+  "notebooks": [
+    "01_dlt_bronze.py",
+    "02_dlt_silver_spc.py",
+    "03_dlt_gold_quality.py",
+    "04_feature_store_setup.py"
+  ]
+}

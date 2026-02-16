@@ -1,16 +1,20 @@
 import type { BlogSectionPost } from "@/components/landing/BlogSection"
 import { BlogSection } from "@/components/landing/BlogSection"
 import { FAQ } from "@/components/landing/FAQ"
-import { FeaturedMissions } from "@/components/landing/FeaturedMissions"
+import { FieldOperationsPreview } from "@/components/landing/FieldOperationsPreview"
 import { Hero } from "@/components/landing/Hero"
 import { InteractiveSyllabus } from "@/components/landing/InteractiveSyllabus"
 import { blogPosts, getDb } from "@/lib/db"
+import { INDUSTRY_CONFIGS } from "@/lib/field-ops/industries"
 import { getContentFiles } from "@/lib/mdx/content"
 import { blogFrontmatterSchema } from "@/lib/mdx/schema"
 import { getAllMissions } from "@/lib/missions"
 import { StructuredData, getCourseStructuredData } from "@/lib/seo/structured-data"
 import { eq } from "drizzle-orm"
 import type { Metadata } from "next"
+
+// Force dynamic rendering for DB queries (blog posts)
+export const dynamic = "force-dynamic"
 
 export const metadata: Metadata = {
   title: "Databricks Sword — Master the Lakehouse Through Gamified Missions",
@@ -68,16 +72,11 @@ export default async function HomePage(): Promise<React.ReactElement> {
     console.error("Failed to load blog posts for landing page:", error)
   }
 
-  // Pick 4 featured missions for the Active Campaigns section
-  const featuredIds = [
-    "structured-streaming",
-    "unity-catalog-governance",
-    "ml-pipelines-production",
-    "medallion-architecture",
+  // Select 2 featured Field Operations industries for landing page
+  const featuredIndustries = [
+    INDUSTRY_CONFIGS.retail,
+    INDUSTRY_CONFIGS.gaming,
   ]
-  const featuredMissions = featuredIds
-    .map((id) => missions.find((m) => m.id === id))
-    .filter((m): m is NonNullable<typeof m> => m !== undefined)
 
   return (
     <div className="min-h-screen bg-anime-950 text-white selection:bg-anime-accent selection:text-white relative pt-20">
@@ -88,7 +87,7 @@ export default async function HomePage(): Promise<React.ReactElement> {
       
       <main className="relative z-10">
         <Hero />
-        <FeaturedMissions missions={featuredMissions} />
+        <FieldOperationsPreview industries={featuredIndustries} />
         <InteractiveSyllabus missions={missions} />
         <FAQ />
         <BlogSection posts={blogSectionPosts} />

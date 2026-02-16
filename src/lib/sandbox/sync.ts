@@ -140,6 +140,14 @@ export function mergeConflicts(
     new Set([...local.achievements, ...remote.achievements]),
   )
 
+  // Union of completed field ops (combine unique industry IDs)
+  const mergedCompletedFieldOps = Array.from(
+    new Set([
+      ...(local.completedFieldOps ?? []),
+      ...(remote.completedFieldOps ?? []),
+    ]),
+  )
+
   // Merge mission progress (keep latest for each mission)
   const mergedMissionProgress: Record<string, MissionProgress> = { ...local.missionProgress }
 
@@ -241,6 +249,7 @@ export function mergeConflicts(
     userStats: mergedStats,
     streakData: mergedStreakData,
     achievements: mergedAchievements,
+    completedFieldOps: mergedCompletedFieldOps,
     flashcardProgress: mergedFlashcardProgress,
     lastSynced: mergedLastSynced,
   }

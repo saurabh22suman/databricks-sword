@@ -1,0 +1,53 @@
+{
+  "id": "retail-analytics-bronze-to-gold",
+  "industry": "retail",
+  "title": "Retail Analytics Platform",
+  "subtitle": "Fix broken inventory pipeline",
+  "description": "E-commerce company needs immediate fix for broken sales and inventory pipeline",
+  "scenario": "You've been deployed to RetailCo's data team. Their sales dashboard went dark 3 hours ago. The previous data engineer left incomplete notebooks and broken transformations. Revenue reporting is blocked. Your mission: get the data flowing again.",
+  "situation": "The pipeline has three critical issues:\n1. Raw sales data is ingesting but creating duplicates\n2. Inventory deduplication logic is broken\n3. Reorder recommendations table is empty",
+  "objectives": [
+    "Ingest sales_transactions into Bronze layer without duplicates",
+    "Clean and deduplicate inventory data in Silver layer",
+    "Create reorder_recommendations table in Gold layer",
+    "Implement data quality checks on all layers",
+    "Pass all validation queries"
+  ],
+  "dataFiles": [
+    "sales_transactions.csv",
+    "inventory_levels.csv",
+    "products.csv"
+  ],
+  "notebooks": [
+    "01_ingest_sales.py",
+    "02_transform_inventory.py",
+    "03_gold_reorder.py"
+  ],
+  "validations": [
+    {
+      "checkName": "Bronze sales data exists",
+      "description": "Verify sales_transactions table has data",
+      "query": "SELECT COUNT(*) as count FROM {catalog}.{schema_prefix}_bronze.sales_transactions",
+      "expectedResult": "count",
+      "expectedValue": 1
+    },
+    {
+      "checkName": "Silver inventory cleaned",
+      "description": "Verify inventory data is deduplicated",
+      "query": "SELECT COUNT(DISTINCT sku) as count FROM {catalog}.{schema_prefix}_silver.inventory",
+      "expectedResult": "count"
+    },
+    {
+      "checkName": "Gold reorder recommendations exist",
+      "description": "Verify reorder recommendations table has data",
+      "query": "SELECT COUNT(*) as count FROM {catalog}.{schema_prefix}_gold.reorder_recommendations WHERE reorder_quantity > 0",
+      "expectedResult": "count",
+      "expectedValue": 1
+    }
+  ],
+  "hints": [
+    "Check the Bronze ingestion notebook for MERGE logic",
+    "The Silver layer needs a QUALIFY window function to dedupe",
+    "Gold layer should join inventory with sales velocity"
+  ]
+}

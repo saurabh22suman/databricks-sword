@@ -1,0 +1,4 @@
+{"transaction_id": "TXN001", "account_id": "ACC001", "merchant_id": "MER001", "amount": 45.99, "timestamp": "2024-01-15T10:30:00Z", "card_last_4": "1234", "merchant_city": "New York", "merchant_lat": 40.7128, "merchant_lon": -74.0060}
+{"transaction_id": "TXN002", "account_id": "ACC001", "merchant_id": "MER002", "amount": 120.50, "timestamp": "2024-01-15T10:45:00Z", "card_last_4": "1234", "merchant_city": "Boston", "merchant_lat": 42.3601, "merchant_lon": -71.0589}
+{"transaction_id": "TXN003", "account_id": "ACC001", "merchant_id": "MER003", "amount": 8500.00, "timestamp": "2024-01-15T11:00:00Z", "card_last_4": "1234", "merchant_city": "Miami", "merchant_lat": 25.7617, "merchant_lon": -80.1918}
+{"transaction_id": "TXN004", "account_id": "ACC002", "merchant_id": "MER001", "amount": 25.00, "timestamp": "2024-01-15T12:00:00Z", "card_last_4": "5678", "merchant_city": "New York", "merchant_lat": 40.7128, "merchant_lon": -74.0060}

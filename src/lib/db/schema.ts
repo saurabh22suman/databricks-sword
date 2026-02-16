@@ -98,6 +98,7 @@ export const databricksConnections = sqliteTable("databricks_connections", {
   id: text("id").primaryKey(),
   userId: text("user_id")
     .notNull()
+    .unique()
     .references(() => users.id, { onDelete: "cascade" }),
   workspaceUrl: text("workspace_url").notNull(),
   encryptedPat: text("encrypted_pat").notNull(),
@@ -156,5 +157,56 @@ export const faqItems = sqliteTable("faq_items", {
   updatedAt: integer("updated_at", { mode: "timestamp" })
     .notNull()
     .$defaultFn(() => new Date()),
+})
+
+/**
+ * Field Operations deployments for real Databricks missions.
+ * Tracks deployment lifecycle from pending to cleaned up.
+ */
+export const fieldOpsDeployments = sqliteTable("field_ops_deployments", {
+  id: text("id")
+    .primaryKey()
+    .$defaultFn(() => crypto.randomUUID()),
+  userId: text("user_id")
+    .notNull()
+    .references(() => users.id, { onDelete: "cascade" }),
+  industry: text("industry").notNull(), // retail, gaming, healthcare, fintech, automotive, manufacturing, telecom, agritech
+  status: text("status").notNull().default("pending"), // pending, deploying, deployed, validating, completed, failed, cleaning_up, cleaned_up
+  catalogName: text("catalog_name").notNull().default("default"),
+  schemaPrefix: text("schema_prefix").notNull(), // e.g., "fo_retail_abc123"
+  warehouseId: text("warehouse_id"),
+  workspaceUrl: text("workspace_url"),
+  bundlePath: text("bundle_path"), // Local path to generated bundle
+  deployedAt: integer("deployed_at", { mode: "timestamp" }),
+  validatedAt: integer("validated_at", { mode: "timestamp" }),
+  completedAt: integer("completed_at", { mode: "timestamp" }),
+  cleanedUpAt: integer("cleaned_up_at", { mode: "timestamp" }),
+  errorMessage: text("error_message"),
+  createdAt: integer("created_at", { mode: "timestamp" })
+    .notNull()
+    .$defaultFn(() => new Date()),
+  updatedAt: integer("updated_at", { mode: "timestamp" })
+    .notNull()
+    .$defaultFn(() => new Date()),
+})
+
+/**
+ * Field Operations validation results.
+ * Stores results from running validation queries against deployed resources.
+ */
+export const fieldOpsValidations = sqliteTable("field_ops_validations", {
+  id: text("id")
+    .primaryKey()
+    .$defaultFn(() => crypto.randomUUID()),
+  deploymentId: text("deployment_id")
+    .notNull()
+    .references(() => fieldOpsDeployments.id, { onDelete: "cascade" }),
+  checkName: text("check_name").notNull(),
+  query: text("query").notNull(),
+  passed: integer("passed", { mode: "boolean" }).notNull(),
+  executedAt: integer("executed_at", { mode: "timestamp" })
+    .notNull()
+    .$defaultFn(() => new Date()),
+  errorMessage: text("error_message"),
 })
 

@@ -1,0 +1,5 @@
+transaction_id,is_fraud,fraud_type
+TXN001,0,
+TXN002,0,
+TXN003,1,high_amount
+TXN004,0,

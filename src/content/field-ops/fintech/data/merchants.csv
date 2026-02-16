@@ -1,0 +1,4 @@
+merchant_id,merchant_name,category,city,country
+MER001,Coffee Shop,food,New York,USA
+MER002,Electronics Store,retail,Boston,USA
+MER003,Luxury Goods,retail,Miami,USA

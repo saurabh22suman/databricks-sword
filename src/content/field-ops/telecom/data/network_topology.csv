@@ -1,0 +1,4 @@
+tower_id,region,site_type,install_date,vendor,model
+TOWER_001,US-WEST,macro,2021-05-15,Ericsson,RBS6000
+TOWER_002,US-EAST,macro,2020-11-20,Nokia,AirScale
+TOWER_003,US-SOUTH,small_cell,2022-03-10,Samsung,Compact Macro

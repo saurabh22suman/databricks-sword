@@ -1,0 +1,4 @@
+service_id,vehicle_id,service_date,service_type,mileage,cost
+SVC001,VIN001,2023-12-15,Oil Change,44500,45.00
+SVC002,VIN002,2024-01-05,Brake Service,38200,320.00
+SVC003,VIN003,2023-11-20,Tire Rotation,52000,35.00

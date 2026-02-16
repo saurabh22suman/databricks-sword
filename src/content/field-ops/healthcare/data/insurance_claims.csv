@@ -1,0 +1,4 @@
+claim_id,patient_id,claim_date,amount,insurance_provider
+CLM001,P001,2024-01-10,450.00,BlueCross
+CLM002,P002,2024-01-12,320.00,Aetna
+CLM003,P001A,2024-01-15,280.00,BlueCross

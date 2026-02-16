@@ -208,6 +208,74 @@ export const ACHIEVEMENTS: readonly Achievement[] = [
     xpBonus: 650,
     condition: { type: "side-quest-complete", count: 10 },
   },
+
+  // ============================================================================
+  // Field Ops Industry Mastery
+  // ============================================================================
+  {
+    id: "field-ops-retail",
+    title: "Retail Analytics Expert",
+    description: "Complete the Retail Analytics Field Ops deployment",
+    icon: "shopping-cart",
+    xpBonus: 500,
+    condition: { type: "field-ops-complete", industry: "retail" },
+  },
+  {
+    id: "field-ops-gaming",
+    title: "Gaming Analytics Engineer",
+    description: "Complete the Gaming Analytics Field Ops deployment",
+    icon: "gamepad",
+    xpBonus: 500,
+    condition: { type: "field-ops-complete", industry: "gaming" },
+  },
+  {
+    id: "field-ops-healthcare",
+    title: "Healthcare Data Architect",
+    description: "Complete the Healthcare EHR Field Ops deployment",
+    icon: "heart-pulse",
+    xpBonus: 600,
+    condition: { type: "field-ops-complete", industry: "healthcare" },
+  },
+  {
+    id: "field-ops-fintech",
+    title: "FinTech Security Specialist",
+    description: "Complete the FinTech Fraud Detection Field Ops deployment",
+    icon: "shield-check",
+    xpBonus: 600,
+    condition: { type: "field-ops-complete", industry: "fintech" },
+  },
+  {
+    id: "field-ops-automotive",
+    title: "Automotive IoT Architect",
+    description: "Complete the Automotive IoT Field Ops deployment",
+    icon: "car",
+    xpBonus: 550,
+    condition: { type: "field-ops-complete", industry: "automotive" },
+  },
+  {
+    id: "field-ops-manufacturing",
+    title: "Manufacturing Intelligence",
+    description: "Complete the Smart Factory Field Ops deployment",
+    icon: "factory",
+    xpBonus: 650,
+    condition: { type: "field-ops-complete", industry: "manufacturing" },
+  },
+  {
+    id: "field-ops-telecom",
+    title: "Telecom Network Analyst",
+    description: "Complete the Network Operations Field Ops deployment",
+    icon: "antenna",
+    xpBonus: 625,
+    condition: { type: "field-ops-complete", industry: "telecom" },
+  },
+  {
+    id: "field-ops-agritech",
+    title: "AgriTech Data Scientist",
+    description: "Complete the Precision Agriculture Field Ops deployment",
+    icon: "leaf",
+    xpBonus: 750,
+    condition: { type: "field-ops-complete", industry: "agritech" },
+  },
 ] as const
 
 /**
@@ -261,6 +329,11 @@ export function checkAchievement(
       }
       // Check for total challenge count
       return profile.completedChallenges.length >= condition.count
+    }
+
+    case "field-ops-complete": {
+      // Check if the specific industry Field Ops deployment is completed
+      return (profile.completedFieldOps ?? []).includes(condition.industry)
     }
 
     default: {

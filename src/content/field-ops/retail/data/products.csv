@@ -1,0 +1,4 @@
+product_id,product_name,category,unit_price
+PROD123,Widget A,Electronics,29.99
+PROD456,Widget B,Home,49.99
+PROD789,Widget C,Garden,19.99

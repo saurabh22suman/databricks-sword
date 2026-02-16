@@ -1,0 +1,4 @@
+patient_id,test_code,test_name,result_value,result_unit,lab_date
+P001,2345-7,Glucose,125,mg/dL,2024-01-10
+P002,8480-6,Systolic BP,140,mmHg,2024-01-12
+P001A,2345-7,Glucose,130,mg/dL,2024-01-15

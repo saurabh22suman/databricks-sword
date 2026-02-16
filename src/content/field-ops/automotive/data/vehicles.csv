@@ -1,0 +1,4 @@
+vehicle_id,make,model,year,owner,last_service_date,last_service_mileage
+VIN001,Toyota,Camry,2020,John Doe,2023-12-15,44500
+VIN002,Honda,Accord,2019,Jane Smith,2024-01-05,38200
+VIN003,Ford,F-150,2021,Bob Johnson,2023-11-20,52000

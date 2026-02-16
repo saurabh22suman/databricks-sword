@@ -1,0 +1,5 @@
+{"player_id": "P001", "event_type": "login", "timestamp": "2024-01-15T10:00:00Z", "session_id": "S001"}
+{"player_id": "P001", "event_type": "level_complete", "timestamp": "2024-01-15T10:15:00Z", "session_id": "S001"}
+{"player_id": "P001", "event_type": "logout", "timestamp": "2024-01-15T10:30:00Z", "session_id": "S001"}
+{"player_id": "P002", "event_type": "login", "timestamp": "2024-01-15T11:00:00Z", "session_id": "S002"}
+{"player_id": "P002", "event_type": "purchase", "timestamp": "2024-01-15T11:10:00Z", "session_id": "S002"}

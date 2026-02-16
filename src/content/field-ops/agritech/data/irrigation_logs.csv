@@ -1,0 +1,4 @@
+log_id,field_id,timestamp,zone_id,water_applied_gallons,duration_minutes,soil_moisture_before,soil_moisture_after
+IRR_001,FIELD_A,2024-01-15 06:00:00,ZONE_1,1500,45,28.3,42.5
+IRR_002,FIELD_A,2024-01-15 06:00:00,ZONE_2,1450,45,30.1,44.2
+IRR_003,FIELD_B,2024-01-15 07:00:00,ZONE_3,1800,60,35.2,52.8

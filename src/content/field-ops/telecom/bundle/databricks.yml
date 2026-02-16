@@ -1,0 +1,56 @@
+# Databricks Asset Bundle Configuration
+# Field Ops Mission: Network Operations Analytics Platform
+# Scalable telemetry ingestion for telecom network operations
+
+bundle:
+  name: dbsword-fo-telecom-network
+
+variables:
+  catalog_name:
+    default: main
+    description: Unity Catalog name for deployment
+  schema_prefix:
+    default: dbsword_telecom
+    description: Prefix for medallion schemas
+
+targets:
+  dev:
+    mode: development
+    default: true
+    workspace:
+      root_path: /Workspace/Users/${workspace.current_user.userName}/dbsword-fo-telecom-network
+
+resources:
+  schemas:
+    bronze_layer:
+      catalog_name: ${var.catalog_name}
+      name: ${var.schema_prefix}_bronze
+      comment: "Databricks Sword - Telecom Bronze layer (raw cell tower metrics)"
+
+    silver_layer:
+      catalog_name: ${var.catalog_name}
+      name: ${var.schema_prefix}_silver
+      comment: "Databricks Sword - Telecom Silver layer (validated, enriched)"
+
+    gold_layer:
+      catalog_name: ${var.catalog_name}
+      name: ${var.schema_prefix}_gold
+      comment: "Databricks Sword - Telecom Gold layer (KPIs, dashboards)"
+
+  volumes:
+    data_volume:
+      catalog_name: ${var.catalog_name}
+      schema_name: ${var.schema_prefix}_bronze
+      name: raw_data
+      volume_type: MANAGED
+      comment: "Raw network telemetry for telecom mission"
+
+sync:
+  include:
+    - notebooks/**
+    - data/**
+
+artifacts:
+  notebooks:
+    path: notebooks
+    deploy_to: /Workspace/Users/${workspace.current_user.userName}/dbsword-fo-telecom-network/notebooks

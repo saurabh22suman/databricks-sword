@@ -1,0 +1,59 @@
+{
+  "id": "healthcare-ehr-platform",
+  "industry": "healthcare",
+  "title": "Healthcare Data Platform",
+  "subtitle": "Fix EHR data standardization pipeline",
+  "description": "Hospital system needs patient 360 views and FHIR-compliant data lake",
+  "scenario": "HealthCare United's new EHR data lake went live last week but patient lookups are failing. Clinical teams can't access unified patient records. The data engineer who built it left incomplete code for patient deduplication, missing PII masking, and broken FHIR code standardization.",
+  "situation": "The pipeline has four critical issues:\n1. EHR records have schema mismatches causing ingestion failures\n2. Patient records aren't deduplicated (same patient, multiple IDs)\n3. PII fields in patient_360 view are not masked\n4. ICD-10 and LOINC codes aren't standardized to FHIR",
+  "objectives": [
+    "Ingest EHR records with schema evolution handling",
+    "Deduplicate patients using fuzzy matching on name+DOB",
+    "Create patient_360 view with PII masking (SSN, address)",
+    "Standardize ICD-10 and LOINC codes to FHIR format",
+    "Pass all HIPAA compliance validation checks"
+  ],
+  "dataFiles": [
+    "ehr_records.json",
+    "lab_results.csv",
+    "appointments.csv",
+    "insurance_claims.csv",
+    "icd10_codes.csv",
+    "loinc_codes.csv"
+  ],
+  "notebooks": [
+    "01_ingest_ehr.py",
+    "02_standardize_codes.py",
+    "03_dedupe_patients.py",
+    "04_patient_360.py"
+  ],
+  "validations": [
+    {
+      "checkName": "Bronze EHR data ingested",
+      "description": "Verify EHR records table exists with data",
+      "query": "SELECT COUNT(*) as count FROM {catalog}.{schema_prefix}_bronze.ehr_records",
+      "expectedResult": "count",
+      "expectedValue": 1
+    },
+    {
+      "checkName": "Silver patients deduplicated",
+      "description": "Verify patients table has unique patient_key",
+      "query": "SELECT COUNT(DISTINCT patient_key) as unique_patients FROM {catalog}.{schema_prefix}_silver.patients",
+      "expectedResult": "count",
+      "expectedValue": 1
+    },
+    {
+      "checkName": "Gold patient_360 with masked PII",
+      "description": "Verify patient_360 exists with masked SSN",
+      "query": "SELECT COUNT(*) as count FROM {catalog}.{schema_prefix}_gold.patient_360 WHERE ssn LIKE 'XXX-XX-%'",
+      "expectedResult": "count",
+      "expectedValue": 1
+    }
+  ],
+  "hints": [
+    "Use schema evolution with mergeSchema=true for Bronze ingestion",
+    "Dedupe with soundex(name) + date_of_birth matching logic",
+    "Use regexp_replace to mask first 7 digits of SSN: XXX-XX-NNNN",
+    "Join with reference tables for ICD-10 and LOINC FHIR mappings"
+  ]
+}

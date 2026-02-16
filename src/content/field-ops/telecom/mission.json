@@ -1,0 +1,82 @@
+{
+  "industry": "telecom",
+  "title": "Network Operations Analytics Platform",
+  "description": "Deploy a scalable telemetry ingestion system using Auto Loader for massive cell tower metrics. Build real-time KPI dashboards with aggregated network performance data across regions.",
+  "difficulty": "advanced",
+  "estimatedMinutes": 85,
+  "xpReward": 1900,
+  "objectives": [
+    "Implement Auto Loader with schema evolution for cell tower metrics",
+    "Fix broken partition pruning causing full table scans",
+    "Calculate network KPIs (latency, throughput, packet loss) with correct window functions",
+    "Build regional aggregations with proper time-zone handling",
+    "Optimize query performance with Z-ordering on high-cardinality columns"
+  ],
+  "technologies": [
+    "Auto Loader",
+    "Schema Evolution",
+    "Window Functions",
+    "Z-Order Optimization",
+    "Time Series Analysis"
+  ],
+  "scenario": {
+    "industry": "Telecommunications",
+    "challenge": "A national carrier processes 2TB/day of cell tower telemetry but queries are slow (30+ seconds for regional dashboards). Auto Loader schema inference is disabled, causing ingestion failures when new metrics are added. Partition pruning is broken - queries scan entire history instead of targeted date ranges. Time-zone conversions are inconsistent between UTC and local time.",
+    "deployment": "3 notebooks + 2 dashboards (Network KPIs, Tower Health)"
+  },
+  "validations": [
+    {
+      "id": "autoloader_running",
+      "name": "Auto Loader Stream Health",
+      "query": "SELECT COUNT(*) as stream_count FROM system.streaming.active WHERE name LIKE '%cell_tower_metrics%' AND status = 'ACTIVE'",
+      "expected": 1,
+      "hint": "Check Auto Loader configuration - schema evolution might be disabled"
+    },
+    {
+      "id": "bronze_metrics_partitioned",
+      "name": "Bronze Layer Partitioning",
+      "query": "DESCRIBE DETAIL telecom_bronze.cell_tower_metrics",
+      "expected": "partitionColumns = ['date']",
+      "hint": "Verify partitionBy() is applied when writing to Delta table"
+    },
+    {
+      "id": "silver_kpi_calculations",
+      "name": "Network KPI Accuracy",
+      "query": "SELECT AVG(avg_latency_ms) as overall_latency FROM telecom_silver.network_kpis WHERE region = 'US-WEST'",
+      "expected": 45.3,
+      "hint": "Check window function for latency calculation - ensure PARTITION BY region, tower_id"
+    },
+    {
+      "id": "gold_regional_aggregates",
+      "name": "Regional Aggregation",
+      "query": "SELECT COUNT(DISTINCT region) as region_count FROM telecom_gold.regional_performance",
+      "expected": 4,
+      "hint": "Ensure timezone conversion from UTC to regional timezones is working"
+    },
+    {
+      "id": "zorder_optimization",
+      "name": "Z-Order Optimization Applied",
+      "query": "DESCRIBE HISTORY telecom_silver.network_kpis",
+      "expected": "OPTIMIZE ... ZORDER BY (region, tower_id, timestamp)",
+      "hint": "Run OPTIMIZE with ZORDER BY on high-cardinality columns"
+    }
+  ],
+  "hints": [
+    "Auto Loader: Set cloudFiles.schemaEvolutionMode = 'addNewColumns' for schema flexibility",
+    "Partitioning: Use .partitionBy('date') when writing to Delta, not after reading",
+    "Window Functions: Use PARTITION BY (region, tower_id) not just PARTITION BY region",
+    "Timezone: Convert UTC timestamps to regional timezones with AT TIME ZONE syntax",
+    "Z-Order: Apply OPTIMIZE ZORDER BY (region, tower_id, timestamp) on silver tables"
+  ],
+  "dataFiles": [
+    "cell_tower_metrics.json",
+    "network_topology.csv",
+    "customer_complaints.csv",
+    "weather_data.csv"
+  ],
+  "notebooks": [
+    "01_autoloader_bronze.py",
+    "02_network_kpis_silver.py",
+    "03_regional_aggregates_gold.py"
+  ]
+}

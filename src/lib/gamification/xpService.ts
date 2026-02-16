@@ -59,6 +59,7 @@ function buildProfileFromSandbox(data: SandboxData): UserProfile {
       .map(([id]) => id),
     perfectQuizzes,
     completedSideQuests,
+    completedFieldOps: data.completedFieldOps ?? [],
     createdAt: new Date().toISOString(),
   }
 }

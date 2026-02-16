@@ -1,0 +1,4 @@
+appointment_id,patient_id,provider,appointment_date,status
+APT001,P001,Dr. Johnson,2024-01-20,scheduled
+APT002,P002,Dr. Williams,2024-01-22,completed
+APT003,P001A,Dr. Johnson,2024-01-25,scheduled

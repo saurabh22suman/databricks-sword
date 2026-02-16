@@ -27,6 +27,7 @@ function createTestProfile(overrides?: Partial<UserProfile>): UserProfile {
     completedChallenges: [],
     perfectQuizzes: 0,
     completedSideQuests: 0,
+    completedFieldOps: [],
     createdAt: "2026-02-12T00:00:00Z",
     ...overrides,
   }

@@ -261,6 +261,7 @@ describe("Sandbox Types", () => {
           freezesUsed: 0,
         },
         achievements: ["first-blood", "mission-clear"],
+        completedFieldOps: [],
         flashcardProgress: {
           "card-1": {
             lastReviewed: "2026-02-12T10:00:00Z",
@@ -298,6 +299,7 @@ describe("Sandbox Types", () => {
           freezesUsed: 0,
         },
         achievements: [],
+        completedFieldOps: [],
         flashcardProgress: {},
         lastSynced: null,
       }

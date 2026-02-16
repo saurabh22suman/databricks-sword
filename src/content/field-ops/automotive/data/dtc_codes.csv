@@ -1,0 +1,5 @@
+dtc_code,description,severity,system
+P0300,Random/Multiple Cylinder Misfire,high,engine
+P0420,Catalyst System Efficiency Below Threshold,medium,emissions
+P0171,System Too Lean (Bank 1),medium,fuel
+C0050,Right Front Wheel Speed Sensor Circuit,high,abs

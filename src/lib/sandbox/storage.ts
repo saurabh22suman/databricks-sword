@@ -46,6 +46,7 @@ export function initializeSandbox(): SandboxData {
       freezesUsed: 0,
     },
     achievements: [],
+    completedFieldOps: [],
     flashcardProgress: {},
     lastSynced: null,
   }

@@ -53,6 +53,7 @@ export async function POST(_request: NextRequest): Promise<NextResponse> {
         .map(([id]) => id),
       perfectQuizzes,
       completedSideQuests,
+      completedFieldOps: sandbox.completedFieldOps ?? [],
       createdAt: new Date().toISOString(),
     }
 

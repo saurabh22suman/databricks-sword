@@ -1,0 +1,11 @@
+[
+  {"sensor_id": "TEMP_001", "timestamp": "2024-01-15T08:00:00Z", "metric": "temperature", "value": 285.4, "unit": "celsius", "equipment_id": "CVD_CHAMBER_01", "production_line": "LINE_A"},
+  {"sensor_id": "PRES_001", "timestamp": "2024-01-15T08:00:00Z", "metric": "pressure", "value": 12.5, "unit": "torr", "equipment_id": "CVD_CHAMBER_01", "production_line": "LINE_A"},
+  {"sensor_id": "VIB_001", "timestamp": "2024-01-15T08:00:00Z", "metric": "vibration", "value": 0.35, "unit": "mm_s", "equipment_id": "CVD_CHAMBER_01", "production_line": "LINE_A"},
+  {"sensor_id": "TEMP_001", "timestamp": "2024-01-15T08:01:00Z", "metric": "temperature", "value": 286.1, "unit": "celsius", "equipment_id": "CVD_CHAMBER_01", "production_line": "LINE_A"},
+  {"sensor_id": "PRES_001", "timestamp": "2024-01-15T08:01:00Z", "metric": "pressure", "value": 12.7, "unit": "torr", "equipment_id": "CVD_CHAMBER_01", "production_line": "LINE_A"},
+  {"sensor_id": "VIB_001", "timestamp": "2024-01-15T08:01:00Z", "metric": "vibration", "value": 0.38, "unit": "mm_s", "equipment_id": "CVD_CHAMBER_01", "production_line": "LINE_A"},
+  {"sensor_id": "TEMP_002", "timestamp": "2024-01-15T08:00:00Z", "metric": "temperature", "value": 420.2, "unit": "celsius", "equipment_id": "LITHOGRAPHY_01", "production_line": "LINE_B"},
+  {"sensor_id": "HUMID_001", "timestamp": "2024-01-15T08:00:00Z", "metric": "humidity", "value": 45.2, "unit": "percent", "equipment_id": "LITHOGRAPHY_01", "production_line": "LINE_B"},
+  {"sensor_id": "PARTICLE_001", "timestamp": "2024-01-15T08:00:00Z", "metric": "particle_count", "value": 12, "unit": "count_per_m3", "equipment_id": "LITHOGRAPHY_01", "production_line": "LINE_B"}
+]

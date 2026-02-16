@@ -1,0 +1,56 @@
+{
+  "id": "automotive-predictive-maintenance",
+  "industry": "automotive",
+  "title": "Automotive IoT Platform",
+  "subtitle": "Fix vehicle telemetry and predictive maintenance",
+  "description": "Connected vehicle platform needs telemetry pipeline and maintenance predictions",
+  "scenario": "AutoConnect's predictive maintenance system crashed this morning. Fleet managers can't see vehicle health dashboards. Service centers are operating blind. The IoT engineer left broken timestamp parsing, incomplete anomaly detection, and empty predictive maintenance tables.",
+  "situation": "The pipeline has three issues:\n1. Telemetry data has timestamp parsing errors (timezone issues)\n2. Anomaly detection thresholds are hardcoded wrong\n3. Predictive maintenance model integration is completely missing",
+  "objectives": [
+    "Ingest telemetry with proper UTC timestamp conversion",
+    "Detect anomalies in engine temp, oil pressure, battery voltage",
+    "Calculate time-to-maintenance predictions per vehicle",
+    "Generate maintenance alerts for critical vehicles",
+    "Pass all vehicle health validation checks"
+  ],
+  "dataFiles": [
+    "vehicle_telemetry.json",
+    "vehicles.csv",
+    "dtc_codes.csv",
+    "service_records.csv"
+  ],
+  "notebooks": [
+    "01_ingest_telemetry.py",
+    "02_anomaly_detection.py",
+    "03_predictive_maint.py"
+  ],
+  "validations": [
+    {
+      "checkName": "Bronze telemetry ingested",
+      "description": "Verify telemetry table has data with valid timestamps",
+      "query": "SELECT COUNT(*) as count FROM {catalog}.{schema_prefix}_bronze.vehicle_telemetry WHERE timestamp IS NOT NULL",
+      "expectedResult": "count",
+      "expectedValue": 1
+    },
+    {
+      "checkName": "Silver anomalies detected",
+      "description": "Verify anomaly_events table exists",
+      "query": "SELECT COUNT(*) as count FROM {catalog}.{schema_prefix}_silver.anomaly_events",
+      "expectedResult": "count",
+      "expectedValue": 1
+    },
+    {
+      "checkName": "Gold maintenance predictions",
+      "description": "Verify predictive_maintenance table has predictions",
+      "query": "SELECT COUNT(*) as count FROM {catalog}.{schema_prefix}_gold.predictive_maintenance WHERE days_to_service > 0",
+      "expectedResult": "count",
+      "expectedValue": 1
+    }
+  ],
+  "hints": [
+    "Parse timestamps with to_timestamp() and convert to UTC",
+    "Detect anomalies: engine_temp > 220F, oil_pressure < 20 PSI, battery < 12V",
+    "Calculate days_to_service using mileage and last_service_date",
+    "Join with DTC codes to enrich fault descriptions"
+  ]
+}

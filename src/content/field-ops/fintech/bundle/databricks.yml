@@ -1,0 +1,56 @@
+# Databricks Asset Bundle Configuration
+# Field Ops Mission: FinTech Fraud Detection
+# Fix real-time fraud alerting pipeline for payment processor
+
+bundle:
+  name: dbsword-fo-fintech-fraud
+
+variables:
+  catalog_name:
+    default: main
+    description: Unity Catalog name for deployment
+  schema_prefix:
+    default: dbsword_fintech
+    description: Prefix for medallion schemas
+
+targets:
+  dev:
+    mode: development
+    default: true
+    workspace:
+      root_path: /Workspace/Users/${workspace.current_user.userName}/dbsword-fo-fintech-fraud
+
+resources:
+  schemas:
+    bronze_layer:
+      catalog_name: ${var.catalog_name}
+      name: ${var.schema_prefix}_bronze
+      comment: "Databricks Sword - FinTech Fraud Detection Bronze layer"
+
+    silver_layer:
+      catalog_name: ${var.catalog_name}
+      name: ${var.schema_prefix}_silver
+      comment: "Databricks Sword - FinTech Fraud Detection Silver layer (features)"
+
+    gold_layer:
+      catalog_name: ${var.catalog_name}
+      name: ${var.schema_prefix}_gold
+      comment: "Databricks Sword - FinTech Fraud Detection Gold layer (alerts)"
+
+  volumes:
+    data_volume:
+      catalog_name: ${var.catalog_name}
+      schema_name: ${var.schema_prefix}_bronze
+      name: raw_data
+      volume_type: MANAGED
+      comment: "Raw transaction data for fraud detection mission"
+
+sync:
+  include:
+    - notebooks/**
+    - data/**
+
+artifacts:
+  notebooks:
+    path: notebooks
+    deploy_to: /Workspace/Users/${workspace.current_user.userName}/dbsword-fo-fintech-fraud/notebooks

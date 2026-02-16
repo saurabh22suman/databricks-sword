@@ -166,6 +166,7 @@ export type SandboxData = {
     freezesUsed: number
   }
   achievements: string[] // Achievement IDs
+  completedFieldOps: string[] // Industry IDs for completed Field Ops
   flashcardProgress: Record<string, FlashcardProgress>
   lastSynced: string | null // ISO timestamp
 }
@@ -186,6 +187,7 @@ export const SandboxDataSchema = z.object({
     freezesUsed: z.number().nonnegative().int(),
   }),
   achievements: z.array(z.string()),
+  completedFieldOps: z.array(z.string()).default([]),
   flashcardProgress: z.record(z.string(), FlashcardProgressSchema),
   lastSynced: z.string().nullable(),
 })

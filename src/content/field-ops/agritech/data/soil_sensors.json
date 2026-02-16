@@ -1,0 +1,5 @@
+[
+  {"sensor_id": "SOIL_001", "timestamp": "2024-01-15T08:00:00Z", "field_id": "FIELD_A", "latitude": 39.7392, "longitude": -104.9903, "soil_moisture_pct": 32.5, "soil_temp_c": 18.2, "ph": 6.8, "nitrogen_ppm": 45, "phosphorus_ppm": 28, "potassium_ppm": 180},
+  {"sensor_id": "SOIL_002", "timestamp": "2024-01-15T08:00:00Z", "field_id": "FIELD_A", "latitude": 39.7395, "longitude": -104.9900, "soil_moisture_pct": 28.3, "soil_temp_c": 17.9, "ph": 7.1, "nitrogen_ppm": 42, "phosphorus_ppm": 25, "potassium_ppm": 175},
+  {"sensor_id": "SOIL_003", "timestamp": "2024-01-15T08:00:00Z", "field_id": "FIELD_B", "latitude": 39.7400, "longitude": -104.9850, "soil_moisture_pct": 45.1, "soil_temp_c": 19.5, "ph": 6.5, "nitrogen_ppm": 38, "phosphorus_ppm": 30, "potassium_ppm": 195}
+]

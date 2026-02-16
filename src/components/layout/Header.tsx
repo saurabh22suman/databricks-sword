@@ -1,7 +1,7 @@
 "use client"
 
 import { ProfileSidebar } from "@/components/auth/ProfileSidebar"
-import { User } from "lucide-react"
+import { Menu, User, X } from "lucide-react"
 import { useSession } from "next-auth/react"
 import Image from "next/image"
 import Link from "next/link"
@@ -11,10 +11,12 @@ import { useState } from "react"
  * Main site header with cyberpunk anime aesthetic.
  * Fixed navbar with neon branding and dark-only theme.
  * Shows avatar ring when authenticated that opens the game-style pause sidebar.
+ * Includes mobile hamburger menu for smaller screens.
  */
 export function Header(): React.ReactElement {
   const { data: session, status } = useSession()
   const [sidebarOpen, setSidebarOpen] = useState(false)
+  const [mobileMenuOpen, setMobileMenuOpen] = useState(false)
 
   return (
     <>
@@ -59,6 +61,13 @@ export function Header(): React.ReactElement {
               <span className="absolute -bottom-1 left-0 w-0 h-0.5 bg-anime-cyan group-hover:w-full transition-all duration-300" />
             </Link>
             <Link
+              href="/field-ops"
+              className="hover:text-white relative group transition-colors"
+            >
+              ⚡ Field Ops
+              <span className="absolute -bottom-1 left-0 w-0 h-0.5 bg-anime-cyan group-hover:w-full transition-all duration-300" />
+            </Link>
+            <Link
               href="/#blog"
               className="hover:text-white relative group transition-colors"
             >
@@ -68,7 +77,20 @@ export function Header(): React.ReactElement {
           </nav>
 
           {/* Actions */}
-          <div className="flex items-center gap-6">
+          <div className="flex items-center gap-4">
+            {/* Mobile Menu Toggle */}
+            <button
+              onClick={() => setMobileMenuOpen(!mobileMenuOpen)}
+              className="md:hidden p-2 text-gray-400 hover:text-white transition-colors"
+              aria-label={mobileMenuOpen ? "Close menu" : "Open menu"}
+            >
+              {mobileMenuOpen ? (
+                <X className="w-6 h-6" />
+              ) : (
+                <Menu className="w-6 h-6" />
+              )}
+            </button>
+
             <Link
               href="/missions"
               className="hidden sm:block text-xs font-bold uppercase tracking-widest text-white hover:text-anime-cyan transition-colors"
@@ -114,6 +136,56 @@ export function Header(): React.ReactElement {
 
       {/* Game-style pause sidebar */}
       <ProfileSidebar isOpen={sidebarOpen} onClose={() => setSidebarOpen(false)} />
+
+      {/* Mobile Navigation Menu */}
+      {mobileMenuOpen && (
+        <div className="fixed inset-0 z-40 md:hidden">
+          {/* Backdrop */}
+          <div
+            className="absolute inset-0 bg-anime-950/90 backdrop-blur-sm"
+            onClick={() => setMobileMenuOpen(false)}
+          />
+          
+          {/* Menu Content */}
+          <nav className="absolute top-20 left-0 right-0 bg-anime-950 border-b border-anime-700 p-6 flex flex-col gap-4">
+            <Link
+              href="/#projects"
+              onClick={() => setMobileMenuOpen(false)}
+              className="text-sm font-bold uppercase tracking-widest text-gray-400 hover:text-white py-2 border-b border-anime-800 transition-colors"
+            >
+              Projects
+            </Link>
+            <Link
+              href="/#interview-prep"
+              onClick={() => setMobileMenuOpen(false)}
+              className="text-sm font-bold uppercase tracking-widest text-gray-400 hover:text-white py-2 border-b border-anime-800 transition-colors"
+            >
+              Intel
+            </Link>
+            <Link
+              href="/field-ops"
+              onClick={() => setMobileMenuOpen(false)}
+              className="text-sm font-bold uppercase tracking-widest text-gray-400 hover:text-white py-2 border-b border-anime-800 transition-colors"
+            >
+              ⚡ Field Ops
+            </Link>
+            <Link
+              href="/#blog"
+              onClick={() => setMobileMenuOpen(false)}
+              className="text-sm font-bold uppercase tracking-widest text-gray-400 hover:text-white py-2 border-b border-anime-800 transition-colors"
+            >
+              Logs
+            </Link>
+            <Link
+              href="/missions"
+              onClick={() => setMobileMenuOpen(false)}
+              className="text-sm font-bold uppercase tracking-widest text-anime-cyan hover:text-white py-2 transition-colors"
+            >
+              Missions
+            </Link>
+          </nav>
+        </div>
+      )}
     </>
   )
 }

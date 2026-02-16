@@ -1,0 +1,57 @@
+{
+  "id": "fintech-fraud-detection",
+  "industry": "fintech",
+  "title": "FinTech Fraud Detection",
+  "subtitle": "Fix real-time fraud alerting pipeline",
+  "description": "Payment processor needs fraud detection system operational immediately",
+  "scenario": "PayTech's fraud detection went dark 2 hours ago. Transaction approvals are delayed, causing customer complaints. The ML engineer left incomplete feature engineering code, broken velocity calculations, and missing alert generation logic. Fraud losses are mounting.",
+  "situation": "The pipeline has four issues:\n1. Transaction data is ingesting without proper timestamp handling\n2. Feature engineering has broken velocity calculations (wrong time windows)\n3. Fraud rules engine is partially implemented\n4. Alert generation table is completely empty",
+  "objectives": [
+    "Ingest transactions with proper timestamp parsing",
+    "Calculate transaction velocity features (1h, 24h, 7d windows)",
+    "Implement fraud rules (velocity thresholds, geo-distance)",
+    "Generate real-time fraud alerts to Gold layer",
+    "Pass all fraud detection validation checks"
+  ],
+  "dataFiles": [
+    "transactions.json",
+    "accounts.csv",
+    "merchants.csv",
+    "fraud_labels.csv"
+  ],
+  "notebooks": [
+    "01_ingest_transactions.py",
+    "02_feature_engineering.py",
+    "03_fraud_rules.py",
+    "04_alert_generation.py"
+  ],
+  "validations": [
+    {
+      "checkName": "Bronze transactions ingested",
+      "description": "Verify transactions table has data",
+      "query": "SELECT COUNT(*) as count FROM {catalog}.{schema_prefix}_bronze.transactions",
+      "expectedResult": "count",
+      "expectedValue": 1
+    },
+    {
+      "checkName": "Silver features calculated",
+      "description": "Verify transaction_features has velocity columns",
+      "query": "SELECT COUNT(*) as count FROM {catalog}.{schema_prefix}_silver.transaction_features WHERE velocity_1h IS NOT NULL",
+      "expectedResult": "count",
+      "expectedValue": 1
+    },
+    {
+      "checkName": "Gold alerts generated",
+      "description": "Verify fraud_alerts table exists with flagged transactions",
+      "query": "SELECT COUNT(*) as count FROM {catalog}.{schema_prefix}_gold.fraud_alerts WHERE risk_score > 0",
+      "expectedResult": "count",
+      "expectedValue": 1
+    }
+  ],
+  "hints": [
+    "Parse timestamp strings to proper timestamp type in Bronze",
+    "Use window functions with RANGE BETWEEN for time-based aggregations",
+    "Implement rules: velocity_1h > 10 OR amount > 5000 OR geo_distance > 500",
+    "Calculate geo distance with haversine formula or use ST_Distance"
+  ]
+}
