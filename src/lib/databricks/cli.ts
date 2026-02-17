@@ -5,6 +5,8 @@
 
 import { execFile } from "child_process"
 import fs from "fs/promises"
+import os from "os"
+import path from "path"
 import { promisify } from "util"
 import type { DatabricksConnection } from "../field-ops/types"
 
@@ -20,12 +22,13 @@ async function runCli(
   config: DatabricksConnection,
   args: string[]
 ): Promise<string> {
-  // Create a temporary config file for authentication
+  // Create a secure temporary config file for authentication
   const configContent = `[DEFAULT]
 host = ${config.workspaceUrl}
 token = ${config.token}
 `
-  const tempConfigPath = `/tmp/databrickscfg-${Date.now()}`
+  const tempDir = await fs.mkdtemp(path.join(os.tmpdir(), "dbsword-databricks-"))
+  const tempConfigPath = path.join(tempDir, ".databrickscfg")
   await fs.writeFile(tempConfigPath, configContent, { mode: 0o600 })
 
   try {
@@ -39,8 +42,8 @@ token = ${config.token}
     }
     return stdout.trim()
   } finally {
-    // Clean up temp config
-    await fs.unlink(tempConfigPath).catch(() => {})
+    // Clean up temp config directory and file
+    await fs.rm(tempDir, { recursive: true, force: true }).catch(() => {})
   }
 }
 

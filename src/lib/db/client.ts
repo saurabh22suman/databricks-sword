@@ -1,6 +1,7 @@
 import { createClient } from "@libsql/client"
 import type { LibSQLDatabase } from "drizzle-orm/libsql"
 import { drizzle } from "drizzle-orm/libsql"
+import { getServerEnv } from "@/lib/env"
 
 let _db: LibSQLDatabase | undefined
 
@@ -13,8 +14,9 @@ let _db: LibSQLDatabase | undefined
  */
 export function getDb(): LibSQLDatabase {
   if (!_db) {
-    const url = process.env.TURSO_DATABASE_URL
-    const authToken = process.env.TURSO_AUTH_TOKEN
+    const env = getServerEnv()
+    const url = env.TURSO_DATABASE_URL
+    const authToken = env.TURSO_AUTH_TOKEN
 
     if (!url) {
       throw new Error(

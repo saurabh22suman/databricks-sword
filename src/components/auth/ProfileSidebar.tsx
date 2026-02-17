@@ -16,9 +16,11 @@ import {
     X,
     Zap,
 } from "lucide-react"
-import { signOut, useSession } from "next-auth/react"
+import { useDisconnect } from "@/lib/sandbox/useDisconnect"
+import { useSession } from "next-auth/react"
 import Link from "next/link"
 import { useCallback, useEffect, useState } from "react"
+import { SyncProgressDialog } from "./SyncProgressDialog"
 
 /**
  * ProfileSidebar props.
@@ -84,6 +86,8 @@ export function ProfileSidebar({ isOpen, onClose }: ProfileSidebarProps): React.
       document.body.style.overflow = ""
     }
   }, [isOpen])
+
+  const { disconnect, isSyncing } = useDisconnect()
 
   // Close on Escape key
   useEffect(() => {
@@ -313,9 +317,10 @@ export function ProfileSidebar({ isOpen, onClose }: ProfileSidebarProps): React.
           <button
             onClick={() => {
               handleClose()
-              signOut({ callbackUrl: "/" })
+              void disconnect()
             }}
-            className="w-full flex items-center gap-3 px-4 py-3 text-anime-accent hover:bg-anime-accent/10 transition-colors rounded font-mono text-sm uppercase tracking-wider"
+            disabled={isSyncing}
+            className="w-full flex items-center gap-3 px-4 py-3 text-anime-accent hover:bg-anime-accent/10 transition-colors rounded font-mono text-sm uppercase tracking-wider disabled:opacity-50 disabled:cursor-not-allowed"
           >
             <LogOut className="w-4 h-4" />
             <span>Disconnect</span>
@@ -326,6 +331,9 @@ export function ProfileSidebar({ isOpen, onClose }: ProfileSidebarProps): React.
           </p>
         </div>
       </aside>
+
+      {/* Sync progress dialog — shown during disconnect */}
+      <SyncProgressDialog open={isSyncing} />
     </>
   )
 }

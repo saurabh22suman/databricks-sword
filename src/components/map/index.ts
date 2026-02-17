@@ -1,7 +1,7 @@
 /**
  * Map Components
  *
- * Interactive mission map with circuit-board visualization.
+ * Interactive pipeline-style mission map inspired by DLT architecture diagrams.
  */
 
 export { CircuitPath, CircuitPaths } from "./CircuitPath"

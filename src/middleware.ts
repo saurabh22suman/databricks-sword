@@ -14,8 +14,8 @@ const publicRoutes = [
   "/",
   "/blog",
   "/intel",
-  "/intel",
   "/faq", // Legacy redirect for backwards compatibility
+  "/api/health",
 ]
 
 // Static assets and Next.js internals (skip middleware entirely)

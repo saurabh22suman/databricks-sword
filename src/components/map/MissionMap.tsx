@@ -1,34 +1,48 @@
 "use client"
 
 /**
- * MissionMap Component
+ * MissionMap Component — Pipeline Layout
  *
- * Main orchestrator for the interactive circuit-board mission map.
- * Provides pan/zoom, track filtering, minimap, and progress visualization.
+ * Renders the full interactive pipeline-style mission map inspired by
+ * DLT architecture diagrams. Missions flow left-to-right through
+ * 5 zones (Foundation → Core → Specialization → Mastery → Capstone)
+ * with Field Operations in a row below.
+ *
+ * Features: pan/zoom, track filtering, progress stats, minimap.
  */
 
 import type { IndustryConfig } from "@/lib/field-ops/types"
 import {
-    getAllMapNodes,
-    getMapEdges,
-    MAP_CENTER,
-    MAP_SIZE,
-    RING_RADII,
-    type MapNode as MapNodeType,
+  MAP_HEIGHT,
+  MAP_WIDTH,
+  type MapNode as MapNodeType,
+  getAllMapNodes,
+  getMapEdges,
 } from "@/lib/missions/mapLayout"
 import { TRACKS, type Track } from "@/lib/missions/tracks"
 import type { Mission, MissionRank } from "@/lib/missions/types"
 import { loadSandbox } from "@/lib/sandbox"
 import type { SandboxData } from "@/lib/sandbox/types"
 import { cn } from "@/lib/utils"
-import { Filter, HelpCircle, Map as MapIcon, Maximize2, MousePointer, Move, X, Zap, ZoomIn, ZoomOut } from "lucide-react"
+import {
+  Filter,
+  HelpCircle,
+  Map as MapIcon,
+  Maximize2,
+  MousePointer,
+  Move,
+  X,
+  Zap,
+  ZoomIn,
+  ZoomOut,
+} from "lucide-react"
 import { useCallback, useEffect, useMemo, useRef, useState } from "react"
 import { CircuitPaths } from "./CircuitPath"
 import { HudGrid } from "./HudGrid"
 import { MapNode, type NodeState } from "./MapNode"
 
 /**
- * Props for MissionMap component.
+ * Props for the MissionMap component.
  */
 type MissionMapProps = {
   missions: Mission[]
@@ -45,15 +59,12 @@ type Viewport = {
   scale: number
 }
 
-/**
- * Minimum and maximum zoom levels.
- */
-const MIN_SCALE = 0.3
+const MIN_SCALE = 0.25
 const MAX_SCALE = 2
-const ZOOM_STEP = 0.2
+const ZOOM_STEP = 0.15
 
 /**
- * Determine node state based on sandbox progress data.
+ * Determine the visual state of a node.
  */
 function getNodeState(
   nodeId: string,
@@ -66,37 +77,46 @@ function getNodeState(
 ): NodeState {
   if (!sandbox) return "locked"
 
-  const userXp = sandbox.userStats.totalXp
-
-  // Check XP requirement
-  if (userXp < xpRequired) return "locked"
-
-  // Check prerequisites
-  const hasAllPrereqs = prerequisites.every((prereq) => completedMissions.has(prereq))
-  if (!hasAllPrereqs) return "locked"
-
-  // Check current progress
-  if (nodeType === "mission") {
-    const progress = sandbox.missionProgress[nodeId]
-    if (progress?.completed) return "completed"
-    if (progress?.started) return "in-progress"
-    return "available"
+  // Check if completed
+  if (nodeType === "mission" && completedMissions.has(nodeId)) return "completed"
+  if (nodeType === "field-ops") {
+    const industry = nodeId.replace("field-ops-", "")
+    if (completedFieldOps.has(industry)) return "completed"
   }
 
-  // Field ops - check completion from completedFieldOps array
-  if (completedFieldOps.has(nodeId)) return "completed"
+  // Check if in progress
+  if (
+    nodeType === "mission" &&
+    sandbox.missionProgress?.[nodeId] &&
+    !sandbox.missionProgress[nodeId].completed
+  ) {
+    return "in-progress"
+  }
+
+  // Check XP requirement
+  const currentXp = sandbox.userStats?.totalXp ?? 0
+  if (currentXp < xpRequired) return "locked"
+
+  // Check prerequisites
+  if (
+    prerequisites.length > 0 &&
+    !prerequisites.every((id) => completedMissions.has(id))
+  ) {
+    return "locked"
+  }
+
   return "available"
 }
 
 /**
- * Get mission progress percentage.
+ * Compute mission progress percentage.
  */
 function getMissionProgressPercent(
   missionId: string,
   totalStages: number,
   sandbox: SandboxData | null
 ): number {
-  if (!sandbox) return 0
+  if (!sandbox?.missionProgress) return 0
   const progress = sandbox.missionProgress[missionId]
   if (!progress) return 0
 
@@ -108,7 +128,7 @@ function getMissionProgressPercent(
 }
 
 /**
- * Renders the full interactive mission map.
+ * Renders the full interactive pipeline mission map.
  */
 export function MissionMap({
   missions,
@@ -116,11 +136,10 @@ export function MissionMap({
   className,
 }: MissionMapProps): React.ReactElement {
   const containerRef = useRef<HTMLDivElement>(null)
-  // Start zoomed in and centered on mission cluster
   const [viewport, setViewport] = useState<Viewport>({
-    x: -200,
-    y: -100,
-    scale: 1.2,
+    x: 50,
+    y: 30,
+    scale: 1,
   })
   const [showHelp, setShowHelp] = useState(false)
   const [activeFilters, setActiveFilters] = useState<Set<Track>>(
@@ -136,7 +155,7 @@ export function MissionMap({
     setSandbox(loadSandbox())
   }, [])
 
-  // Compute completed missions set
+  // Computed state
   const completedMissions = useMemo(() => {
     const set = new Set<string>()
     if (!sandbox?.missionProgress) return set
@@ -146,36 +165,31 @@ export function MissionMap({
     return set
   }, [sandbox])
 
-  // Compute completed field ops set
-  const completedFieldOps = useMemo(() => {
-    return new Set<string>(sandbox?.completedFieldOps || [])
-  }, [sandbox])
+  const completedFieldOps = useMemo(
+    () => new Set<string>(sandbox?.completedFieldOps || []),
+    [sandbox]
+  )
 
-  // Build mission lookup map
   const missionLookup = useMemo(() => {
     const map = new Map<string, Mission>()
     missions.forEach((m) => map.set(m.id, m))
     return map
   }, [missions])
 
-  // Build field ops lookup map
   const fieldOpsLookup = useMemo(() => {
     const map = new Map<string, IndustryConfig>()
     fieldOps.forEach((f) => map.set(f.industry, f))
     return map
   }, [fieldOps])
 
-  // Get all map nodes
   const mapNodes = useMemo(() => getAllMapNodes(), [])
 
-  // Create nodes Map for edge rendering
   const nodesMap = useMemo(() => {
     const map = new Map<string, MapNodeType>()
     mapNodes.forEach((node) => map.set(node.id, node))
     return map
   }, [mapNodes])
 
-  // Get all edges
   const edges = useMemo(() => getMapEdges(), [])
 
   // Filter nodes by active tracks
@@ -196,14 +210,10 @@ export function MissionMap({
         const fromNode = nodesMap.get(edge.from)
         const toNode = nodesMap.get(edge.to)
         if (!fromNode || !toNode) return false
-        
-        // Show edge if either node's track is active
         const fromTrack = fromNode.track
         const toTrack = toNode.track
-        
         if (fromTrack && !activeFilters.has(fromTrack)) return false
         if (toTrack && !activeFilters.has(toTrack)) return false
-        
         return true
       }),
     [edges, nodesMap, activeFilters]
@@ -225,13 +235,13 @@ export function MissionMap({
   }, [])
 
   const handleResetView = useCallback(() => {
-    setViewport({ x: -200, y: -100, scale: 1.2 })
+    setViewport({ x: 50, y: 30, scale: 1 })
   }, [])
 
   // Pan handlers
   const handleMouseDown = useCallback(
     (e: React.MouseEvent) => {
-      if (e.button !== 0) return // Only left click
+      if (e.button !== 0) return
       setIsDragging(true)
       setDragStart({ x: e.clientX - viewport.x, y: e.clientY - viewport.y })
     },
@@ -254,17 +264,12 @@ export function MissionMap({
     setIsDragging(false)
   }, [])
 
-  // Wheel zoom disabled - use buttons only
-
   // Track filter toggle
   const toggleFilter = useCallback((track: Track) => {
     setActiveFilters((filters) => {
       const newFilters = new Set(filters)
-      if (newFilters.has(track)) {
-        newFilters.delete(track)
-      } else {
-        newFilters.add(track)
-      }
+      if (newFilters.has(track)) newFilters.delete(track)
+      else newFilters.add(track)
       return newFilters
     })
   }, [])
@@ -282,36 +287,19 @@ export function MissionMap({
       onMouseUp={handleMouseUp}
       onMouseLeave={handleMouseUp}
     >
-      {/* Main SVG Map */}
+      {/* Main SVG — horizontal pipeline */}
       <svg
-        viewBox={`0 0 ${MAP_SIZE} ${MAP_SIZE}`}
+        viewBox={`0 0 ${MAP_WIDTH} ${MAP_HEIGHT}`}
         className="w-full h-full"
         style={{
           transform: `translate(${viewport.x}px, ${viewport.y}px) scale(${viewport.scale})`,
           transformOrigin: "center center",
         }}
       >
-        {/* Background HUD grid */}
+        {/* Background: zones, grid, chevrons */}
         <HudGrid />
 
-        {/* Concentric progress rings */}
-        <g className="progress-rings" opacity="0.3">
-          {[RING_RADII[1], RING_RADII[2], RING_RADII[3], RING_RADII[4]].map((radius, i) => (
-            <circle
-              key={radius}
-              cx={MAP_CENTER.x}
-              cy={MAP_CENTER.y}
-              r={radius}
-              fill="none"
-              stroke="var(--anime-cyan)"
-              strokeWidth="0.5"
-              strokeDasharray="10 5"
-              className={i % 2 === 0 ? "ring-pulse" : "ring-pulse-delayed"}
-            />
-          ))}
-        </g>
-
-        {/* Circuit paths (edges) */}
+        {/* Flow arrows (edges) */}
         <CircuitPaths
           edges={filteredEdges}
           nodes={nodesMap}
@@ -319,18 +307,14 @@ export function MissionMap({
           currentMission={undefined}
         />
 
-        {/* Map nodes */}
+        {/* Pipeline nodes */}
         {filteredNodes.map((node) => {
           const mission = missionLookup.get(node.id)
           const fieldOp = fieldOpsLookup.get(node.industry || "")
 
-          // Determine prerequisites
           const prerequisites =
-            node.type === "mission"
-              ? mission?.prerequisites || []
-              : [] // Field ops have XP requirements only
+            node.type === "mission" ? mission?.prerequisites || [] : []
 
-          // Determine XP required
           const xpRequired =
             node.type === "mission"
               ? mission?.xpRequired || 0
@@ -352,7 +336,9 @@ export function MissionMap({
               : fieldOp?.title || node.industry || ""
 
           const rank =
-            node.type === "mission" ? (mission?.rank as MissionRank) : undefined
+            node.type === "mission"
+              ? (mission?.rank as MissionRank)
+              : undefined
 
           const xpReward =
             node.type === "mission"
@@ -366,7 +352,11 @@ export function MissionMap({
 
           const progress =
             node.type === "mission" && mission
-              ? getMissionProgressPercent(node.id, mission.stages.length, sandbox)
+              ? getMissionProgressPercent(
+                  node.id,
+                  mission.stages.length,
+                  sandbox
+                )
               : 0
 
           return (
@@ -385,9 +375,8 @@ export function MissionMap({
         })}
       </svg>
 
-      {/* Control panel - top right */}
+      {/* Control panel — top right */}
       <div className="absolute top-4 right-4 flex flex-col gap-2 z-10">
-        {/* Zoom controls */}
         <div className="flex flex-col bg-anime-900/90 border border-anime-700 rounded-lg overflow-hidden">
           <button
             onClick={handleZoomIn}
@@ -412,7 +401,6 @@ export function MissionMap({
           </button>
         </div>
 
-        {/* Minimap toggle */}
         <button
           onClick={() => setShowMinimap(!showMinimap)}
           className={cn(
@@ -426,7 +414,6 @@ export function MissionMap({
           <MapIcon size={18} />
         </button>
 
-        {/* Help toggle */}
         <button
           onClick={() => setShowHelp(!showHelp)}
           className={cn(
@@ -441,7 +428,7 @@ export function MissionMap({
         </button>
       </div>
 
-      {/* Track filter panel - top left */}
+      {/* Track filters — top left */}
       <div className="absolute top-4 left-4 z-10 flex flex-col gap-2">
         <div className="bg-anime-900/90 border border-anime-700 rounded-lg p-2">
           <div className="flex items-center gap-1 mb-2 text-anime-500 text-xs">
@@ -461,9 +448,12 @@ export function MissionMap({
                     isActive
                       ? cn(
                           "border",
-                          track === "de" && "bg-cyan-900/30 border-anime-cyan/50 text-anime-cyan",
-                          track === "ml" && "bg-purple-900/30 border-anime-purple/50 text-anime-purple",
-                          track === "bi" && "bg-yellow-900/30 border-anime-yellow/50 text-anime-yellow"
+                          track === "de" &&
+                            "bg-cyan-900/30 border-anime-cyan/50 text-anime-cyan",
+                          track === "ml" &&
+                            "bg-purple-900/30 border-anime-purple/50 text-anime-purple",
+                          track === "bi" &&
+                            "bg-yellow-900/30 border-anime-yellow/50 text-anime-yellow"
                         )
                       : "bg-anime-800/50 text-anime-500 hover:bg-anime-800"
                   )}
@@ -484,7 +474,7 @@ export function MissionMap({
         </div>
       </div>
 
-      {/* Stats panel - bottom left */}
+      {/* Stats panel — bottom left */}
       <div className="absolute bottom-4 left-4 z-10">
         <div className="bg-anime-900/90 border border-anime-700 rounded-lg p-3 text-xs">
           <div className="text-anime-500 mb-2">Progress</div>
@@ -505,11 +495,13 @@ export function MissionMap({
         </div>
       </div>
 
-      {/* Minimap - bottom right */}
+      {/* Minimap — bottom right */}
       {showMinimap && (
-        <div className="minimap absolute bottom-4 right-4 w-40 h-40 rounded-lg overflow-hidden z-10">
-          <svg viewBox={`0 0 ${MAP_SIZE} ${MAP_SIZE}`} className="w-full h-full">
-            {/* Simplified nodes */}
+        <div className="minimap absolute bottom-4 right-4 w-56 h-28 rounded-lg overflow-hidden z-10">
+          <svg
+            viewBox={`0 0 ${MAP_WIDTH} ${MAP_HEIGHT}`}
+            className="w-full h-full"
+          >
             {filteredNodes.map((node) => {
               const isCompleted = completedMissions.has(node.id)
               return (
@@ -517,27 +509,33 @@ export function MissionMap({
                   key={node.id}
                   cx={node.x}
                   cy={node.y}
-                  r={node.type === "field-ops" ? 20 : 15}
+                  r={node.type === "field-ops" ? 14 : 12}
                   fill={
                     isCompleted
                       ? "var(--anime-green)"
                       : node.track === "ml"
-                      ? "var(--anime-purple)"
-                      : node.track === "bi"
-                      ? "var(--anime-yellow)"
-                      : "var(--anime-cyan)"
+                        ? "var(--anime-purple)"
+                        : node.track === "bi"
+                          ? "var(--anime-yellow)"
+                          : "var(--anime-cyan)"
                   }
-                  opacity={isCompleted ? 1 : 0.5}
+                  opacity={isCompleted ? 1 : 0.4}
                 />
               )
             })}
-
-            {/* Viewport indicator */}
             {containerRef.current && (
               <rect
                 className="minimap-viewport"
-                x={MAP_CENTER.x - (containerRef.current.clientWidth / 2 / viewport.scale) - viewport.x / viewport.scale}
-                y={MAP_CENTER.y - (containerRef.current.clientHeight / 2 / viewport.scale) - viewport.y / viewport.scale}
+                x={
+                  MAP_WIDTH / 2 -
+                  containerRef.current.clientWidth / 2 / viewport.scale -
+                  viewport.x / viewport.scale
+                }
+                y={
+                  MAP_HEIGHT / 2 -
+                  containerRef.current.clientHeight / 2 / viewport.scale -
+                  viewport.y / viewport.scale
+                }
                 width={containerRef.current.clientWidth / viewport.scale}
                 height={containerRef.current.clientHeight / viewport.scale}
               />
@@ -553,7 +551,7 @@ export function MissionMap({
             <div className="flex items-center justify-between mb-4">
               <h3 className="text-lg font-bold text-anime-cyan flex items-center gap-2">
                 <MapIcon size={20} />
-                Mission Map Guide
+                Pipeline Map Guide
               </h3>
               <button
                 onClick={() => setShowHelp(false)}
@@ -562,48 +560,63 @@ export function MissionMap({
                 <X size={18} />
               </button>
             </div>
-            
+
             <div className="space-y-4 text-sm">
               <div className="flex items-start gap-3">
                 <div className="p-2 bg-anime-800 rounded-lg">
                   <Move size={16} className="text-anime-cyan" />
                 </div>
                 <div>
-                  <div className="font-medium text-anime-100">Pan &amp; Navigate</div>
-                  <div className="text-anime-400">Click and drag to pan around the map. Use the minimap for quick navigation.</div>
+                  <div className="font-medium text-anime-100">
+                    Pan &amp; Navigate
+                  </div>
+                  <div className="text-anime-400">
+                    Click and drag to pan. Scroll to zoom. Use the minimap for
+                    quick navigation.
+                  </div>
                 </div>
               </div>
-              
+
               <div className="flex items-start gap-3">
                 <div className="p-2 bg-anime-800 rounded-lg">
                   <ZoomIn size={16} className="text-anime-cyan" />
                 </div>
                 <div>
                   <div className="font-medium text-anime-100">Zoom Controls</div>
-                  <div className="text-anime-400">Scroll wheel to zoom in/out. Use the zoom buttons on the right panel for precise control.</div>
+                  <div className="text-anime-400">
+                    Mouse wheel to zoom. Use buttons on the right for precise
+                    control.
+                  </div>
                 </div>
               </div>
-              
+
               <div className="flex items-start gap-3">
                 <div className="p-2 bg-anime-800 rounded-lg">
                   <MousePointer size={16} className="text-anime-cyan" />
                 </div>
                 <div>
-                  <div className="font-medium text-anime-100">Interact with Nodes</div>
-                  <div className="text-anime-400">Hover over any node to see mission details. Click to navigate to that mission.</div>
+                  <div className="font-medium text-anime-100">
+                    Interact with Nodes
+                  </div>
+                  <div className="text-anime-400">
+                    Hover to see details. Click to navigate. Missions flow left →
+                    right through the pipeline.
+                  </div>
                 </div>
               </div>
-              
+
               <div className="flex items-start gap-3">
                 <div className="p-2 bg-anime-800 rounded-lg">
                   <Filter size={16} className="text-anime-cyan" />
                 </div>
                 <div>
                   <div className="font-medium text-anime-100">Track Filters</div>
-                  <div className="text-anime-400">Toggle tracks (DE/ML/BI) to focus on specific learning paths.</div>
+                  <div className="text-anime-400">
+                    Toggle tracks (DE/ML/BI) to focus on specific learning paths.
+                  </div>
                 </div>
               </div>
-              
+
               <div className="flex items-start gap-3">
                 <div className="p-2 bg-anime-800 rounded-lg">
                   <Zap size={16} className="text-anime-purple" />
@@ -613,15 +626,17 @@ export function MissionMap({
                   <div className="text-anime-400">
                     <span className="text-anime-green">●</span> Completed &nbsp;
                     <span className="text-anime-cyan">●</span> Available &nbsp;
-                    <span className="text-anime-accent">●</span> In Progress &nbsp;
+                    <span className="text-anime-accent">●</span> In Progress
+                    &nbsp;
                     <span className="text-anime-500">●</span> Locked
                   </div>
                 </div>
               </div>
             </div>
-            
+
             <div className="mt-6 pt-4 border-t border-anime-700 text-xs text-anime-500">
-              💡 Tip: Complete prerequisites to unlock new missions. Hexagonal nodes are Field Operations requiring real Databricks deployment.
+              💡 Tip: Complete prerequisites to unlock missions in the next zone.
+              Follow the arrows to progress through the data pipeline.
             </div>
           </div>
         </div>

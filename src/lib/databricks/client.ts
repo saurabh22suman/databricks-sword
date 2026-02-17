@@ -5,8 +5,8 @@
 
 import type { StatementResponse, Warehouse } from "./types";
 
-const POLL_INTERVAL_MS = 500;
-const MAX_POLL_ATTEMPTS = 120; // 60 seconds max wait
+const POLL_INTERVAL_MS = Number(process.env.DATABRICKS_POLL_INTERVAL_MS ?? 1000);
+const MAX_POLL_ATTEMPTS = Number(process.env.DATABRICKS_MAX_POLL_ATTEMPTS ?? 30); // 30 seconds max wait by default
 
 /**
  * Makes an authenticated request to the Databricks API

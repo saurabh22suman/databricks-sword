@@ -1,6 +1,6 @@
 "use client"
 
-import { ArrowRight, Cpu, Play } from "lucide-react"
+import { ArrowRight, Cpu } from "lucide-react"
 import Image from "next/image"
 import Link from "next/link"
 import { useEffect, useState } from "react"
@@ -85,11 +85,6 @@ export function Hero(): React.ReactElement {
               <span className="relative z-10 drop-shadow-md">Start Mission</span>
               <ArrowRight className="w-5 h-5 group-hover:translate-x-1 transition-transform relative z-10" />
             </Link>
-
-            <button className="cut-corner px-8 py-4 bg-transparent border border-white/20 hover:border-anime-cyan hover:bg-anime-cyan/5 text-white font-bold uppercase tracking-wider flex items-center justify-center gap-3 transition-all group hover:shadow-[0_0_20px_rgba(0,240,255,0.2)]">
-              <Play className="w-5 h-5 fill-current group-hover:text-anime-cyan transition-colors" />
-              <span className="group-hover:text-anime-cyan transition-colors">Watch Trailer</span>
-            </button>
           </div>
 
           <div className="mt-16 flex items-center gap-8 opacity-60">

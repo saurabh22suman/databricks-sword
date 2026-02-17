@@ -1,11 +1,11 @@
 "use client"
 
 /**
- * CircuitPath Component
+ * FlowArrow Component
  *
- * Renders prerequisite connection paths between map nodes.
- * Uses L-shaped routing with circuit-board aesthetic.
- * Animates with electricity flow effect when unlocked.
+ * Renders prerequisite connection arrows between pipeline nodes.
+ * Uses smooth bezier curves for a clean DLT-inspired data flow look.
+ * Arrows flow left-to-right with subtle animated particles when unlocked.
  */
 
 import { TRACK_COLORS, type MapEdge, type MapNode } from "@/lib/missions/mapLayout"
@@ -13,146 +13,96 @@ import { cn } from "@/lib/utils"
 import { useMemo } from "react"
 
 /**
- * Props for CircuitPath component.
+ * Props for a single FlowArrow.
  */
-type CircuitPathProps = {
+type FlowArrowProps = {
   edge: MapEdge
   nodes: Map<string, MapNode>
   isUnlocked: boolean
-  isActive?: boolean // Currently traversing this path
+  isActive?: boolean
 }
 
 /**
- * Routing style for edges.
+ * Node radius for offset calculation.
  */
-type RoutingStyle = "direct" | "horizontal-first" | "vertical-first"
+const NODE_RADIUS = 32
 
 /**
- * Get the midpoint offset for L-shaped routing.
+ * Generate smooth bezier path between two nodes.
+ * Horizontal-first for the pipeline flow aesthetic.
  */
-function getRoutingStyle(from: MapNode, to: MapNode): RoutingStyle {
+function generateFlowPath(from: MapNode, to: MapNode): string {
   const dx = to.x - from.x
   const dy = to.y - from.y
-  const distance = Math.sqrt(dx * dx + dy * dy)
+  const dist = Math.sqrt(dx * dx + dy * dy)
 
-  // For short distances, use direct paths
-  if (distance < 100) return "direct"
+  // Normalize and offset start/end by node radius
+  const nx = dx / dist
+  const ny = dy / dist
+  const sx = from.x + nx * NODE_RADIUS
+  const sy = from.y + ny * NODE_RADIUS
+  const ex = to.x - nx * NODE_RADIUS
+  const ey = to.y - ny * NODE_RADIUS
 
-  // Choose routing based on relative positions to minimize path length
-  // and create cleaner circuit-board aesthetics
-  if (Math.abs(dx) > Math.abs(dy)) {
-    return "horizontal-first"
+  // Short distance: straight line
+  if (dist < 120) {
+    return `M ${sx} ${sy} L ${ex} ${ey}`
   }
-  return "vertical-first"
+
+  // Horizontal flow curve — control points pull toward the horizontal
+  const cpOffset = Math.min(Math.abs(dx) * 0.45, 120)
+  const cp1x = sx + cpOffset
+  const cp1y = sy
+  const cp2x = ex - cpOffset
+  const cp2y = ey
+
+  return `M ${sx} ${sy} C ${cp1x} ${cp1y}, ${cp2x} ${cp2y}, ${ex} ${ey}`
 }
 
 /**
- * Generate SVG path data for the edge.
- */
-function generatePathData(
-  from: MapNode,
-  to: MapNode,
-  nodeRadius: number = 28
-): string {
-  const dx = to.x - from.x
-  const dy = to.y - from.y
-  const distance = Math.sqrt(dx * dx + dy * dy)
-
-  // Normalize direction vector
-  const nx = dx / distance
-  const ny = dy / distance
-
-  // Start and end points (offset from center by node radius)
-  const startX = from.x + nx * nodeRadius
-  const startY = from.y + ny * nodeRadius
-  const endX = to.x - nx * nodeRadius
-  const endY = to.y - ny * nodeRadius
-
-  const routing = getRoutingStyle(from, to)
-
-  if (routing === "direct") {
-    return `M ${startX} ${startY} L ${endX} ${endY}`
-  }
-
-  // L-shaped routing with curved corners
-  const cornerRadius = 15
-
-  if (routing === "horizontal-first") {
-    const midX = startX + (endX - startX) * 0.5
-    return `M ${startX} ${startY} 
-            L ${midX - cornerRadius * Math.sign(endX - startX)} ${startY}
-            Q ${midX} ${startY} ${midX} ${startY + cornerRadius * Math.sign(endY - startY)}
-            L ${midX} ${endY - cornerRadius * Math.sign(endY - startY)}
-            Q ${midX} ${endY} ${midX + cornerRadius * Math.sign(endX - startX)} ${endY}
-            L ${endX} ${endY}`
-  }
-
-  // vertical-first
-  const midY = startY + (endY - startY) * 0.5
-  return `M ${startX} ${startY}
-          L ${startX} ${midY - cornerRadius * Math.sign(endY - startY)}
-          Q ${startX} ${midY} ${startX + cornerRadius * Math.sign(endX - startX)} ${midY}
-          L ${endX - cornerRadius * Math.sign(endX - startX)} ${midY}
-          Q ${endX} ${midY} ${endX} ${midY + cornerRadius * Math.sign(endY - startY)}
-          L ${endX} ${endY}`
-}
-
-/**
- * Generate arrow marker for path end.
- */
-function ArrowMarker({ id, color }: { id: string; color: string }): React.ReactElement {
-  return (
-    <marker
-      id={id}
-      markerWidth="8"
-      markerHeight="6"
-      refX="8"
-      refY="3"
-      orient="auto"
-    >
-      <polygon points="0 0, 8 3, 0 6" fill={color} />
-    </marker>
-  )
-}
-
-/**
- * Renders a circuit-board style path between two nodes.
+ * Renders one flow-arrow between two nodes.
  */
 export function CircuitPath({
   edge,
   nodes,
   isUnlocked,
   isActive = false,
-}: CircuitPathProps): React.ReactElement | null {
+}: FlowArrowProps): React.ReactElement | null {
   const fromNode = nodes.get(edge.from)
   const toNode = nodes.get(edge.to)
 
   if (!fromNode || !toNode) return null
 
   const trackColors = edge.track ? TRACK_COLORS[edge.track] : TRACK_COLORS.de
-  const pathData = useMemo(
-    () => generatePathData(fromNode, toNode),
-    [fromNode, toNode]
-  )
+  const pathData = useMemo(() => generateFlowPath(fromNode, toNode), [fromNode, toNode])
 
-  // Calculate path length for animation
-  const pathId = `path-${edge.from}-${edge.to}`
-  const gradientId = `gradient-${edge.from}-${edge.to}`
+  const pathId = `flow-${edge.from}-${edge.to}`
   const markerId = `arrow-${edge.from}-${edge.to}`
 
   return (
-    <g className={cn(
-      isUnlocked ? "circuit-trace" : "circuit-trace-dim",
-      isActive && "circuit-trace-bright"
-    )}>
-      {/* Gradient for path */}
+    <g
+      className={cn(
+        "flow-arrow",
+        !isUnlocked && "flow-arrow-dim",
+        isActive && "flow-arrow-active"
+      )}
+    >
+      {/* Arrow marker */}
       <defs>
-        <linearGradient id={gradientId} x1="0%" y1="0%" x2="100%" y2="100%">
-          <stop offset="0%" stopColor={trackColors.stroke} stopOpacity={isUnlocked ? 0.6 : 0.2} />
-          <stop offset="50%" stopColor={trackColors.fill} stopOpacity={isUnlocked ? 0.8 : 0.3} />
-          <stop offset="100%" stopColor={trackColors.stroke} stopOpacity={isUnlocked ? 0.6 : 0.2} />
-        </linearGradient>
-        {isUnlocked && <ArrowMarker id={markerId} color={trackColors.stroke} />}
+        <marker
+          id={markerId}
+          markerWidth="8"
+          markerHeight="6"
+          refX="7"
+          refY="3"
+          orient="auto"
+        >
+          <polygon
+            points="0 0, 8 3, 0 6"
+            fill={isUnlocked ? trackColors.stroke : "var(--anime-700)"}
+            opacity={isUnlocked ? 0.8 : 0.3}
+          />
+        </marker>
       </defs>
 
       {/* Background glow */}
@@ -161,10 +111,10 @@ export function CircuitPath({
           d={pathData}
           fill="none"
           stroke={trackColors.fill}
-          strokeWidth="8"
+          strokeWidth="6"
           strokeLinecap="round"
-          opacity="0.15"
-          style={{ filter: "blur(4px)" }}
+          opacity="0.08"
+          style={{ filter: "blur(3px)" }}
         />
       )}
 
@@ -173,44 +123,37 @@ export function CircuitPath({
         id={pathId}
         d={pathData}
         fill="none"
-        stroke={`url(#${gradientId})`}
-        strokeWidth={isUnlocked ? 2 : 1}
+        stroke={isUnlocked ? trackColors.stroke : "var(--anime-700)"}
+        strokeWidth={isUnlocked ? 1.5 : 1}
         strokeLinecap="round"
-        strokeDasharray={isUnlocked ? "none" : "4 4"}
-        markerEnd={isUnlocked ? `url(#${markerId})` : undefined}
+        strokeDasharray={isUnlocked ? "none" : "4 6"}
+        opacity={isUnlocked ? 0.6 : 0.2}
+        markerEnd={`url(#${markerId})`}
       />
 
-      {/* Animated electricity flow (when unlocked) */}
+      {/* Animated particle (when unlocked) */}
       {isUnlocked && (
-        <circle r="3" fill={trackColors.fill}>
-          <animateMotion dur="2s" repeatCount="indefinite">
+        <circle r="2.5" fill={trackColors.fill} opacity="0.7">
+          <animateMotion dur="3s" repeatCount="indefinite">
             <mpath href={`#${pathId}`} />
           </animateMotion>
         </circle>
       )}
 
-      {/* Additional spark effect for active paths */}
+      {/* Brighter spark for active paths */}
       {isActive && (
-        <>
-          <circle r="5" fill="white" opacity="0.8">
-            <animateMotion dur="1.5s" repeatCount="indefinite">
-              <mpath href={`#${pathId}`} />
-            </animateMotion>
-          </circle>
-          <circle r="8" fill={trackColors.fill} opacity="0.3">
-            <animateMotion dur="1.5s" repeatCount="indefinite" begin="0.2s">
-              <mpath href={`#${pathId}`} />
-            </animateMotion>
-          </circle>
-        </>
+        <circle r="4" fill="white" opacity="0.6">
+          <animateMotion dur="2s" repeatCount="indefinite">
+            <mpath href={`#${pathId}`} />
+          </animateMotion>
+        </circle>
       )}
     </g>
   )
 }
 
 /**
- * Batch render multiple circuit paths.
- * Useful for rendering all edges at once.
+ * Batch render multiple flow arrows.
  */
 type CircuitPathsProps = {
   edges: MapEdge[]
@@ -219,6 +162,9 @@ type CircuitPathsProps = {
   currentMission?: string
 }
 
+/**
+ * Renders all flow arrows for the pipeline map.
+ */
 export function CircuitPaths({
   edges,
   nodes,
@@ -226,11 +172,12 @@ export function CircuitPaths({
   currentMission,
 }: CircuitPathsProps): React.ReactElement {
   return (
-    <g className="circuit-paths">
+    <g className="flow-arrows">
       {edges.map((edge) => {
         const isUnlocked =
           completedMissions.has(edge.from) || completedMissions.has(edge.to)
-        const isActive = edge.to === currentMission && completedMissions.has(edge.from)
+        const isActive =
+          edge.to === currentMission && completedMissions.has(edge.from)
 
         return (
           <CircuitPath

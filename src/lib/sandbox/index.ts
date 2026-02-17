@@ -28,6 +28,10 @@ export { mergeConflicts, shouldSync, syncFromServer, syncToServer } from "./sync
 export { useSandboxSync } from "./useSandboxSync"
 export type { UseSandboxSyncResult } from "./useSandboxSync"
 
+// Disconnect hook (client-only) — sync → clear → sign out
+export { useDisconnect } from "./useDisconnect"
+export type { UseDisconnectResult } from "./useDisconnect"
+
 // DAB lifecycle functions
 export {
     closeMission, initMission, resetMission, updateBundleStatus

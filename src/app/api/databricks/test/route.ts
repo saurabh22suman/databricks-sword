@@ -4,28 +4,31 @@
  * Test Databricks connection with provided credentials.
  */
 
-import { auth } from "@/lib/auth"
+import { apiError, apiOk } from "@/lib/api/responses"
+import { authenticateApiRequest } from "@/lib/auth/api-auth"
 import { testConnection } from "@/lib/databricks/cli"
 import { NextRequest, NextResponse } from "next/server"
+import { z } from "zod"
+
+const testConnectionRequestSchema = z.object({
+  workspaceUrl: z.string().url(),
+  token: z.string().min(1),
+  warehouseId: z.string().min(1),
+  catalog: z.string().min(1).optional(),
+})
 
 export async function POST(request: NextRequest): Promise<NextResponse> {
   try {
-    // Check authentication
-    const session = await auth()
-    if (!session?.user?.email) {
-      return NextResponse.json({ error: "Unauthorized" }, { status: 401 })
+    const authResult = await authenticateApiRequest()
+    if (!authResult.authenticated) {
+      return apiError(authResult.error, authResult.status, "UNAUTHORIZED")
     }
 
-    // Parse request body
-    const body = await request.json()
-    const { workspaceUrl, token, warehouseId, catalog } = body
-
-    if (!workspaceUrl || !token || !warehouseId) {
-      return NextResponse.json(
-        { error: "Missing required fields" },
-        { status: 400 }
-      )
+    const parsedBody = testConnectionRequestSchema.safeParse(await request.json())
+    if (!parsedBody.success) {
+      return apiError("Invalid Databricks connection payload", 400, "VALIDATION_ERROR")
     }
+    const { workspaceUrl, token, warehouseId, catalog } = parsedBody.data
 
     // Test connection
     const result = await testConnection({
@@ -36,27 +39,14 @@ export async function POST(request: NextRequest): Promise<NextResponse> {
     })
 
     if (result.success) {
-      return NextResponse.json({
-        success: true,
+      return apiOk({
         message: "Connection successful",
       })
-    } else {
-      return NextResponse.json(
-        {
-          success: false,
-          error: result.errorMessage || "Connection failed",
-        },
-        { status: 400 }
-      )
     }
+
+    return apiError(result.errorMessage || "Connection failed", 400, "BAD_REQUEST")
   } catch (error) {
     console.error("Connection test error:", error)
-    return NextResponse.json(
-      {
-        success: false,
-        error: error instanceof Error ? error.message : "Connection test failed",
-      },
-      { status: 500 }
-    )
+    return apiError(error instanceof Error ? error.message : "Connection test failed", 500, "INTERNAL_ERROR")
   }
 }
