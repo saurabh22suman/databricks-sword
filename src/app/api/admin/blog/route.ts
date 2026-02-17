@@ -1,34 +1,13 @@
 import { blogPosts, getDb } from "@/lib/db"
 import { eq } from "drizzle-orm"
-import { cookies } from "next/headers"
 import { NextResponse } from "next/server"
-
-const ADMIN_COOKIE_NAME = "admin_session"
-
-/**
- * Verify admin authentication from cookie.
- */
-async function isAuthenticated(): Promise<boolean> {
-  const cookieStore = await cookies()
-  const session = cookieStore.get(ADMIN_COOKIE_NAME)
-  const adminPassword = process.env.ADMIN_PASSWORD
-
-  if (!session || !adminPassword) return false
-
-  try {
-    const decoded = Buffer.from(session.value, "base64").toString("utf8")
-    const [storedPassword] = decoded.split(":")
-    return storedPassword === adminPassword
-  } catch {
-    return false
-  }
-}
+import { isAdminAuthenticated } from "@/lib/auth/admin-auth"
 
 /**
  * GET /api/admin/blog - List all blog posts from database
  */
 export async function GET(): Promise<NextResponse> {
-  if (!(await isAuthenticated())) {
+  if (!(await isAdminAuthenticated())) {
     return NextResponse.json({ error: "Unauthorized" }, { status: 401 })
   }
 
@@ -76,7 +55,7 @@ export async function GET(): Promise<NextResponse> {
  * POST /api/admin/blog - Create a new blog post
  */
 export async function POST(request: Request): Promise<NextResponse> {
-  if (!(await isAuthenticated())) {
+  if (!(await isAdminAuthenticated())) {
     return NextResponse.json({ error: "Unauthorized" }, { status: 401 })
   }
 
@@ -161,7 +140,7 @@ export async function POST(request: Request): Promise<NextResponse> {
  * PATCH /api/admin/blog - Update a blog post
  */
 export async function PATCH(request: Request): Promise<NextResponse> {
-  if (!(await isAuthenticated())) {
+  if (!(await isAdminAuthenticated())) {
     return NextResponse.json({ error: "Unauthorized" }, { status: 401 })
   }
 
@@ -227,7 +206,7 @@ export async function PATCH(request: Request): Promise<NextResponse> {
  * DELETE /api/admin/blog - Delete a blog post
  */
 export async function DELETE(request: Request): Promise<NextResponse> {
-  if (!(await isAuthenticated())) {
+  if (!(await isAdminAuthenticated())) {
     return NextResponse.json({ error: "Unauthorized" }, { status: 401 })
   }
 

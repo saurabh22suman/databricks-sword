@@ -1,320 +1,196 @@
 /**
- * HUD Grid Background
+ * PipelineBackground Component
  *
- * Renders a tactical HUD-style grid background with:
- * - Fine and major grid lines
- * - Corner HUD elements (radar, data readouts)
- * - Coordinate labels
- * - Animated scanline effect
+ * Renders the background layer for the pipeline map:
+ * - Subtle grid pattern
+ * - Zone rectangles with colored borders and headers
+ * - Chevron arrows between zones indicating data flow direction
+ * - Ambient HUD scanline effect
  */
 
-import { MAP_SIZE } from "@/lib/missions/mapLayout"
+import { MAP_HEIGHT, MAP_WIDTH, ZONES, type Zone } from "@/lib/missions/mapLayout"
 
 /**
- * Props for the HudGrid component.
+ * Props for PipelineBackground component.
  */
-type HudGridProps = {
+type PipelineBackgroundProps = {
   /** Whether to show the scanline animation */
   showScanline?: boolean
-  /** Whether to show corner HUD elements */
-  showHudElements?: boolean
 }
 
 /**
- * HUD Grid background for the mission map.
- * Server component - purely visual, no interactivity.
+ * Renders a single zone background panel with header label.
+ */
+function ZonePanel({ zone }: { zone: Zone }): React.ReactElement {
+  return (
+    <g>
+      {/* Zone background fill */}
+      <rect
+        x={zone.x}
+        y={zone.y}
+        width={zone.width}
+        height={zone.height}
+        rx="12"
+        fill={zone.color}
+        stroke={zone.borderColor}
+        strokeWidth="1"
+      />
+
+      {/* Top header bar */}
+      <rect
+        x={zone.x}
+        y={zone.y}
+        width={zone.width}
+        height="38"
+        rx="12"
+        fill={zone.color}
+      />
+      {/* Bottom corners of header need to be square */}
+      <rect
+        x={zone.x}
+        y={zone.y + 26}
+        width={zone.width}
+        height="12"
+        fill={zone.color}
+      />
+      {/* Header divider line */}
+      <line
+        x1={zone.x + 12}
+        y1={zone.y + 38}
+        x2={zone.x + zone.width - 12}
+        y2={zone.y + 38}
+        stroke={zone.borderColor}
+        strokeWidth="0.5"
+      />
+
+      {/* Zone label */}
+      <text
+        x={zone.x + zone.width / 2}
+        y={zone.y + 20}
+        fill={zone.glowColor}
+        fontSize="12"
+        fontWeight="bold"
+        textAnchor="middle"
+        style={{ fontFamily: "var(--font-mono)", letterSpacing: "2px" }}
+      >
+        {zone.label}
+      </text>
+
+      {/* Subtitle */}
+      <text
+        x={zone.x + zone.width / 2}
+        y={zone.y + 33}
+        fill={zone.glowColor}
+        fontSize="8"
+        textAnchor="middle"
+        opacity="0.5"
+        style={{ fontFamily: "var(--font-mono)", letterSpacing: "0.5px" }}
+      >
+        {zone.subtitle}
+      </text>
+    </g>
+  )
+}
+
+/**
+ * Renders a chevron arrow between two zones indicating flow direction.
+ */
+function FlowChevron({
+  x,
+  y,
+  color,
+}: {
+  x: number
+  y: number
+  color: string
+}): React.ReactElement {
+  return (
+    <g transform={`translate(${x}, ${y})`} opacity="0.35">
+      {/* Triple chevron arrows */}
+      <path d="M -8 -10 L 2 0 L -8 10" fill="none" stroke={color} strokeWidth="1.5" strokeLinecap="round" />
+      <path d="M -2 -8 L 6 0 L -2 8" fill="none" stroke={color} strokeWidth="1.5" strokeLinecap="round" />
+      <path d="M 4 -6 L 10 0 L 4 6" fill="none" stroke={color} strokeWidth="1.5" strokeLinecap="round" />
+    </g>
+  )
+}
+
+/**
+ * Pipeline background for the mission map.
+ * Renders zones, grid, and ambient effects.
  */
 export function HudGrid({
   showScanline = true,
-  showHudElements = true,
-}: HudGridProps): React.ReactElement {
-  const gridSize = MAP_SIZE
+}: PipelineBackgroundProps): React.ReactElement {
+  // Compute inter-zone chevron positions
+  const missionZones = ZONES.filter((z) => z.id !== "field-ops")
 
   return (
-    <g className="hud-grid-layer">
-      {/* Fine grid lines (10px spacing) */}
+    <g className="pipeline-background-layer">
+      {/* Fine grid pattern */}
       <defs>
-        <pattern
-          id="fine-grid"
-          width="20"
-          height="20"
-          patternUnits="userSpaceOnUse"
-        >
-          <path
-            d="M 20 0 L 0 0 0 20"
-            fill="none"
-            stroke="rgba(0, 255, 255, 0.03)"
-            strokeWidth="0.5"
-          />
+        <pattern id="pipeline-grid-fine" width="40" height="40" patternUnits="userSpaceOnUse">
+          <path d="M 40 0 L 0 0 0 40" fill="none" stroke="rgba(0, 255, 255, 0.02)" strokeWidth="0.5" />
         </pattern>
-        <pattern
-          id="major-grid"
-          width="100"
-          height="100"
-          patternUnits="userSpaceOnUse"
-        >
-          <path
-            d="M 100 0 L 0 0 0 100"
-            fill="none"
-            stroke="rgba(0, 255, 255, 0.08)"
-            strokeWidth="1"
-          />
+        <pattern id="pipeline-grid-major" width="200" height="200" patternUnits="userSpaceOnUse">
+          <path d="M 200 0 L 0 0 0 200" fill="none" stroke="rgba(0, 255, 255, 0.04)" strokeWidth="0.5" />
         </pattern>
-        {/* Radar gradient */}
-        <linearGradient id="radar-gradient" x1="0%" y1="0%" x2="100%" y2="0%">
-          <stop offset="0%" stopColor="rgba(0, 255, 255, 0)" />
-          <stop offset="100%" stopColor="rgba(0, 255, 255, 0.5)" />
-        </linearGradient>
       </defs>
 
       {/* Grid background */}
-      <rect width={gridSize} height={gridSize} fill="url(#fine-grid)" />
-      <rect width={gridSize} height={gridSize} fill="url(#major-grid)" />
+      <rect width={MAP_WIDTH} height={MAP_HEIGHT} fill="url(#pipeline-grid-fine)" />
+      <rect width={MAP_WIDTH} height={MAP_HEIGHT} fill="url(#pipeline-grid-major)" />
 
-      {/* Coordinate labels along edges */}
-      <g className="coordinate-labels" opacity="0.3">
-        {/* Top edge labels */}
-        {[0, 200, 400, 600, 800, 1000, 1200, 1400, 1600].map((x) => (
-          <text
-            key={`top-${x}`}
-            x={x}
-            y={20}
-            fill="var(--anime-cyan)"
-            fontSize="10"
-            fontFamily="var(--font-mono)"
-            textAnchor="middle"
-          >
-            {x}
-          </text>
-        ))}
-        {/* Left edge labels */}
-        {[200, 400, 600, 800, 1000, 1200, 1400].map((y) => (
-          <text
-            key={`left-${y}`}
-            x={15}
-            y={y}
-            fill="var(--anime-cyan)"
-            fontSize="10"
-            fontFamily="var(--font-mono)"
-            textAnchor="middle"
-            dominantBaseline="middle"
-          >
-            {y}
-          </text>
-        ))}
+      {/* Zone panels */}
+      {ZONES.map((zone) => (
+        <ZonePanel key={zone.id} zone={zone} />
+      ))}
+
+      {/* Flow chevrons between mission zones */}
+      {missionZones.slice(0, -1).map((zone, i) => {
+        const nextZone = missionZones[i + 1]
+        const chevronX = zone.x + zone.width + (nextZone.x - zone.x - zone.width) / 2
+        const chevronY = zone.y + zone.height / 2
+        // Blend the two zone colors
+        const color = zone.glowColor
+        return (
+          <FlowChevron
+            key={`chevron-${zone.id}`}
+            x={chevronX}
+            y={chevronY}
+            color={color}
+          />
+        )
+      })}
+
+      {/* "Pipeline Flow" indicator at top-left */}
+      <g transform="translate(50, 30)">
+        <text
+          fill="rgba(0, 255, 255, 0.3)"
+          fontSize="9"
+          fontWeight="600"
+          style={{ fontFamily: "var(--font-mono)", letterSpacing: "3px" }}
+        >
+          DATA PIPELINE FLOW ▸
+        </text>
       </g>
 
-      {/* Corner HUD elements */}
-      {showHudElements && (
-        <>
-          {/* Top-left: Radar circle */}
-          <g transform="translate(60, 60)">
-            <circle
-              r="40"
-              fill="none"
-              stroke="rgba(0, 255, 255, 0.2)"
-              strokeWidth="1"
-            />
-            <circle
-              r="30"
-              fill="none"
-              stroke="rgba(0, 255, 255, 0.15)"
-              strokeWidth="1"
-            />
-            <circle
-              r="20"
-              fill="none"
-              stroke="rgba(0, 255, 255, 0.1)"
-              strokeWidth="1"
-            />
-            <circle r="3" fill="var(--anime-cyan)" opacity="0.5" />
-            {/* Radar sweep */}
-            <path
-              d="M 0 0 L 40 0 A 40 40 0 0 1 28 28 Z"
-              fill="url(#radar-gradient)"
-              className="radar-sweep"
-            />
-            <line
-              x1="0"
-              y1="-40"
-              x2="0"
-              y2="40"
-              stroke="rgba(0, 255, 255, 0.1)"
-              strokeWidth="0.5"
-            />
-            <line
-              x1="-40"
-              y1="0"
-              x2="40"
-              y2="0"
-              stroke="rgba(0, 255, 255, 0.1)"
-              strokeWidth="0.5"
-            />
-          </g>
-
-          {/* Top-right: Mission indicator */}
-          <g transform={`translate(${gridSize - 200}, 40)`}>
-            <rect
-              x="0"
-              y="0"
-              width="180"
-              height="60"
-              fill="none"
-              stroke="rgba(0, 255, 255, 0.3)"
-              strokeWidth="1"
-            />
-            <line
-              x1="0"
-              y1="20"
-              x2="180"
-              y2="20"
-              stroke="rgba(0, 255, 255, 0.2)"
-              strokeWidth="0.5"
-            />
-            <text
-              x="10"
-              y="14"
-              fill="rgba(0, 255, 255, 0.5)"
-              fontSize="8"
-              fontFamily="var(--font-mono)"
-            >
-              TACTICAL OVERVIEW
-            </text>
-            <text
-              x="10"
-              y="45"
-              fill="var(--anime-cyan)"
-              fontSize="14"
-              fontFamily="var(--font-mono)"
-              fontWeight="bold"
-            >
-              MISSION MAP
-            </text>
-          </g>
-
-          {/* Bottom-left: Data readout */}
-          <g transform={`translate(20, ${gridSize - 100})`}>
-            <rect
-              x="0"
-              y="0"
-              width="150"
-              height="80"
-              fill="rgba(0, 0, 0, 0.3)"
-              stroke="rgba(0, 255, 255, 0.2)"
-              strokeWidth="1"
-            />
-            {[0, 1, 2, 3, 4].map((i) => (
-              <g key={`readout-${i}`}>
-                <rect
-                  x="10"
-                  y={10 + i * 14}
-                  width={60 + Math.random() * 60}
-                  height="8"
-                  fill="rgba(0, 255, 255, 0.1)"
-                />
-                <text
-                  x="140"
-                  y={18 + i * 14}
-                  fill="rgba(0, 255, 255, 0.4)"
-                  fontSize="7"
-                  fontFamily="var(--font-mono)"
-                  textAnchor="end"
-                >
-                  {Math.floor(Math.random() * 100)}%
-                </text>
-              </g>
-            ))}
-          </g>
-
-          {/* Bottom-right: Compass/Logo */}
-          <g transform={`translate(${gridSize - 80}, ${gridSize - 80})`}>
-            <circle
-              r="50"
-              fill="none"
-              stroke="rgba(0, 255, 255, 0.15)"
-              strokeWidth="1"
-            />
-            <polygon
-              points="0,-35 5,-20 -5,-20"
-              fill="var(--anime-cyan)"
-              opacity="0.6"
-            />
-            <polygon
-              points="0,35 5,20 -5,20"
-              fill="rgba(0, 255, 255, 0.3)"
-            />
-            <polygon
-              points="-35,0 -20,5 -20,-5"
-              fill="rgba(0, 255, 255, 0.3)"
-            />
-            <polygon
-              points="35,0 20,5 20,-5"
-              fill="rgba(0, 255, 255, 0.3)"
-            />
-            <text
-              y="-42"
-              fill="rgba(0, 255, 255, 0.5)"
-              fontSize="8"
-              fontFamily="var(--font-mono)"
-              textAnchor="middle"
-            >
-              N
-            </text>
-          </g>
-        </>
-      )}
-
-      {/* Ring labels */}
-      <g className="ring-labels" opacity="0.4">
-        <text
-          x={gridSize / 2}
-          y={gridSize / 2 - 60}
-          fill="var(--anime-cyan)"
-          fontSize="10"
-          fontFamily="var(--font-mono)"
-          textAnchor="middle"
-          letterSpacing="2"
-        >
-          FOUNDATION
-        </text>
-        <text
-          x={gridSize / 2 + 200}
-          y={gridSize / 2 - 200}
-          fill="var(--anime-cyan)"
-          fontSize="9"
-          fontFamily="var(--font-mono)"
-          textAnchor="middle"
-          letterSpacing="1"
-        >
-          SPECIALIZATION
-        </text>
-        <text
-          x={gridSize / 2}
-          y={gridSize / 2 - 380}
-          fill="var(--anime-cyan)"
-          fontSize="9"
-          fontFamily="var(--font-mono)"
-          textAnchor="middle"
-          letterSpacing="1"
-        >
-          MASTERY
-        </text>
-        <text
-          x={gridSize / 2}
-          y={100}
-          fill="var(--anime-purple)"
-          fontSize="10"
-          fontFamily="var(--font-mono)"
-          textAnchor="middle"
-          letterSpacing="2"
-        >
-          FIELD OPERATIONS
-        </text>
+      {/* Track legend — top-right area */}
+      <g transform={`translate(${MAP_WIDTH - 200}, 20)`}>
+        <rect x="0" y="0" width="160" height="36" rx="6" fill="rgba(10, 10, 15, 0.5)" stroke="rgba(0, 255, 255, 0.15)" strokeWidth="0.5" />
+        {/* DE */}
+        <circle cx="18" cy="18" r="4" fill="#00ffff" />
+        <text x="28" y="22" fill="#00ffff" fontSize="8" style={{ fontFamily: "var(--font-mono)" }}>DE</text>
+        {/* ML */}
+        <circle cx="65" cy="18" r="4" fill="#9933ff" />
+        <text x="75" y="22" fill="#9933ff" fontSize="8" style={{ fontFamily: "var(--font-mono)" }}>ML</text>
+        {/* BI */}
+        <circle cx="112" cy="18" r="4" fill="#ffcc00" />
+        <text x="122" y="22" fill="#ffcc00" fontSize="8" style={{ fontFamily: "var(--font-mono)" }}>BI</text>
       </g>
 
       {/* Scanline effect */}
       {showScanline && (
-        <rect className="hud-scanline" x="0" y="0" width={gridSize} height="2" />
+        <rect className="hud-scanline" x="0" y="0" width={MAP_WIDTH} height="2" />
       )}
     </g>
   )

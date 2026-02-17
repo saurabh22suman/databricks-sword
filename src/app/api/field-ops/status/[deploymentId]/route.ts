@@ -4,7 +4,7 @@
  * Get deployment status and validation results.
  */
 
-import { auth } from "@/lib/auth"
+import { authenticateApiRequest } from "@/lib/auth/api-auth"
 import { getDeploymentStatus, getValidationResults } from "@/lib/field-ops/deployment"
 import { NextRequest, NextResponse } from "next/server"
 
@@ -17,10 +17,9 @@ export async function GET(
   context: RouteContext
 ): Promise<NextResponse> {
   try {
-    // Check authentication
-    const session = await auth()
-    if (!session?.user?.email) {
-      return NextResponse.json({ error: "Unauthorized" }, { status: 401 })
+    const authResult = await authenticateApiRequest()
+    if (!authResult.authenticated) {
+      return NextResponse.json({ error: authResult.error }, { status: authResult.status })
     }
 
     const { deploymentId } = await context.params
@@ -29,6 +28,10 @@ export async function GET(
     const deployment = await getDeploymentStatus(deploymentId)
     if (!deployment) {
       return NextResponse.json({ error: "Deployment not found" }, { status: 404 })
+    }
+
+    if (deployment.userId !== authResult.userId) {
+      return NextResponse.json({ error: "Forbidden" }, { status: 403 })
     }
 
     // Get validation results

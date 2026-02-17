@@ -72,7 +72,7 @@ describe("Footer", () => {
       "href",
       "/feedback",
     )
-    expect(screen.getByRole("link", { name: "Support" })).toHaveAttribute(
+    expect(screen.getByRole("link", { name: "Support this Project" })).toHaveAttribute(
       "href",
       "https://buymeacoffee.com/saurabh.suman",
     )

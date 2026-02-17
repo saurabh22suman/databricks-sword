@@ -4,9 +4,9 @@
  * Clean up deployment resources (drop schemas, remove bundle).
  */
 
-import { auth } from "@/lib/auth"
+import { authenticateApiRequest } from "@/lib/auth/api-auth"
 import { decryptPat } from "@/lib/databricks"
-import { databricksConnections, getDb, users } from "@/lib/db"
+import { databricksConnections, getDb } from "@/lib/db"
 import { cleanupDeployment, getDeploymentStatus } from "@/lib/field-ops/deployment"
 import { eq } from "drizzle-orm"
 import { NextRequest, NextResponse } from "next/server"
@@ -20,23 +20,13 @@ export async function POST(
   context: RouteContext
 ): Promise<NextResponse> {
   try {
-    // Check authentication
-    const session = await auth()
-    if (!session?.user?.email) {
-      return NextResponse.json({ error: "Unauthorized" }, { status: 401 })
+    const authResult = await authenticateApiRequest()
+    if (!authResult.authenticated) {
+      return NextResponse.json({ error: authResult.error }, { status: authResult.status })
     }
 
-    // Get user from database
     const db = getDb()
-    const [user] = await db
-      .select()
-      .from(users)
-      .where(eq(users.email, session.user.email))
-      .limit(1)
-
-    if (!user) {
-      return NextResponse.json({ error: "User not found" }, { status: 404 })
-    }
+    const userId = authResult.userId
 
     const { deploymentId } = await context.params
 
@@ -47,7 +37,7 @@ export async function POST(
     }
 
     // Check deployment belongs to user
-    if (deployment.userId !== user.id) {
+    if (deployment.userId !== userId) {
       return NextResponse.json({ error: "Forbidden" }, { status: 403 })
     }
 
@@ -55,7 +45,7 @@ export async function POST(
     const [connection] = await db
       .select()
       .from(databricksConnections)
-      .where(eq(databricksConnections.userId, user.id))
+      .where(eq(databricksConnections.userId, userId))
       .limit(1)
 
     if (!connection) {

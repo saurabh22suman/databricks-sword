@@ -5,21 +5,24 @@
  */
 
 import { authenticateApiRequest } from "@/lib/auth/api-auth"
+import { apiError, apiOk } from "@/lib/api/responses"
 import { getDb } from "@/lib/db/client"
 import { sandboxSnapshots, users } from "@/lib/db/schema"
 import { getRankForXp } from "@/lib/gamification/ranks"
 import { SandboxDataSchema } from "@/lib/sandbox/types"
-import { eq } from "drizzle-orm"
+import { desc, eq, sql } from "drizzle-orm"
 import { NextRequest, NextResponse } from "next/server"
 
 export async function GET(_request: NextRequest): Promise<NextResponse> {
   const authResult = await authenticateApiRequest()
   if (!authResult.authenticated) {
-    return NextResponse.json({ error: authResult.error }, { status: authResult.status })
+    return apiError(authResult.error, authResult.status, "UNAUTHORIZED")
   }
 
   try {
-    // Fetch all snapshots with user info
+    const xpExpr = sql<number>`cast(json_extract(${sandboxSnapshots.snapshotData}, '$.userStats.totalXp') as integer)`
+
+    // Fetch top players by XP directly in SQL to avoid full in-memory sort/scan work.
     const rows = await getDb()
       .select({
         snapshotData: sandboxSnapshots.snapshotData,
@@ -29,6 +32,12 @@ export async function GET(_request: NextRequest): Promise<NextResponse> {
       })
       .from(sandboxSnapshots)
       .innerJoin(users, eq(sandboxSnapshots.userId, users.id))
+      .orderBy(desc(xpExpr))
+      .limit(50)
+
+    const [countRow] = await getDb()
+      .select({ totalPlayers: sql<number>`count(*)` })
+      .from(sandboxSnapshots)
 
     type LeaderboardEntry = {
       userId: string
@@ -57,16 +66,12 @@ export async function GET(_request: NextRequest): Promise<NextResponse> {
       }
     }
 
-    // Sort by totalXp descending
-    entries.sort((a, b) => b.totalXp - a.totalXp)
-
-    // Return top 50
-    return NextResponse.json({
-      entries: entries.slice(0, 50),
-      totalPlayers: entries.length,
+    return apiOk({
+      entries,
+      totalPlayers: countRow?.totalPlayers ?? 0,
     })
   } catch (error) {
     console.error("Error fetching leaderboard:", error)
-    return NextResponse.json({ error: "Internal server error" }, { status: 500 })
+    return apiError("Internal server error", 500, "INTERNAL_ERROR")
   }
 }

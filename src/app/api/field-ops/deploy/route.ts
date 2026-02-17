@@ -5,44 +5,45 @@
  */
 
 import { getUserSandbox } from "@/app/api/user/helpers"
-import { auth } from "@/lib/auth"
+import { apiError, apiOk } from "@/lib/api/responses"
+import { authenticateApiRequest } from "@/lib/auth/api-auth"
 import { decryptPat } from "@/lib/databricks"
-import { databricksConnections, getDb, users } from "@/lib/db"
+import { databricksConnections, getDb } from "@/lib/db"
 import { startDeployment } from "@/lib/field-ops/deployment"
 import { getIndustryConfig, isIndustryUnlocked } from "@/lib/field-ops/industries"
 import type { Industry } from "@/lib/field-ops/types"
 import { eq } from "drizzle-orm"
 import { NextRequest, NextResponse } from "next/server"
+import { z } from "zod"
+
+const deployRequestSchema = z.object({
+  industry: z.enum([
+    "retail",
+    "gaming",
+    "healthcare",
+    "fintech",
+    "automotive",
+    "manufacturing",
+    "telecom",
+    "agritech",
+  ]),
+})
 
 export async function POST(request: NextRequest): Promise<NextResponse> {
   try {
-    // Check authentication
-    const session = await auth()
-    if (!session?.user?.id) {
-      return NextResponse.json({ error: "Unauthorized" }, { status: 401 })
+    const authResult = await authenticateApiRequest()
+    if (!authResult.authenticated) {
+      return apiError(authResult.error, authResult.status, "UNAUTHORIZED")
     }
 
-    const userId = session.user.id
+    const userId = authResult.userId
 
-    // Get user from database
     const db = getDb()
-    const [user] = await db
-      .select()
-      .from(users)
-      .where(eq(users.id, userId))
-      .limit(1)
-
-    if (!user) {
-      return NextResponse.json({ error: "User not found" }, { status: 404 })
+    const parsedBody = deployRequestSchema.safeParse(await request.json())
+    if (!parsedBody.success) {
+      return apiError("Invalid deploy request payload", 400, "VALIDATION_ERROR")
     }
-
-    // Parse request body
-    const body = await request.json()
-    const { industry } = body as { industry: Industry }
-
-    if (!industry) {
-      return NextResponse.json({ error: "Industry is required" }, { status: 400 })
-    }
+    const { industry } = parsedBody.data as { industry: Industry }
 
     // Get industry config and check if unlocked
     const config = getIndustryConfig(industry)
@@ -59,24 +60,18 @@ export async function POST(request: NextRequest): Promise<NextResponse> {
     }
     
     if (!isIndustryUnlocked(industry, userXp)) {
-      return NextResponse.json(
-        { error: `Industry locked. Requires ${config.xpRequired} XP.` },
-        { status: 403 }
-      )
+      return apiError(`Industry locked. Requires ${config.xpRequired} XP.`, 403, "FORBIDDEN")
     }
 
     // Get Databricks connection
     const [connection] = await db
       .select()
       .from(databricksConnections)
-      .where(eq(databricksConnections.userId, user.id))
+      .where(eq(databricksConnections.userId, userId))
       .limit(1)
 
     if (!connection) {
-      return NextResponse.json(
-        { error: "Databricks connection not configured" },
-        { status: 400 }
-      )
+      return apiError("Databricks connection not configured", 400, "BAD_REQUEST")
     }
 
     // Decrypt PAT and build config
@@ -88,10 +83,9 @@ export async function POST(request: NextRequest): Promise<NextResponse> {
     }
 
     // Start deployment
-    const deployment = await startDeployment(user.id, industry, databricksConfig)
+    const deployment = await startDeployment(userId, industry, databricksConfig)
 
-    return NextResponse.json({
-      success: true,
+    return apiOk({
       deployment: {
         id: deployment.id,
         industry: deployment.industry,
@@ -101,9 +95,6 @@ export async function POST(request: NextRequest): Promise<NextResponse> {
     })
   } catch (error) {
     console.error("Deploy error:", error)
-    return NextResponse.json(
-      { error: error instanceof Error ? error.message : "Deployment failed" },
-      { status: 500 }
-    )
+    return apiError(error instanceof Error ? error.message : "Deployment failed", 500, "INTERNAL_ERROR")
   }
 }

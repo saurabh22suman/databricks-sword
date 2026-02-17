@@ -68,7 +68,17 @@ export function useSandboxSync(): UseSandboxSyncResult {
 
         if (remote) {
           const merged = mergeConflicts(local, remote)
-          saveSandbox({ ...merged, lastSynced: new Date().toISOString() })
+          const lastSynced = new Date().toISOString()
+          saveSandbox({ ...merged, lastSynced })
+
+          // Push merged result back so server always has latest
+          await syncToServer(userId, { ...merged, lastSynced })
+        } else if (local.userStats.totalXp > 0) {
+          // No remote snapshot exists — push local data to server
+          const result = await syncToServer(userId, local)
+          if (result.success && result.lastSynced) {
+            saveSandbox({ ...local, lastSynced: result.lastSynced })
+          }
         }
       } finally {
         isSyncingRef.current = false

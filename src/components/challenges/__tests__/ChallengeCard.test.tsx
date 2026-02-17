@@ -1,4 +1,5 @@
 import type { Challenge } from "@/lib/challenges"
+import { MAX_CHALLENGE_XP_COMPLETIONS } from "@/lib/sandbox/types"
 import { render, screen } from "@testing-library/react"
 import { describe, expect, it, vi } from "vitest"
 import { ChallengeCard } from "../ChallengeCard"
@@ -76,16 +77,29 @@ describe("ChallengeCard", () => {
     expect(screen.queryByText(/XP Maxed/i)).not.toBeInTheDocument()
   })
 
-  it("shows completion progress when completionCount is 1", () => {
-    render(<ChallengeCard challenge={mockChallenge} completionCount={1} />)
-    expect(screen.getByText(/50.*XP/i)).toBeInTheDocument()
-    expect(screen.getByText(/Completed 1\/2/)).toBeInTheDocument()
-  })
+  it("shows completed indicator and XP maxed when completion reaches cap", () => {
+    render(
+      <ChallengeCard
+        challenge={mockChallenge}
+        completionCount={MAX_CHALLENGE_XP_COMPLETIONS}
+      />
+    )
 
-  it("shows XP Maxed when completionCount reaches max", () => {
-    render(<ChallengeCard challenge={mockChallenge} completionCount={2} />)
     expect(screen.queryByText(/50.*XP/i)).not.toBeInTheDocument()
     expect(screen.getByText(/XP Maxed/i)).toBeInTheDocument()
-    expect(screen.getByText(/Completed 2\/2/)).toBeInTheDocument()
+    expect(screen.getByText(/Completed/i)).toBeInTheDocument()
+  })
+
+  it("shows XP Maxed when completionCount exceeds max", () => {
+    render(
+      <ChallengeCard
+        challenge={mockChallenge}
+        completionCount={MAX_CHALLENGE_XP_COMPLETIONS + 1}
+      />
+    )
+
+    expect(screen.queryByText(/50.*XP/i)).not.toBeInTheDocument()
+    expect(screen.getByText(/XP Maxed/i)).toBeInTheDocument()
+    expect(screen.getByText(/Completed/i)).toBeInTheDocument()
   })
 })

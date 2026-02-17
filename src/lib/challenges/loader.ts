@@ -24,6 +24,15 @@ const DIFFICULTY_ORDER: Record<string, number> = {
   S: 3,
 }
 
+type ChallengeCacheEntry = {
+  expiresAt: number
+  challenges: Challenge[]
+}
+
+const CHALLENGE_CACHE_TTL_MS = 30_000
+let challengeCache: ChallengeCacheEntry | null = null
+const isTestRuntime = process.env.NODE_ENV === "test"
+
 /**
  * Discovers all category directories in the challenges folder.
  *
@@ -68,6 +77,10 @@ function loadChallengeFile(filePath: string): Challenge | null {
  * ```
  */
 export async function getAllChallenges(): Promise<Challenge[]> {
+  if (!isTestRuntime && challengeCache && challengeCache.expiresAt > Date.now()) {
+    return challengeCache.challenges
+  }
+
   const categories = getCategoryDirectories()
   const challenges: Challenge[] = []
 
@@ -100,7 +113,21 @@ export async function getAllChallenges(): Promise<Challenge[]> {
     return (DIFFICULTY_ORDER[a.difficulty] ?? 0) - (DIFFICULTY_ORDER[b.difficulty] ?? 0)
   })
 
+  if (!isTestRuntime) {
+    challengeCache = {
+      expiresAt: Date.now() + CHALLENGE_CACHE_TTL_MS,
+      challenges,
+    }
+  }
+
   return challenges
+}
+
+/**
+ * Clears the in-memory challenge cache.
+ */
+export function clearChallengeCache(): void {
+  challengeCache = null
 }
 
 /**

@@ -111,9 +111,8 @@ describe("ChallengeGridClient", () => {
     it("filters by category when selected", () => {
       render(<ChallengeGridClient challenges={mockChallenges} />)
 
-      // Click on pyspark category filter
-      const pysparkButton = screen.getByRole("button", { name: /pyspark/i })
-      fireEvent.click(pysparkButton)
+      const [categorySelect] = screen.getAllByRole("combobox")
+      fireEvent.change(categorySelect, { target: { value: "pyspark" } })
 
       expect(screen.getByText("PySpark Test Challenge 1")).toBeInTheDocument()
       expect(
@@ -129,9 +128,8 @@ describe("ChallengeGridClient", () => {
     it("filters by difficulty when selected", () => {
       render(<ChallengeGridClient challenges={mockChallenges} />)
 
-      // Click on A difficulty filter
-      const difficultyButton = screen.getByRole("button", { name: /^A$/ })
-      fireEvent.click(difficultyButton)
+      const [, difficultySelect] = screen.getAllByRole("combobox")
+      fireEvent.change(difficultySelect, { target: { value: "A" } })
 
       expect(screen.queryByText("PySpark Test Challenge 1")).not.toBeInTheDocument()
       expect(screen.getByText("SQL Test Challenge")).toBeInTheDocument()
@@ -157,11 +155,9 @@ describe("ChallengeGridClient", () => {
     it("shows empty state when no challenges match filters", () => {
       render(<ChallengeGridClient challenges={mockChallenges} />)
 
-      // Apply filters that result in no matches
-      const pysparkButton = screen.getByRole("button", { name: /pyspark/i })
-      fireEvent.click(pysparkButton)
-      const sButton = screen.getByRole("button", { name: /^S$/ })
-      fireEvent.click(sButton)
+      const [categorySelect, difficultySelect] = screen.getAllByRole("combobox")
+      fireEvent.change(categorySelect, { target: { value: "pyspark" } })
+      fireEvent.change(difficultySelect, { target: { value: "S" } })
 
       expect(
         screen.getByText("No challenges match your filters.")
@@ -171,10 +167,9 @@ describe("ChallengeGridClient", () => {
     it("shows clear filters button when no results", () => {
       render(<ChallengeGridClient challenges={mockChallenges} />)
 
-      const pysparkButton = screen.getByRole("button", { name: /pyspark/i })
-      fireEvent.click(pysparkButton)
-      const sButton = screen.getByRole("button", { name: /^S$/ })
-      fireEvent.click(sButton)
+      const [categorySelect, difficultySelect] = screen.getAllByRole("combobox")
+      fireEvent.change(categorySelect, { target: { value: "pyspark" } })
+      fireEvent.change(difficultySelect, { target: { value: "S" } })
 
       expect(screen.getByText("Clear Filters")).toBeInTheDocument()
     })
@@ -182,11 +177,9 @@ describe("ChallengeGridClient", () => {
     it("clears filters when Clear Filters button clicked", () => {
       render(<ChallengeGridClient challenges={mockChallenges} />)
 
-      // Apply filters
-      const pysparkButton = screen.getByRole("button", { name: /pyspark/i })
-      fireEvent.click(pysparkButton)
-      const sButton = screen.getByRole("button", { name: /^S$/ })
-      fireEvent.click(sButton)
+      const [categorySelect, difficultySelect] = screen.getAllByRole("combobox")
+      fireEvent.change(categorySelect, { target: { value: "pyspark" } })
+      fireEvent.change(difficultySelect, { target: { value: "S" } })
 
       // Clear filters
       fireEvent.click(screen.getByText("Clear Filters"))

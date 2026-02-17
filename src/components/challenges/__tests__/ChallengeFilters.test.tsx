@@ -13,45 +13,47 @@ describe("ChallengeFilters", () => {
     onStatusChange: vi.fn(),
   }
 
-  it("renders category filter buttons", () => {
+  it("renders three filter dropdowns", () => {
     render(<ChallengeFilters {...defaultProps} />)
-    expect(screen.getAllByRole("button", { name: /all/i })).toHaveLength(3)
-    expect(screen.getByRole("button", { name: /pyspark/i })).toBeInTheDocument()
-    expect(screen.getByRole("button", { name: /sql/i })).toBeInTheDocument()
+    expect(screen.getAllByRole("combobox")).toHaveLength(3)
+    expect(screen.getByRole("option", { name: "PySpark" })).toBeInTheDocument()
+    expect(screen.getByRole("option", { name: "SQL" })).toBeInTheDocument()
   })
 
-  it("renders difficulty filter buttons", () => {
+  it("renders difficulty options", () => {
     render(<ChallengeFilters {...defaultProps} />)
-    expect(screen.getByRole("button", { name: /^B$/i })).toBeInTheDocument()
-    expect(screen.getByRole("button", { name: /^A$/i })).toBeInTheDocument()
-    expect(screen.getByRole("button", { name: /^S$/i })).toBeInTheDocument()
+    expect(screen.getByRole("option", { name: "B — Beginner" })).toBeInTheDocument()
+    expect(screen.getByRole("option", { name: "A — Intermediate" })).toBeInTheDocument()
+    expect(screen.getByRole("option", { name: "S — Advanced" })).toBeInTheDocument()
   })
 
-  it("calls onCategoryChange when a category is clicked", async () => {
+  it("calls onCategoryChange when a category is selected", async () => {
     const onCategoryChange = vi.fn()
     const user = userEvent.setup()
     render(<ChallengeFilters {...defaultProps} onCategoryChange={onCategoryChange} />)
 
-    await user.click(screen.getByRole("button", { name: /pyspark/i }))
+    const [categorySelect] = screen.getAllByRole("combobox")
+    await user.selectOptions(categorySelect, "pyspark")
     expect(onCategoryChange).toHaveBeenCalledWith("pyspark")
   })
 
-  it("calls onDifficultyChange when a difficulty is clicked", async () => {
+  it("calls onDifficultyChange when a difficulty is selected", async () => {
     const onDifficultyChange = vi.fn()
     const user = userEvent.setup()
     render(<ChallengeFilters {...defaultProps} onDifficultyChange={onDifficultyChange} />)
 
-    await user.click(screen.getByRole("button", { name: /^S$/i }))
+    const [, difficultySelect] = screen.getAllByRole("combobox")
+    await user.selectOptions(difficultySelect, "S")
     expect(onDifficultyChange).toHaveBeenCalledWith("S")
   })
 
-  it("highlights the active category filter", () => {
+  it("applies selected category styles", () => {
     render(<ChallengeFilters {...defaultProps} selectedCategory="sql" />)
-    const sqlButton = screen.getByRole("button", { name: /sql/i })
-    expect(sqlButton.className).toMatch(/cyan|active|selected/i)
+    const [categorySelect] = screen.getAllByRole("combobox")
+    expect(categorySelect.className).toMatch(/anime-cyan/i)
   })
 
-  it("calls onCategoryChange with null when All is clicked", async () => {
+  it("calls onCategoryChange with null when All Categories is selected", async () => {
     const onCategoryChange = vi.fn()
     const user = userEvent.setup()
     render(
@@ -62,23 +64,24 @@ describe("ChallengeFilters", () => {
       />
     )
 
-    const allButtons = screen.getAllByRole("button", { name: /all/i })
-    await user.click(allButtons[0])
+    const [categorySelect] = screen.getAllByRole("combobox")
+    await user.selectOptions(categorySelect, "")
     expect(onCategoryChange).toHaveBeenCalledWith(null)
   })
 
-  it("renders status filter buttons", () => {
+  it("renders status options", () => {
     render(<ChallengeFilters {...defaultProps} />)
-    expect(screen.getByRole("button", { name: /not started/i })).toBeInTheDocument()
-    expect(screen.getByRole("button", { name: /completed/i })).toBeInTheDocument()
+    expect(screen.getByRole("option", { name: "Not Started" })).toBeInTheDocument()
+    expect(screen.getByRole("option", { name: "Completed" })).toBeInTheDocument()
   })
 
-  it("calls onStatusChange when a status is clicked", async () => {
+  it("calls onStatusChange when a status is selected", async () => {
     const onStatusChange = vi.fn()
     const user = userEvent.setup()
     render(<ChallengeFilters {...defaultProps} onStatusChange={onStatusChange} />)
 
-    await user.click(screen.getByRole("button", { name: /completed/i }))
+    const [, , statusSelect] = screen.getAllByRole("combobox")
+    await user.selectOptions(statusSelect, "completed")
     expect(onStatusChange).toHaveBeenCalledWith("completed")
   })
 })

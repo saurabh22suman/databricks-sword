@@ -1078,6 +1078,28 @@ html {
   filter: drop-shadow(0 0 4px currentColor);
 }
 
+/* Pipeline flow arrow styles */
+.flow-arrow {
+  transition: opacity 0.3s ease;
+}
+
+.flow-arrow-dim {
+  opacity: 0.2;
+}
+
+.flow-arrow-active path {
+  filter: drop-shadow(0 0 6px currentColor);
+}
+
+/* Pipeline node style */
+.pipeline-node {
+  transition: filter 0.2s ease;
+}
+
+.pipeline-node:hover {
+  filter: brightness(1.15);
+}
+
 /* Node pulse animation for available missions */
 @keyframes node-pulse {
   0%, 100% {

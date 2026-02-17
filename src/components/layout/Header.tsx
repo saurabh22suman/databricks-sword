@@ -47,14 +47,14 @@ export function Header(): React.ReactElement {
           {/* Navigation */}
           <nav className="hidden md:flex items-center gap-8 text-xs font-bold uppercase tracking-widest text-gray-400">
             <Link
-              href="/#projects"
+              href="/missions"
               className="hover:text-white relative group transition-colors"
             >
-              Projects
+              Missions
               <span className="absolute -bottom-1 left-0 w-0 h-0.5 bg-anime-cyan group-hover:w-full transition-all duration-300" />
             </Link>
             <Link
-              href="/#interview-prep"
+              href="/intel"
               className="hover:text-white relative group transition-colors"
             >
               Intel
@@ -75,7 +75,7 @@ export function Header(): React.ReactElement {
               <span className="absolute -bottom-1 left-0 w-0 h-0.5 bg-anime-purple group-hover:w-full transition-all duration-300" />
             </Link>
             <Link
-              href="/#blog"
+              href="/blog"
               className="hover:text-white relative group transition-colors"
             >
               Logs
@@ -97,13 +97,6 @@ export function Header(): React.ReactElement {
                 <Menu className="w-6 h-6" />
               )}
             </button>
-
-            <Link
-              href="/missions"
-              className="hidden sm:block text-xs font-bold uppercase tracking-widest text-white hover:text-anime-cyan transition-colors"
-            >
-              Missions
-            </Link>
 
             {/* Auth: Avatar ring (logged in) or Start Training CTA */}
             {status === "loading" ? (
@@ -156,14 +149,14 @@ export function Header(): React.ReactElement {
           {/* Menu Content */}
           <nav className="absolute top-20 left-0 right-0 bg-anime-950 border-b border-anime-700 p-6 flex flex-col gap-4">
             <Link
-              href="/#projects"
+              href="/missions"
               onClick={() => setMobileMenuOpen(false)}
               className="text-sm font-bold uppercase tracking-widest text-gray-400 hover:text-white py-2 border-b border-anime-800 transition-colors"
             >
-              Projects
+              Missions
             </Link>
             <Link
-              href="/#interview-prep"
+              href="/intel"
               onClick={() => setMobileMenuOpen(false)}
               className="text-sm font-bold uppercase tracking-widest text-gray-400 hover:text-white py-2 border-b border-anime-800 transition-colors"
             >
@@ -184,18 +177,11 @@ export function Header(): React.ReactElement {
               🗺️ Map
             </Link>
             <Link
-              href="/#blog"
+              href="/blog"
               onClick={() => setMobileMenuOpen(false)}
               className="text-sm font-bold uppercase tracking-widest text-gray-400 hover:text-white py-2 border-b border-anime-800 transition-colors"
             >
               Logs
-            </Link>
-            <Link
-              href="/missions"
-              onClick={() => setMobileMenuOpen(false)}
-              className="text-sm font-bold uppercase tracking-widest text-anime-cyan hover:text-white py-2 transition-colors"
-            >
-              Missions
             </Link>
           </nav>
         </div>

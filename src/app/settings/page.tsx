@@ -23,7 +23,9 @@ import {
     VolumeX,
     Zap
 } from "lucide-react"
-import { signOut, useSession } from "next-auth/react"
+import { useDisconnect } from "@/lib/sandbox/useDisconnect"
+import { SyncProgressDialog } from "@/components/auth/SyncProgressDialog"
+import { useSession } from "next-auth/react"
 import { useCallback, useEffect, useState } from "react"
 
 /**
@@ -32,6 +34,7 @@ import { useCallback, useEffect, useState } from "react"
 export default function SettingsPage(): React.ReactElement {
   const { data: session } = useSession()
   const { settings, updateSetting, resetSettings } = useSettings()
+  const { disconnect, isSyncing } = useDisconnect()
   const [sandbox, setSandbox] = useState<SandboxData | null>(null)
   const [showDangerConfirm, setShowDangerConfirm] = useState(false)
   const [exportMsg, setExportMsg] = useState("")
@@ -185,8 +188,9 @@ export default function SettingsPage(): React.ReactElement {
                   </div>
                 </div>
                 <button
-                  onClick={() => signOut({ callbackUrl: "/" })}
-                  className="px-4 py-2 bg-anime-accent/20 border border-anime-accent text-anime-accent rounded-lg text-sm font-bold hover:bg-anime-accent/30 transition-all"
+                  onClick={() => void disconnect()}
+                  disabled={isSyncing}
+                  className="px-4 py-2 bg-anime-accent/20 border border-anime-accent text-anime-accent rounded-lg text-sm font-bold hover:bg-anime-accent/30 transition-all disabled:opacity-50 disabled:cursor-not-allowed"
                 >
                   Sign Out
                 </button>
@@ -430,6 +434,9 @@ export default function SettingsPage(): React.ReactElement {
           <p className="text-anime-400">Dark-only. No telemetry. Your data stays yours.</p>
         </div>
       </div>
+
+      {/* Sync progress dialog — shown during sign-out */}
+      <SyncProgressDialog open={isSyncing} />
     </div>
   )
 }

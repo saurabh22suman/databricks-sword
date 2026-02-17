@@ -10,6 +10,9 @@ import Google from "next-auth/providers/google"
  * Deferred so that `next build` can complete without a live DATABASE_URL.
  */
 function createAuth(): ReturnType<typeof NextAuth> {
+  const allowDangerousEmailAccountLinking =
+    process.env.AUTH_ALLOW_DANGEROUS_EMAIL_LINKING === "true"
+
   return NextAuth({
     adapter: DrizzleAdapter(getDb(), {
       usersTable: users,
@@ -18,8 +21,8 @@ function createAuth(): ReturnType<typeof NextAuth> {
       verificationTokensTable: verificationTokens,
     }),
     providers: [
-      Google({ allowDangerousEmailAccountLinking: true }),
-      GitHub({ allowDangerousEmailAccountLinking: true }),
+      Google({ allowDangerousEmailAccountLinking }),
+      GitHub({ allowDangerousEmailAccountLinking }),
     ],
     session: {
       strategy: "database",

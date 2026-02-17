@@ -24,6 +24,15 @@ const RANK_ORDER: Record<MissionRank, number> = {
   S: 3,
 }
 
+type MissionCacheEntry = {
+  expiresAt: number
+  missions: Mission[]
+}
+
+const MISSION_CACHE_TTL_MS = 30_000
+let missionCache: MissionCacheEntry | null = null
+const isTestRuntime = process.env.NODE_ENV === "test"
+
 /**
  * Discovers all mission slugs from the content directory.
  * 
@@ -92,6 +101,10 @@ export async function getMission(slug: string): Promise<Mission> {
  * ```
  */
 export async function getAllMissions(): Promise<Mission[]> {
+  if (!isTestRuntime && missionCache && missionCache.expiresAt > Date.now()) {
+    return missionCache.missions
+  }
+
   const slugs = getMissionSlugs()
   const missions: Mission[] = []
 
@@ -113,7 +126,21 @@ export async function getAllMissions(): Promise<Mission[]> {
     return RANK_ORDER[a.rank] - RANK_ORDER[b.rank]
   })
 
+  if (!isTestRuntime) {
+    missionCache = {
+      expiresAt: Date.now() + MISSION_CACHE_TTL_MS,
+      missions,
+    }
+  }
+
   return missions
+}
+
+/**
+ * Clears the in-memory mission cache.
+ */
+export function clearMissionCache(): void {
+  missionCache = null
 }
 
 /**

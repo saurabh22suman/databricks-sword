@@ -1,27 +1,40 @@
 import { blogPosts, getDb } from "@/lib/db"
 import { eq } from "drizzle-orm"
-import { cookies } from "next/headers"
 import { NextResponse } from "next/server"
-
-const ADMIN_COOKIE_NAME = "admin_session"
+import { isAdminAuthenticated } from "@/lib/auth/admin-auth"
 
 /**
- * Verify admin authentication from cookie.
+ * Checks whether the URL points to a likely private/internal destination.
  */
-async function isAuthenticated(): Promise<boolean> {
-  const cookieStore = await cookies()
-  const session = cookieStore.get(ADMIN_COOKIE_NAME)
-  const adminPassword = process.env.ADMIN_PASSWORD
+function isPrivateOrLocalAddress(hostname: string): boolean {
+  const normalizedHost = hostname.toLowerCase()
 
-  if (!session || !adminPassword) return false
-
-  try {
-    const decoded = Buffer.from(session.value, "base64").toString("utf8")
-    const [storedPassword] = decoded.split(":")
-    return storedPassword === adminPassword
-  } catch {
-    return false
+  if (
+    normalizedHost === "localhost" ||
+    normalizedHost === "::1" ||
+    normalizedHost.endsWith(".local") ||
+    normalizedHost.endsWith(".internal")
+  ) {
+    return true
   }
+
+  if (/^127\./.test(normalizedHost)) {
+    return true
+  }
+
+  if (/^10\./.test(normalizedHost)) {
+    return true
+  }
+
+  if (/^192\.168\./.test(normalizedHost)) {
+    return true
+  }
+
+  if (/^172\.(1[6-9]|2\d|3[0-1])\./.test(normalizedHost)) {
+    return true
+  }
+
+  return false
 }
 
 /**
@@ -181,7 +194,7 @@ function generateSlug(title: string): string {
  * POST /api/admin/import - Import article from URL and save to database
  */
 export async function POST(request: Request): Promise<NextResponse> {
-  if (!(await isAuthenticated())) {
+  if (!(await isAdminAuthenticated())) {
     return NextResponse.json({ error: "Unauthorized" }, { status: 401 })
   }
 
@@ -200,6 +213,20 @@ export async function POST(request: Request): Promise<NextResponse> {
       return NextResponse.json({ error: "Invalid URL format" }, { status: 400 })
     }
 
+    if (!["http:", "https:"].includes(parsedUrl.protocol)) {
+      return NextResponse.json(
+        { error: "Only HTTP(S) URLs are allowed" },
+        { status: 400 }
+      )
+    }
+
+    if (isPrivateOrLocalAddress(parsedUrl.hostname)) {
+      return NextResponse.json(
+        { error: "Import URL points to a restricted host" },
+        { status: 400 }
+      )
+    }
+
     // Fetch the page
     const response = await fetch(parsedUrl.toString(), {
       headers: {
@@ -207,6 +234,7 @@ export async function POST(request: Request): Promise<NextResponse> {
           "Mozilla/5.0 (compatible; DatabricksSword/1.0; +https://databricks-sword.dev)",
         Accept: "text/html",
       },
+      redirect: "error",
     })
 
     if (!response.ok) {

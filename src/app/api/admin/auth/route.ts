@@ -1,8 +1,12 @@
 import { cookies } from "next/headers"
 import { NextResponse } from "next/server"
-
-const ADMIN_COOKIE_NAME = "admin_session"
-const COOKIE_MAX_AGE = 60 * 60 * 24 // 24 hours
+import {
+  createAdminSessionToken,
+  getAdminCookieMaxAge,
+  getAdminCookieName,
+  isValidAdminPassword,
+  verifyAdminSessionToken,
+} from "@/lib/auth/admin-auth"
 
 /**
  * POST /api/admin/auth - Login with admin password
@@ -10,16 +14,15 @@ const COOKIE_MAX_AGE = 60 * 60 * 24 // 24 hours
 export async function POST(request: Request): Promise<NextResponse> {
   try {
     const { password } = await request.json()
-    const adminPassword = process.env.ADMIN_PASSWORD
 
-    if (!adminPassword) {
+    if (!process.env.ADMIN_PASSWORD) {
       return NextResponse.json(
         { error: "Admin password not configured" },
         { status: 500 }
       )
     }
 
-    if (password !== adminPassword) {
+    if (!isValidAdminPassword(password)) {
       return NextResponse.json(
         { error: "Invalid password" },
         { status: 401 }
@@ -28,15 +31,13 @@ export async function POST(request: Request): Promise<NextResponse> {
 
     // Set session cookie
     const cookieStore = await cookies()
-    const sessionToken = Buffer.from(
-      `${adminPassword}:${Date.now()}`
-    ).toString("base64")
+    const sessionToken = createAdminSessionToken()
 
-    cookieStore.set(ADMIN_COOKIE_NAME, sessionToken, {
+    cookieStore.set(getAdminCookieName(), sessionToken, {
       httpOnly: true,
       secure: process.env.NODE_ENV === "production",
       sameSite: "strict",
-      maxAge: COOKIE_MAX_AGE,
+      maxAge: getAdminCookieMaxAge(),
       path: "/",
     })
 
@@ -54,22 +55,14 @@ export async function POST(request: Request): Promise<NextResponse> {
  */
 export async function GET(): Promise<NextResponse> {
   const cookieStore = await cookies()
-  const session = cookieStore.get(ADMIN_COOKIE_NAME)
-  const adminPassword = process.env.ADMIN_PASSWORD
+  const session = cookieStore.get(getAdminCookieName())
 
-  if (!session || !adminPassword) {
+  if (!session?.value || !process.env.ADMIN_PASSWORD) {
     return NextResponse.json({ authenticated: false })
   }
 
-  try {
-    const decoded = Buffer.from(session.value, "base64").toString("utf8")
-    const [storedPassword] = decoded.split(":")
-
-    if (storedPassword === adminPassword) {
-      return NextResponse.json({ authenticated: true })
-    }
-  } catch {
-    // Invalid token format
+  if (verifyAdminSessionToken(session.value)) {
+    return NextResponse.json({ authenticated: true })
   }
 
   return NextResponse.json({ authenticated: false })
@@ -80,6 +73,6 @@ export async function GET(): Promise<NextResponse> {
  */
 export async function DELETE(): Promise<NextResponse> {
   const cookieStore = await cookies()
-  cookieStore.delete(ADMIN_COOKIE_NAME)
+  cookieStore.delete(getAdminCookieName())
   return NextResponse.json({ success: true })
 }

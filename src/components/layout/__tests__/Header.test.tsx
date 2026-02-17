@@ -32,6 +32,7 @@ vi.mock("next-auth/react", () => ({
 
 // Mock lucide-react icons
 vi.mock("lucide-react", () => ({
+  Menu: () => <span data-testid="menu-icon" />,
   Sword: () => <span data-testid="sword-icon" />,
   User: () => <span data-testid="user-icon" />,
   X: () => <span data-testid="x-icon" />,
@@ -64,8 +65,10 @@ describe("Header", () => {
 
   it("renders navigation links", () => {
     render(<Header />)
-    expect(screen.getByText("Projects")).toBeInTheDocument()
+    expect(screen.getByText("Missions")).toBeInTheDocument()
     expect(screen.getByText("Intel")).toBeInTheDocument()
+    expect(screen.getByText("⚡ Field Ops")).toBeInTheDocument()
+    expect(screen.getByText("Map")).toBeInTheDocument()
     expect(screen.getByText("Logs")).toBeInTheDocument()
   })
 
@@ -74,6 +77,18 @@ describe("Header", () => {
     expect(screen.getByRole("link", { name: "Missions" })).toHaveAttribute(
       "href",
       "/missions",
+    )
+  })
+
+  it("links Intel and Logs to canonical pages", () => {
+    render(<Header />)
+    expect(screen.getByRole("link", { name: "Intel" })).toHaveAttribute(
+      "href",
+      "/intel",
+    )
+    expect(screen.getByRole("link", { name: "Logs" })).toHaveAttribute(
+      "href",
+      "/blog",
     )
   })
 
