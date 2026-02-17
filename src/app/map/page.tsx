@@ -24,7 +24,7 @@ export default async function MapPage(): Promise<React.ReactElement> {
   ])
 
   return (
-    <main className="h-[calc(100vh-5rem)] w-full overflow-hidden mt-20">
+    <main className="h-[calc(100vh-4rem)] w-full overflow-hidden mt-16">
       <MissionMap missions={missions} fieldOps={fieldOps} />
     </main>
   )

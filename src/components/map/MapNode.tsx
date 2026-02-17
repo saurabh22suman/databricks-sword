@@ -291,49 +291,49 @@ export function MapNode({
         </g>
       )}
 
-      {/* Hover tooltip */}
+      {/* Hover tooltip — 2x size */}
       {isHovered && state !== "locked" && (
-        <g transform={`translate(${radius + 16}, -50)`} style={{ pointerEvents: "none" }}>
+        <g transform={`translate(${radius + 20}, -100)`} style={{ pointerEvents: "none" }}>
           <rect
             x="0"
             y="0"
-            width="200"
-            height={node.industry ? 65 : 78}
-            rx="8"
+            width="400"
+            height={node.industry ? 130 : 156}
+            rx="16"
             fill="rgba(10, 10, 15, 0.96)"
             stroke={state === "completed" ? "var(--anime-green)" : "var(--anime-cyan)"}
-            strokeWidth="1"
+            strokeWidth="2"
           />
           {/* Title */}
-          <text x="12" y="20" fill="var(--anime-cyan)" fontSize="12" fontWeight="bold">
-            {title.length > 22 ? title.slice(0, 22) + "…" : title}
+          <text x="24" y="40" fill="var(--anime-cyan)" fontSize="24" fontWeight="bold">
+            {title.length > 30 ? title.slice(0, 30) + "…" : title}
           </text>
           {/* Track badge row */}
           {node.track && (
             <g>
               <rect
-                x="12" y="28"
-                width={TRACKS[node.track].shortName.length * 7 + 12}
-                height="16" rx="3"
+                x="24" y="56"
+                width={TRACKS[node.track].shortName.length * 14 + 24}
+                height="32" rx="6"
                 fill={node.track === "de" ? "rgba(0, 255, 255, 0.2)" : node.track === "ml" ? "rgba(153, 51, 255, 0.2)" : "rgba(255, 204, 0, 0.2)"}
                 stroke={trackColors.stroke}
-                strokeWidth="0.5"
+                strokeWidth="1"
               />
-              <text x="18" y="40" fill={trackColors.stroke} fontSize="9" fontWeight="600">
+              <text x="36" y="78" fill={trackColors.stroke} fontSize="18" fontWeight="600">
                 {TRACKS[node.track].shortName}
               </text>
             </g>
           )}
           {node.industry && industryConfig && (
-            <text x="12" y="42" fill="var(--anime-purple)" fontSize="10" fontWeight="500">
-              {industryConfig.title.length > 24 ? industryConfig.title.slice(0, 24) + "…" : industryConfig.title}
+            <text x="24" y="84" fill="var(--anime-purple)" fontSize="20" fontWeight="500">
+              {industryConfig.title.length > 30 ? industryConfig.title.slice(0, 30) + "…" : industryConfig.title}
             </text>
           )}
           {/* XP + time */}
-          <text x="12" y={node.industry ? 56 : 65} fill="var(--anime-green)" fontSize="10" fontWeight="bold">
+          <text x="24" y={node.industry ? 112 : 130} fill="var(--anime-green)" fontSize="20" fontWeight="bold">
             +{xpReward} XP
           </text>
-          <text x="90" y={node.industry ? 56 : 65} fill="var(--anime-400)" fontSize="10">
+          <text x="180" y={node.industry ? 112 : 130} fill="var(--anime-400)" fontSize="20">
             ⏱ {estimatedMinutes}m
           </text>
         </g>

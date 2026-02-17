@@ -44,6 +44,9 @@ export function useDisconnect(): UseDisconnectResult {
   const [isSyncing, setIsSyncing] = useState(false)
 
   const disconnect = useCallback(async (): Promise<void> => {
+    // Note: isSyncing is intentionally never set back to false.
+    // signOut() causes a full page redirect which unmounts this component,
+    // so the SyncProgressDialog stays visible until navigation completes.
     setIsSyncing(true)
 
     try {

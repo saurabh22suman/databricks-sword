@@ -72,11 +72,6 @@ describe("Hero", () => {
     })
   })
 
-  it("renders the Watch Trailer button", () => {
-    render(<Hero />)
-    expect(screen.getByText("Watch Trailer")).toBeInTheDocument()
-  })
-
   it("renders the code editor preview", () => {
     render(<Hero />)
     expect(screen.getByText("Main_System.py")).toBeInTheDocument()

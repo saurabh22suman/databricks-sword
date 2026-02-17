@@ -137,9 +137,9 @@ export function MissionMap({
 }: MissionMapProps): React.ReactElement {
   const containerRef = useRef<HTMLDivElement>(null)
   const [viewport, setViewport] = useState<Viewport>({
-    x: -50,
-    y: -20,
-    scale: 0.75,
+    x: 50,
+    y: 30,
+    scale: 1,
   })
   const [showHelp, setShowHelp] = useState(false)
   const [activeFilters, setActiveFilters] = useState<Set<Track>>(
@@ -235,7 +235,7 @@ export function MissionMap({
   }, [])
 
   const handleResetView = useCallback(() => {
-    setViewport({ x: -50, y: -20, scale: 0.75 })
+    setViewport({ x: 50, y: 30, scale: 1 })
   }, [])
 
   // Pan handlers

@@ -1230,11 +1230,11 @@ html {
 /* Node hover states */
 .map-node {
   cursor: pointer;
-  transition: transform 0.2s ease, filter 0.2s ease;
+  transition: filter 0.2s ease;
 }
 
 .map-node:hover {
-  transform: scale(1.1);
+  filter: brightness(1.2);
 }
 
 .map-node-locked {
@@ -1243,7 +1243,7 @@ html {
 }
 
 .map-node-locked:hover {
-  transform: none;
+  filter: none;
 }
 
 /* Tooltip styling for map */
