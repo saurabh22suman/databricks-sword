@@ -35,39 +35,34 @@
     {
       "id": "bronze_metrics_partitioned",
       "name": "Bronze Layer Partitioning",
-      "query": "DESCRIBE DETAIL telecom_bronze.cell_tower_metrics",
+      "query": "DESCRIBE DETAIL {catalog}.{schema_prefix}_bronze.cell_tower_metrics",
       "expected": "partitionColumns = ['date']",
       "hint": "Verify partitionBy() is applied when writing to Delta table"
     },
     {
       "id": "silver_kpi_calculations",
       "name": "Network KPI Accuracy",
-      "query": "SELECT AVG(avg_latency_ms) as overall_latency FROM telecom_silver.network_kpis WHERE region = 'US-WEST'",
+      "query": "SELECT AVG(avg_latency_ms) as overall_latency FROM {catalog}.{schema_prefix}_silver.network_kpis WHERE region = 'US-WEST'",
       "expected": 45.3,
       "hint": "Check window function for latency calculation - ensure PARTITION BY region, tower_id"
     },
     {
       "id": "gold_regional_aggregates",
       "name": "Regional Aggregation",
-      "query": "SELECT COUNT(DISTINCT region) as region_count FROM telecom_gold.regional_performance",
+      "query": "SELECT COUNT(DISTINCT region) as region_count FROM {catalog}.{schema_prefix}_gold.regional_performance",
       "expected": 4,
       "hint": "Ensure timezone conversion from UTC to regional timezones is working"
     },
     {
       "id": "zorder_optimization",
       "name": "Z-Order Optimization Applied",
-      "query": "DESCRIBE HISTORY telecom_silver.network_kpis",
+      "query": "DESCRIBE HISTORY {catalog}.{schema_prefix}_silver.network_kpis",
       "expected": "OPTIMIZE ... ZORDER BY (region, tower_id, timestamp)",
       "hint": "Run OPTIMIZE with ZORDER BY on high-cardinality columns"
     }
   ],
-  "hints": [
-    "Auto Loader: Set cloudFiles.schemaEvolutionMode = 'addNewColumns' for schema flexibility",
-    "Partitioning: Use .partitionBy('date') when writing to Delta, not after reading",
-    "Window Functions: Use PARTITION BY (region, tower_id) not just PARTITION BY region",
-    "Timezone: Convert UTC timestamps to regional timezones with AT TIME ZONE syntax",
-    "Z-Order: Apply OPTIMIZE ZORDER BY (region, tower_id, timestamp) on silver tables"
-  ],
+  "hintsInNotebooks": false,
+  "hintsNote": "No SQL hints are provided in the notebooks. You must identify the issues and implement fixes using the briefing context and notebook error descriptions only.",
   "dataFiles": [
     "cell_tower_metrics.json",
     "network_topology.csv",

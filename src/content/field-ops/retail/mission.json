@@ -40,11 +40,13 @@
     {
       "checkName": "Gold reorder recommendations exist",
       "description": "Verify reorder recommendations table has data",
-      "query": "SELECT COUNT(*) as count FROM {catalog}.{schema_prefix}_gold.reorder_recommendations WHERE reorder_quantity > 0",
+      "query": "SELECT COUNT(*) as count FROM {catalog}.{schema_prefix}_gold.reorder_recommendations WHERE recommended_qty > 0",
       "expectedResult": "count",
       "expectedValue": 1
     }
   ],
+  "hintsInNotebooks": true,
+  "hintsNote": "SQL hints and alternative approaches are provided as commented-out code blocks in the notebooks. Use them if you get stuck.",
   "hints": [
     "Check the Bronze ingestion notebook for MERGE logic",
     "The Silver layer needs a QUALIFY window function to dedupe",

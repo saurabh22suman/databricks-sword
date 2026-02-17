@@ -1,4 +1,501 @@
-merchant_id,merchant_name,category,city,country
-MER001,Coffee Shop,food,New York,USA
-MER002,Electronics Store,retail,Boston,USA
-MER003,Luxury Goods,retail,Miami,USA
+merchant_id,merchant_name,category,city,country,mcc_code,risk_level
+MER000001,Balistreri - Runte,food,West Addisonworth,GBR,7446,low
+MER000002,Ryan - Wehner,travel,Shanahanberg,MEX,7019,high
+MER000003,"Feeney, Bins and Reichert",healthcare,North Moseboro,USA,8550,medium
+MER000004,"Wintheiser, Weber and Schaefer",utilities,St. Petersburg,MEX,2064,high
+MER000005,"Corwin, Donnelly and Wolf",food,Dorthyside,USA,4206,low
+MER000006,"Kris, Buckridge and Kiehn",entertainment,North Dorthy,GBR,3290,medium
+MER000007,Metz Group,gas,Minniebury,USA,7319,medium
+MER000008,Turner - Streich,travel,Janickchester,CAN,3682,high
+MER000009,Kozey LLC,travel,Bismarck,USA,7829,high
+MER000010,Halvorson Group,retail,Parkerburgh,GBR,1144,medium
+MER000011,Goyette Inc,entertainment,Buckeye,USA,6910,medium
+MER000012,Simonis - Homenick,gas,North Norwoodborough,GBR,8182,medium
+MER000013,McKenzie - Haag,entertainment,The Villages,CAN,6719,high
+MER000014,Raynor - Schmitt,retail,New Alessia,USA,4530,high
+MER000015,"Bosco, Feeney and Mayert",entertainment,West Mazie,USA,8748,medium
+MER000016,"Kunze, Howell and Marvin",online,Port Abdiel,MEX,4596,low
+MER000017,"Nienow, Lynch and Mosciski",utilities,Hoegerland,CAN,9458,medium
+MER000018,Shanahan Inc,gas,Port Beth,USA,1966,low
+MER000019,"Mueller, Franecki and Schuppe",healthcare,South Careyfield,MEX,1902,high
+MER000020,"Johns, Rempel and Roob",entertainment,La Habra,USA,7030,medium
+MER000021,Mills Group,food,Welchcester,GBR,2711,medium
+MER000022,Hilll and Sons,food,East Lansing,USA,8313,low
+MER000023,"Kozey, Runolfsdottir and Volkman",entertainment,Mount Vernon,USA,4584,low
+MER000024,Jacobs and Sons,healthcare,La Mirada,USA,4316,medium
+MER000025,"Mante, Harber and Green",entertainment,Swaniawskichester,CAN,6859,medium
+MER000026,"Ritchie, Wiegand and Morar",travel,Fort Calebfurt,GBR,1428,medium
+MER000027,Will Inc,entertainment,Fort Estevanboro,MEX,5101,high
+MER000028,Stamm LLC,entertainment,Adolphview,USA,8446,low
+MER000029,"Hayes, Hickle and Turcotte",food,Lornahaven,USA,3151,medium
+MER000030,Dietrich - Monahan,travel,Port Oswald,CAN,9993,high
+MER000031,"Pouros, Daniel and Legros",food,West Tyra,USA,7294,low
+MER000032,Dibbert Group,entertainment,Jackson,GBR,6189,medium
+MER000033,Friesen and Sons,online,South Aileen,USA,2924,high
+MER000034,West LLC,retail,Fort Collins,USA,3152,high
+MER000035,"Sanford, Kiehn and Franecki",healthcare,Tamarac,USA,9008,high
+MER000036,Glover Group,travel,Turcottefield,GBR,8387,medium
+MER000037,Veum - Metz,travel,Dibbertview,CAN,5863,high
+MER000038,"Harber, Koelpin and Murphy",utilities,Gutmannbury,USA,4835,low
+MER000039,Mueller LLC,retail,North Jessikaworth,GBR,2229,low
+MER000040,Deckow LLC,retail,Port Harmoncester,USA,4562,low
+MER000041,"Lehner, Wolf and Brakus",food,Yakima,USA,1523,high
+MER000042,Morar Inc,online,South Khalid,USA,8633,high
+MER000043,Cruickshank - Roberts,travel,Nelsside,USA,9575,high
+MER000044,"Rice, Stokes and Ledner",gas,Shawnee,GBR,6374,low
+MER000045,Hermann - Schamberger,healthcare,Mansfield,USA,8245,low
+MER000046,"Gibson, Blanda and Abbott",healthcare,Reeceshire,CAN,6672,high
+MER000047,Koch - Lubowitz,online,Tevinchester,GBR,4305,high
+MER000048,"D'Amore, Gleason and Hermann",utilities,El Centro,USA,3324,low
+MER000049,Kreiger Group,utilities,Shainabury,CAN,1217,medium
+MER000050,Littel - Upton,gas,South Jadon,USA,6932,medium
+MER000051,"Flatley, Schamberger and Okuneva",gas,New Maybellemouth,USA,2600,high
+MER000052,Pfannerstill Group,online,Manchester,MEX,3999,low
+MER000053,"Little, Collins and Dicki",online,Wehnerboro,CAN,5554,medium
+MER000054,"Lakin, Gleason and Ebert",online,Camyllefield,CAN,1518,low
+MER000055,"Cassin, Heidenreich and Raynor",entertainment,Port Isadore,MEX,5704,high
+MER000056,"Cruickshank, Lockman and Wisoky",online,Alhambra,CAN,8756,medium
+MER000057,Batz Group,travel,Layneside,USA,8473,low
+MER000058,Bednar - Heller,food,Fort Chloe,USA,3116,medium
+MER000059,"Goyette, Ward and Kirlin",healthcare,Fort Pinkie,GBR,3142,low
+MER000060,"Johns, Greenfelder and Powlowski",food,South Vancebury,USA,5937,low
+MER000061,Miller Inc,travel,West Dora,USA,3786,low
+MER000062,Pfeffer and Sons,travel,Welchborough,USA,3096,medium
+MER000063,O'Connell and Sons,entertainment,West Kavonbury,CAN,9958,low
+MER000064,Hirthe - Gutkowski,entertainment,Russelland,MEX,1323,high
+MER000065,Moen Inc,gas,Friedrichstad,CAN,3122,high
+MER000066,"Strosin, Gutkowski and Ferry",utilities,Kolbyside,USA,7797,medium
+MER000067,"Kuhlman, Marvin and Kemmer",gas,Lake Forrestfurt,MEX,6850,low
+MER000068,"Schuppe, Kozey and Heller",food,North Josefinaton,USA,5277,high
+MER000069,Leannon - Barton,entertainment,Fort Allison,CAN,2049,high
+MER000070,"Kerluke, Christiansen and Bogisich",entertainment,Gutkowskifield,GBR,8485,low
+MER000071,Predovic - Satterfield,food,Waco,GBR,3242,high
+MER000072,Crooks - Feil,food,Lake Alexfurt,USA,1699,medium
+MER000073,Wisoky Group,healthcare,Kuphalfurt,GBR,8156,low
+MER000074,Cummings - Strosin,food,Fort Amiya,MEX,5130,medium
+MER000075,Schoen Group,utilities,North Freedacester,MEX,7026,high
+MER000076,Witting - Dooley,online,Davisboro,CAN,3305,high
+MER000077,Graham - Rolfson,travel,Maggioshire,USA,1233,medium
+MER000078,Hettinger - Wisozk,travel,Fort Derick,MEX,4198,high
+MER000079,Lockman - Bauch,utilities,Eunicehaven,MEX,4066,low
+MER000080,Thompson - Jerde,utilities,East Sharonhaven,MEX,2302,medium
+MER000081,"Heaney, Nienow and Crona",gas,South Mikelburgh,USA,7969,medium
+MER000082,"Hammes, Schinner and Kreiger",online,Walkerburgh,MEX,4930,medium
+MER000083,Considine - Beahan,entertainment,Majorfield,USA,1740,medium
+MER000084,Bashirian - Krajcik,food,Fort Neomaboro,CAN,3190,high
+MER000085,Morissette and Sons,online,North Paige,USA,6286,medium
+MER000086,O'Hara Inc,food,Tamiami,USA,2080,medium
+MER000087,"Aufderhar, Denesik and Tromp",food,Richardson,MEX,1523,high
+MER000088,Wisoky - Koch,retail,West Priscilla,USA,5337,low
+MER000089,Breitenberg - Prohaska,entertainment,Arnoldstead,GBR,6491,medium
+MER000090,Schuster Group,retail,North Candicemouth,USA,8156,medium
+MER000091,Kunde LLC,retail,Irving,CAN,7041,medium
+MER000092,Prohaska Inc,travel,West Kiley,USA,6169,medium
+MER000093,Fahey Group,travel,Howardmouth,MEX,7615,low
+MER000094,Murphy - Johnson,food,Hartford,GBR,3239,medium
+MER000095,Klocko - Nader,travel,Heidenreichport,MEX,8486,low
+MER000096,Lemke - Barrows,food,Buckridgeside,USA,4980,high
+MER000097,McCullough - Davis,healthcare,New Letitia,MEX,7243,medium
+MER000098,Baumbach - Gerlach,retail,San Bruno,CAN,6715,medium
+MER000099,Kling and Sons,travel,Giovannaberg,USA,6139,high
+MER000100,Mertz and Sons,utilities,Keelingstad,USA,5956,low
+MER000101,"Goyette, Rogahn and Langworth",food,Canton,MEX,3930,high
+MER000102,Larson - Herzog,gas,Zemlaktown,GBR,7497,low
+MER000103,Kuhic - Schaden,entertainment,Quigleyborough,CAN,1779,low
+MER000104,Moen Inc,healthcare,Lake Mckayla,CAN,2705,medium
+MER000105,Koepp - Wilkinson,online,South Derek,MEX,4789,high
+MER000106,Rosenbaum - Hills,utilities,East Marcelino,CAN,5247,high
+MER000107,Sanford - Pollich,entertainment,Beierstead,GBR,7782,low
+MER000108,O'Conner Group,travel,Guaynabo,CAN,5418,high
+MER000109,Predovic - Streich,food,West Carlieshire,MEX,6353,high
+MER000110,"Schuppe, Marks and Zboncak",travel,Blockstead,USA,4427,medium
+MER000111,Becker - Fahey,online,Dontown,GBR,2787,low
+MER000112,Hamill - Morar,entertainment,Bolingbrook,CAN,2621,high
+MER000113,Moen LLC,online,South Selena,CAN,3820,high
+MER000114,"Trantow, Hammes and Kirlin",online,Poinciana,USA,1499,low
+MER000115,Lesch Inc,entertainment,Mosciskiburgh,USA,6432,high
+MER000116,Gorczany - Mann,gas,New Camillestad,GBR,8119,low
+MER000117,Schaefer - Konopelski,online,Erichhaven,GBR,3918,high
+MER000118,Grady - Kuvalis,utilities,Kannapolis,CAN,1194,medium
+MER000119,Bailey - Schinner,healthcare,Port Bernice,CAN,7171,low
+MER000120,Bernhard - Nader,travel,Bellflower,USA,2424,low
+MER000121,"Rodriguez, Ullrich and Hackett",retail,Riverview,MEX,1805,high
+MER000122,"Jacobs, Hyatt and Cummerata",travel,Yakima,USA,1913,medium
+MER000123,"Hane, Mitchell and Ernser",healthcare,South Nathan,MEX,3099,high
+MER000124,Sawayn LLC,healthcare,Bricemouth,GBR,2101,low
+MER000125,"Hayes, Adams and Hartmann",online,Nathenshire,USA,7580,low
+MER000126,Wisozk and Sons,entertainment,Littleview,USA,7719,medium
+MER000127,"Feil, Waters and Dietrich",utilities,Shawnee,CAN,7904,high
+MER000128,"Dibbert, Boehm and Lind",healthcare,Elnastead,CAN,2798,high
+MER000129,Quigley - Bernhard,online,Texas City,CAN,8578,low
+MER000130,Smitham - Lebsack,gas,Prohaskaland,MEX,3579,low
+MER000131,Langworth LLC,travel,Fountain Valley,CAN,2729,low
+MER000132,Ankunding and Sons,food,Roseville,MEX,1887,low
+MER000133,"Beatty, Pollich and Cole",healthcare,Port Erling,GBR,1305,high
+MER000134,Spinka LLC,online,East Kennedicester,USA,4218,medium
+MER000135,"Mueller, Pfannerstill and Wyman",utilities,Feilfurt,GBR,1815,medium
+MER000136,"Price, Fahey and Ratke",travel,Arthurberg,CAN,5457,high
+MER000137,Maggio - Kub,travel,New Rochelle,USA,6878,high
+MER000138,Stiedemann - Larson,gas,East Kirk,MEX,8883,low
+MER000139,"Effertz, Kuphal and Olson",healthcare,Lucietown,CAN,6036,high
+MER000140,"Baumbach, Hoeger and Wisozk",utilities,Parkercester,USA,1352,high
+MER000141,Fadel Inc,food,Provo,MEX,3180,low
+MER000142,Towne LLC,travel,Metairie,USA,6786,high
+MER000143,Gleason - Wiza,online,Brekkehaven,USA,9267,low
+MER000144,Cummerata and Sons,healthcare,Kendall,USA,3163,low
+MER000145,"O'Conner, Skiles and Rolfson",travel,East Selinafort,GBR,6212,medium
+MER000146,"Rempel, Pfannerstill and Halvorson",online,Batzville,USA,7506,high
+MER000147,Bednar Group,healthcare,Maxbury,GBR,3568,high
+MER000148,"Quigley, Lindgren and Baumbach",food,Port Cyril,CAN,6628,high
+MER000149,Legros - Jast,online,Elbertchester,GBR,9353,low
+MER000150,Maggio - Skiles,gas,Lake Terrellton,MEX,9835,medium
+MER000151,Weber LLC,healthcare,Idabury,GBR,5539,medium
+MER000152,"Gerlach, Metz and Beer",food,Glennieworth,USA,8476,high
+MER000153,Hilll Group,online,Schillerport,USA,6832,medium
+MER000154,"Zieme, Smith and Schimmel",entertainment,South Enosboro,CAN,9007,low
+MER000155,"Abshire, Glover and Ward",food,North Eldredboro,GBR,4600,low
+MER000156,Schumm - Hirthe,retail,Alameda,GBR,1750,low
+MER000157,"Hegmann, Kunde and Kohler",gas,Portsmouth,MEX,8245,medium
+MER000158,Dare Group,retail,Fort Glenworth,USA,5621,high
+MER000159,Bernhard LLC,gas,Whiteboro,USA,4616,medium
+MER000160,Hauck Group,food,Lindville,USA,5833,low
+MER000161,Vandervort and Sons,entertainment,Fort Madisyn,USA,8175,medium
+MER000162,Zulauf - Welch,healthcare,Blaine,USA,1227,medium
+MER000163,Botsford - Kuvalis,travel,West Stan,USA,7071,low
+MER000164,Johnston - Goyette,online,Rancho Santa Margarita,GBR,9637,low
+MER000165,Grimes Group,travel,Jakaylacester,CAN,7491,medium
+MER000166,Rowe Inc,food,West Marion,MEX,7961,high
+MER000167,Schaefer and Sons,travel,Port Gonzaloport,MEX,2631,medium
+MER000168,"Gerhold, Bogisich and Olson",online,Hilo,USA,1971,low
+MER000169,Schimmel Group,gas,Fort Jedidiah,USA,3194,high
+MER000170,"Stanton, Boehm and Veum",gas,West Toyland,USA,2867,medium
+MER000171,"Wilderman, Will and Gibson",online,Port Margareteville,GBR,6175,high
+MER000172,Kutch Inc,food,Virginiaboro,MEX,7154,low
+MER000173,Kovacek - Harvey,utilities,Marksbury,USA,3323,medium
+MER000174,Will - Kling,travel,Nevachester,CAN,7982,high
+MER000175,Schinner LLC,food,Wolffshire,GBR,1654,high
+MER000176,Ruecker Inc,travel,Camden,GBR,3744,high
+MER000177,Huel - Labadie,food,Murrayview,USA,7560,low
+MER000178,"King, Miller and Lueilwitz",entertainment,Joplin,GBR,7825,medium
+MER000179,"Zulauf, Ondricka and King",food,Kathlynberg,MEX,2682,high
+MER000180,Rosenbaum Inc,utilities,Elizabeth,CAN,6368,medium
+MER000181,"Rolfson, Howell and Wisozk",retail,Port Beryl,USA,5131,low
+MER000182,Schumm Inc,travel,Lake Dandre,GBR,8927,medium
+MER000183,"Batz, West and Spencer",entertainment,Lake Leo,USA,5460,high
+MER000184,"Kling, Becker and Wiegand",food,Lake Florinehaven,CAN,7863,low
+MER000185,"Stamm, Muller and Schimmel",entertainment,Rodrigofort,USA,4734,low
+MER000186,Pagac Inc,entertainment,South Curtisview,CAN,7911,medium
+MER000187,Kling - Corwin,food,Parker,USA,5193,medium
+MER000188,Welch and Sons,travel,Addiefield,USA,8673,high
+MER000189,"Heaney, Emmerich and Beier",utilities,New Lamontworth,USA,2354,high
+MER000190,Terry Inc,online,Thousand Oaks,GBR,5663,high
+MER000191,Ernser Group,online,Leschport,CAN,1374,high
+MER000192,Terry - Gottlieb,food,Otisshire,CAN,7531,high
+MER000193,Frami and Sons,travel,Carolina,CAN,5518,high
+MER000194,Pfannerstill Inc,utilities,Baileyton,USA,6179,low
+MER000195,"Halvorson, Murazik and Jakubowski",retail,Port Brendon,USA,8802,low
+MER000196,Ortiz - Farrell,gas,Stantonport,CAN,4328,high
+MER000197,Skiles LLC,healthcare,Shyannside,USA,7914,medium
+MER000198,Rolfson LLC,online,South Graceville,USA,2659,medium
+MER000199,"Windler, Graham and Heidenreich",retail,Theresacester,CAN,8507,high
+MER000200,"Lind, McClure and Kuhlman",travel,Reaganshire,CAN,7499,high
+MER000201,"Crooks, Hansen and Franecki",healthcare,South Jessica,MEX,7831,high
+MER000202,"Leannon, Gutkowski and Nikolaus",online,Littleshire,USA,7350,low
+MER000203,Kohler Group,gas,Strosinchester,GBR,6911,medium
+MER000204,Olson - Bruen,utilities,Folsom,GBR,7843,high
+MER000205,Toy - Schulist,utilities,North Kevinfield,USA,1513,low
+MER000206,Baumbach - Metz,healthcare,Torphyton,GBR,9118,high
+MER000207,"Bernier, Greenfelder and Harvey",healthcare,Fort Katlynnberg,USA,4197,medium
+MER000208,"Gibson, Terry and Wilderman",retail,East Lawson,CAN,7854,medium
+MER000209,Haley and Sons,travel,Tyrelhaven,CAN,4785,low
+MER000210,Pagac - Sawayn,food,West Serenaside,GBR,9143,medium
+MER000211,Schulist - Schaden,food,Liamside,USA,6576,low
+MER000212,Schinner Group,online,Alvertaside,CAN,3181,low
+MER000213,"Crooks, D'Amore and Russel",retail,Schulistbury,USA,8674,high
+MER000214,Quitzon - Bode,food,East Nanniecester,GBR,3431,medium
+MER000215,Nienow - Schmitt,utilities,Rayworth,CAN,6525,medium
+MER000216,Kling and Sons,travel,Lake Lindsay,MEX,4958,high
+MER000217,Gutmann Group,entertainment,Fort Lynnboro,USA,6576,low
+MER000218,Botsford - Pagac,utilities,Izaiahport,USA,9477,high
+MER000219,Bartoletti Inc,retail,Chapel Hill,MEX,3365,low
+MER000220,Leuschke LLC,gas,Josuefort,USA,3273,high
+MER000221,"Renner, Jerde and Murazik",entertainment,Shawnee,USA,7280,low
+MER000222,"Hansen, Cartwright and Gottlieb",retail,New Chadrickworth,USA,7211,medium
+MER000223,Auer Inc,online,East Vickieworth,MEX,2605,medium
+MER000224,Emard and Sons,healthcare,Mobile,GBR,4667,high
+MER000225,Dooley Group,food,Annandale,USA,1842,low
+MER000226,"Kertzmann, Bosco and Streich",travel,The Hammocks,GBR,1406,high
+MER000227,Treutel - Nader,online,Fort Elyssafield,GBR,4970,low
+MER000228,Hegmann Inc,food,Port Janaestead,GBR,4141,low
+MER000229,Hirthe - Mertz,gas,East Maribel,USA,1418,low
+MER000230,"Hagenes, Jacobs and Schaden",food,West Robin,GBR,9825,high
+MER000231,"Considine, Murray and Turcotte",travel,North Lawrence,CAN,7090,high
+MER000232,Kuhic and Sons,travel,Port Lilymouth,USA,8461,high
+MER000233,Denesik - Kuhn,healthcare,McGlynnburgh,USA,2848,medium
+MER000234,Romaguera - Lemke,food,Autumntown,USA,6816,high
+MER000235,Hirthe Group,online,Hanford,USA,3032,low
+MER000236,"Rowe, Kris and Littel",gas,Fort Kenton,USA,4551,high
+MER000237,Bins Group,utilities,New Arachester,USA,8187,low
+MER000238,Block - Oberbrunner,food,Alyciastead,USA,8720,low
+MER000239,Johnson Inc,healthcare,Louveniafurt,GBR,2351,high
+MER000240,"Fahey, Roob and Stanton",food,East Shaniyafurt,MEX,6554,high
+MER000241,"Emmerich, Dickens and Koepp",retail,Hirtheshire,USA,3710,medium
+MER000242,Becker - Boyle,food,Hudsonside,GBR,6298,low
+MER000243,Jacobi - Turcotte,retail,Annetteberg,CAN,5849,low
+MER000244,"Turcotte, Spencer and Rempel",retail,Fort Malvina,GBR,1059,low
+MER000245,"Mueller, Adams and Little",gas,East Giaworth,USA,2580,low
+MER000246,Huels Group,online,Chasestead,GBR,6252,medium
+MER000247,"Mitchell, O'Connell and Bashirian",healthcare,New Lacyview,MEX,4840,low
+MER000248,"Romaguera, Bruen and Beahan",gas,South Judd,USA,2874,medium
+MER000249,"Weimann, Stamm and McDermott",travel,Tillmanstad,USA,2286,medium
+MER000250,Wunsch LLC,travel,Longmont,USA,7643,low
+MER000251,Lockman - Kuvalis,food,New Davion,MEX,2159,low
+MER000252,Miller and Sons,healthcare,Shawnacester,USA,7189,high
+MER000253,Goldner - Johns,online,Fort Heberstad,USA,5644,low
+MER000254,"Brakus, Deckow and Larson",utilities,Walterstad,USA,2787,low
+MER000255,"Denesik, Collier and Moen",healthcare,Eltaberg,USA,2340,medium
+MER000256,"Bradtke, Fritsch and Klocko",retail,Hattiesburg,GBR,4073,high
+MER000257,"Hartmann, Reynolds and Bechtelar",retail,East Jesus,USA,1659,low
+MER000258,"Hand, Maggio and Wehner",entertainment,Hettingerstad,MEX,1061,medium
+MER000259,Wisoky and Sons,entertainment,Norwoodside,CAN,4260,low
+MER000260,Bednar - Bergstrom,utilities,New Athenashire,USA,5188,high
+MER000261,Beer - Willms,retail,Fort Heath,MEX,5796,medium
+MER000262,"Mills, Maggio and Rolfson",online,Lake Natalia,GBR,6574,medium
+MER000263,Pfeffer and Sons,healthcare,South Brodyfurt,USA,3947,low
+MER000264,"Schimmel, Raynor and Leuschke",healthcare,Fort Zandershire,USA,3674,low
+MER000265,Friesen - O'Conner,retail,Deliabury,USA,1373,low
+MER000266,Haag LLC,travel,New Linneaboro,USA,7783,high
+MER000267,Thompson - Trantow,gas,Syracuse,USA,9744,high
+MER000268,Towne Inc,food,Haleyside,GBR,9425,low
+MER000269,King and Sons,gas,South Mattie,MEX,4396,low
+MER000270,Hauck and Sons,healthcare,Port Kylabury,CAN,1076,medium
+MER000271,Kautzer - Gleason,entertainment,Tuckahoe,GBR,2258,medium
+MER000272,Kuvalis - Rolfson,healthcare,West Adriannahaven,USA,9967,medium
+MER000273,"Shields, Roberts and Dibbert",healthcare,Brendontown,GBR,1981,medium
+MER000274,Christiansen - Cremin,utilities,Jacobsonside,USA,6043,high
+MER000275,Monahan - Luettgen,utilities,Lexington-Fayette,USA,3409,low
+MER000276,"Barrows, Ruecker and Schumm",travel,East Rory,USA,1109,low
+MER000277,Turcotte Inc,travel,Salvadorview,GBR,7838,low
+MER000278,"Rice, Hane and Boehm",online,Fredrickton,MEX,4012,high
+MER000279,Blick and Sons,entertainment,New Otiliahaven,USA,4702,medium
+MER000280,"Parker, Lemke and Bode",online,Autumnstad,GBR,9972,high
+MER000281,Nader - Medhurst,utilities,Port Kaylin,USA,2727,low
+MER000282,Hartmann LLC,retail,Monroe,MEX,7813,high
+MER000283,Leuschke Group,food,Corneliusland,MEX,4052,low
+MER000284,Morissette LLC,retail,Naperville,MEX,7195,medium
+MER000285,"Mann, Daugherty and Klocko",retail,Glenview,USA,5190,medium
+MER000286,Klocko - Olson,healthcare,Gradystad,USA,3459,medium
+MER000287,"Reichel, Brakus and Kirlin",healthcare,Krajcikfield,USA,2971,low
+MER000288,Considine - Boyer,healthcare,East Teaganfurt,USA,1253,medium
+MER000289,"Zboncak, Haley and Waelchi",retail,Rancho Cucamonga,GBR,1547,high
+MER000290,Bradtke Inc,food,Raymundostad,USA,2005,low
+MER000291,Wisoky - Champlin,utilities,Karlhaven,USA,9440,high
+MER000292,Lang - Gibson,entertainment,Port Hymanfurt,USA,8245,medium
+MER000293,"Rosenbaum, Wisozk and Harvey",travel,New Schuylerhaven,MEX,7575,medium
+MER000294,"Schimmel, Murazik and White",food,Miami,GBR,5374,high
+MER000295,"Stokes, Wisozk and Connelly",retail,Wilson,GBR,9148,high
+MER000296,Hermiston - Osinski,online,Bradenchester,USA,1296,medium
+MER000297,Fahey LLC,entertainment,Loweberg,MEX,4727,high
+MER000298,Stoltenberg LLC,online,Fort Evertside,MEX,6661,low
+MER000299,"Gislason, Barton and Pollich",food,Brownberg,GBR,8469,high
+MER000300,Mosciski - Berge,entertainment,North Carloberg,USA,1705,high
+MER000301,Beatty - McGlynn,entertainment,Monroeberg,USA,4382,medium
+MER000302,Marquardt - Keeling,online,Bradtkeside,USA,7574,medium
+MER000303,Schulist and Sons,healthcare,Nicklauschester,MEX,8699,high
+MER000304,"Treutel, Quigley and Hammes",healthcare,Lake Shirley,USA,5783,medium
+MER000305,"Lindgren, Dicki and Bednar",healthcare,Port Kasandra,USA,5594,high
+MER000306,"Jacobson, Reinger and Tremblay",entertainment,St. Clair Shores,GBR,1017,low
+MER000307,Watsica Inc,utilities,Santee,GBR,7292,medium
+MER000308,"Ebert, Casper and Brown",utilities,Hickletown,GBR,8825,high
+MER000309,Barton - Williamson,travel,Saginaw,USA,1249,high
+MER000310,Greenholt Group,retail,East Nils,USA,2396,high
+MER000311,Hackett Inc,entertainment,The Woodlands,USA,8656,medium
+MER000312,Bauch LLC,utilities,West Opalland,USA,1786,high
+MER000313,Goldner Inc,online,Pabloville,USA,6158,medium
+MER000314,Towne and Sons,online,Columbia,USA,5571,high
+MER000315,Walter - Kling,online,Port Margarettaboro,MEX,2084,low
+MER000316,Johns and Sons,online,Leuschkefield,MEX,3916,low
+MER000317,"Hamill, Wisozk and Daniel",travel,East Laruecester,USA,2077,medium
+MER000318,Hilll and Sons,online,Fort Stephonville,GBR,9418,medium
+MER000319,"Bins, Boehm and Wintheiser",entertainment,Jadenstad,CAN,9217,high
+MER000320,"Von, O'Connell and Kuvalis",retail,Skilestown,CAN,3820,medium
+MER000321,"Renner, Erdman and Hahn",retail,Altaville,GBR,6689,low
+MER000322,"Larson, Cartwright and Welch",retail,Jaskolskiville,GBR,7319,high
+MER000323,Torphy - Berge,utilities,Alexannefort,USA,8500,high
+MER000324,"Green, Cole and Bauch",food,East Alfield,USA,7510,medium
+MER000325,"Haley, Schoen and Koelpin",entertainment,West Wilfredo,USA,9797,high
+MER000326,Hilpert - Bechtelar,retail,West Fosterberg,USA,6413,medium
+MER000327,"Rosenbaum, Bechtelar and Kilback",online,Amyafort,MEX,4956,low
+MER000328,Cassin - Leannon,food,Lee's Summit,GBR,8359,low
+MER000329,"Olson, Crona and Abshire",healthcare,Pfannerstillhaven,MEX,8346,medium
+MER000330,Pacocha LLC,retail,North Michaelfield,USA,5344,high
+MER000331,Wisoky - Huels,gas,North Eda,USA,8296,high
+MER000332,Davis Inc,healthcare,Fort Adeletown,MEX,8508,medium
+MER000333,Fisher - Dietrich,online,Port Llewellyn,MEX,3847,medium
+MER000334,Zulauf and Sons,online,Brookhaven,USA,8045,medium
+MER000335,Pagac - McCullough,utilities,Shieldsborough,GBR,1722,medium
+MER000336,"Bailey, Walter and Carroll",utilities,Dothan,USA,5923,medium
+MER000337,Kuvalis - Price,retail,Rogahntown,USA,7899,high
+MER000338,"Moen, Kuvalis and Kertzmann",food,Fisherport,CAN,2887,high
+MER000339,Maggio - Volkman,utilities,Port Clovismouth,MEX,6978,high
+MER000340,Schuster Inc,utilities,Lake Phyllis,USA,7781,high
+MER000341,"Stamm, Gibson and Bailey",entertainment,Lockmanfurt,USA,7831,medium
+MER000342,Fritsch Group,entertainment,North Jeanette,USA,8191,high
+MER000343,Rath and Sons,retail,New Juniuschester,MEX,3147,medium
+MER000344,Collins - Beahan,travel,West Luigibury,GBR,8827,low
+MER000345,Hessel - Jacobi,travel,Great Falls,USA,8256,medium
+MER000346,Kunze Group,entertainment,Fort Americo,USA,5588,low
+MER000347,Sawayn - Altenwerth,travel,North Jarrettchester,MEX,3049,high
+MER000348,"Rutherford, Thompson and Gleichner",healthcare,Bahringerworth,MEX,6209,high
+MER000349,Prohaska Group,online,Bartellfield,CAN,1252,high
+MER000350,Yundt Inc,gas,West Tamia,USA,4732,medium
+MER000351,Schuppe - Nienow,online,Port Aaronstad,USA,8946,medium
+MER000352,"Emmerich, Dooley and Stokes",healthcare,Tiannastead,GBR,2653,medium
+MER000353,Buckridge LLC,healthcare,Lake Kacifield,CAN,1363,low
+MER000354,"Windler, Kirlin and Koch",utilities,Port Nickolas,USA,6070,high
+MER000355,"Pollich, Torphy and Fadel",online,O'Connellfurt,USA,9018,high
+MER000356,Pagac - Tremblay,online,Volkmanchester,USA,3005,medium
+MER000357,Reichert - Bins,online,Sunnyvale,USA,1141,high
+MER000358,Emard - Lindgren,gas,Meganestead,USA,4999,low
+MER000359,Waelchi Group,utilities,South Davinberg,CAN,2195,high
+MER000360,Bahringer and Sons,entertainment,South Alexys,GBR,5467,medium
+MER000361,"Skiles, Roberts and Gutmann",travel,West Roberta,USA,1508,medium
+MER000362,Kihn and Sons,retail,Koeppfurt,GBR,1090,high
+MER000363,"Schiller, Gusikowski and Hamill",food,New Jasenburgh,MEX,2949,high
+MER000364,"Wolff, Veum and Little",food,New Jadefield,USA,2345,high
+MER000365,"Renner, Kuphal and Prohaska",gas,New Noemiestead,MEX,4179,low
+MER000366,Mueller - Wehner,travel,Davinbury,USA,2746,low
+MER000367,Leffler Inc,healthcare,Alfonzoworth,MEX,5262,low
+MER000368,Kuhic - D'Amore,food,Fritschville,GBR,4302,low
+MER000369,"Macejkovic, Hoeger and Huel",online,Alvahberg,USA,8510,high
+MER000370,Hoppe Inc,food,Santa Fe,MEX,3352,low
+MER000371,Gottlieb Group,utilities,East Nasir,MEX,8517,high
+MER000372,"Runte, Bergstrom and Jast",entertainment,Lake Anjaliburgh,MEX,3177,low
+MER000373,Morar - Padberg,healthcare,Teresahaven,CAN,3044,low
+MER000374,Schowalter - Schuppe,entertainment,Elliottville,GBR,3212,low
+MER000375,"Hessel, Graham and Turner",gas,Port Cale,GBR,3183,low
+MER000376,Mayer LLC,entertainment,Fort Anabeltown,MEX,2119,high
+MER000377,Altenwerth and Sons,gas,Swiftland,USA,8750,high
+MER000378,Koelpin - Pouros,online,Casandrastad,USA,9897,medium
+MER000379,"Konopelski, Wisozk and Upton",online,Bolingbrook,MEX,4576,low
+MER000380,Casper - Connelly,gas,Zemlakburgh,MEX,4825,low
+MER000381,Hahn - Oberbrunner,food,Port Lucienne,USA,8752,low
+MER000382,Orn - Hilpert,gas,Port Cornelius,MEX,4252,low
+MER000383,King - Borer,travel,North Elza,CAN,4984,medium
+MER000384,Baumbach Inc,utilities,Elvisbury,USA,6997,medium
+MER000385,Torphy and Sons,healthcare,Lakincester,GBR,1165,medium
+MER000386,Gutmann - Dietrich,online,Gleichnerland,MEX,1719,high
+MER000387,"Skiles, DuBuque and Rippin",gas,Loveland,CAN,5783,low
+MER000388,Moore Inc,gas,Arvada,MEX,4951,low
+MER000389,Tromp Group,utilities,Lawton,USA,4560,high
+MER000390,"Cartwright, Hoppe and Gibson",utilities,West Jessika,GBR,2695,medium
+MER000391,Ruecker Inc,entertainment,Poway,MEX,6588,medium
+MER000392,Wilderman - Keebler,food,Maxineboro,GBR,2582,high
+MER000393,Davis - Kautzer,healthcare,Fort Christa,GBR,1331,medium
+MER000394,King - Bergnaum,food,MacGyverville,GBR,8643,medium
+MER000395,"Harber, Batz and Wiza",utilities,West Palm Beach,USA,9209,high
+MER000396,Hudson and Sons,retail,Pourosport,GBR,1142,medium
+MER000397,Ryan - Aufderhar,entertainment,Bloomington,CAN,5820,low
+MER000398,"Collier, Reinger and Torp",utilities,Enterprise,MEX,1772,high
+MER000399,West and Sons,utilities,North Cheyannestad,MEX,5516,medium
+MER000400,Langosh Inc,healthcare,Howetown,GBR,3903,medium
+MER000401,Koch - Pfannerstill,food,North Robertashire,CAN,2007,low
+MER000402,Shanahan LLC,food,Mayertstad,MEX,7073,medium
+MER000403,Wisozk Inc,travel,Lake Brandi,CAN,8169,medium
+MER000404,Witting - Mills,utilities,East Mayra,USA,5178,medium
+MER000405,Purdy - Mills,healthcare,Angelaburgh,USA,6838,high
+MER000406,Cummerata LLC,retail,Rafaelahaven,MEX,8556,medium
+MER000407,"Romaguera, Waters and Boyle",food,Lake Brandon,USA,1620,medium
+MER000408,"Trantow, Doyle and McGlynn",retail,Port Maddison,GBR,2648,medium
+MER000409,Dooley and Sons,food,North Leiffort,GBR,6276,medium
+MER000410,Batz LLC,food,West Juanaview,GBR,1839,low
+MER000411,Bradtke LLC,travel,Port Jimmyshire,USA,3811,medium
+MER000412,"Carter, Goodwin and Zulauf",healthcare,Raulbury,USA,5252,low
+MER000413,Strosin Group,retail,Leolaboro,USA,2971,low
+MER000414,"Hahn, Kihn and Nolan",healthcare,Yvettefield,USA,9188,low
+MER000415,Trantow Inc,travel,St. George,USA,4947,medium
+MER000416,"Kris, Von and Herzog",travel,Hagenesfurt,CAN,9989,high
+MER000417,McDermott - Dickinson,retail,Boyerboro,USA,3017,high
+MER000418,Treutel Group,gas,Fort Letitia,USA,1168,medium
+MER000419,Huel - Turner,entertainment,South Avis,USA,1724,medium
+MER000420,Goyette and Sons,gas,Wisozkworth,CAN,7820,low
+MER000421,Jast - Marvin,food,Fritschville,USA,1679,low
+MER000422,Hessel Inc,food,Lake Sonyashire,USA,6856,low
+MER000423,Monahan - Marvin,travel,Gordonshire,CAN,5577,medium
+MER000424,Cremin Group,retail,Ziemeboro,USA,4677,low
+MER000425,Price and Sons,travel,Port Jamal,MEX,4047,medium
+MER000426,Blanda Group,gas,Lake Sibylstad,USA,7310,medium
+MER000427,DuBuque - Hintz,utilities,Potomac,USA,3940,high
+MER000428,"Feeney, Altenwerth and Jacobi",healthcare,Willmsmouth,USA,3277,medium
+MER000429,"Yost, Wyman and Hermiston",food,Clearwater,USA,5228,low
+MER000430,Stamm and Sons,online,Port Harvey,USA,2984,medium
+MER000431,McGlynn - Steuber,online,Bowie,USA,1295,high
+MER000432,Block Group,healthcare,McKinney,GBR,2082,low
+MER000433,"Tremblay, Skiles and Bergnaum",healthcare,Oakland,USA,7056,medium
+MER000434,Gislason - Predovic,food,Hayward,MEX,9367,medium
+MER000435,Treutel and Sons,retail,Port Daron,USA,4267,low
+MER000436,"Halvorson, Hegmann and Johnston",healthcare,East Heaven,USA,9466,high
+MER000437,Crona - Jones,online,Casper,GBR,8366,medium
+MER000438,McClure - Gerlach,utilities,Zulaufcester,USA,2298,medium
+MER000439,McCullough Inc,utilities,Port Cruz,MEX,8974,low
+MER000440,Auer - Jakubowski,utilities,South Chynafield,USA,2719,medium
+MER000441,Gorczany Inc,online,Woodland,CAN,3449,high
+MER000442,Pagac - Hermiston,utilities,Fort Erna,MEX,2041,medium
+MER000443,Kulas - Paucek,gas,Johnsonboro,USA,5530,low
+MER000444,Baumbach - Hintz,healthcare,Port Dorotheaworth,MEX,4244,high
+MER000445,"Marks, Gottlieb and Block",travel,North Garett,CAN,5373,high
+MER000446,Hagenes - Harber,retail,Strosinfort,CAN,3445,low
+MER000447,"Lind, Macejkovic and Raynor",utilities,Lake Oma,USA,8892,high
+MER000448,Quitzon - Wiza,food,Lake Krystelside,USA,7272,low
+MER000449,Robel - Nicolas,entertainment,Wellington,USA,2215,low
+MER000450,Hilpert and Sons,utilities,Opalton,GBR,8249,medium
+MER000451,Dicki Inc,entertainment,Kennedyland,MEX,4434,low
+MER000452,Langworth - Jenkins,gas,Fort Edgar,USA,7037,high
+MER000453,Hermann - Hodkiewicz,retail,Porterville,USA,9437,medium
+MER000454,Lehner - Stark,retail,Kannapolis,USA,8938,medium
+MER000455,Lemke - Lowe,gas,Honolulu,GBR,5222,low
+MER000456,Schmidt - Kozey,online,Lake Merritt,USA,6325,high
+MER000457,Jakubowski and Sons,travel,East Erynstad,MEX,6802,medium
+MER000458,"Hackett, Harris and Reinger",retail,Bloomington,USA,1845,low
+MER000459,Rau - Streich,healthcare,Fort Kacey,USA,7576,low
+MER000460,"Beier, Hessel and Marquardt",healthcare,Bolingbrook,MEX,7193,low
+MER000461,"Gleason, Brakus and Daugherty",travel,West Jenaport,MEX,2967,high
+MER000462,Jacobson - Klein,travel,Tamarac,MEX,8918,medium
+MER000463,"Lockman, Auer and Bartell",entertainment,Long Beach,USA,5202,low
+MER000464,"Konopelski, Hermann and Friesen",healthcare,West Terranceville,USA,4188,medium
+MER000465,Altenwerth - Breitenberg,retail,Emmerichboro,MEX,1043,low
+MER000466,"Bashirian, Tremblay and Anderson",entertainment,Fort Thurman,CAN,4718,medium
+MER000467,Towne LLC,utilities,Bonitaton,MEX,1586,low
+MER000468,Reichert LLC,food,Braulioberg,USA,4405,low
+MER000469,"Lind, Rath and Schmidt",retail,New Bedford,USA,3366,low
+MER000470,"Waelchi, Watsica and Rice",retail,North Rudyborough,MEX,2271,low
+MER000471,"Jacobs, Hoeger and Runolfsson",food,New Domenica,USA,1267,high
+MER000472,Considine and Sons,travel,Fort Lamar,USA,9679,medium
+MER000473,"Collier, Frami and Murazik",entertainment,Merlville,USA,5807,high
+MER000474,Quitzon - Greenholt,travel,Port Pauline,CAN,5049,medium
+MER000475,Strosin - Schuster,utilities,Connworth,USA,6354,low
+MER000476,Hills Group,travel,South Jackieton,GBR,1892,low
+MER000477,"Rosenbaum, Goldner and Heaney",food,Sanford,USA,4539,medium
+MER000478,Haley - Anderson,entertainment,New Deroncester,GBR,6516,medium
+MER000479,Kertzmann Inc,food,Escondido,USA,2845,low
+MER000480,Schoen Group,food,Kissimmee,USA,2170,medium
+MER000481,Hand - Walter,food,Fort Murphytown,USA,1352,low
+MER000482,Ward and Sons,food,East Gus,USA,7535,low
+MER000483,Yost - Monahan,online,Port Sibyl,GBR,6973,low
+MER000484,Marquardt - Treutel,gas,Dennischester,USA,6979,high
+MER000485,"Raynor, Stracke and Corkery",online,Destiniworth,USA,2054,medium
+MER000486,Donnelly - Kozey,food,Lake Casper,USA,2613,medium
+MER000487,Herman - Auer,retail,Fort Smith,USA,5631,medium
+MER000488,O'Keefe - Ankunding,utilities,Lake Adrielchester,USA,6494,medium
+MER000489,"Wilkinson, Sipes and Parker",utilities,State College,MEX,4926,low
+MER000490,Hilpert Group,food,Cronaburgh,USA,7998,medium
+MER000491,Bartoletti - Reilly,healthcare,Pricefort,GBR,8013,medium
+MER000492,Langworth - Haag,entertainment,New Heaven,USA,8245,low
+MER000493,"Howell, Blanda and Marks",food,West Macie,CAN,1235,high
+MER000494,Stiedemann - Weber,online,Catonsville,CAN,3795,medium
+MER000495,"McCullough, Runte and Marquardt",food,Sallyfort,USA,5317,high
+MER000496,Muller - Leffler,retail,Fort Mitchelville,USA,6699,medium
+MER000497,Lebsack Inc,retail,West Percival,USA,4667,medium
+MER000498,"Kiehn, Medhurst and Crist",entertainment,New Cristalshire,USA,4956,high
+MER000499,Will - Ondricka,travel,Rohanstead,USA,4404,high
+MER000500,Spinka Group,healthcare,Waldorf,CAN,6688,low

@@ -28,51 +28,48 @@
     {
       "id": "great_expectations_suite",
       "name": "Data Quality Suite Passing",
-      "query": "SELECT success_percent FROM great_expectations.validation_results WHERE suite_name = 'soil_sensor_suite' ORDER BY run_time DESC LIMIT 1",
-      "expected": 100.0,
-      "hint": "Check Great Expectations suite - expectations might be too strict or data needs cleaning"
+      "query": "SELECT COUNT(*) FROM {catalog}.{schema_prefix}_silver.soil_sensors_clean WHERE validation_status = 'PASS'",
+      "expected": 1,
+      "hint": "Check validation rules - pH range might be too strict, should be 4.0-9.0"
     },
     {
       "id": "sensor_weather_join",
       "name": "Multi-Source Join Completeness",
-      "query": "SELECT COUNT(*) FROM agritech_silver.sensor_weather_enriched WHERE weather_temp_f IS NOT NULL",
+      "query": "SELECT COUNT(*) FROM {catalog}.{schema_prefix}_silver.sensor_weather_enriched WHERE weather_temp_max_c IS NOT NULL",
       "expected": 950,
       "hint": "Use LEFT JOIN to preserve sensor records when weather data is missing"
     },
     {
       "id": "ndvi_calculation",
       "name": "NDVI Value Range",
-      "query": "SELECT MIN(ndvi) as min_ndvi, MAX(ndvi) as max_ndvi FROM agritech_silver.satellite_imagery_processed",
+      "query": "SELECT MIN(computed_ndvi) as min_ndvi, MAX(computed_ndvi) as max_ndvi FROM {catalog}.{schema_prefix}_silver.ndvi_metrics",
       "expected": "min_ndvi >= -1 AND max_ndvi <= 1",
       "hint": "NDVI = (NIR - Red) / (NIR + Red) - ensure band ordering is correct"
     },
     {
       "id": "irrigation_efficiency",
       "name": "Irrigation Efficiency Metrics",
-      "query": "SELECT AVG(water_use_efficiency) FROM agritech_gold.irrigation_summary WHERE crop_type = 'corn'",
+      "query": "SELECT AVG(water_use_efficiency) FROM {catalog}.{schema_prefix}_gold.irrigation_efficiency WHERE crop_type = 'corn'",
       "expected": 0.85,
       "hint": "Water Use Efficiency = (yield / water_applied) - check units and time window aggregation"
     },
     {
       "id": "yield_prediction_features",
       "name": "Yield Prediction Feature Count",
-      "query": "SELECT COUNT(DISTINCT feature_name) FROM feature_store.crop_yield_features",
+      "query": "SELECT COUNT(*) as col_count FROM {catalog}.{schema_prefix}_gold.yield_prediction_features LIMIT 1",
       "expected": 12,
-      "hint": "Need features: NDVI_avg, soil_moisture_avg, gdd_cumulative, rainfall_total, etc."
+      "hint": "Need 12+ features covering soil, weather/GDD, NDVI, and irrigation"
     }
   ],
-  "hints": [
-    "Great Expectations: Use expect_column_values_to_be_between for sensor ranges (pH: 4-9, moisture: 0-100%)",
-    "Multi-source joins: Use LEFT JOIN from sensors, not INNER JOIN (preserves sensor readings even when satellite/weather is missing)",
-    "NDVI: Formula is (NIR - Red) / (NIR + Red), ensure NIR is band 8 and Red is band 4 (not reversed)",
-    "Geospatial: Use ST_Distance for sensor-to-field matching, not simple lat/long comparison",
-    "GDD (Growing Degree Days): Formula is ((Tmax + Tmin) / 2) - Tbase, where Tbase varies by crop"
-  ],
+  "hintsInNotebooks": false,
+  "hintsNote": "No SQL hints are provided in the notebooks. You must identify the issues and implement fixes using the briefing context and notebook error descriptions only.",
   "dataFiles": [
     "soil_sensors.json",
     "satellite_imagery.csv",
     "weather_history.csv",
     "irrigation_logs.csv",
+    "harvest_records.csv",
+    "fields.csv",
     "field_boundaries.geojson"
   ],
   "notebooks": [

@@ -47,10 +47,6 @@
       "expectedValue": 1
     }
   ],
-  "hints": [
-    "Parse timestamps with to_timestamp() and convert to UTC",
-    "Detect anomalies: engine_temp > 220F, oil_pressure < 20 PSI, battery < 12V",
-    "Calculate days_to_service using mileage and last_service_date",
-    "Join with DTC codes to enrich fault descriptions"
-  ]
+  "hintsInNotebooks": false,
+  "hintsNote": "No SQL hints are provided in the notebooks. You must identify the issues and implement fixes using the briefing context and notebook error descriptions only."
 }

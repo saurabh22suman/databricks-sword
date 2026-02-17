@@ -4,11 +4,12 @@
  * Clean up deployment resources (drop schemas, remove bundle).
  */
 
-import { NextRequest, NextResponse } from "next/server"
 import { auth } from "@/lib/auth"
-import { getDb, users, databricksConnections } from "@/lib/db"
+import { decryptPat } from "@/lib/databricks"
+import { databricksConnections, getDb, users } from "@/lib/db"
+import { cleanupDeployment, getDeploymentStatus } from "@/lib/field-ops/deployment"
 import { eq } from "drizzle-orm"
-import { getDeploymentStatus, cleanupDeployment } from "@/lib/field-ops/deployment"
+import { NextRequest, NextResponse } from "next/server"
 
 type RouteContext = {
   params: Promise<{ deploymentId: string }>
@@ -65,9 +66,9 @@ export async function POST(
     }
 
     const databricksConfig = {
-      workspaceUrl: connection.workspaceUrl,
-      token: connection.encryptedPat, // TODO: Decrypt
-      warehouseId: "", // TODO: Add to schema
+      workspaceUrl: connection.workspaceUrl.replace(/\/+$/, ""),
+      token: decryptPat(connection.encryptedPat),
+      warehouseId: connection.warehouseId ?? "",
       catalog: deployment.catalogName,
     }
 

@@ -5,13 +5,14 @@
 
 "use client"
 
-import { useState, useEffect } from "react"
-import { useRouter } from "next/navigation"
 import type { Industry, IndustryConfig } from "@/lib/field-ops/types"
+import { getStreakMultiplier } from "@/lib/gamification"
+import { updateSandbox } from "@/lib/sandbox"
+import { useRouter } from "next/navigation"
+import { useEffect, useState } from "react"
+import { ConfirmDialog } from "../ui/ConfirmDialog"
 import { ObjectivesList } from "./ObjectivesList"
 import { ValidationResults } from "./ValidationResults"
-import { updateSandbox } from "@/lib/sandbox"
-import { getStreakMultiplier } from "@/lib/gamification"
 
 type ActiveMissionProps = {
   deploymentId: string
@@ -28,6 +29,10 @@ type DeploymentData = {
     deployedAt?: string | null
     completedAt?: string | null
     errorMessage?: string | null
+    // Connection info for dynamic links
+    workspaceUrl?: string
+    catalogName?: string
+    warehouseId?: string
   }
   validations: Array<{
     checkName: string
@@ -47,6 +52,8 @@ export function ActiveMission({
   const [isValidating, setIsValidating] = useState(false)
   const [isCleaning, setIsCleaning] = useState(false)
   const [isCompleting, setIsCompleting] = useState(false)
+  const [showCleanupConfirm, setShowCleanupConfirm] = useState(false)
+  const [cleanupSuccess, setCleanupSuccess] = useState(false)
   const [error, setError] = useState<string | null>(null)
 
   // Load deployment status
@@ -139,10 +146,6 @@ export function ActiveMission({
   }
 
   const handleCleanup = async () => {
-    if (!confirm("This will delete all deployed resources. Continue?")) {
-      return
-    }
-
     setIsCleaning(true)
     setError(null)
 
@@ -157,9 +160,14 @@ export function ActiveMission({
         throw new Error(result.error || "Cleanup failed")
       }
 
-      // Redirect back to field ops
-      router.push("/field-ops")
+      // Show success state briefly, then redirect
+      setShowCleanupConfirm(false)
+      setCleanupSuccess(true)
+      setTimeout(() => {
+        router.push("/field-ops")
+      }, 2000)
     } catch (err) {
+      setShowCleanupConfirm(false)
       setError(err instanceof Error ? err.message : "Cleanup failed")
     } finally {
       setIsCleaning(false)
@@ -233,36 +241,47 @@ export function ActiveMission({
                 Schema: <code className="text-anime-cyan">{deployment.schemaPrefix}</code>
               </p>
               <ul className="space-y-2">
-                <li>
-                  <a
-                    href="#"
-                    className="text-anime-cyan hover:text-anime-accent"
-                    target="_blank"
-                    rel="noopener noreferrer"
-                  >
-                    → Open in Databricks
-                  </a>
-                </li>
-                <li>
-                  <a
-                    href="#"
-                    className="text-anime-cyan hover:text-anime-accent"
-                    target="_blank"
-                    rel="noopener noreferrer"
-                  >
-                    → View Notebooks
-                  </a>
-                </li>
-                <li>
-                  <a
-                    href="#"
-                    className="text-anime-cyan hover:text-anime-accent"
-                    target="_blank"
-                    rel="noopener noreferrer"
-                  >
-                    → Catalog Explorer
-                  </a>
-                </li>
+                {deployment.workspaceUrl && (
+                  <li>
+                    <a
+                      href={deployment.workspaceUrl.replace(/\/+$/, "")}
+                      className="text-anime-cyan hover:text-anime-accent"
+                      target="_blank"
+                      rel="noopener noreferrer"
+                    >
+                      → Open in Databricks
+                    </a>
+                  </li>
+                )}
+                {deployment.workspaceUrl && (
+                  <li>
+                    <a
+                      href={`${deployment.workspaceUrl.replace(/\/+$/, "")}/#workspace`}
+                      className="text-anime-cyan hover:text-anime-accent"
+                      target="_blank"
+                      rel="noopener noreferrer"
+                    >
+                      → View Notebooks
+                    </a>
+                  </li>
+                )}
+                {deployment.workspaceUrl && deployment.catalogName && (
+                  <li>
+                    <a
+                      href={`${deployment.workspaceUrl.replace(/\/+$/, "")}/explore/data/${deployment.catalogName}/${deployment.schemaPrefix}`}
+                      className="text-anime-cyan hover:text-anime-accent"
+                      target="_blank"
+                      rel="noopener noreferrer"
+                    >
+                      → Catalog Explorer
+                    </a>
+                  </li>
+                )}
+                {!deployment.workspaceUrl && (
+                  <li className="text-anime-500 italic">
+                    No connection info available
+                  </li>
+                )}
               </ul>
             </div>
 
@@ -306,7 +325,7 @@ export function ActiveMission({
                 )}
 
                 <button
-                  onClick={handleCleanup}
+                  onClick={() => setShowCleanupConfirm(true)}
                   disabled={isCleaning}
                   className="w-full cut-corner bg-anime-accent hover:bg-anime-accent/80 text-white font-semibold py-3 transition-colors disabled:opacity-50 disabled:cursor-not-allowed"
                 >
@@ -329,6 +348,30 @@ export function ActiveMission({
           </div>
         </div>
       </div>
+
+      {/* Cleanup Confirmation Dialog */}
+      <ConfirmDialog
+        open={showCleanupConfirm}
+        title="🗑️ Cleanup Resources"
+        description="This will permanently delete all deployed schemas, volumes, and notebooks from your Databricks workspace. This action cannot be undone."
+        confirmLabel="Delete Resources"
+        cancelLabel="Cancel"
+        variant="danger"
+        loading={isCleaning}
+        onConfirm={handleCleanup}
+        onCancel={() => setShowCleanupConfirm(false)}
+      />
+
+      {/* Cleanup Success Toast */}
+      {cleanupSuccess && (
+        <div className="fixed bottom-6 left-1/2 -translate-x-1/2 z-50">
+          <div className="cut-corner bg-anime-900 border border-anime-green px-6 py-3 shadow-neon-cyan/30">
+            <p className="text-anime-green font-medium">
+              ✓ Resources cleaned up successfully. Redirecting...
+            </p>
+          </div>
+        </div>
+      )}
     </div>
   )
 }

@@ -5,10 +5,10 @@
 
 "use client"
 
-import { useState } from "react"
-import { useRouter } from "next/navigation"
 import type { Industry } from "@/lib/field-ops/types"
 import { cn } from "@/lib/utils"
+import { useRouter } from "next/navigation"
+import { useState } from "react"
 
 type DeployButtonProps = {
   industry: Industry

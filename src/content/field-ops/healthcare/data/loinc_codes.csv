@@ -1,3 +1,6 @@
-loinc_code,test_name,fhir_code,fhir_system
-2345-7,Glucose,15074-8,http://loinc.org
-8480-6,Systolic BP,8480-6,http://loinc.org
+code,description,category
+2345-7,Glucose [Mass/volume] in Serum or Plasma,Chemistry
+4548-4,Hemoglobin A1c/Hemoglobin.total in Blood,Chemistry
+2093-3,Cholesterol [Mass/volume] in Serum or Plasma,Chemistry
+3094-0,Urea nitrogen [Mass/volume] in Serum or Plasma,Chemistry
+2160-0,Creatinine [Mass/volume] in Serum or Plasma,Chemistry

@@ -102,6 +102,8 @@ export const databricksConnections = sqliteTable("databricks_connections", {
     .references(() => users.id, { onDelete: "cascade" }),
   workspaceUrl: text("workspace_url").notNull(),
   encryptedPat: text("encrypted_pat").notNull(),
+  warehouseId: text("warehouse_id"), // SQL Warehouse ID for validation queries
+  catalogName: text("catalog_name").notNull().default("dev"), // Unity Catalog name
   patExpiresAt: integer("pat_expires_at", { mode: "timestamp" }),
   connectedAt: integer("connected_at", { mode: "timestamp" })
     .notNull()

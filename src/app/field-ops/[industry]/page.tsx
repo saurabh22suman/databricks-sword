@@ -3,12 +3,13 @@
  * Shows mission details and start button.
  */
 
-import { Metadata } from "next"
-import { auth } from "@/lib/auth"
-import { redirect, notFound } from "next/navigation"
-import { getIndustryConfig, isIndustryUnlocked } from "@/lib/field-ops/industries"
+import { getUserSandbox } from "@/app/api/user/helpers"
 import { MissionBriefing } from "@/components/field-ops/MissionBriefing"
+import { auth } from "@/lib/auth"
+import { getIndustryConfig, isIndustryUnlocked } from "@/lib/field-ops/industries"
 import type { Industry } from "@/lib/field-ops/types"
+import { Metadata } from "next"
+import { notFound, redirect } from "next/navigation"
 
 type PageProps = {
   params: Promise<{ industry: string }>
@@ -29,7 +30,7 @@ export default async function IndustryMissionPage(
   props: PageProps
 ): Promise<React.ReactElement> {
   const session = await auth()
-  if (!session?.user?.email) {
+  if (!session?.user?.id) {
     redirect("/auth/signin")
   }
 
@@ -40,8 +41,16 @@ export default async function IndustryMissionPage(
   try {
     const config = getIndustryConfig(industry)
     
-    // TODO: Get user XP from profile
-    const userXp = 0
+    // Get user XP from sandbox
+    let userXp = 0
+    try {
+      const sandbox = await getUserSandbox(session.user.id)
+      if (sandbox) {
+        userXp = sandbox.userStats.totalXp
+      }
+    } catch (error) {
+      console.error("Error fetching user sandbox:", error)
+    }
 
     // Check if unlocked
     if (!isIndustryUnlocked(industry, userXp)) {

@@ -4,12 +4,13 @@
  * Run validation queries for a deployment.
  */
 
-import { NextRequest, NextResponse } from "next/server"
 import { auth } from "@/lib/auth"
-import { getDb, users, databricksConnections } from "@/lib/db"
-import { eq } from "drizzle-orm"
+import { decryptPat } from "@/lib/databricks"
+import { databricksConnections, getDb, users } from "@/lib/db"
 import { getDeploymentStatus, updateDeploymentStatus } from "@/lib/field-ops/deployment"
 import { runValidation } from "@/lib/field-ops/validation"
+import { eq } from "drizzle-orm"
+import { NextRequest, NextResponse } from "next/server"
 
 type RouteContext = {
   params: Promise<{ deploymentId: string }>
@@ -74,9 +75,9 @@ export async function POST(
     }
 
     const databricksConfig = {
-      workspaceUrl: connection.workspaceUrl,
-      token: connection.encryptedPat, // TODO: Decrypt
-      warehouseId: "", // TODO: Add to schema
+      workspaceUrl: connection.workspaceUrl.replace(/\/+$/, ""),
+      token: decryptPat(connection.encryptedPat),
+      warehouseId: connection.warehouseId ?? "",
       catalog: deployment.catalogName,
     }
 

@@ -4,16 +4,16 @@
  * Mark mission as complete and award XP.
  */
 
-import { NextRequest, NextResponse } from "next/server"
 import { auth } from "@/lib/auth"
 import { getDb, users } from "@/lib/db"
-import { eq } from "drizzle-orm"
 import {
-  getDeploymentStatus,
-  completeDeployment,
-  allValidationsPassed,
+    allValidationsPassed,
+    completeDeployment,
+    getDeploymentStatus,
 } from "@/lib/field-ops/deployment"
 import { getIndustryConfig } from "@/lib/field-ops/industries"
+import { eq } from "drizzle-orm"
+import { NextRequest, NextResponse } from "next/server"
 
 type RouteContext = {
   params: Promise<{ deploymentId: string }>

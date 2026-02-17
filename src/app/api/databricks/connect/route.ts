@@ -11,6 +11,8 @@ const connectRequestSchema = z.object({
       message: "Invalid Databricks workspace URL",
     }),
   pat: z.string().min(1, "Personal Access Token is required"),
+  warehouseId: z.string().regex(/^[a-f0-9]{16}$/i, "Invalid warehouse ID format").optional(),
+  catalogName: z.string().regex(/^[a-z_][a-z0-9_]*$/i, "Invalid catalog name").default("dev"),
 });
 
 /**
@@ -37,7 +39,7 @@ export async function POST(request: NextRequest): Promise<NextResponse> {
       return NextResponse.json({ error: errors }, { status: 400 });
     }
 
-    const { workspaceUrl, pat } = parsed.data;
+    const { workspaceUrl, pat, warehouseId, catalogName } = parsed.data;
 
     // Validate the connection
     const validation = await validateConnection(workspaceUrl, pat);
@@ -51,7 +53,6 @@ export async function POST(request: NextRequest): Promise<NextResponse> {
     // Store in database (dynamic import to avoid issues when db is not configured)
     try {
       const { getDb, databricksConnections } = await import("@/lib/db");
-      const { eq } = await import("drizzle-orm");
       const { randomUUID } = await import("crypto");
 
       await getDb()
@@ -61,6 +62,8 @@ export async function POST(request: NextRequest): Promise<NextResponse> {
           userId,
           workspaceUrl,
           encryptedPat,
+          warehouseId: warehouseId || null,
+          catalogName,
           connectedAt: new Date(),
           lastValidatedAt: new Date(),
         })
@@ -69,6 +72,8 @@ export async function POST(request: NextRequest): Promise<NextResponse> {
           set: {
             workspaceUrl,
             encryptedPat,
+            warehouseId: warehouseId || null,
+            catalogName,
             lastValidatedAt: new Date(),
           },
         });
@@ -80,6 +85,8 @@ export async function POST(request: NextRequest): Promise<NextResponse> {
     return NextResponse.json({
       success: true,
       workspaceUrl,
+      warehouseId,
+      catalogName,
       message: "Successfully connected to Databricks workspace",
     });
   } catch (error) {

@@ -4,9 +4,9 @@
  * Get deployment status and validation results.
  */
 
-import { NextRequest, NextResponse } from "next/server"
 import { auth } from "@/lib/auth"
 import { getDeploymentStatus, getValidationResults } from "@/lib/field-ops/deployment"
+import { NextRequest, NextResponse } from "next/server"
 
 type RouteContext = {
   params: Promise<{ deploymentId: string }>
@@ -43,6 +43,10 @@ export async function GET(
         deployedAt: deployment.deployedAt,
         completedAt: deployment.completedAt,
         errorMessage: deployment.errorMessage,
+        // Connection info for dynamic links
+        workspaceUrl: deployment.workspaceUrl,
+        catalogName: deployment.catalogName,
+        warehouseId: deployment.warehouseId,
       },
       validations: validations.map((v: { checkName: string; passed: boolean; executedAt: Date; errorMessage?: string | null }) => ({
         checkName: v.checkName,

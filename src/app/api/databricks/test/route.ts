@@ -4,9 +4,9 @@
  * Test Databricks connection with provided credentials.
  */
 
-import { NextRequest, NextResponse } from "next/server"
 import { auth } from "@/lib/auth"
 import { testConnection } from "@/lib/databricks/cli"
+import { NextRequest, NextResponse } from "next/server"
 
 export async function POST(request: NextRequest): Promise<NextResponse> {
   try {

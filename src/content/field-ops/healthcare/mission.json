@@ -37,23 +37,19 @@
     },
     {
       "checkName": "Silver patients deduplicated",
-      "description": "Verify patients table has unique patient_key",
-      "query": "SELECT COUNT(DISTINCT patient_key) as unique_patients FROM {catalog}.{schema_prefix}_silver.patients",
+      "description": "Verify patients table has unique patient_id",
+      "query": "SELECT COUNT(DISTINCT patient_id) as unique_patients FROM {catalog}.{schema_prefix}_silver.patients",
       "expectedResult": "count",
       "expectedValue": 1
     },
     {
       "checkName": "Gold patient_360 with masked PII",
       "description": "Verify patient_360 exists with masked SSN",
-      "query": "SELECT COUNT(*) as count FROM {catalog}.{schema_prefix}_gold.patient_360 WHERE ssn LIKE 'XXX-XX-%'",
+      "query": "SELECT COUNT(*) as count FROM {catalog}.{schema_prefix}_gold.patient_360 WHERE masked_ssn LIKE 'XXX-XX-%'",
       "expectedResult": "count",
       "expectedValue": 1
     }
   ],
-  "hints": [
-    "Use schema evolution with mergeSchema=true for Bronze ingestion",
-    "Dedupe with soundex(name) + date_of_birth matching logic",
-    "Use regexp_replace to mask first 7 digits of SSN: XXX-XX-NNNN",
-    "Join with reference tables for ICD-10 and LOINC FHIR mappings"
-  ]
+  "hintsInNotebooks": false,
+  "hintsNote": "No SQL hints are provided in the notebooks. You must identify the issues and implement fixes using the briefing context and notebook error descriptions only."
 }

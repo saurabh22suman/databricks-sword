@@ -3,12 +3,15 @@
  * Displays all 8 industries with unlock status.
  */
 
-import { Metadata } from "next"
-import { auth } from "@/lib/auth"
-import { redirect } from "next/navigation"
-import { getAllIndustries } from "@/lib/field-ops/industries"
-import { IndustryCard } from "@/components/field-ops/IndustryCard"
+import { getUserSandbox } from "@/app/api/user/helpers"
 import { ConnectionStatus } from "@/components/field-ops/ConnectionStatus"
+import { IndustryCard } from "@/components/field-ops/IndustryCard"
+import { auth } from "@/lib/auth"
+import { databricksConnections, getDb } from "@/lib/db"
+import { getAllIndustries } from "@/lib/field-ops/industries"
+import { eq } from "drizzle-orm"
+import { Metadata } from "next"
+import { redirect } from "next/navigation"
 
 export const metadata: Metadata = {
   title: "Field Operations | Databricks Sword",
@@ -17,17 +20,35 @@ export const metadata: Metadata = {
 
 export default async function FieldOpsPage(): Promise<React.ReactElement> {
   const session = await auth()
-  if (!session?.user?.email) {
+  if (!session?.user?.id) {
     redirect("/auth/signin")
   }
 
+  const userId = session.user.id
   const industries = getAllIndustries()
 
-  // TODO: Get user XP from profile
-  const userXp = 0
+  // Get user XP from sandbox
+  let userXp = 0
+  try {
+    const sandbox = await getUserSandbox(userId)
+    if (sandbox) {
+      userXp = sandbox.userStats.totalXp
+    }
+  } catch (error) {
+    console.error("Error fetching user sandbox:", error)
+  }
 
-  // TODO: Check if Databricks is connected
-  const isConnected = false
+  // Check if Databricks is connected
+  let isConnected = false
+  try {
+    const connections = await getDb()
+      .select()
+      .from(databricksConnections)
+      .where(eq(databricksConnections.userId, userId))
+    isConnected = connections.length > 0
+  } catch (error) {
+    console.error("Error checking Databricks connection:", error)
+  }
 
   return (
     <div className="py-12">

@@ -3,10 +3,10 @@
  * Displays an industry with lock/unlock state and progress.
  */
 
-import Link from "next/link"
+import { getUnlockProgress, isIndustryUnlocked } from "@/lib/field-ops/industries"
 import type { IndustryConfig } from "@/lib/field-ops/types"
-import { isIndustryUnlocked, getUnlockProgress } from "@/lib/field-ops/industries"
 import { cn } from "@/lib/utils"
+import Link from "next/link"
 
 type IndustryCardProps = {
   industry: IndustryConfig

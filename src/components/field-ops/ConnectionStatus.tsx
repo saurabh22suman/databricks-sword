@@ -3,8 +3,8 @@
  * Shows Databricks connection status banner.
  */
 
-import Link from "next/link"
 import { cn } from "@/lib/utils"
+import Link from "next/link"
 
 type ConnectionStatusProps = {
   isConnected: boolean

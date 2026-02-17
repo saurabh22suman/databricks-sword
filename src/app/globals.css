@@ -1047,3 +1047,226 @@ html {
 .animate-glitch-soft {
   animation: glitch-soft 2s ease-in-out infinite;
 }
+
+/* ============================================================================
+   Mission Map - Circuit Board Visualization
+   ============================================================================ */
+
+/* Circuit trace electricity flow animation */
+@keyframes circuit-flow {
+  0% {
+    stroke-dashoffset: 20;
+  }
+  100% {
+    stroke-dashoffset: 0;
+  }
+}
+
+.circuit-trace {
+  stroke-dasharray: 4 2;
+  animation: circuit-flow 1s linear infinite;
+}
+
+.circuit-trace-dim {
+  stroke-dasharray: 3 6;
+  opacity: 0.3;
+}
+
+.circuit-trace-bright {
+  stroke-dasharray: 8 2;
+  animation: circuit-flow 0.5s linear infinite;
+  filter: drop-shadow(0 0 4px currentColor);
+}
+
+/* Node pulse animation for available missions */
+@keyframes node-pulse {
+  0%, 100% {
+    transform: scale(1);
+    opacity: 1;
+  }
+  50% {
+    transform: scale(1.15);
+    opacity: 0.7;
+  }
+}
+
+.node-pulse {
+  animation: node-pulse 2s ease-in-out infinite;
+}
+
+/* Concentric ring pulse for available nodes */
+@keyframes ring-pulse {
+  0% {
+    transform: scale(0.8);
+    opacity: 0.8;
+  }
+  100% {
+    transform: scale(1.8);
+    opacity: 0;
+  }
+}
+
+.ring-pulse {
+  animation: ring-pulse 2s ease-out infinite;
+}
+
+.ring-pulse-delayed {
+  animation: ring-pulse 2s ease-out 0.5s infinite;
+}
+
+/* Radar sweep animation for center node */
+@keyframes radar-sweep {
+  0% {
+    transform: rotate(0deg);
+  }
+  100% {
+    transform: rotate(360deg);
+  }
+}
+
+.radar-sweep {
+  animation: radar-sweep 4s linear infinite;
+  transform-origin: center;
+}
+
+/* HUD Grid background */
+.hud-grid {
+  background-image:
+    linear-gradient(rgba(0, 255, 255, 0.03) 1px, transparent 1px),
+    linear-gradient(90deg, rgba(0, 255, 255, 0.03) 1px, transparent 1px),
+    linear-gradient(rgba(0, 255, 255, 0.08) 1px, transparent 1px),
+    linear-gradient(90deg, rgba(0, 255, 255, 0.08) 1px, transparent 1px);
+  background-size: 10px 10px, 10px 10px, 100px 100px, 100px 100px;
+}
+
+/* HUD scanline effect */
+@keyframes hud-scanline {
+  0% {
+    transform: translateY(-100%);
+  }
+  100% {
+    transform: translateY(100%);
+  }
+}
+
+.hud-scanline {
+  position: absolute;
+  top: 0;
+  left: 0;
+  width: 100%;
+  height: 2px;
+  background: linear-gradient(90deg, transparent, rgba(0, 255, 255, 0.5), transparent);
+  animation: hud-scanline 8s linear infinite;
+  pointer-events: none;
+}
+
+/* Map node glow effects */
+.map-glow-cyan {
+  filter: drop-shadow(0 0 8px rgba(0, 255, 255, 0.6));
+}
+
+.map-glow-purple {
+  filter: drop-shadow(0 0 8px rgba(153, 51, 255, 0.6));
+}
+
+.map-glow-yellow {
+  filter: drop-shadow(0 0 8px rgba(255, 204, 0, 0.6));
+}
+
+.map-glow-green {
+  filter: drop-shadow(0 0 8px rgba(0, 255, 102, 0.6));
+}
+
+.map-glow-red {
+  filter: drop-shadow(0 0 8px rgba(255, 51, 102, 0.6));
+}
+
+/* Progress arc animation */
+@keyframes progress-arc {
+  0% {
+    stroke-dashoffset: 100;
+  }
+  100% {
+    stroke-dashoffset: 0;
+  }
+}
+
+.progress-arc {
+  animation: progress-arc 1s ease-out forwards;
+}
+
+/* Map container utilities */
+.map-container {
+  touch-action: none;
+  cursor: grab;
+}
+
+.map-container:active {
+  cursor: grabbing;
+}
+
+/* Node hover states */
+.map-node {
+  cursor: pointer;
+  transition: transform 0.2s ease, filter 0.2s ease;
+}
+
+.map-node:hover {
+  transform: scale(1.1);
+}
+
+.map-node-locked {
+  opacity: 0.4;
+  cursor: not-allowed;
+}
+
+.map-node-locked:hover {
+  transform: none;
+}
+
+/* Tooltip styling for map */
+.map-tooltip {
+  background: rgba(18, 18, 26, 0.98);
+  border: 1px solid var(--anime-cyan);
+  box-shadow: 0 4px 30px rgba(0, 255, 255, 0.4), 0 0 60px rgba(0, 255, 255, 0.2);
+  backdrop-filter: blur(12px);
+  z-index: 9999;
+  position: relative;
+}
+
+/* Minimap styling */
+.minimap {
+  background: var(--anime-950);
+  border: 1px solid var(--anime-700);
+  box-shadow: inset 0 0 20px rgba(0, 0, 0, 0.5);
+}
+
+.minimap-viewport {
+  border: 1px solid var(--anime-cyan);
+  background: rgba(0, 255, 255, 0.1);
+}
+
+/* Field ops hexagon node */
+.hexagon-node {
+  clip-path: polygon(50% 0%, 100% 25%, 100% 75%, 50% 100%, 0% 75%, 0% 25%);
+}
+
+/* Track indicator pills */
+.track-pill-de {
+  background: rgba(0, 255, 255, 0.2);
+  border: 1px solid var(--anime-cyan);
+  color: var(--anime-cyan);
+}
+
+.track-pill-ml {
+  background: rgba(153, 51, 255, 0.2);
+  border: 1px solid var(--anime-purple);
+  color: var(--anime-purple);
+}
+
+.track-pill-bi {
+  background: rgba(255, 204, 0, 0.2);
+  border: 1px solid var(--anime-yellow);
+  color: var(--anime-yellow);
+}
+

@@ -17,7 +17,7 @@ type ConnectionFormProps = {
 
 /**
  * Form for connecting to a Databricks workspace
- * Validates workspace URL and PAT before submitting to API
+ * Validates workspace URL, PAT, warehouse ID, and catalog before submitting to API
  */
 export function ConnectionForm({
   userId,
@@ -26,15 +26,19 @@ export function ConnectionForm({
 }: ConnectionFormProps): React.ReactElement {
   const [workspaceUrl, setWorkspaceUrl] = useState("");
   const [pat, setPat] = useState("");
+  const [warehouseId, setWarehouseId] = useState("");
+  const [catalogName, setCatalogName] = useState("dev");
   const [isLoading, setIsLoading] = useState(false);
   const [error, setError] = useState<string | null>(null);
   const [validationErrors, setValidationErrors] = useState<{
     workspaceUrl?: string;
     pat?: string;
+    warehouseId?: string;
+    catalogName?: string;
   }>({});
 
   const validateForm = (): boolean => {
-    const errors: { workspaceUrl?: string; pat?: string } = {};
+    const errors: { workspaceUrl?: string; pat?: string; warehouseId?: string; catalogName?: string } = {};
 
     // Validate workspace URL
     if (!workspaceUrl.trim()) {
@@ -50,6 +54,18 @@ export function ConnectionForm({
     // Validate PAT
     if (!pat.trim()) {
       errors.pat = "Personal Access Token is required";
+    }
+
+    // Validate Warehouse ID (optional but recommended)
+    if (warehouseId.trim() && !warehouseId.match(/^[a-f0-9]{16}$/i)) {
+      errors.warehouseId = "Invalid warehouse ID format (should be 16 hex characters)";
+    }
+
+    // Validate catalog name
+    if (!catalogName.trim()) {
+      errors.catalogName = "Catalog name is required";
+    } else if (!catalogName.match(/^[a-z_][a-z0-9_]*$/i)) {
+      errors.catalogName = "Invalid catalog name (use letters, numbers, underscores)";
     }
 
     setValidationErrors(errors);
@@ -73,6 +89,8 @@ export function ConnectionForm({
         body: JSON.stringify({
           workspaceUrl,
           pat,
+          warehouseId: warehouseId.trim() || undefined,
+          catalogName,
           userId,
         }),
       });
@@ -158,6 +176,85 @@ export function ConnectionForm({
         {validationErrors.pat && (
           <p className="text-sm text-red-400">{validationErrors.pat}</p>
         )}
+        <p className="text-xs text-anime-500">
+          <a 
+            href="https://docs.databricks.com/en/dev-tools/auth/pat.html" 
+            target="_blank" 
+            rel="noopener noreferrer"
+            className="text-anime-cyan hover:underline"
+          >
+            How to create a PAT
+          </a>
+        </p>
+      </div>
+
+      {/* SQL Warehouse ID Field */}
+      <div className="space-y-1">
+        <label
+          htmlFor="warehouse-id"
+          className="block text-sm font-medium text-anime-200"
+        >
+          SQL Warehouse ID
+          <span className="ml-1 text-anime-500 font-normal">(for validation queries)</span>
+        </label>
+        <input
+          id="warehouse-id"
+          type="text"
+          value={warehouseId}
+          onChange={(e) => {
+            setWarehouseId(e.target.value);
+            setValidationErrors((prev) => ({ ...prev, warehouseId: undefined }));
+          }}
+          placeholder="b4d816135a346c2e"
+          className={cn(
+            "w-full px-3 py-2 rounded-md border bg-anime-900 text-anime-100 font-mono",
+            "placeholder:text-anime-500 focus:outline-none focus:ring-2",
+            validationErrors.warehouseId
+              ? "border-red-500 focus:ring-red-500"
+              : "border-anime-700 focus:ring-anime-cyan"
+          )}
+          disabled={isLoading}
+        />
+        {validationErrors.warehouseId && (
+          <p className="text-sm text-red-400">{validationErrors.warehouseId}</p>
+        )}
+        <p className="text-xs text-anime-500">
+          Find in SQL Warehouses → Click warehouse → Copy ID from Overview tab
+        </p>
+      </div>
+
+      {/* Catalog Name Field */}
+      <div className="space-y-1">
+        <label
+          htmlFor="catalog-name"
+          className="block text-sm font-medium text-anime-200"
+        >
+          Catalog Name
+        </label>
+        <input
+          id="catalog-name"
+          type="text"
+          value={catalogName}
+          onChange={(e) => {
+            setCatalogName(e.target.value);
+            setValidationErrors((prev) => ({ ...prev, catalogName: undefined }));
+          }}
+          placeholder="dev"
+          className={cn(
+            "w-full px-3 py-2 rounded-md border bg-anime-900 text-anime-100 font-mono",
+            "placeholder:text-anime-500 focus:outline-none focus:ring-2",
+            validationErrors.catalogName
+              ? "border-red-500 focus:ring-red-500"
+              : "border-anime-700 focus:ring-anime-cyan"
+          )}
+          disabled={isLoading}
+        />
+        {validationErrors.catalogName && (
+          <p className="text-sm text-red-400">{validationErrors.catalogName}</p>
+        )}
+        <p className="text-xs text-anime-500">
+          Default is &quot;dev&quot; for Free Edition. Check in Catalog Explorer.
+        </p>
       </div>
 
       {/* Error Message */}
@@ -181,17 +278,9 @@ export function ConnectionForm({
         {isLoading ? "Connecting..." : "Connect"}
       </button>
 
-      {/* Help Text */}
-      <p className="text-xs text-anime-400">
-        Your PAT is encrypted at rest and never logged. 
-        <a 
-          href="https://docs.databricks.com/en/dev-tools/auth/pat.html" 
-          target="_blank" 
-          rel="noopener noreferrer"
-          className="text-anime-cyan hover:underline ml-1"
-        >
-          How to create a PAT
-        </a>
+      {/* Security Note */}
+      <p className="text-xs text-anime-400 text-center">
+        Your credentials are encrypted at rest and never logged.
       </p>
     </form>
   );
