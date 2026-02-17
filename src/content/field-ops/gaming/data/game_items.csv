@@ -1,4 +1,51 @@
-item_id,item_name,item_type,price_usd
-ITEM001,Sword Upgrade,weapon,4.99
-ITEM002,Shield Pack,armor,2.99
-ITEM003,Energy Boost,consumable,0.99
+item_id,item_name,item_type,rarity,price_gems
+ITEM0001,Unbranded Cotton Cheese,cosmetic,rare,643
+ITEM0002,Rustic Granite Shirt,cosmetic,rare,3603
+ITEM0003,Small Gold Towels,weapon,legendary,1174
+ITEM0004,Intelligent Granite Ball,weapon,legendary,1387
+ITEM0005,Awesome Silk Towels,consumable,rare,574
+ITEM0006,Tasty Ceramic Mouse,currency,rare,474
+ITEM0007,Fantastic Bamboo Fish,consumable,rare,1729
+ITEM0008,Ergonomic Plastic Tuna,armor,rare,834
+ITEM0009,Electronic Bronze Bike,cosmetic,epic,4993
+ITEM0010,Unbranded Gold Cheese,consumable,legendary,3413
+ITEM0011,Modern Plastic Car,armor,common,4747
+ITEM0012,Fantastic Bronze Table,currency,epic,4993
+ITEM0013,Bespoke Plastic Chair,armor,uncommon,4347
+ITEM0014,Elegant Concrete Shirt,cosmetic,rare,4067
+ITEM0015,Electronic Aluminum Bike,currency,rare,1928
+ITEM0016,Fresh Bamboo Mouse,cosmetic,common,373
+ITEM0017,Recycled Gold Chips,consumable,common,139
+ITEM0018,Gorgeous Concrete Fish,consumable,legendary,4527
+ITEM0019,Ergonomic Cotton Bacon,cosmetic,uncommon,2163
+ITEM0020,Bespoke Silk Sausages,weapon,common,592
+ITEM0021,Intelligent Silk Sausages,cosmetic,epic,2564
+ITEM0022,Oriental Silk Mouse,cosmetic,epic,4647
+ITEM0023,Incredible Bamboo Soap,weapon,common,984
+ITEM0024,Bespoke Granite Table,armor,common,1267
+ITEM0025,Frozen Silk Pizza,weapon,uncommon,3153
+ITEM0026,Bespoke Plastic Soap,currency,common,4045
+ITEM0027,Intelligent Granite Mouse,consumable,epic,1617
+ITEM0028,Refined Steel Car,consumable,common,2208
+ITEM0029,Handmade Plastic Computer,currency,uncommon,2768
+ITEM0030,Frozen Bronze Pizza,consumable,epic,3047
+ITEM0031,Intelligent Concrete Chair,weapon,rare,1490
+ITEM0032,Luxurious Rubber Keyboard,consumable,legendary,1886
+ITEM0033,Awesome Steel Cheese,consumable,legendary,3727
+ITEM0034,Sleek Gold Hat,weapon,epic,3724
+ITEM0035,Licensed Silk Bike,weapon,common,4316
+ITEM0036,Fantastic Bamboo Shoes,cosmetic,common,3820
+ITEM0037,Frozen Aluminum Bacon,weapon,legendary,1993
+ITEM0038,Handcrafted Rubber Pizza,currency,common,839
+ITEM0039,Small Wooden Chips,weapon,common,154
+ITEM0040,Oriental Ceramic Computer,armor,uncommon,907
+ITEM0041,Licensed Bamboo Gloves,consumable,uncommon,419
+ITEM0042,Oriental Metal Sausages,consumable,rare,1227
+ITEM0043,Handcrafted Marble Ball,cosmetic,legendary,4849
+ITEM0044,Rustic Silk Car,armor,epic,196
+ITEM0045,Electronic Metal Gloves,cosmetic,uncommon,414
+ITEM0046,Sleek Rubber Hat,currency,uncommon,1842
+ITEM0047,Fresh Bamboo Pizza,consumable,rare,4302
+ITEM0048,Intelligent Gold Salad,weapon,uncommon,4170
+ITEM0049,Elegant Silk Pizza,currency,common,3530
+ITEM0050,Rustic Aluminum Sausages,consumable,common,3239

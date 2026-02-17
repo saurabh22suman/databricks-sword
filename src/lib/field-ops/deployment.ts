@@ -3,15 +3,15 @@
  * Orchestrates the deployment lifecycle for Field Ops missions.
  */
 
-import { getDb, fieldOpsDeployments, fieldOpsValidations } from "../db"
-import { eq, and } from "drizzle-orm"
+import { and, eq } from "drizzle-orm"
+import { deployBundle, destroyBundle, generateBundle } from "../databricks/bundle"
+import { fieldOpsDeployments, fieldOpsValidations, getDb } from "../db"
 import type {
-  Industry,
-  Deployment,
-  DeploymentStatus,
-  DatabricksConnection,
+    DatabricksConnection,
+    Deployment,
+    DeploymentStatus,
+    Industry,
 } from "./types"
-import { generateBundle, deployBundle, destroyBundle } from "../databricks/bundle"
 
 /**
  * Start a new Field Ops deployment.

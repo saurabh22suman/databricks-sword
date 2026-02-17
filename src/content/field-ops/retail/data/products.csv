@@ -1,4 +1,201 @@
-product_id,product_name,category,unit_price
-PROD123,Widget A,Electronics,29.99
-PROD456,Widget B,Home,49.99
-PROD789,Widget C,Garden,19.99
+sku,product_name,category,price,cost,supplier
+SKU00001,Handcrafted Wooden Sausages,Sports,82.29,49.37,"Mills, Quigley and Aufderhar"
+SKU00002,Unbranded Silk Cheese,Clothing,95.75,57.45,Greenfelder LLC
+SKU00003,Elegant Concrete Computer,Home,393.65,236.19,Bayer LLC
+SKU00004,Ergonomic Aluminum Towels,Books,405.19,243.11,"Kiehn, Cartwright and Kunze"
+SKU00005,Awesome Steel Chicken,Beauty,159.35,95.61,Wisozk - Ryan
+SKU00006,Tasty Steel Pants,Books,48.89,29.33,Howell - Goldner
+SKU00007,Sleek Cotton Chicken,Sports,74.79,44.87,"Rutherford, Donnelly and Abshire"
+SKU00008,Sleek Plastic Sausages,Toys,41.69,25.01,"Mueller, Harris and Bergnaum"
+SKU00009,Generic Concrete Sausages,Beauty,444.19,266.51,"Rowe, Macejkovic and Russel"
+SKU00010,Intelligent Granite Gloves,Electronics,58.45,35.07,Lang - Upton
+SKU00011,Fresh Gold Shirt,Clothing,43.19,25.91,"Schowalter, Nader and Swaniawski"
+SKU00012,Rustic Bronze Table,Sports,404.69,242.81,Farrell - Keebler
+SKU00013,Sleek Silk Bacon,Sports,211.69,127.01,Weissnat Inc
+SKU00014,Licensed Plastic Computer,Books,481.49,288.89,Graham - Bashirian
+SKU00015,Modern Granite Ball,Food,454.69,272.81,Yost Group
+SKU00016,Practical Rubber Cheese,Beauty,187.05,112.23,Borer and Sons
+SKU00017,Generic Bronze Bacon,Sports,340.45,204.27,O'Connell - Daniel
+SKU00018,Practical Cotton Towels,Clothing,173.81,104.29,"Gerlach, Okuneva and Schumm"
+SKU00019,Licensed Granite Cheese,Electronics,449.15,269.49,Heller LLC
+SKU00020,Soft Steel Shirt,Beauty,46.60,27.96,Altenwerth Group
+SKU00021,Oriental Aluminum Car,Sports,347.49,208.49,"Ferry, Hane and Rogahn"
+SKU00022,Oriental Silk Pizza,Sports,51.39,30.83,Wiza - Huel
+SKU00023,Soft Metal Shoes,Sports,290.59,174.35,"Goyette, Bailey and O'Connell"
+SKU00024,Ergonomic Wooden Towels,Books,188.20,112.92,Wisoky and Sons
+SKU00025,Small Concrete Fish,Toys,161.85,97.11,"Predovic, Marks and Boyer"
+SKU00026,Modern Wooden Car,Sports,439.35,263.61,"Hessel, Greenholt and Schowalter"
+SKU00027,Rustic Steel Table,Sports,253.25,151.95,"Schinner, Towne and Hauck"
+SKU00028,Handcrafted Bamboo Mouse,Electronics,235.49,141.29,Bartell Group
+SKU00029,Sleek Cotton Car,Sports,386.15,231.69,Bechtelar - Lemke
+SKU00030,Licensed Metal Sausages,Books,260.55,156.33,Kessler - Block
+SKU00031,Awesome Wooden Soap,Beauty,207.49,124.49,Lowe - Rau
+SKU00032,Oriental Concrete Towels,Beauty,279.49,167.69,Hermiston - Rosenbaum
+SKU00033,Awesome Bamboo Ball,Electronics,428.49,257.09,Kulas - Kozey
+SKU00034,Ergonomic Gold Fish,Sports,319.39,191.63,Kuvalis and Sons
+SKU00035,Oriental Bronze Ball,Beauty,18.15,10.89,Howell LLC
+SKU00036,Incredible Marble Towels,Home,480.79,288.47,Bradtke - Auer
+SKU00037,Electronic Plastic Ball,Food,423.20,253.92,Carroll - Predovic
+SKU00038,Modern Steel Sausages,Toys,144.65,86.79,"Zboncak, Jerde and Hilpert"
+SKU00039,Refined Cotton Towels,Toys,217.35,130.41,Turcotte - Labadie
+SKU00040,Sleek Concrete Table,Home,10.39,6.23,Wiegand - Wiegand
+SKU00041,Luxurious Metal Gloves,Food,167.65,100.59,"Schamberger, Bosco and Kunde"
+SKU00042,Bespoke Marble Gloves,Books,178.79,107.27,"Mosciski, Bradtke and Boehm"
+SKU00043,Practical Bamboo Shoes,Beauty,45.20,27.12,Hilpert and Sons
+SKU00044,Tasty Wooden Shirt,Home,46.35,27.81,Ullrich Group
+SKU00045,Intelligent Aluminum Hat,Electronics,63.85,38.31,"McCullough, Windler and Hirthe"
+SKU00046,Frozen Steel Cheese,Books,11.09,6.65,"Legros, Zemlak and Bins"
+SKU00047,Licensed Wooden Keyboard,Beauty,349.45,209.67,Turcotte Group
+SKU00048,Frozen Wooden Table,Home,311.99,187.19,Hermann LLC
+SKU00049,Electronic Wooden Tuna,Beauty,270.30,162.18,"Crooks, Vandervort and Senger"
+SKU00050,Tasty Plastic Pants,Home,466.79,280.07,Hodkiewicz - Schroeder
+SKU00051,Unbranded Bronze Pants,Home,485.10,291.06,Johns Inc
+SKU00052,Bespoke Silk Shoes,Books,498.35,299.01,"Stanton, Franecki and Klein"
+SKU00053,Elegant Wooden Pants,Clothing,337.49,202.49,Osinski - Lebsack
+SKU00054,Refined Granite Soap,Sports,282.69,169.61,Barrows - Roob
+SKU00055,Modern Plastic Cheese,Clothing,12.15,7.29,Kertzmann and Sons
+SKU00056,Gorgeous Granite Shirt,Home,312.98,187.79,Walter - Kulas
+SKU00057,Fresh Gold Tuna,Home,167.79,100.67,Champlin - Champlin
+SKU00058,Ergonomic Bronze Pizza,Clothing,176.19,105.71,"Dach, Dicki and Bauch"
+SKU00059,Ergonomic Concrete Chair,Electronics,64.79,38.87,Labadie LLC
+SKU00060,Bespoke Rubber Pizza,Electronics,437.49,262.49,Schoen - Rogahn
+SKU00061,Ergonomic Ceramic Computer,Home,311.09,186.65,"Bashirian, Fritsch and Ratke"
+SKU00062,Soft Granite Keyboard,Electronics,226.49,135.89,Hodkiewicz - Aufderhar
+SKU00063,Generic Ceramic Chips,Electronics,445.85,267.51,"Kuphal, Bogisich and Lind"
+SKU00064,Luxurious Rubber Gloves,Clothing,145.45,87.27,Hermiston and Sons
+SKU00065,Modern Ceramic Bike,Clothing,126.79,76.07,Daniel - Treutel
+SKU00066,Electronic Granite Fish,Books,60.43,36.26,"Schumm, Gerhold and D'Amore"
+SKU00067,Practical Steel Mouse,Sports,143.59,86.15,Kautzer - Lang
+SKU00068,Fresh Bamboo Pants,Food,292.79,175.67,Bechtelar Inc
+SKU00069,Elegant Aluminum Tuna,Food,405.85,243.51,"Mertz, Kozey and Jenkins"
+SKU00070,Gorgeous Steel Shoes,Books,66.57,39.94,Bergstrom - Robel
+SKU00071,Luxurious Silk Car,Toys,104.89,62.93,"Ondricka, Ledner and Herzog"
+SKU00072,Small Cotton Shoes,Home,191.59,114.95,"Kuvalis, Feeney and Tromp"
+SKU00073,Handcrafted Marble Table,Sports,62.85,37.71,Conn and Sons
+SKU00074,Modern Marble Table,Toys,80.09,48.05,"Bartoletti, Marks and Ruecker"
+SKU00075,Small Cotton Shoes,Electronics,424.09,254.45,"Cormier, Fay and Reichert"
+SKU00076,Recycled Metal Salad,Sports,129.69,77.81,"McCullough, Jacobs and Koepp"
+SKU00077,Tasty Bronze Pants,Sports,307.60,184.56,"Mann, Predovic and Walker"
+SKU00078,Recycled Bronze Mouse,Sports,214.97,128.98,"Klein, Bruen and Wyman"
+SKU00079,Sleek Bamboo Towels,Toys,261.89,157.13,Harvey - Schmitt
+SKU00080,Awesome Cotton Fish,Sports,460.39,276.23,"Klein, Fahey and Kling"
+SKU00081,Elegant Bronze Hat,Home,457.85,274.71,Ankunding LLC
+SKU00082,Ergonomic Wooden Car,Home,47.25,28.35,Bergstrom LLC
+SKU00083,Fantastic Steel Chair,Clothing,23.05,13.83,Ryan - Kling
+SKU00084,Licensed Gold Fish,Sports,81.80,49.08,"Hintz, Goldner and Nolan"
+SKU00085,Handmade Aluminum Car,Beauty,331.19,198.71,Osinski - Aufderhar
+SKU00086,Electronic Rubber Chair,Beauty,122.99,73.79,"Steuber, Simonis and Hyatt"
+SKU00087,Practical Ceramic Chips,Books,11.49,6.89,Davis - McCullough
+SKU00088,Handmade Steel Shoes,Food,133.45,80.07,Muller - Jast
+SKU00089,Licensed Gold Chips,Books,382.90,229.74,Tremblay and Sons
+SKU00090,Handmade Aluminum Chicken,Sports,318.59,191.15,"Wyman, Leffler and Dach"
+SKU00091,Frozen Aluminum Table,Electronics,290.35,174.21,Simonis Group
+SKU00092,Awesome Bronze Table,Toys,300.75,180.45,Volkman - Johnston
+SKU00093,Handcrafted Granite Ball,Clothing,370.35,222.21,Hudson - Green
+SKU00094,Gorgeous Plastic Chips,Sports,240.66,144.40,"Emard, Bartell and Gislason"
+SKU00095,Modern Aluminum Hat,Sports,170.49,102.29,Rempel - Kunze
+SKU00096,Practical Gold Cheese,Toys,400.79,240.47,Hessel Group
+SKU00097,Soft Bronze Towels,Home,96.60,57.96,"Schoen, Oberbrunner and Pouros"
+SKU00098,Sleek Ceramic Hat,Clothing,493.99,296.39,"Walsh, Davis and Mante"
+SKU00099,Soft Aluminum Salad,Food,462.59,277.55,Stoltenberg and Sons
+SKU00100,Generic Silk Bacon,Sports,118.89,71.33,"Hayes, Reilly and Bergnaum"
+SKU00101,Generic Marble Shirt,Food,314.85,188.91,Bailey - Strosin
+SKU00102,Awesome Steel Keyboard,Books,400.49,240.29,"Jacobson, Kris and Murazik"
+SKU00103,Small Wooden Shirt,Home,213.59,128.15,Hermann - Grant
+SKU00104,Generic Ceramic Ball,Electronics,493.99,296.39,"Erdman, Wiegand and Schaden"
+SKU00105,Electronic Gold Table,Books,236.39,141.83,"Feeney, Weissnat and O'Hara"
+SKU00106,Modern Granite Cheese,Clothing,114.15,68.49,Beer and Sons
+SKU00107,Small Steel Tuna,Clothing,201.15,120.69,Schultz - Fahey
+SKU00108,Fresh Marble Pants,Sports,50.29,30.17,Towne - Will
+SKU00109,Small Silk Pizza,Sports,48.09,28.85,Reilly - Kunze
+SKU00110,Electronic Ceramic Salad,Electronics,426.39,255.83,Shanahan Inc
+SKU00111,Practical Marble Chicken,Books,399.70,239.82,"Quitzon, Smith and Predovic"
+SKU00112,Practical Metal Shirt,Clothing,441.09,264.65,"Champlin, Harvey and Roberts"
+SKU00113,Ergonomic Silk Shoes,Sports,8.15,4.89,"Murray, Gerlach and Nader"
+SKU00114,Licensed Rubber Bike,Toys,272.99,163.79,Waters Group
+SKU00115,Tasty Plastic Ball,Food,355.55,213.33,Mraz Group
+SKU00116,Small Wooden Tuna,Beauty,69.39,41.63,Hane - Kuhn
+SKU00117,Refined Plastic Gloves,Food,498.59,299.15,Schimmel - Powlowski
+SKU00118,Fantastic Bamboo Salad,Beauty,140.29,84.17,Welch Inc
+SKU00119,Oriental Cotton Chicken,Books,207.69,124.61,Bartell - O'Keefe
+SKU00120,Gorgeous Silk Hat,Books,96.85,58.11,"Sporer, Rowe and Murazik"
+SKU00121,Elegant Aluminum Towels,Sports,399.29,239.57,Pfannerstill - Keeling
+SKU00122,Fantastic Granite Ball,Sports,138.19,82.91,Anderson Group
+SKU00123,Handcrafted Granite Pants,Food,349.05,209.43,Kshlerin - Braun
+SKU00124,Fresh Wooden Car,Home,310.95,186.57,Hansen - Larson
+SKU00125,Electronic Cotton Bacon,Electronics,201.45,120.87,"Schmidt, Dooley and Cummings"
+SKU00126,Electronic Metal Salad,Electronics,468.45,281.07,"Strosin, Ratke and Schmitt"
+SKU00127,Gorgeous Silk Ball,Books,276.09,165.65,Leffler LLC
+SKU00128,Electronic Aluminum Cheese,Clothing,436.52,261.91,Deckow and Sons
+SKU00129,Oriental Granite Mouse,Beauty,118.09,70.85,Dooley LLC
+SKU00130,Bespoke Aluminum Chicken,Home,434.85,260.91,Hegmann Inc
+SKU00131,Unbranded Aluminum Soap,Sports,222.19,133.31,"Turcotte, Jones and Gorczany"
+SKU00132,Luxurious Steel Cheese,Sports,317.69,190.61,"Upton, Daugherty and Ferry"
+SKU00133,Unbranded Bronze Soap,Home,127.39,76.43,Herzog LLC
+SKU00134,Ergonomic Cotton Tuna,Food,330.05,198.03,Wisozk - Kling
+SKU00135,Fresh Bamboo Chair,Sports,171.89,103.13,Morissette - Quigley
+SKU00136,Ergonomic Bronze Bacon,Beauty,333.50,200.10,"McDermott, Stroman and DuBuque"
+SKU00137,Elegant Concrete Ball,Sports,468.69,281.21,Watsica Inc
+SKU00138,Intelligent Aluminum Car,Books,482.70,289.62,Stroman Inc
+SKU00139,Intelligent Granite Salad,Clothing,19.85,11.91,Pacocha - Wisozk
+SKU00140,Electronic Plastic Gloves,Toys,92.60,55.56,"Paucek, Kuphal and Mosciski"
+SKU00141,Small Marble Bacon,Books,346.39,207.83,Huels LLC
+SKU00142,Electronic Metal Tuna,Electronics,488.70,293.22,"Mante, Ritchie and Thiel"
+SKU00143,Handcrafted Concrete Salad,Toys,382.39,229.43,"Carter, Little and Abshire"
+SKU00144,Generic Cotton Fish,Beauty,197.39,118.43,Farrell Group
+SKU00145,Modern Plastic Pants,Home,192.95,115.77,Balistreri Inc
+SKU00146,Handcrafted Cotton Mouse,Sports,305.90,183.54,"Wilkinson, Auer and Dietrich"
+SKU00147,Awesome Metal Table,Clothing,463.80,278.28,Bradtke Inc
+SKU00148,Fresh Concrete Chips,Toys,271.85,163.11,"Goldner, Jerde and Cartwright"
+SKU00149,Ergonomic Plastic Chair,Sports,355.95,213.57,Windler - Kub
+SKU00150,Rustic Marble Ball,Beauty,475.90,285.54,"Farrell, Effertz and Monahan"
+SKU00151,Handmade Silk Table,Food,122.29,73.37,"Kassulke, Orn and Boyer"
+SKU00152,Modern Gold Pants,Clothing,369.79,221.87,Bailey - Nitzsche
+SKU00153,Modern Marble Cheese,Home,299.24,179.54,Powlowski - Jakubowski
+SKU00154,Handmade Plastic Salad,Books,68.55,41.13,Goodwin Group
+SKU00155,Electronic Steel Chair,Food,117.19,70.31,Bergstrom and Sons
+SKU00156,Fresh Marble Table,Beauty,268.89,161.33,"Ziemann, Olson and Lynch"
+SKU00157,Recycled Gold Ball,Sports,479.05,287.43,Leuschke - Boyer
+SKU00158,Incredible Rubber Computer,Beauty,398.79,239.27,Cremin and Sons
+SKU00159,Tasty Marble Soap,Sports,313.65,188.19,Shanahan - Sauer
+SKU00160,Recycled Aluminum Chips,Food,183.20,109.92,Haag Inc
+SKU00161,Incredible Metal Keyboard,Books,251.00,150.60,Waters - Carroll
+SKU00162,Sleek Cotton Table,Toys,403.99,242.39,Jacobson - Daniel
+SKU00163,Practical Cotton Tuna,Beauty,412.10,247.26,"Kuhlman, Moen and Runolfsdottir"
+SKU00164,Ergonomic Granite Fish,Clothing,186.99,112.19,Windler - Lowe
+SKU00165,Unbranded Gold Chips,Sports,222.55,133.53,Mraz - O'Hara
+SKU00166,Ergonomic Aluminum Shirt,Home,33.79,20.27,"Wyman, Fisher and Conroy"
+SKU00167,Elegant Concrete Bike,Beauty,35.85,21.51,"Morar, Haag and Muller"
+SKU00168,Licensed Gold Car,Books,227.69,136.61,Shields LLC
+SKU00169,Refined Aluminum Fish,Home,14.55,8.73,Leuschke - Emard
+SKU00170,Awesome Ceramic Tuna,Toys,480.09,288.05,Kling and Sons
+SKU00171,Electronic Granite Car,Food,369.99,221.99,Koelpin and Sons
+SKU00172,Soft Wooden Shirt,Food,345.69,207.41,"Batz, Turcotte and Koepp"
+SKU00173,Oriental Metal Table,Beauty,308.85,185.31,Rippin - Langworth
+SKU00174,Practical Aluminum Bike,Beauty,40.69,24.41,"Rippin, Hermann and Gulgowski"
+SKU00175,Gorgeous Rubber Pizza,Clothing,91.15,54.69,"Gleason, Aufderhar and Bode"
+SKU00176,Unbranded Concrete Shirt,Sports,194.09,116.45,Ryan LLC
+SKU00177,Licensed Aluminum Tuna,Toys,149.95,89.97,Rogahn and Sons
+SKU00178,Oriental Bamboo Computer,Books,116.19,69.71,Moore and Sons
+SKU00179,Fresh Bamboo Chair,Books,324.60,194.76,"Stamm, VonRueden and Fritsch"
+SKU00180,Refined Gold Soap,Beauty,389.39,233.63,Wyman and Sons
+SKU00181,Bespoke Bronze Car,Beauty,409.85,245.91,"Reynolds, Littel and McLaughlin"
+SKU00182,Intelligent Concrete Mouse,Beauty,437.35,262.41,Koepp - Altenwerth
+SKU00183,Fresh Plastic Tuna,Electronics,203.79,122.27,Reynolds LLC
+SKU00184,Fantastic Cotton Shirt,Sports,7.59,4.55,"Douglas, Williamson and Hills"
+SKU00185,Generic Bronze Chips,Books,498.19,298.91,"Torphy, Medhurst and Huel"
+SKU00186,Handmade Plastic Bacon,Sports,180.99,108.59,Kshlerin LLC
+SKU00187,Bespoke Marble Mouse,Sports,303.70,182.22,Shanahan - Kuphal
+SKU00188,Electronic Aluminum Computer,Toys,355.35,213.21,Corkery Inc
+SKU00189,Handmade Bamboo Cheese,Sports,369.19,221.51,Jones LLC
+SKU00190,Rustic Bamboo Fish,Toys,195.05,117.03,Hettinger - Harvey
+SKU00191,Awesome Aluminum Shoes,Food,261.42,156.85,Keeling - Swaniawski
+SKU00192,Sleek Bronze Shoes,Home,244.09,146.45,"Kunze, Kertzmann and Renner"
+SKU00193,Refined Bronze Pants,Clothing,376.96,226.18,Bednar - Grady
+SKU00194,Frozen Ceramic Table,Clothing,139.69,83.81,"Bergnaum, Kuhlman and Bartoletti"
+SKU00195,Bespoke Steel Car,Sports,208.40,125.04,Olson - Windler
+SKU00196,Luxurious Wooden Ball,Home,133.77,80.26,O'Kon - Donnelly
+SKU00197,Luxurious Gold Tuna,Sports,178.09,106.85,Friesen - Stark
+SKU00198,Luxurious Granite Bike,Toys,362.85,217.71,Bode Inc
+SKU00199,Intelligent Bronze Towels,Toys,336.19,201.71,Little Group
+SKU00200,Intelligent Silk Hat,Electronics,394.29,236.57,Harris - Roob

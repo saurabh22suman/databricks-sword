@@ -34,7 +34,7 @@
     {
       "checkName": "Silver sessions calculated",
       "description": "Verify session metrics exist with valid durations",
-      "query": "SELECT COUNT(*) as count FROM {catalog}.{schema_prefix}_silver.sessions WHERE session_duration_sec > 0",
+      "query": "SELECT COUNT(*) as count FROM {catalog}.{schema_prefix}_silver.sessions WHERE duration_minutes > 0",
       "expectedResult": "count",
       "expectedValue": 1
     },
@@ -46,6 +46,8 @@
       "expectedValue": 1
     }
   ],
+  "hintsInNotebooks": true,
+  "hintsNote": "SQL hints and alternative approaches are provided as commented-out code blocks in the notebooks. Use them if you get stuck.",
   "hints": [
     "Events need sessionization with 30-minute timeout windows",
     "Use LAG() to calculate time between events per player",

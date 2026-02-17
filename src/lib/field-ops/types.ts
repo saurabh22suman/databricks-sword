@@ -116,6 +116,8 @@ export type IndustryConfig = {
   emoji: string
   title: string
   description: string
+  scenario: string
+  objectives: string[]
   xpRequired: number
   xpReward: number
   estimatedMinutes: number

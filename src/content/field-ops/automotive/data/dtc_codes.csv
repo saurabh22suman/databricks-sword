@@ -1,5 +1,15 @@
-dtc_code,description,severity,system
-P0300,Random/Multiple Cylinder Misfire,high,engine
-P0420,Catalyst System Efficiency Below Threshold,medium,emissions
-P0171,System Too Lean (Bank 1),medium,fuel
-C0050,Right Front Wheel Speed Sensor Circuit,high,abs
+code,description,system,severity
+P0300,Random/Multiple Cylinder Misfire Detected,engine,high
+P0171,System Too Lean (Bank 1),fuel,medium
+P0420,Catalyst System Efficiency Below Threshold,emissions,medium
+P0128,Coolant Thermostat Temperature Below Regulating,cooling,low
+P0455,Evaporative Emission System Leak Detected (large leak),emissions,medium
+P0401,Exhaust Gas Recirculation Flow Insufficient,emissions,medium
+P0442,Evaporative Emission System Leak Detected (small leak),emissions,low
+P0301,Cylinder 1 Misfire Detected,engine,high
+P0500,Vehicle Speed Sensor Malfunction,transmission,medium
+P0700,Transmission Control System Malfunction,transmission,high
+C0035,Left Front Wheel Speed Sensor Circuit,abs,high
+C0050,Right Rear Wheel Speed Sensor Circuit,abs,high
+B0092,Left Side Restraint Seat Position Sensor,airbag,high
+U0100,Lost Communication With ECM/PCM,network,high

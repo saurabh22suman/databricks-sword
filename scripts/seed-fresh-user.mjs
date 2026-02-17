@@ -41,6 +41,12 @@ const freshSandbox = {
   lastSynced: null,
 };
 
+/** Databricks connection fields to update */
+const databricksFields = {
+  warehouseId: "b4d816135a346c2e",
+  catalogName: "dev",
+};
+
 async function main() {
   const userId = "mock-user-001";
   const snapshotJson = JSON.stringify(freshSandbox);
@@ -78,6 +84,20 @@ async function main() {
   console.log(
     "   Completing one challenge (usually 75-125 XP) should trigger rank-up to Recruit!"
   );
+
+  // Update Databricks connection with warehouse ID and catalog name
+  const connResult = await db.execute({
+    sql: `UPDATE databricks_connections SET warehouse_id = ?, catalog_name = ? WHERE user_id = ?`,
+    args: [databricksFields.warehouseId, databricksFields.catalogName, userId],
+  });
+
+  if (connResult.rowsAffected > 0) {
+    console.log("✅ Updated Databricks connection with warehouse ID and catalog");
+    console.log(`   Warehouse ID: ${databricksFields.warehouseId}`);
+    console.log(`   Catalog: ${databricksFields.catalogName}`);
+  } else {
+    console.log("⚠️  No Databricks connection found for user - connect first via /settings");
+  }
 }
 
 main().catch((err) => {

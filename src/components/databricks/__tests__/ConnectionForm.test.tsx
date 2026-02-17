@@ -168,4 +168,72 @@ describe("ConnectionForm", () => {
     const urlInput = screen.getByLabelText(/workspace url/i);
     expect(urlInput).toHaveAttribute("placeholder", expect.stringContaining("databricks.com"));
   });
+
+  it("renders warehouse ID and catalog name fields", () => {
+    render(<ConnectionForm {...defaultProps} />);
+
+    expect(screen.getByLabelText(/warehouse id/i)).toBeInTheDocument();
+    expect(screen.getByLabelText(/catalog name/i)).toBeInTheDocument();
+  });
+
+  it("has default value for catalog name", () => {
+    render(<ConnectionForm {...defaultProps} />);
+
+    const catalogInput = screen.getByLabelText(/catalog name/i);
+    expect(catalogInput).toHaveValue("dev");
+  });
+
+  it("shows validation error for invalid warehouse ID format", async () => {
+    const user = userEvent.setup();
+    render(<ConnectionForm {...defaultProps} />);
+
+    const urlInput = screen.getByLabelText(/workspace url/i);
+    const patInput = screen.getByLabelText(/personal access token/i);
+    const warehouseInput = screen.getByLabelText(/warehouse id/i);
+    const submitButton = screen.getByRole("button", { name: /connect/i });
+
+    await user.type(urlInput, "https://dbc-abc123.cloud.databricks.com");
+    await user.type(patInput, "dapi_test_token");
+    await user.type(warehouseInput, "invalid-format");
+    await user.click(submitButton);
+
+    await waitFor(() => {
+      expect(screen.getByText(/invalid warehouse id/i)).toBeInTheDocument();
+    });
+  });
+
+  it("includes warehouse ID and catalog name in API request", async () => {
+    mockFetch.mockResolvedValueOnce({
+      ok: true,
+      json: async () => ({ 
+        success: true, 
+        workspaceUrl: "https://dbc-abc123.cloud.databricks.com",
+        warehouseId: "b4d816135a346c2e",
+        catalogName: "dev"
+      }),
+    });
+
+    const user = userEvent.setup();
+    render(<ConnectionForm {...defaultProps} />);
+
+    const urlInput = screen.getByLabelText(/workspace url/i);
+    const patInput = screen.getByLabelText(/personal access token/i);
+    const warehouseInput = screen.getByLabelText(/warehouse id/i);
+    const submitButton = screen.getByRole("button", { name: /connect/i });
+
+    await user.type(urlInput, "https://dbc-abc123.cloud.databricks.com");
+    await user.type(patInput, "dapi_test_token_123");
+    await user.type(warehouseInput, "b4d816135a346c2e");
+    await user.click(submitButton);
+
+    await waitFor(() => {
+      expect(mockFetch).toHaveBeenCalledWith(
+        "/api/databricks/connect",
+        expect.objectContaining({
+          method: "POST",
+          body: expect.stringContaining("b4d816135a346c2e"),
+        })
+      );
+    });
+  });
 });

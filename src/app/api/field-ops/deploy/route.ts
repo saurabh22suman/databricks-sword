@@ -4,28 +4,32 @@
  * Start a new Field Ops deployment.
  */
 
-import { NextRequest, NextResponse } from "next/server"
+import { getUserSandbox } from "@/app/api/user/helpers"
 import { auth } from "@/lib/auth"
-import { getDb, users, databricksConnections } from "@/lib/db"
-import { eq } from "drizzle-orm"
+import { decryptPat } from "@/lib/databricks"
+import { databricksConnections, getDb, users } from "@/lib/db"
 import { startDeployment } from "@/lib/field-ops/deployment"
 import { getIndustryConfig, isIndustryUnlocked } from "@/lib/field-ops/industries"
 import type { Industry } from "@/lib/field-ops/types"
+import { eq } from "drizzle-orm"
+import { NextRequest, NextResponse } from "next/server"
 
 export async function POST(request: NextRequest): Promise<NextResponse> {
   try {
     // Check authentication
     const session = await auth()
-    if (!session?.user?.email) {
+    if (!session?.user?.id) {
       return NextResponse.json({ error: "Unauthorized" }, { status: 401 })
     }
+
+    const userId = session.user.id
 
     // Get user from database
     const db = getDb()
     const [user] = await db
       .select()
       .from(users)
-      .where(eq(users.email, session.user.email))
+      .where(eq(users.id, userId))
       .limit(1)
 
     if (!user) {
@@ -43,8 +47,16 @@ export async function POST(request: NextRequest): Promise<NextResponse> {
     // Get industry config and check if unlocked
     const config = getIndustryConfig(industry)
     
-    // TODO: Get user XP from sandbox or profile
-    const userXp = 0 // Placeholder
+    // Get user XP from sandbox
+    let userXp = 0
+    try {
+      const sandbox = await getUserSandbox(userId)
+      if (sandbox) {
+        userXp = sandbox.userStats.totalXp
+      }
+    } catch (error) {
+      console.error("Error fetching user sandbox:", error)
+    }
     
     if (!isIndustryUnlocked(industry, userXp)) {
       return NextResponse.json(
@@ -67,12 +79,12 @@ export async function POST(request: NextRequest): Promise<NextResponse> {
       )
     }
 
-    // TODO: Decrypt PAT
+    // Decrypt PAT and build config
     const databricksConfig = {
-      workspaceUrl: connection.workspaceUrl,
-      token: connection.encryptedPat, // TODO: Decrypt this
-      warehouseId: "", // TODO: Add warehouse ID to connection
-      catalog: "default",
+      workspaceUrl: connection.workspaceUrl.replace(/\/+$/, ""),
+      token: decryptPat(connection.encryptedPat),
+      warehouseId: connection.warehouseId ?? "",
+      catalog: "dev", // Use dev catalog for Field Ops
     }
 
     // Start deployment

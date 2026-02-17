@@ -26,6 +26,11 @@ export function Footer(): React.ReactElement {
                 </Link>
               </li>
               <li>
+                <Link href="/field-ops" className="hover:text-anime-cyan hover:pl-2 transition-all">
+                  Field Ops
+                </Link>
+              </li>
+              <li>
                 <Link href="/challenges" className="hover:text-anime-cyan hover:pl-2 transition-all">
                   Challenges
                 </Link>
@@ -62,7 +67,7 @@ export function Footer(): React.ReactElement {
                   rel="noopener noreferrer"
                   className="hover:text-anime-accent hover:pl-2 transition-all"
                 >
-                  Support
+                  Support this Project
                 </a>
               </li>
             </ul>

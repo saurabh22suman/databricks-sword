@@ -1,60 +1,268 @@
 # Databricks notebook source
-# MAGIC %md
-# MAGIC # NDVI Calculation from Satellite Imagery
-# MAGIC Calculate Normalized Difference Vegetation Index for crop health monitoring
+
+# ════════════════════════════════════════════════════════════════════════════
+# NOTEBOOK: 03_ndvi_calculation.py
+# MISSION:  AgriTech — Precision Agriculture Data Platform
+# STATUS:   BROKEN — NDVI formula uses (Red - NIR) instead of (NIR - Red)
+# ════════════════════════════════════════════════════════════════════════════
+#
+# OBJECTIVE:
+#   Calculate Normalized Difference Vegetation Index (NDVI) from satellite
+#   band data. NDVI is the most widely used vegetation index in precision
+#   agriculture — it quantifies plant health by comparing near-infrared
+#   (NIR) reflectance (which healthy vegetation reflects strongly) against
+#   red light reflectance (which chlorophyll absorbs).
+#
+# WHAT YOU'LL LEARN:
+#   ✅ NDVI formula and remote sensing fundamentals
+#   ✅ Band arithmetic with PySpark column expressions
+#   ✅ Value clamping with greatest()/least()
+#   ✅ CASE WHEN for categorical classification
+#   ✅ Time-series vegetation trend analysis with window functions
+#
+# ⚠️ KNOWN BUG:
+#   The NDVI formula is reversed: (Red - NIR)/(Red + NIR).
+#   The CORRECT formula is: (NIR - Red)/(NIR + Red).
+#   This produces NEGATIVE values for healthy vegetation and POSITIVE
+#   for bare soil — the exact opposite of reality.
+#
+# REFERENCE:
+#   NDVI = (NIR - Red) / (NIR + Red)
+#   Range: -1.0 to +1.0
+#     -1.0 to 0.0  → Water, bare soil, urban, clouds
+#      0.0 to 0.33 → Sparse vegetation, stressed crops
+#      0.33 to 0.66 → Moderate vegetation, cropland
+#      0.66 to 1.0  → Dense, healthy vegetation
+#
+# INPUT:
+#   - {catalog}.{schema_prefix}_bronze.satellite_imagery
+#
+# OUTPUT:
+#   - {catalog}.{schema_prefix}_silver.ndvi_metrics
+#
+# DOCUMENTATION:
+#   - NDVI:    https://en.wikipedia.org/wiki/Normalized_difference_vegetation_index
+#   - Spark:   https://docs.databricks.com/en/sql/language-manual/functions/greatest.html
+# ════════════════════════════════════════════════════════════════════════════
 
 # COMMAND ----------
-from pyspark.sql import functions as F
+
+catalog = "{catalog}"
+schema_prefix = "{schema_prefix}"
+
+bronze_schema = f"{catalog}.{schema_prefix}_bronze"
+silver_schema = f"{catalog}.{schema_prefix}_silver"
 
 # COMMAND ----------
-# Read satellite imagery data
-satellite_df = spark.read.table("agritech_bronze.satellite_imagery")
+
+# ────────────────────────────────────────────────────────────────────────────
+# SECTION 1: Load Satellite Band Data
+# ────────────────────────────────────────────────────────────────────────────
+# Satellite imagery typically contains spectral bands:
+#   - band_red:    visible red reflectance (0.0 - 1.0)
+#   - band_nir:    near-infrared reflectance (0.0 - 1.0)
+#   - band_green:  visible green reflectance (0.0 - 1.0)
+#   - band_blue:   visible blue reflectance (0.0 - 1.0)
+#   - ndvi:        pre-calculated NDVI from source (may be stale)
+
+from pyspark.sql.functions import (
+    col, to_date, when, lit, greatest, least,
+    avg, min as spark_min, max as spark_max, count,
+    round as spark_round, current_timestamp, row_number,
+    lag
+)
+from pyspark.sql.window import Window
+
+df_satellite = spark.read.table(f"{bronze_schema}.satellite_imagery")
+
+display(df_satellite.limit(10))
+print(f"📊 Total satellite records: {df_satellite.count()}")
 
 # COMMAND ----------
-# BROKEN: Band ordering is reversed - NIR and Red are swapped
-# Expected: NDVI = (NIR - Red) / (NIR + Red), where NIR = band_8, Red = band_4
-# Current: Using Red in place of NIR and vice versa - produces negative NDVI values!
 
-# ❌ WRONG: Bands are reversed (Red - NIR) instead of (NIR - Red)
-ndvi_df = satellite_df.withColumn(
-    "ndvi",
-    (F.col("band_4_red") - F.col("band_8_nir")) / 
-    (F.col("band_4_red") + F.col("band_8_nir"))
+# ────────────────────────────────────────────────────────────────────────────
+# SECTION 2: Compute NDVI from Band Data (⚠️ BUG: Formula Reversed!)
+# ────────────────────────────────────────────────────────────────────────────
+# NDVI = (NIR - Red) / (NIR + Red)
+#
+# ⚠️ BUG: The formula below is REVERSED — it computes (Red - NIR)/(Red + NIR)
+# This produces negative values for healthy vegetation and positive
+# for bare soil. The values will fail the validation range check.
+
+df_ndvi = (
+    df_satellite
+    .withColumn(
+        "computed_ndvi",
+        # ⚠️ BUG: (Red - NIR) instead of (NIR - Red) — inverts all values!
+        (col("band_red") - col("band_nir"))
+        / (col("band_red") + col("band_nir"))
+    )
+    # Clamp to valid range [-1, 1] to handle any floating point drift
+    .withColumn("computed_ndvi",
+        greatest(lit(-1.0), least(lit(1.0), col("computed_ndvi")))
+    )
 )
 
 # COMMAND ----------
-# Check NDVI range (should be -1 to +1, typically 0.2 to 0.8 for crops)
-print("NDVI Statistics:")
-ndvi_df.select(
-    F.min("ndvi").alias("min_ndvi"),
-    F.max("ndvi").alias("max_ndvi"),
-    F.avg("ndvi").alias("avg_ndvi")
-).show()
 
-# Current output: min_ndvi = -0.8, max_ndvi = -0.4 (ALL NEGATIVE - clearly wrong!)
+# ────────────────────────────────────────────────────────────────────────────
+# SECTION 3: SQL Equivalent (Correct Formula for Reference)
+# ────────────────────────────────────────────────────────────────────────────
+
+# ⚡ SQL APPROACH: Implement the correct SQL query yourself!
+# No SQL hints are provided for this operation.
+# Use the WHAT'S BROKEN section at the bottom and Databricks SQL docs for guidance.
+
+# NOTE: SQL approach uses NULLIF to avoid division by zero when both
+# bands are 0 (e.g., ocean pixels). PySpark equivalent:
+#   when(col("band_nir") + col("band_red") != 0, ...)
 
 # COMMAND ----------
-# Filter out cloudy images
-ndvi_filtered = ndvi_df.filter(F.col("cloud_cover_pct") < 10)
+
+# ────────────────────────────────────────────────────────────────────────────
+# SECTION 4: Classify Vegetation Health
+# ────────────────────────────────────────────────────────────────────────────
+# Map NDVI continuous value to discrete health categories.
+
+df_classified = (
+    df_ndvi
+    .withColumn("vegetation_class",
+        when(col("computed_ndvi") < 0.0, "water_or_bare")
+        .when(col("computed_ndvi") < 0.15, "bare_soil")
+        .when(col("computed_ndvi") < 0.33, "sparse_vegetation")
+        .when(col("computed_ndvi") < 0.50, "moderate_vegetation")
+        .when(col("computed_ndvi") < 0.66, "healthy_vegetation")
+        .otherwise("dense_vegetation")
+    )
+)
+
+# Show distribution of classes
+display(
+    df_classified
+    .groupBy("vegetation_class")
+    .agg(count("*").alias("pixel_count"))
+    .orderBy("vegetation_class")
+)
 
 # COMMAND ----------
-# Write to Silver
+
+# ────────────────────────────────────────────────────────────────────────────
+# SECTION 5: SQL Classification with CASE WHEN
+# ────────────────────────────────────────────────────────────────────────────
+
+# ⚡ SQL APPROACH: Implement the correct SQL query yourself!
+# No SQL hints are provided for this operation.
+# Use the WHAT'S BROKEN section at the bottom and Databricks SQL docs for guidance.
+
+# COMMAND ----------
+
+# ────────────────────────────────────────────────────────────────────────────
+# SECTION 6: NDVI Trend Analysis per Field (Window Functions)
+# ────────────────────────────────────────────────────────────────────────────
+# Track vegetation health changes over time using LAG().
+# A significant drop in NDVI between consecutive captures may indicate
+# drought, disease, or harvest.
+
+window_field_time = Window.partitionBy("field_id").orderBy("capture_date")
+
+df_with_trend = (
+    df_classified
+    .withColumn("prev_ndvi", lag("computed_ndvi", 1).over(window_field_time))
+    .withColumn("ndvi_change",
+        when(col("prev_ndvi").isNotNull(),
+             spark_round(col("computed_ndvi") - col("prev_ndvi"), 4))
+    )
+    .withColumn("trend",
+        when(col("ndvi_change") > 0.1, "improving")
+        .when(col("ndvi_change") < -0.1, "declining")
+        .otherwise("stable")
+    )
+)
+
+# COMMAND ----------
+
+# ────────────────────────────────────────────────────────────────────────────
+# SECTION 7: Aggregate NDVI by Field
+# ────────────────────────────────────────────────────────────────────────────
+# Compute per-field NDVI statistics for use in downstream enrichment.
+
+df_field_ndvi_stats = (
+    df_with_trend
+    .groupBy("field_id")
+    .agg(
+        spark_round(avg("computed_ndvi"), 4).alias("avg_ndvi"),
+        spark_round(spark_min("computed_ndvi"), 4).alias("min_ndvi"),
+        spark_round(spark_max("computed_ndvi"), 4).alias("max_ndvi"),
+        count("*").alias("observation_count"),
+        avg(when(col("trend") == "declining", 1).otherwise(0)).alias("decline_rate"),
+    )
+)
+
+display(df_field_ndvi_stats)
+
+# COMMAND ----------
+
+# ────────────────────────────────────────────────────────────────────────────
+# SECTION 8: Write NDVI Metrics to Silver
+# ────────────────────────────────────────────────────────────────────────────
+
 (
-    ndvi_filtered
+    df_with_trend
+    .withColumn("_computed_at", current_timestamp())
     .write
-    .format("delta")
     .mode("overwrite")
-    .saveAsTable("agritech_silver.satellite_imagery_processed")
+    .option("overwriteSchema", "true")
+    .saveAsTable(f"{silver_schema}.ndvi_metrics")
 )
 
+print(f"✅ Silver table: {silver_schema}.ndvi_metrics")
+
 # COMMAND ----------
-# MAGIC %md
-# MAGIC ## Expected Fix
-# MAGIC ```python
-# MAGIC # Correct NDVI formula with proper band ordering
-# MAGIC ndvi_df = satellite_df.withColumn(
-# MAGIC     "ndvi",
-# MAGIC     (F.col("band_8_nir") - F.col("band_4_red")) /   # ✅ NIR - Red
-# MAGIC     (F.col("band_8_nir") + F.col("band_4_red"))     # ✅ NIR + Red
-# MAGIC )
-# MAGIC ```
+
+# ────────────────────────────────────────────────────────────────────────────
+# SECTION 9: Validation — NDVI Range Check
+# ────────────────────────────────────────────────────────────────────────────
+# All NDVI values must be in [-1, 1]. Due to the REVERSED formula,
+# values for healthy fields will show as NEGATIVE (inverted).
+
+df_check = spark.sql(f"""
+    SELECT
+        MIN(computed_ndvi) AS min_ndvi,
+        MAX(computed_ndvi) AS max_ndvi,
+        COUNT(*) AS total_records,
+        SUM(CASE WHEN computed_ndvi < -1 OR computed_ndvi > 1 THEN 1 ELSE 0 END) AS out_of_range
+    FROM {silver_schema}.ndvi_metrics
+""")
+
+display(df_check)
+print("⚠️ NOTE: If min_ndvi is very negative, check the formula — NIR and Red may be swapped!")
+
+# COMMAND ----------
+
+# ────────────────────────────────────────────────────────────────────────────
+# ✅ NOTEBOOK STATUS: BROKEN — NDVI Formula Reversed
+# ────────────────────────────────────────────────────────────────────────────
+# WHAT'S BROKEN:
+#   The NDVI formula computes (Red - NIR) / (Red + NIR) instead of the
+#   correct (NIR - Red) / (NIR + Red). This inverts all NDVI values:
+#   healthy crops show negative, bare soil shows positive.
+#
+# TO FIX:
+#   Swap the subtraction order in the computed_ndvi expression:
+#     (col("band_nir") - col("band_red"))
+#     / (col("band_nir") + col("band_red"))
+#
+# DOMAIN KNOWLEDGE:
+#   Healthy vegetation strongly reflects NIR and absorbs Red light.
+#   So NIR > Red → NDVI > 0 for vegetation.
+#   The reversed formula makes NIR > Red → NDVI < 0 (wrong!).
+#
+# CONCEPTS LEARNED:
+#   1. NDVI formula and band arithmetic
+#   2. greatest()/least() for value clamping
+#   3. CASE WHEN for categorical classification
+#   4. LAG() for time-series trend detection
+#   5. Domain validation of computed metrics
+#
+# NEXT: Run 04_irrigation_efficiency.py for water use analysis
+# ────────────────────────────────────────────────────────────────────────────

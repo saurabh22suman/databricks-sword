@@ -48,10 +48,6 @@
       "expectedValue": 1
     }
   ],
-  "hints": [
-    "Parse timestamp strings to proper timestamp type in Bronze",
-    "Use window functions with RANGE BETWEEN for time-based aggregations",
-    "Implement rules: velocity_1h > 10 OR amount > 5000 OR geo_distance > 500",
-    "Calculate geo distance with haversine formula or use ST_Distance"
-  ]
+  "hintsInNotebooks": false,
+  "hintsNote": "No SQL hints are provided in the notebooks. You must identify the issues and implement fixes using the briefing context and notebook error descriptions only."
 }

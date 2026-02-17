@@ -3,14 +3,14 @@
  * Shows deployed mission with validation and cleanup controls.
  */
 
-import { Metadata } from "next"
-import { auth } from "@/lib/auth"
-import { redirect, notFound } from "next/navigation"
-import { getDb, users, fieldOpsDeployments } from "@/lib/db"
-import { eq, and } from "drizzle-orm"
-import { getIndustryConfig } from "@/lib/field-ops/industries"
 import { ActiveMission } from "@/components/field-ops/ActiveMission"
+import { auth } from "@/lib/auth"
+import { fieldOpsDeployments, getDb, users } from "@/lib/db"
+import { getIndustryConfig } from "@/lib/field-ops/industries"
 import type { Industry } from "@/lib/field-ops/types"
+import { and, desc, eq, notInArray } from "drizzle-orm"
+import { Metadata } from "next"
+import { redirect } from "next/navigation"
 
 type PageProps = {
   params: Promise<{ industry: string }>
@@ -43,17 +43,18 @@ export default async function ActiveMissionPage(
   const params = await props.params
   const industry = params.industry as Industry
 
-  // Get active deployment
+  // Get the most recent non-terminal deployment
   const [deployment] = await db
     .select()
     .from(fieldOpsDeployments)
     .where(
       and(
         eq(fieldOpsDeployments.userId, user.id),
-        eq(fieldOpsDeployments.industry, industry)
+        eq(fieldOpsDeployments.industry, industry),
+        notInArray(fieldOpsDeployments.status, ["cleaned_up", "completed", "failed"])
       )
     )
-    .orderBy(fieldOpsDeployments.createdAt)
+    .orderBy(desc(fieldOpsDeployments.createdAt))
     .limit(1)
 
   if (!deployment) {

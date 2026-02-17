@@ -1,9 +1,10 @@
 /**
  * @file page.tsx
- * @description Mission select page - displays all available missions in a grid
+ * @description Mission select page - displays all available missions in a grid or map view
  */
 
-import { MissionGrid } from "@/components/missions/MissionGrid";
+import { MissionsView } from "@/components/missions/MissionsView";
+import { getAllIndustries } from "@/lib/field-ops/industries";
 import { getAllMissions } from "@/lib/missions";
 import type { Metadata } from "next";
 
@@ -15,11 +16,14 @@ export const metadata: Metadata = {
 /**
  * Missions page component
  *
- * Displays all available missions in a grid, grouped by industry.
- * Shows locked/unlocked state based on user XP.
+ * Displays all available missions in a grid or interactive map view.
+ * Toggle between views for different visualizations.
  */
 export default async function MissionsPage(): Promise<React.ReactElement> {
-  const missions = await getAllMissions();
+  const [missions, fieldOps] = await Promise.all([
+    getAllMissions(),
+    Promise.resolve(getAllIndustries()),
+  ]);
 
   // TODO: Get user XP from profile/session (for now, hardcode 0)
   const userXp = 0;
@@ -40,8 +44,8 @@ export default async function MissionsPage(): Promise<React.ReactElement> {
           </p>
         </div>
 
-        {/* Mission Grid by Industry */}
-        <MissionGrid missions={missions} userXp={userXp} />
+        {/* Mission View (Grid/Map toggle) */}
+        <MissionsView missions={missions} fieldOps={fieldOps} userXp={userXp} />
 
         {/* Empty State */}
         {missions.length === 0 && (

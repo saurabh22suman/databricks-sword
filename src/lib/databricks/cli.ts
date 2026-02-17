@@ -1,19 +1,58 @@
 /**
  * Databricks CLI Interface
- * Low-level interface for Databricks REST API interactions.
+ * Uses the Databricks CLI for reliable Unity Catalog operations.
  */
 
+import { execFile } from "child_process"
+import fs from "fs/promises"
+import { promisify } from "util"
 import type { DatabricksConnection } from "../field-ops/types"
 
+const execFileAsync = promisify(execFile)
+
 /**
- * Test Databricks connection by executing a simple query.
+ * Execute a Databricks CLI command with the given connection config.
+ * Creates a temporary .databrickscfg file for authentication.
+ * Uses execFile (not exec) to pass args as an array directly,
+ * avoiding shell interpretation and quoting issues.
+ */
+async function runCli(
+  config: DatabricksConnection,
+  args: string[]
+): Promise<string> {
+  // Create a temporary config file for authentication
+  const configContent = `[DEFAULT]
+host = ${config.workspaceUrl}
+token = ${config.token}
+`
+  const tempConfigPath = `/tmp/databrickscfg-${Date.now()}`
+  await fs.writeFile(tempConfigPath, configContent, { mode: 0o600 })
+
+  try {
+    console.log(`[CLI] Running: databricks ${args.join(" ")}`)
+    const { stdout, stderr } = await execFileAsync("databricks", args, {
+      timeout: 60000,
+      env: { ...process.env, DATABRICKS_CONFIG_FILE: tempConfigPath },
+    })
+    if (stderr) {
+      console.warn(`[CLI] stderr: ${stderr}`)
+    }
+    return stdout.trim()
+  } finally {
+    // Clean up temp config
+    await fs.unlink(tempConfigPath).catch(() => {})
+  }
+}
+
+/**
+ * Test Databricks connection by listing catalogs.
  */
 export async function testConnection(
   config: DatabricksConnection
 ): Promise<{ success: boolean; errorMessage?: string }> {
   try {
-    const result = await executeSQL(config, "SELECT 1 as test")
-    return { success: result !== null }
+    await runCli(config, ["catalogs", "list"])
+    return { success: true }
   } catch (error) {
     return {
       success: false,
@@ -24,12 +63,14 @@ export async function testConnection(
 
 /**
  * Execute a SQL query against Databricks SQL Warehouse.
+ * Note: Requires a warehouse to be running.
  */
 export async function executeSQL(
   config: DatabricksConnection,
   query: string
-): Promise<any> {
-  const url = `${config.workspaceUrl}/api/2.0/sql/statements`
+): Promise<unknown> {
+  const baseUrl = config.workspaceUrl.replace(/\/+$/, "")
+  const url = `${baseUrl}/api/2.0/sql/statements`
 
   const response = await fetch(url, {
     method: "POST",
@@ -63,72 +104,82 @@ export async function executeSQL(
 }
 
 /**
- * Upload a file to Databricks Volumes (Unity Catalog).
+ * Upload a file to Databricks Unity Catalog Volumes using CLI fs cp command.
+ * Requires dbfs: scheme prefix for both DBFS and UC Volume paths per CLI docs.
  */
 export async function uploadFile(
   config: DatabricksConnection,
-  localContent: string,
+  localFilePath: string,
   volumePath: string
 ): Promise<void> {
-  const url = `${config.workspaceUrl}/api/2.0/fs/files${volumePath}`
-
-  const response = await fetch(url, {
-    method: "PUT",
-    headers: {
-      Authorization: `Bearer ${config.token}`,
-      "Content-Type": "application/octet-stream",
-    },
-    body: localContent,
-  })
-
-  if (!response.ok) {
-    const error = await response.json().catch(() => ({}))
-    throw new Error(
-      `File upload failed: ${response.statusText} - ${JSON.stringify(error)}`
-    )
-  }
+  await runCli(config, ["fs", "cp", "--overwrite", localFilePath, `dbfs:${volumePath}`])
 }
 
 /**
- * List schemas in a catalog.
+ * List schemas in a catalog using CLI.
  */
 export async function listSchemas(
   config: DatabricksConnection,
   catalog: string
 ): Promise<string[]> {
-  const query = `SHOW SCHEMAS IN ${catalog}`
-  const result = await executeSQL(config, query)
-
-  if (!result || !Array.isArray(result)) {
+  try {
+    const output = await runCli(config, ["schemas", "list", catalog, "-o", "json"])
+    const schemas = JSON.parse(output)
+    return schemas.map((s: { name: string }) => s.name)
+  } catch {
     return []
   }
-
-  // Result format: [[schema_name, ...], ...]
-  return result.map((row: any[]) => row[0])
 }
 
 /**
- * Drop a schema (cascade).
+ * Drop a schema using CLI.
+ * Uses --force to delete even if schema contains objects (tables, volumes).
  */
 export async function dropSchema(
   config: DatabricksConnection,
   catalog: string,
   schema: string
 ): Promise<void> {
-  const query = `DROP SCHEMA IF EXISTS ${catalog}.${schema} CASCADE`
-  await executeSQL(config, query)
+  try {
+    await runCli(config, ["schemas", "delete", `${catalog}.${schema}`, "--force"])
+  } catch (error) {
+    // Ignore "not found" errors
+    if (
+      error instanceof Error &&
+      !error.message.includes("SCHEMA_DOES_NOT_EXIST")
+    ) {
+      throw error
+    }
+  }
 }
 
 /**
- * Create a schema if it doesn't exist.
+ * Create a schema using CLI.
+ * CLI syntax: databricks schemas create NAME CATALOG_NAME [flags]
  */
 export async function createSchema(
   config: DatabricksConnection,
   catalog: string,
   schema: string
 ): Promise<void> {
-  const query = `CREATE SCHEMA IF NOT EXISTS ${catalog}.${schema}`
-  await executeSQL(config, query)
+  try {
+    await runCli(config, [
+      "schemas",
+      "create",
+      schema,    // NAME comes first
+      catalog,   // CATALOG_NAME comes second
+      "--comment",
+      "Field Ops deployment schema",
+    ])
+  } catch (error) {
+    // Ignore "already exists" errors
+    if (
+      error instanceof Error &&
+      !error.message.includes("SCHEMA_ALREADY_EXISTS")
+    ) {
+      throw error
+    }
+  }
 }
 
 /**
@@ -140,5 +191,89 @@ export async function executeSQLBatch(
 ): Promise<void> {
   for (const query of queries) {
     await executeSQL(config, query)
+  }
+}
+
+/**
+ * Create a Unity Catalog volume for storing data files using CLI.
+ */
+export async function createVolume(
+  config: DatabricksConnection,
+  catalog: string,
+  schema: string,
+  volumeName: string
+): Promise<void> {
+  try {
+    await runCli(config, [
+      "volumes",
+      "create",
+      catalog,
+      schema,
+      volumeName,
+      "MANAGED",
+      "--comment",
+      "Field Ops data volume",
+    ])
+  } catch (error) {
+    // Ignore "already exists" errors
+    if (
+      error instanceof Error &&
+      !error.message.includes("ALREADY_EXISTS")
+    ) {
+      throw error
+    }
+  }
+}
+
+/**
+ * Upload a notebook to the Databricks workspace using CLI.
+ */
+export async function uploadNotebook(
+  config: DatabricksConnection,
+  localFilePath: string,
+  workspacePath: string,
+  language: "PYTHON" | "SQL" | "SCALA" | "R" = "PYTHON"
+): Promise<void> {
+  await runCli(config, [
+    "workspace",
+    "import",
+    "--file",
+    localFilePath,
+    "--language",
+    language,
+    "--format",
+    "SOURCE",
+    "--overwrite",
+    workspacePath,
+  ])
+}
+
+/**
+ * Create a directory in the Databricks workspace using CLI.
+ */
+export async function createWorkspaceDirectory(
+  config: DatabricksConnection,
+  workspacePath: string
+): Promise<void> {
+  await runCli(config, ["workspace", "mkdirs", workspacePath])
+}
+
+/**
+ * Recursively delete a directory in the Databricks workspace using CLI.
+ */
+export async function deleteWorkspaceDirectory(
+  config: DatabricksConnection,
+  workspacePath: string
+): Promise<void> {
+  try {
+    await runCli(config, ["workspace", "delete", "--recursive", workspacePath])
+  } catch (error) {
+    // Ignore "not found" errors
+    if (
+      error instanceof Error &&
+      !error.message.includes("RESOURCE_DOES_NOT_EXIST")
+    ) {
+      throw error
+    }
   }
 }

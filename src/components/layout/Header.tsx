@@ -68,6 +68,13 @@ export function Header(): React.ReactElement {
               <span className="absolute -bottom-1 left-0 w-0 h-0.5 bg-anime-cyan group-hover:w-full transition-all duration-300" />
             </Link>
             <Link
+              href="/map"
+              className="hover:text-white relative group transition-colors"
+            >
+              Map
+              <span className="absolute -bottom-1 left-0 w-0 h-0.5 bg-anime-purple group-hover:w-full transition-all duration-300" />
+            </Link>
+            <Link
               href="/#blog"
               className="hover:text-white relative group transition-colors"
             >
@@ -168,6 +175,13 @@ export function Header(): React.ReactElement {
               className="text-sm font-bold uppercase tracking-widest text-gray-400 hover:text-white py-2 border-b border-anime-800 transition-colors"
             >
               ⚡ Field Ops
+            </Link>
+            <Link
+              href="/map"
+              onClick={() => setMobileMenuOpen(false)}
+              className="text-sm font-bold uppercase tracking-widest text-gray-400 hover:text-white py-2 border-b border-anime-800 transition-colors"
+            >
+              🗺️ Map
             </Link>
             <Link
               href="/#blog"

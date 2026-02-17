@@ -5,9 +5,10 @@
 
 "use client"
 
-import { useState } from "react"
-import { useRouter } from "next/navigation"
 import type { Industry, IndustryConfig } from "@/lib/field-ops/types"
+import { useRouter } from "next/navigation"
+import { useRef, useState } from "react"
+import { DeploymentLoader } from "./DeploymentLoader"
 import { ObjectivesList } from "./ObjectivesList"
 
 type MissionBriefingProps = {
@@ -21,11 +22,19 @@ export function MissionBriefing({
 }: MissionBriefingProps): React.ReactElement {
   const router = useRouter()
   const [isDeploying, setIsDeploying] = useState(false)
+  const [showLoader, setShowLoader] = useState(false)
   const [error, setError] = useState<string | null>(null)
+  
+  // Track deployment status
+  const deploymentResult = useRef<{ success: boolean; error?: string } | null>(null)
+  const loaderComplete = useRef(false)
 
   const handleDeploy = async () => {
     setIsDeploying(true)
+    setShowLoader(true)
     setError(null)
+    deploymentResult.current = null
+    loaderComplete.current = false
 
     try {
       const response = await fetch("/api/field-ops/deploy", {
@@ -37,36 +46,68 @@ export function MissionBriefing({
       const data = await response.json()
 
       if (!response.ok) {
-        throw new Error(data.error || "Deployment failed")
+        deploymentResult.current = { success: false, error: data.error || "Deployment failed" }
+        // If loader already complete, show error immediately
+        if (loaderComplete.current) {
+          setShowLoader(false)
+          setError(deploymentResult.current.error!)
+          setIsDeploying(false)
+        }
+        return
       }
 
-      // Redirect to active mission page
-      router.push(`/field-ops/${industry}/active`)
+      deploymentResult.current = { success: true }
+      
+      // If loader already complete, redirect immediately
+      if (loaderComplete.current) {
+        router.push(`/field-ops/${industry}/active`)
+      }
     } catch (err) {
-      setError(err instanceof Error ? err.message : "Deployment failed")
-    } finally {
-      setIsDeploying(false)
+      deploymentResult.current = { 
+        success: false, 
+        error: err instanceof Error ? err.message : "Deployment failed" 
+      }
+      if (loaderComplete.current) {
+        setShowLoader(false)
+        setError(deploymentResult.current.error!)
+        setIsDeploying(false)
+      }
     }
   }
 
-  // Placeholder objectives - will be loaded from mission.json
-  const objectives = [
-    "Ingest raw data into Bronze layer",
-    "Clean and deduplicate data in Silver layer",
-    "Create business-ready tables in Gold layer",
-    "Implement data quality checks",
-    "Pass all validation queries",
-  ]
+  const handleLoaderComplete = () => {
+    loaderComplete.current = true
+    
+    // Check if API already returned
+    if (deploymentResult.current) {
+      if (deploymentResult.current.success) {
+        router.push(`/field-ops/${industry}/active`)
+      } else {
+        setShowLoader(false)
+        setError(deploymentResult.current.error!)
+        setIsDeploying(false)
+      }
+    }
+    // If API hasn't returned yet, wait for it
+  }
 
   return (
-    <div className="py-12">
-      <div className="container mx-auto px-4 max-w-4xl">
-        {/* Header */}
-        <div className="mb-8">
-          <a
-            href="/field-ops"
-            className="text-anime-cyan hover:text-anime-accent mb-4 inline-block"
-          >
+    <>
+      {showLoader && (
+        <DeploymentLoader 
+          industry={config.title} 
+          onComplete={handleLoaderComplete}
+        />
+      )}
+      
+      <div className="py-12">
+        <div className="container mx-auto px-4 max-w-4xl">
+          {/* Header */}
+          <div className="mb-8">
+            <a
+              href="/field-ops"
+              className="text-anime-cyan hover:text-anime-accent mb-4 inline-block"
+            >
             ← Back to Field Operations
           </a>
           <div className="flex items-center gap-4 mb-4">
@@ -85,11 +126,8 @@ export function MissionBriefing({
           <h2 className="font-heading text-2xl text-anime-cyan mb-3">
             📋 Scenario
           </h2>
-          <p className="text-anime-300">
-            {/* TODO: Load from mission.json */}
-            Your team has been deployed to fix critical data pipelines. The previous
-            engineer left incomplete notebooks and broken transformations. Your mission
-            is to get the data flowing again.
+          <p className="text-anime-300 leading-relaxed">
+            {config.scenario}
           </p>
         </div>
 
@@ -98,7 +136,7 @@ export function MissionBriefing({
           <h2 className="font-heading text-2xl text-anime-cyan mb-3">
             🎯 Objectives
           </h2>
-          <ObjectivesList objectives={objectives} completed={[]} />
+          <ObjectivesList objectives={config.objectives} completed={[]} />
         </div>
 
         {/* What Gets Deployed */}
@@ -148,5 +186,6 @@ export function MissionBriefing({
         )}
       </div>
     </div>
+    </>
   )
 }

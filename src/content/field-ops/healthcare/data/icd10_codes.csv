@@ -1,4 +1,11 @@
-icd10_code,description,fhir_code,fhir_system
-E11.9,Type 2 diabetes without complications,44054006,http://snomed.info/sct
-E11.65,Type 2 diabetes with hyperglycemia,44054006,http://snomed.info/sct
-I10,Essential hypertension,59621000,http://snomed.info/sct
+code,description,category
+I10,Essential hypertension,Circulatory
+E11.9,Type 2 diabetes mellitus without complications,Endocrine
+J06.9,Acute upper respiratory infection,Respiratory
+M54.5,Low back pain,Musculoskeletal
+F32.9,Major depressive disorder, single episode,Mental
+K21.0,Gastroesophageal reflux disease with esophagitis,Digestive
+J18.9,Pneumonia, unspecified organism,Respiratory
+N39.0,Urinary tract infection,Genitourinary
+R10.9,Unspecified abdominal pain,Symptoms
+J45.909,Unspecified asthma,Respiratory

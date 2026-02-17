@@ -59,10 +59,10 @@ WORKDIR /app
 ENV NODE_ENV=production
 ENV NEXT_TELEMETRY_DISABLED=1
 
-# Install Python and pip for Databricks CLI
-# The Databricks CLI is needed at runtime for deploying DAB bundles
-RUN apk add --no-cache python3 py3-pip && \
-    pip3 install --no-cache-dir --break-system-packages databricks-cli
+# Install Databricks CLI (new Go-based version)
+# The Databricks CLI is needed at runtime for deploying Field Ops missions
+RUN apk add --no-cache curl unzip && \
+    curl -fsSL https://raw.githubusercontent.com/databricks/setup-cli/main/install.sh | sh
 
 # Create non-root user for security
 RUN addgroup --system --gid 1001 nodejs && \

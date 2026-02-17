@@ -3,14 +3,14 @@
  * Executes validation queries and records results.
  */
 
-import { getDb, fieldOpsValidations } from "../db"
-import type {
-  Industry,
-  ValidationConfig,
-  ValidationResult,
-  DatabricksConnection,
-} from "./types"
 import { executeSQL } from "../databricks/cli"
+import { fieldOpsValidations, getDb } from "../db"
+import type {
+    DatabricksConnection,
+    Industry,
+    ValidationConfig,
+    ValidationResult,
+} from "./types"
 
 /**
  * Get validation queries for an industry.
@@ -91,7 +91,10 @@ export async function executeValidation(
       .replace(/{schema_prefix}/g, schemaPrefix)
 
     // Execute query
-    const result = await executeSQL(config, query)
+    const rawResult = await executeSQL(config, query)
+
+    // Cast result to expected format (array of rows)
+    const result = rawResult as unknown[][] | null
 
     if (!result || result.length === 0) {
       return {
@@ -106,19 +109,19 @@ export async function executeValidation(
     }
 
     if (validation.expectedResult === "count") {
-      const count = result[0][0] // First row, first column
-      const passed =
-        validation.expectedValue !== undefined
-          ? count >= validation.expectedValue
-          : count > 0
+      const count = Number(result[0]?.[0] ?? 0) // First row, first column
+      const expectedCount = validation.expectedValue !== undefined 
+        ? Number(validation.expectedValue) 
+        : 1
+      const passed = count >= expectedCount
       return {
         passed,
-        errorMessage: passed ? undefined : `Expected count >= ${validation.expectedValue || 1}, got ${count}`,
+        errorMessage: passed ? undefined : `Expected count >= ${expectedCount}, got ${count}`,
       }
     }
 
     if (validation.expectedResult === "value") {
-      const value = result[0][0]
+      const value = result[0]?.[0]
       const passed = value === validation.expectedValue
       return {
         passed,

@@ -35,39 +35,34 @@
     {
       "id": "bronze_sensor_data",
       "name": "Bronze Sensor Ingestion",
-      "query": "SELECT COUNT(*) FROM manufacturing_bronze.sensor_readings WHERE timestamp_parsed IS NOT NULL",
+      "query": "SELECT COUNT(*) FROM {catalog}.{schema_prefix}_bronze.raw_sensor_readings WHERE timestamp_parsed IS NOT NULL",
       "expected": 1000,
       "hint": "Verify timestamp parsing logic in bronze layer"
     },
     {
       "id": "silver_spc_metrics",
       "name": "SPC Metrics Calculation",
-      "query": "SELECT COUNT(*) FROM manufacturing_silver.spc_metrics WHERE ucl IS NOT NULL AND lcl IS NOT NULL",
+      "query": "SELECT COUNT(*) FROM {catalog}.{schema_prefix}_silver.spc_metrics WHERE ucl IS NOT NULL AND lcl IS NOT NULL",
       "expected": 50,
       "hint": "Check control limit formulas - UCL/LCL should use 3-sigma rule correctly"
     },
     {
       "id": "gold_batch_quality",
       "name": "Batch Quality Aggregation",
-      "query": "SELECT AVG(defect_rate) as avg_defect_rate FROM manufacturing_gold.batch_quality_summary",
+      "query": "SELECT AVG(defect_rate) as avg_defect_rate FROM {catalog}.{schema_prefix}_gold.batch_quality_summary",
       "expected": 0.032,
       "hint": "Ensure defect rate calculation is (defects / total_units) * 100"
     },
     {
       "id": "feature_store_table",
       "name": "Feature Store Registration",
-      "query": "SELECT COUNT(*) FROM feature_store.manufacturing_features WHERE feature_table_name = 'production_metrics_features'",
+      "query": "SELECT COUNT(*) FROM {catalog}.{schema_prefix}_gold.production_metrics_features WHERE batch_id IS NOT NULL",
       "expected": 1,
       "hint": "Feature table needs primary key (batch_id) and timestamp key (production_timestamp)"
     }
   ],
-  "hints": [
-    "DLT expectations: Use @expect_or_drop for quality checks, not @expect_or_fail",
-    "SPC Control Limits: UCL = mean + 3*sigma, LCL = mean - 3*sigma (not 2*sigma)",
-    "Feature Store: Must use create_table() with primary_keys and timestamp_keys parameters",
-    "Sensor fusion: Join temperature, pressure, vibration sensors with INNER join (not LEFT)",
-    "Time travel: Use VERSION AS OF or TIMESTAMP AS OF for point-in-time feature lookups"
-  ],
+  "hintsInNotebooks": false,
+  "hintsNote": "No SQL hints are provided in the notebooks. You must identify the issues and implement fixes using the briefing context and notebook error descriptions only.",
   "dataFiles": [
     "sensor_readings.json",
     "production_batches.csv",
