@@ -24,8 +24,9 @@ const serverEnvSchema = z.object({
 
   // Auth behaviour
   MOCK_AUTH: z
-    .enum(["true", "false"])
+    .enum(["true", "false", ""])
     .optional()
+    .default("false")
     .transform((v) => v === "true"),
   AUTH_TRUST_HOST: z.string().optional(),
 
