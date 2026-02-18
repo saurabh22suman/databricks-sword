@@ -8,6 +8,7 @@
 import type { Challenge, ValidationResult } from "@/lib/challenges"
 import { calculateDailyForgeXp } from "@/lib/gamification"
 import { loadSandbox, saveSandbox } from "@/lib/sandbox"
+import { useSyncNow } from "@/components/auth"
 import React, { useEffect, useState } from "react"
 import { DailyForge } from "./DailyForge"
 
@@ -37,6 +38,7 @@ function getToday(): string {
 export function DailyForgeClient({
   challenge,
 }: DailyForgeClientProps): React.ReactElement {
+  const { syncNow } = useSyncNow()
   const [state, setState] = useState<DailyForgeState>({
     lastCompletedDate: null,
     streakCount: 0,
@@ -94,6 +96,8 @@ export function DailyForgeClient({
         }
         sandbox.streakData.lastActiveDate = today
         saveSandbox(sandbox)
+        // Immediately push XP to server so it isn't lost on logout
+        void syncNow()
       }
     } catch {
       // Ignore sandbox errors

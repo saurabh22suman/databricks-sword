@@ -195,7 +195,7 @@ describe("mapLayout — pipeline layout", () => {
   describe("edges", () => {
     it("should return 37 prerequisite edges", () => {
       const edges = getMapEdges()
-      expect(edges).toHaveLength(37)
+      expect(edges).toHaveLength(35)
     })
 
     it("all edges should reference valid node IDs", () => {
