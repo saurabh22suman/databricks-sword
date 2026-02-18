@@ -293,9 +293,7 @@ const PREREQUISITE_EDGES: Array<[string, string]> = [
   ["delta-lake-deep-dive", "data-quality-framework"],
   ["unity-catalog-governance", "data-quality-framework"],
 
-  // ML Track
-  ["pyspark-essentials", "ml-foundations"],
-  ["advanced-transformations", "ml-foundations"],
+  // ML Track (ml-foundations is unlocked at 0 XP — no prerequisites)
   ["ml-foundations", "mlflow-experiment-tracking"],
 
   // BI Track

@@ -21,7 +21,7 @@ import {
 } from "@/lib/missions/mapLayout"
 import { TRACKS, type Track } from "@/lib/missions/tracks"
 import type { Mission, MissionRank } from "@/lib/missions/types"
-import { loadSandbox } from "@/lib/sandbox"
+import { initializeSandbox, loadSandbox } from "@/lib/sandbox"
 import type { SandboxData } from "@/lib/sandbox/types"
 import { cn } from "@/lib/utils"
 import {
@@ -75,7 +75,8 @@ function getNodeState(
   xpRequired: number,
   prerequisites: string[]
 ): NodeState {
-  if (!sandbox) return "locked"
+  // Treat null sandbox as a fresh user with 0 XP (not fully locked)
+  if (!sandbox) sandbox = initializeSandbox()
 
   // Check if completed
   if (nodeType === "mission" && completedMissions.has(nodeId)) return "completed"
@@ -150,9 +151,9 @@ export function MissionMap({
   const [dragStart, setDragStart] = useState({ x: 0, y: 0 })
   const [sandbox, setSandbox] = useState<SandboxData | null>(null)
 
-  // Load sandbox data on mount
+  // Load sandbox data on mount — initialize for new users so missions show as available
   useEffect(() => {
-    setSandbox(loadSandbox())
+    setSandbox(loadSandbox() ?? initializeSandbox())
   }, [])
 
   // Computed state
