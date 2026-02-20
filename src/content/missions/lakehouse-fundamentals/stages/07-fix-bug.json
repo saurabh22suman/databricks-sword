@@ -1,0 +1,11 @@
+{
+  "description": "A Delta update statement accidentally updates every row. Fix the WHERE clause to update only when customer_id is 42.",
+  "starterCode": "UPDATE customers SET status = 'active' WHERE 1 = 1;",
+  "expectedPattern": "where\\s+customer_id\\s*=\\s*42",
+  "simulatedOutput": "Issue: All customer statuses changed unexpectedly.",
+  "hints": [
+    "Target one customer record.",
+    "Replace the always-true condition.",
+    "Use customer_id in the predicate."
+  ]
+}

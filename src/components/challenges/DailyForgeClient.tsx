@@ -5,10 +5,10 @@
 
 "use client"
 
+import { useSyncNow } from "@/components/auth"
 import type { Challenge, ValidationResult } from "@/lib/challenges"
 import { calculateDailyForgeXp } from "@/lib/gamification"
 import { loadSandbox, saveSandbox } from "@/lib/sandbox"
-import { useSyncNow } from "@/components/auth"
 import React, { useEffect, useState } from "react"
 import { DailyForge } from "./DailyForge"
 

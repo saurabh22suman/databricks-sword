@@ -1,0 +1,11 @@
+{
+  "description": "A JOIN is using mismatched keys and inflating the result set. Fix the ON clause to join orders and customers by customer_id.",
+  "starterCode": "SELECT * FROM orders o JOIN customers c ON o.order_id = c.customer_id;",
+  "expectedPattern": "on\\s+o\\.customer_id\\s*=\\s*c\\.customer_id",
+  "simulatedOutput": "Issue: Row count exploded due to mismatched join keys.",
+  "hints": [
+    "Join facts to dimensions using customer_id.",
+    "order_id is not the right relationship key here.",
+    "Only the ON clause needs to change."
+  ]
+}

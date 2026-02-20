@@ -1,0 +1,11 @@
+{
+  "description": "A query is broadcasting a large fact table and exhausting memory. Fix the broadcast hint so it targets the smaller dim_store table.",
+  "starterCode": "SELECT /*+ BROADCAST(fact_sales) */ * FROM fact_sales JOIN dim_store USING (store_id);",
+  "expectedPattern": "broadcast\\s*\\(\\s*dim_store\\s*\\)",
+  "simulatedOutput": "Issue: Broadcast exchange exceeds executor memory limits.",
+  "hints": [
+    "Broadcast the smaller dimension table.",
+    "fact_sales is too large to broadcast.",
+    "Change only the hinted table name."
+  ]
+}

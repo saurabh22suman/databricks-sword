@@ -10,6 +10,7 @@
 
 "use client";
 
+import { useSyncNow } from "@/components/auth";
 import {
     ArchitectureDiagram,
     CompareChallenge,
@@ -35,7 +36,6 @@ import type {
     QuizConfig,
 } from "@/lib/missions";
 import { updateSandbox } from "@/lib/sandbox";
-import { useSyncNow } from "@/components/auth";
 import { playSound } from "@/lib/sound";
 import { useRouter } from "next/navigation";
 import React, { useCallback, useState } from "react";
@@ -100,7 +100,7 @@ export type StagePlayerClientProps = {
 };
 
 /** Stage types that support Databricks mode */
-const CODE_STAGE_TYPES = ["drag-drop", "fill-blank", "free-text", "code"];
+const CODE_STAGE_TYPES = ["drag-drop", "fill-blank", "free-text", "fix-bug", "code"];
 
 /**
  * Client-side stage player that renders the correct component for each
@@ -308,6 +308,7 @@ export function StagePlayerClient({
       );
 
     case "free-text":
+    case "fix-bug":
       return (
         <>
           <FreeTextChallenge

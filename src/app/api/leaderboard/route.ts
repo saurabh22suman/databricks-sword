@@ -4,21 +4,15 @@
  * Scans all snapshots, extracts totalXp + user info, sorts descending.
  */
 
-import { authenticateApiRequest } from "@/lib/auth/api-auth"
 import { apiError, apiOk } from "@/lib/api/responses"
 import { getDb } from "@/lib/db/client"
 import { sandboxSnapshots, users } from "@/lib/db/schema"
 import { getRankForXp } from "@/lib/gamification/ranks"
 import { SandboxDataSchema } from "@/lib/sandbox/types"
 import { desc, eq, sql } from "drizzle-orm"
-import { NextRequest, NextResponse } from "next/server"
+import { NextResponse } from "next/server"
 
-export async function GET(_request: NextRequest): Promise<NextResponse> {
-  const authResult = await authenticateApiRequest()
-  if (!authResult.authenticated) {
-    return apiError(authResult.error, authResult.status, "UNAUTHORIZED")
-  }
-
+export async function GET(): Promise<NextResponse> {
   try {
     const xpExpr = sql<number>`cast(json_extract(${sandboxSnapshots.snapshotData}, '$.userStats.totalXp') as integer)`
 
@@ -46,6 +40,7 @@ export async function GET(_request: NextRequest): Promise<NextResponse> {
       totalXp: number
       rank: ReturnType<typeof getRankForXp>
       missionsCompleted: number
+      currentStreak: number
     }
 
     const entries: LeaderboardEntry[] = []
@@ -60,6 +55,7 @@ export async function GET(_request: NextRequest): Promise<NextResponse> {
           totalXp: sandbox.userStats.totalXp,
           rank: getRankForXp(sandbox.userStats.totalXp),
           missionsCompleted: sandbox.userStats.totalMissionsCompleted,
+          currentStreak: sandbox.streakData.currentStreak,
         })
       } catch {
         // Skip invalid snapshots

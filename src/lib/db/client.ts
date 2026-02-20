@@ -1,7 +1,7 @@
+import { getServerEnv } from "@/lib/env"
 import { createClient } from "@libsql/client"
 import type { LibSQLDatabase } from "drizzle-orm/libsql"
 import { drizzle } from "drizzle-orm/libsql"
-import { getServerEnv } from "@/lib/env"
 
 let _db: LibSQLDatabase | undefined
 

@@ -1,0 +1,11 @@
+{
+  "description": "The train and test assignments are swapped, leaving too little training data. Fix the split assignment so train_df gets 0.8 and test_df gets 0.2.",
+  "starterCode": "test_df, train_df = df.randomSplit([0.8, 0.2], seed=42)",
+  "expectedPattern": "train_df\\s*,\\s*test_df\\s*=\\s*df\\.randomsplit\\s*\\(\\s*\\[\\s*0\\.8\\s*,\\s*0\\.2\\s*\\]",
+  "simulatedOutput": "Issue: Training set is too small and evaluation variance is high.",
+  "hints": [
+    "Assign the larger split to train_df first.",
+    "Keep split ratios at 0.8 and 0.2.",
+    "Only swap variable order."
+  ]
+}

@@ -54,6 +54,14 @@
       "estimatedMinutes": 15
     },
     {
+      "id": "fix-bug",
+      "type": "fix-bug",
+      "title": "Fix a Window Aggregation Bug",
+      "configFile": "stages/07-fix-bug.json",
+      "xpReward": 50,
+      "estimatedMinutes": 8
+    },
+    {
       "id": "quiz",
       "type": "quiz",
       "title": "Knowledge Check",

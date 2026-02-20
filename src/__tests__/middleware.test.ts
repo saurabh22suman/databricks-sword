@@ -7,7 +7,7 @@ vi.mock("@/lib/auth", () => ({
 
 describe("Middleware Route Protection", () => {
   it("should allow unauthenticated access to public routes", async () => {
-    const publicRoutes = ["/", "/blog", "/blog/some-post", "/intel", "/faq"]
+    const publicRoutes = ["/", "/blog", "/blog/some-post", "/intel", "/leaderboard", "/faq"]
     
     for (const route of publicRoutes) {
       // These routes do not require authentication

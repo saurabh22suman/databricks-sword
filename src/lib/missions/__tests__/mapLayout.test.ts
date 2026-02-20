@@ -7,22 +7,22 @@
 
 import { describe, expect, it } from "vitest"
 import {
-  getAllMapNodes,
-  getFieldOpsNodes,
-  getMapEdges,
-  getMissionNodes,
-  getNodeById,
-  getPrerequisites,
-  getDependents,
-  getEdgesByTrack,
-  getZoneById,
-  MAP_WIDTH,
-  MAP_HEIGHT,
-  MAP_CENTER,
-  MAP_SIZE,
-  ZONES,
-  TRACK_COLORS,
-  RANK_COLORS,
+    getAllMapNodes,
+    getDependents,
+    getEdgesByTrack,
+    getFieldOpsNodes,
+    getMapEdges,
+    getMissionNodes,
+    getNodeById,
+    getPrerequisites,
+    getZoneById,
+    MAP_CENTER,
+    MAP_HEIGHT,
+    MAP_SIZE,
+    MAP_WIDTH,
+    RANK_COLORS,
+    TRACK_COLORS,
+    ZONES,
 } from "../mapLayout"
 
 describe("mapLayout — pipeline layout", () => {

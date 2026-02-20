@@ -1,0 +1,11 @@
+{
+  "description": "A DataFrame filter is keeping rows with missing ages. Fix the null check so only rows where age is not null are kept.",
+  "starterCode": "df.filter(F.col(\"age\").isNull())",
+  "expectedPattern": "filter\\s*\\(\\s*f\\.col\\s*\\(\\s*\\\"age\\\"\\s*\\)\\.isnotnull\\s*\\(\\s*\\)\\s*\\)",
+  "simulatedOutput": "Issue: Output still contains missing ages.",
+  "hints": [
+    "You want non-null records.",
+    "Swap to the opposite null check.",
+    "Keep filtering on the age column."
+  ]
+}

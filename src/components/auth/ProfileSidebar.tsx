@@ -2,6 +2,7 @@
 
 import { getNextRank, getRankForXp, getRankProgress, getXpToNextRank, RANKS } from "@/lib/gamification"
 import { loadSandbox } from "@/lib/sandbox"
+import { useDisconnect } from "@/lib/sandbox/useDisconnect"
 import { cn } from "@/lib/utils"
 import {
     Award,
@@ -16,7 +17,6 @@ import {
     X,
     Zap,
 } from "lucide-react"
-import { useDisconnect } from "@/lib/sandbox/useDisconnect"
 import { useSession } from "next-auth/react"
 import Link from "next/link"
 import { useCallback, useEffect, useState } from "react"

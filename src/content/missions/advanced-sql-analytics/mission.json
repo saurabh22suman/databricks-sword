@@ -54,6 +54,14 @@
       "estimatedMinutes": 15
     },
     {
+      "id": "fix-bug",
+      "title": "Fix a Slow Window Query",
+      "type": "fix-bug",
+      "configFile": "stages/07-fix-bug.json",
+      "xpReward": 50,
+      "estimatedMinutes": 8
+    },
+    {
       "id": "quiz",
       "title": "Knowledge Check",
       "type": "quiz",

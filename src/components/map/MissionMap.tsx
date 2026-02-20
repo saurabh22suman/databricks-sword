@@ -13,12 +13,12 @@
 
 import type { IndustryConfig } from "@/lib/field-ops/types"
 import {
-  MAP_HEIGHT,
-  MAP_WIDTH,
-  type MapNode as MapNodeType,
-  getAllMapNodes,
-  getMapEdges,
-  getPrerequisites,
+    MAP_HEIGHT,
+    MAP_WIDTH,
+    type MapNode as MapNodeType,
+    getAllMapNodes,
+    getMapEdges,
+    getPrerequisites,
 } from "@/lib/missions/mapLayout"
 import { TRACKS, type Track } from "@/lib/missions/tracks"
 import type { Mission, MissionRank } from "@/lib/missions/types"
@@ -26,16 +26,16 @@ import { initializeSandbox, loadSandbox } from "@/lib/sandbox"
 import type { SandboxData } from "@/lib/sandbox/types"
 import { cn } from "@/lib/utils"
 import {
-  Filter,
-  HelpCircle,
-  Map as MapIcon,
-  Maximize2,
-  MousePointer,
-  Move,
-  X,
-  Zap,
-  ZoomIn,
-  ZoomOut,
+    Filter,
+    HelpCircle,
+    Map as MapIcon,
+    Maximize2,
+    MousePointer,
+    Move,
+    X,
+    Zap,
+    ZoomIn,
+    ZoomOut,
 } from "lucide-react"
 import { useCallback, useEffect, useMemo, useRef, useState } from "react"
 import { CircuitPaths } from "./CircuitPath"

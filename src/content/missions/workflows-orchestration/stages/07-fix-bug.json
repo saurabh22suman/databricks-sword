@@ -1,0 +1,11 @@
+{
+  "description": "A catalog grant targets the wrong team. Fix the GRANT statement so USE CATALOG on enterprise_core goes to analytics_team.",
+  "starterCode": "GRANT USE CATALOG ON CATALOG enterprise_core TO data_science_team;",
+  "expectedPattern": "to\\s+analytics_team",
+  "simulatedOutput": "Issue: Analytics team cannot access enterprise_core catalog.",
+  "hints": [
+    "The wrong principal is in the GRANT statement.",
+    "Replace it with analytics_team.",
+    "Keep the catalog and privilege unchanged."
+  ]
+}

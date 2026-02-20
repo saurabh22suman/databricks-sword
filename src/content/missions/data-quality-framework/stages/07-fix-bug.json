@@ -1,0 +1,11 @@
+{
+  "description": "Model tracking is logging accuracy under a misspelled metric name. Fix the metric key typo so runs log accuracy under the correct label.",
+  "starterCode": "mlflow.log_metric(\"accuarcy\", accuracy)",
+  "expectedPattern": "mlflow\\.log_metric\\s*\\(\\s*\\\"accuracy\\\"\\s*,",
+  "simulatedOutput": "Issue: Accuracy chart is empty in experiment comparison.",
+  "hints": [
+    "There is a typo in the metric name.",
+    "Use the canonical key: accuracy.",
+    "Keep the same value variable."
+  ]
+}

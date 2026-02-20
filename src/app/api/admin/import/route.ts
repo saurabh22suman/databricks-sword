@@ -1,7 +1,7 @@
+import { isAdminAuthenticated } from "@/lib/auth/admin-auth"
 import { blogPosts, getDb } from "@/lib/db"
 import { eq } from "drizzle-orm"
 import { NextResponse } from "next/server"
-import { isAdminAuthenticated } from "@/lib/auth/admin-auth"
 
 /**
  * Checks whether the URL points to a likely private/internal destination.

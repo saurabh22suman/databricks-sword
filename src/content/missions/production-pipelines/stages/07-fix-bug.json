@@ -1,0 +1,11 @@
+{
+  "description": "Analysts cannot query the revenue table because SELECT was granted at the wrong level. Fix the GRANT so it targets table finance.reporting.monthly_revenue directly.",
+  "starterCode": "GRANT SELECT ON SCHEMA finance.reporting TO analysts;",
+  "expectedPattern": "grant\\s+select\\s+on\\s+table\\s+finance\\.reporting\\.monthly_revenue\\s+to\\s+analysts",
+  "simulatedOutput": "Issue: Permission denied for table finance.reporting.monthly_revenue.",
+  "hints": [
+    "Grant access directly to the target table.",
+    "Use the full three-level object name.",
+    "Keep the principal as analysts."
+  ]
+}

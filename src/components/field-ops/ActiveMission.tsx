@@ -5,10 +5,10 @@
 
 "use client"
 
+import { useSyncNow } from "@/components/auth"
 import type { Industry, IndustryConfig } from "@/lib/field-ops/types"
 import { getStreakMultiplier } from "@/lib/gamification"
 import { updateSandbox } from "@/lib/sandbox"
-import { useSyncNow } from "@/components/auth"
 import { useRouter } from "next/navigation"
 import { useEffect, useState } from "react"
 import { ConfirmDialog } from "../ui/ConfirmDialog"

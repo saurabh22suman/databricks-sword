@@ -54,6 +54,14 @@
       "estimatedMinutes": 12
     },
     {
+      "id": "fix-bug",
+      "type": "fix-bug",
+      "title": "Fix a Broken Expectation Rule",
+      "configFile": "stages/07-fix-bug.json",
+      "xpReward": 50,
+      "estimatedMinutes": 8
+    },
+    {
       "id": "quiz",
       "type": "quiz",
       "title": "Knowledge Check",
