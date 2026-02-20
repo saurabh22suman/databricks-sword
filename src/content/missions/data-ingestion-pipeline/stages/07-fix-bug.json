@@ -1,0 +1,11 @@
+{
+  "description": "A merge clause is trying to update rows that do not exist yet. Fix the WHEN NOT MATCHED branch so new source records are inserted.",
+  "starterCode": "WHEN NOT MATCHED THEN UPDATE SET target.status = source.status",
+  "expectedPattern": "when\\s+not\\s+matched\\s+then\\s+insert",
+  "simulatedOutput": "Issue: New records are not being inserted into target table.",
+  "hints": [
+    "NOT MATCHED rows should create new records.",
+    "Use INSERT for unmatched source rows.",
+    "Keep this change in the NOT MATCHED branch."
+  ]
+}

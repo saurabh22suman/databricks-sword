@@ -1,11 +1,11 @@
+import type { FAQCategory, FAQQuestion } from "@/content/intel/faqData"
+import { faqData } from "@/content/intel/faqData"
 import { faqItems, getDb } from "@/lib/db"
 import { StructuredData, getFAQStructuredData } from "@/lib/seo/structured-data"
-import { faqData } from "@/content/intel/faqData"
-import type { FAQQuestion, FAQCategory } from "@/content/intel/faqData"
 import { eq } from "drizzle-orm"
+import { Database } from "lucide-react"
 import type { Metadata } from "next"
 import Link from "next/link"
-import { Database } from "lucide-react"
 
 export const metadata: Metadata = {
   title: "Intel — Databricks Interview Questions & Knowledge Base",

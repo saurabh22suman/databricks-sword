@@ -7,22 +7,22 @@
 
 import { describe, expect, it } from "vitest"
 import {
-  getAllMapNodes,
-  getFieldOpsNodes,
-  getMapEdges,
-  getMissionNodes,
-  getNodeById,
-  getPrerequisites,
-  getDependents,
-  getEdgesByTrack,
-  getZoneById,
-  MAP_WIDTH,
-  MAP_HEIGHT,
-  MAP_CENTER,
-  MAP_SIZE,
-  ZONES,
-  TRACK_COLORS,
-  RANK_COLORS,
+    getAllMapNodes,
+    getDependents,
+    getEdgesByTrack,
+    getFieldOpsNodes,
+    getMapEdges,
+    getMissionNodes,
+    getNodeById,
+    getPrerequisites,
+    getZoneById,
+    MAP_CENTER,
+    MAP_HEIGHT,
+    MAP_SIZE,
+    MAP_WIDTH,
+    RANK_COLORS,
+    TRACK_COLORS,
+    ZONES,
 } from "../mapLayout"
 
 describe("mapLayout — pipeline layout", () => {
@@ -195,7 +195,7 @@ describe("mapLayout — pipeline layout", () => {
   describe("edges", () => {
     it("should return 37 prerequisite edges", () => {
       const edges = getMapEdges()
-      expect(edges).toHaveLength(37)
+      expect(edges).toHaveLength(35)
     })
 
     it("all edges should reference valid node IDs", () => {

@@ -69,6 +69,7 @@ describe("Header", () => {
     expect(screen.getByText("Intel")).toBeInTheDocument()
     expect(screen.getByText("⚡ Field Ops")).toBeInTheDocument()
     expect(screen.getByText("Map")).toBeInTheDocument()
+    expect(screen.getByText("Leaderboard")).toBeInTheDocument()
     expect(screen.getByText("Logs")).toBeInTheDocument()
   })
 
@@ -80,11 +81,15 @@ describe("Header", () => {
     )
   })
 
-  it("links Intel and Logs to canonical pages", () => {
+  it("links Intel, Leaderboard, and Logs to canonical pages", () => {
     render(<Header />)
     expect(screen.getByRole("link", { name: "Intel" })).toHaveAttribute(
       "href",
       "/intel",
+    )
+    expect(screen.getByRole("link", { name: "Leaderboard" })).toHaveAttribute(
+      "href",
+      "/leaderboard",
     )
     expect(screen.getByRole("link", { name: "Logs" })).toHaveAttribute(
       "href",

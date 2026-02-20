@@ -1,0 +1,11 @@
+{
+  "description": "The gold layer is reading raw bronze data instead of cleaned silver output. Fix the source relation so gold_daily reads from LIVE.silver_orders.",
+  "starterCode": "CREATE OR REFRESH LIVE TABLE gold_daily AS SELECT * FROM LIVE.bronze_orders;",
+  "expectedPattern": "from\\s+live\\.silver_orders",
+  "simulatedOutput": "Issue: Gold layer contains raw fields and duplicate records.",
+  "hints": [
+    "Gold should build on cleaned silver data.",
+    "Update only the source relation.",
+    "Keep the target table name unchanged."
+  ]
+}

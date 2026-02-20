@@ -1,0 +1,11 @@
+{
+  "description": "A workflow dependency is reversed and lets silver start too early. Fix depends_on so silver_transform waits for bronze_ingest, not publish_gold.",
+  "starterCode": "{\"task_key\": \"silver_transform\", \"depends_on\": [{\"task_key\": \"publish_gold\"}]}",
+  "expectedPattern": "\\\"depends_on\\\"\\s*:\\s*\\[\\s*\\{\\s*\\\"task_key\\\"\\s*:\\s*\\\"bronze_ingest\\\"",
+  "simulatedOutput": "Issue: silver_transform starts before ingestion completes.",
+  "hints": [
+    "silver_transform should depend on bronze_ingest.",
+    "Do not depend on downstream gold publish task.",
+    "Only the task_key inside depends_on needs to change."
+  ]
+}

@@ -13,28 +13,29 @@
 
 import type { IndustryConfig } from "@/lib/field-ops/types"
 import {
-  MAP_HEIGHT,
-  MAP_WIDTH,
-  type MapNode as MapNodeType,
-  getAllMapNodes,
-  getMapEdges,
+    MAP_HEIGHT,
+    MAP_WIDTH,
+    type MapNode as MapNodeType,
+    getAllMapNodes,
+    getMapEdges,
+    getPrerequisites,
 } from "@/lib/missions/mapLayout"
 import { TRACKS, type Track } from "@/lib/missions/tracks"
 import type { Mission, MissionRank } from "@/lib/missions/types"
-import { loadSandbox } from "@/lib/sandbox"
+import { initializeSandbox, loadSandbox } from "@/lib/sandbox"
 import type { SandboxData } from "@/lib/sandbox/types"
 import { cn } from "@/lib/utils"
 import {
-  Filter,
-  HelpCircle,
-  Map as MapIcon,
-  Maximize2,
-  MousePointer,
-  Move,
-  X,
-  Zap,
-  ZoomIn,
-  ZoomOut,
+    Filter,
+    HelpCircle,
+    Map as MapIcon,
+    Maximize2,
+    MousePointer,
+    Move,
+    X,
+    Zap,
+    ZoomIn,
+    ZoomOut,
 } from "lucide-react"
 import { useCallback, useEffect, useMemo, useRef, useState } from "react"
 import { CircuitPaths } from "./CircuitPath"
@@ -75,7 +76,8 @@ function getNodeState(
   xpRequired: number,
   prerequisites: string[]
 ): NodeState {
-  if (!sandbox) return "locked"
+  // Treat null sandbox as a fresh user with 0 XP (not fully locked)
+  if (!sandbox) sandbox = initializeSandbox()
 
   // Check if completed
   if (nodeType === "mission" && completedMissions.has(nodeId)) return "completed"
@@ -137,7 +139,7 @@ export function MissionMap({
 }: MissionMapProps): React.ReactElement {
   const containerRef = useRef<HTMLDivElement>(null)
   const [viewport, setViewport] = useState<Viewport>({
-    x: 50,
+    x: 100,
     y: 30,
     scale: 1,
   })
@@ -150,9 +152,9 @@ export function MissionMap({
   const [dragStart, setDragStart] = useState({ x: 0, y: 0 })
   const [sandbox, setSandbox] = useState<SandboxData | null>(null)
 
-  // Load sandbox data on mount
+  // Load sandbox data on mount — initialize for new users so missions show as available
   useEffect(() => {
-    setSandbox(loadSandbox())
+    setSandbox(loadSandbox() ?? initializeSandbox())
   }, [])
 
   // Computed state
@@ -192,15 +194,22 @@ export function MissionMap({
 
   const edges = useMemo(() => getMapEdges(), [])
 
-  // Filter nodes by active tracks
+  // Filter nodes by active tracks — locked nodes are always shown (dimmed), not hidden
   const filteredNodes = useMemo(
     () =>
       mapNodes.filter((node) => {
         if (node.type === "field-ops") return true
         if (!node.track) return true
+        // Always show node if it's locked — just dimmed
+        const mission = missionLookup.get(node.id)
+        const xpReq = mission?.xpRequired || 0
+        const prereqs = getPrerequisites(node.id)
+        const currentXp = sandbox?.userStats?.totalXp ?? 0
+        const isLocked = currentXp < xpReq || (prereqs.length > 0 && !prereqs.every((id) => completedMissions.has(id)))
+        if (isLocked) return true
         return activeFilters.has(node.track)
       }),
-    [mapNodes, activeFilters]
+    [mapNodes, activeFilters, missionLookup, sandbox, completedMissions]
   )
 
   // Filter edges by active tracks
@@ -235,7 +244,7 @@ export function MissionMap({
   }, [])
 
   const handleResetView = useCallback(() => {
-    setViewport({ x: 50, y: 30, scale: 1 })
+    setViewport({ x: 100, y: 30, scale: 1 })
   }, [])
 
   // Pan handlers
@@ -313,7 +322,7 @@ export function MissionMap({
           const fieldOp = fieldOpsLookup.get(node.industry || "")
 
           const prerequisites =
-            node.type === "mission" ? mission?.prerequisites || [] : []
+            node.type === "mission" ? getPrerequisites(node.id) : []
 
           const xpRequired =
             node.type === "mission"
@@ -444,7 +453,7 @@ export function MissionMap({
                   key={track}
                   onClick={() => toggleFilter(track)}
                   className={cn(
-                    "px-3 py-1 rounded text-xs font-medium transition-all flex items-center gap-2",
+                    "px-3 py-1 rounded text-xs font-medium transition-all",
                     isActive
                       ? cn(
                           "border",
@@ -458,14 +467,6 @@ export function MissionMap({
                       : "bg-anime-800/50 text-anime-500 hover:bg-anime-800"
                   )}
                 >
-                  <span
-                    className={cn(
-                      "w-2 h-2 rounded-full",
-                      track === "de" && "bg-anime-cyan",
-                      track === "ml" && "bg-anime-purple",
-                      track === "bi" && "bg-anime-yellow"
-                    )}
-                  />
                   {trackInfo.shortName}
                 </button>
               )

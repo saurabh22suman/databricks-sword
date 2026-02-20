@@ -1,10 +1,12 @@
 "use client"
 
+import { SyncProgressDialog } from "@/components/auth/SyncProgressDialog"
 import { ConnectionForm, ConnectionStatus } from "@/components/databricks"
 import { RankBadge } from "@/components/gamification/RankBadge"
 import { getRankForXp } from "@/lib/gamification"
 import type { SandboxData } from "@/lib/sandbox"
 import { loadSandbox, saveSandbox } from "@/lib/sandbox"
+import { useDisconnect } from "@/lib/sandbox/useDisconnect"
 import { SETTINGS_STORAGE_KEY, useSettings } from "@/lib/settings"
 import { cn } from "@/lib/utils"
 import {
@@ -23,8 +25,6 @@ import {
     VolumeX,
     Zap
 } from "lucide-react"
-import { useDisconnect } from "@/lib/sandbox/useDisconnect"
-import { SyncProgressDialog } from "@/components/auth/SyncProgressDialog"
 import { useSession } from "next-auth/react"
 import { useCallback, useEffect, useState } from "react"
 

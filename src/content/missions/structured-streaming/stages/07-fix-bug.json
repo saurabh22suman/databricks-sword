@@ -1,0 +1,11 @@
+{
+  "description": "Streaming logic is dropping valid late events too early. Fix the watermark so event_time allows 10 minutes of lateness instead of 10 seconds.",
+  "starterCode": "events.withWatermark(\"event_time\", \"10 seconds\")",
+  "expectedPattern": "withwatermark\\s*\\(\\s*\\\"event_time\\\"\\s*,\\s*\\\"10 minutes\\\"\\s*\\)",
+  "simulatedOutput": "Issue: Late-but-valid events are being dropped too early.",
+  "hints": [
+    "The threshold should be minutes, not seconds.",
+    "Keep the same timestamp column.",
+    "Use 10 minutes for this mission scenario."
+  ]
+}

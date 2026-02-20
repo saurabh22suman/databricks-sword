@@ -9,8 +9,8 @@
 
 import { createClient } from "@libsql/client"
 import { drizzle } from "drizzle-orm/libsql"
-import { sqliteTable, text, integer } from "drizzle-orm/sqlite-core"
-import { faqData, categorySlugMap } from "../src/content/intel/faqData"
+import { integer, sqliteTable, text } from "drizzle-orm/sqlite-core"
+import { categorySlugMap, faqData } from "../src/content/intel/faqData"
 
 // Mirror the schema (can't import @/ alias from scripts)
 const faqItems = sqliteTable("faq_items", {

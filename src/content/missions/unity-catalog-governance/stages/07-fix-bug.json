@@ -1,0 +1,11 @@
+{
+  "description": "Autoloader ingestion fails because the cloudFiles format value is misspelled. Fix the option so cloudFiles.format is set to csv.",
+  "starterCode": "spark.readStream.format(\"cloudFiles\").option(\"cloudFiles.format\", \"csvv\").load(input_path)",
+  "expectedPattern": "option\\s*\\(\\s*\\\"cloudfiles\\.format\\\"\\s*,\\s*\\\"csv\\\"\\s*\\)",
+  "simulatedOutput": "Issue: Unknown source format 'csvv'.",
+  "hints": [
+    "There is a typo in the format value.",
+    "Use a supported file format string.",
+    "Keep using cloudFiles reader."
+  ]
+}

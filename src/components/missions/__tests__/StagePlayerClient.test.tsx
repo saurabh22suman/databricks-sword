@@ -26,6 +26,12 @@ vi.mock("@/components/missions", async () => {
         <button onClick={onComplete}>Complete</button>
       </div>
     ),
+    FreeTextChallenge: ({ config, onComplete }: { config: unknown; onComplete: () => void }) => (
+      <div data-testid="free-text-simulated">
+        Simulated FreeText
+        <button onClick={onComplete}>Complete</button>
+      </div>
+    ),
     MissionQuiz: ({ config, onComplete }: { config: unknown; onComplete: () => void }) => (
       <div data-testid="quiz-simulated">
         Quiz Component
@@ -71,6 +77,14 @@ describe("StagePlayerClient Mode Switching", () => {
     blanks: [
       { id: 0, correctAnswer: "users", options: ["users", "customers"] },
     ],
+    hints: ["Hint 1"],
+  };
+
+  const freeTextConfig = {
+    description: "Write the complete solution",
+    starterCode: "SELECT * FROM ",
+    expectedPattern: "SELECT",
+    simulatedOutput: "ok",
     hints: ["Hint 1"],
   };
 
@@ -131,6 +145,21 @@ describe("StagePlayerClient Mode Switching", () => {
       expect(screen.getByTestId("fill-blank-simulated")).toBeInTheDocument();
     });
 
+    it("renders simulated FreeTextChallenge for fix-bug stage", () => {
+      render(
+        <StagePlayerClient
+          stageType="fix-bug"
+          config={freeTextConfig}
+          nextUrl="/missions/test/stage/04"
+          missionId="test-mission"
+          stageId="03-fix-bug"
+          executionMode="simulated"
+        />
+      );
+
+      expect(screen.getByTestId("free-text-simulated")).toBeInTheDocument();
+    });
+
     it("renders quiz component in simulated mode", () => {
       render(
         <StagePlayerClient
@@ -174,6 +203,22 @@ describe("StagePlayerClient Mode Switching", () => {
           nextUrl="/missions/test/stage/03"
           missionId="test-mission"
           stageId="02-fill-blank"
+          executionMode="databricks"
+          bundleStatus="deployed"
+        />
+      );
+
+      expect(screen.getByTestId("databricks-stage-player")).toBeInTheDocument();
+    });
+
+    it("routes fix-bug stage to DatabricksStagePlayer in databricks mode", () => {
+      render(
+        <StagePlayerClient
+          stageType="fix-bug"
+          config={freeTextConfig}
+          nextUrl="/missions/test/stage/04"
+          missionId="test-mission"
+          stageId="03-fix-bug"
           executionMode="databricks"
           bundleStatus="deployed"
         />

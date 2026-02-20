@@ -1,0 +1,11 @@
+{
+  "description": "An aggregation is collapsing all stores into one row. Fix the grouping so sales are aggregated by store_id and return one row per store.",
+  "starterCode": "df.groupBy().agg(F.sum(\"sales\").alias(\"total_sales\"))",
+  "expectedPattern": "groupby\\s*\\(\\s*\\\"store_id\\\"\\s*\\)",
+  "simulatedOutput": "Issue: Only one output row returned. Expected one row per store_id.",
+  "hints": [
+    "The aggregation is missing a grouping key.",
+    "Group by store_id before summing sales.",
+    "Keep the sum(sales) aggregation."
+  ]
+}

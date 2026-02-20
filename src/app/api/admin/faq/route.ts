@@ -1,7 +1,7 @@
+import { isAdminAuthenticated } from "@/lib/auth/admin-auth"
 import { faqItems, getDb } from "@/lib/db"
 import { eq } from "drizzle-orm"
 import { NextResponse } from "next/server"
-import { isAdminAuthenticated } from "@/lib/auth/admin-auth"
 
 /**
  * GET /api/admin/faq - List all FAQ items from database

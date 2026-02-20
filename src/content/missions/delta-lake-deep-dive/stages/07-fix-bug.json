@@ -1,0 +1,11 @@
+{
+  "description": "A Delta MERGE is matching incompatible columns and creating duplicates. Fix the ON clause so target and source are joined by user_id.",
+  "starterCode": "MERGE INTO gold_users t USING updates s ON t.email = s.user_id WHEN MATCHED THEN UPDATE SET t.status = s.status",
+  "expectedPattern": "on\\s+t\\.user_id\\s*=\\s*s\\.user_id",
+  "simulatedOutput": "Issue: Duplicate user records detected after MERGE.",
+  "hints": [
+    "Join on the stable primary key.",
+    "Both sides should use user_id.",
+    "You only need to change the ON condition."
+  ]
+}

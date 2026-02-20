@@ -66,6 +66,7 @@ export type StageType =
   | "drag-drop"
   | "fill-blank"
   | "free-text"
+  | "fix-bug"
   | "quiz"
   | "compare"
   | "debrief"
@@ -76,6 +77,7 @@ export const StageTypeSchema = z.enum([
   "drag-drop",
   "fill-blank",
   "free-text",
+  "fix-bug",
   "quiz",
   "compare",
   "debrief",
@@ -105,6 +107,7 @@ const STAGE_TYPE_CONFIG_MAP: Record<string, string> = {
   "quiz": "stages/05-quiz.json",
   "debrief": "stages/06-debrief.json",
   "free-text": "stages/04-free-text.json",
+  "fix-bug": "stages/07-fix-bug.json",
   "compare": "stages/05-compare.json",
 }
 
@@ -452,7 +455,7 @@ export type QuizQuestion = {
   id: string
   question: string
   options: string[]
-  correctAnswer: number // index
+  correctAnswer: number | string // index or exact option text
   explanation: string
 }
 
@@ -460,7 +463,7 @@ export const QuizQuestionSchema = z.object({
   id: z.string(),
   question: z.string(),
   options: z.array(z.string()).min(2),
-  correctAnswer: z.number().nonnegative().int(),
+  correctAnswer: z.union([z.number().nonnegative().int(), z.string()]),
   explanation: z.string(),
 })
 

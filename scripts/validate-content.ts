@@ -10,9 +10,17 @@
 
 import * as fs from "node:fs";
 import * as path from "node:path";
+import { z } from "zod";
 
 // Schemas
-import { ChallengeSchema } from "../src/lib/challenges/types";
+import {
+  ChallengeCategorySchema,
+  ChallengeCodeBlockSchema,
+  ChallengeDifficultySchema,
+  ChallengeFormatSchema,
+  FillBlankChallengeDataSchema,
+  FreeTextChallengeDataSchema,
+} from "../src/lib/challenges/types";
 import {
     BriefingConfigSchema,
     CompareConfigSchema,
@@ -22,7 +30,6 @@ import {
     FillBlankConfigSchema,
     FreeTextConfigSchema,
     MissionSchema,
-    QuizConfigSchema,
 } from "../src/lib/missions/types";
 
 const CONTENT_DIR = path.resolve(__dirname, "../src/content");
@@ -49,17 +56,92 @@ function logOk(message: string): void {
   console.log(`  ✅ ${message}`);
 }
 
+const MdxRefSchema = z.object({
+  mdxContent: z.string().min(1),
+});
+
+const QuizQuestionForValidationSchema = z.object({
+  id: z.string(),
+  question: z.string(),
+  options: z.array(z.string()).min(2),
+  correctAnswer: z.union([z.number().nonnegative().int(), z.string()]),
+  explanation: z.string(),
+});
+
+const QuizConfigForValidationSchema = z.object({
+  questions: z.array(QuizQuestionForValidationSchema).min(1),
+  passingScore: z.number().min(0).max(100),
+  learnings: z.array(z.string()).optional(),
+});
+
+// Challenge content has two JSON dialects in this repo.
+// Current runtime expects `code`/`starterCode`/`expectedPattern`/`simulatedOutput`,
+// but legacy content still uses `content` and `validationRegex`/`sampleAnswer`.
+const LegacyChallengeCodeBlockSchema = z.object({
+  id: z.string(),
+  content: z.string(),
+  label: z.string().optional(),
+});
+
+const ChallengeDragDropDataForValidationSchema = z.object({
+  blocks: z.array(z.union([ChallengeCodeBlockSchema, LegacyChallengeCodeBlockSchema])).min(2),
+  correctOrder: z.array(z.string()),
+});
+
+const ChallengeFreeTextDataForValidationSchema = z.union([
+  FreeTextChallengeDataSchema,
+  z.object({
+    validationRegex: z.string(),
+    sampleAnswer: z.string(),
+  }),
+]);
+
+const ChallengeSchemaForValidation = z
+  .object({
+    id: z.string(),
+    title: z.string(),
+    category: ChallengeCategorySchema,
+    difficulty: ChallengeDifficultySchema,
+    format: ChallengeFormatSchema,
+    description: z.string(),
+    hints: z.array(z.string()),
+    xpReward: z.number().nonnegative(),
+    optimalSolution: z.string(),
+    explanation: z.string(),
+    dragDrop: ChallengeDragDropDataForValidationSchema.optional(),
+    fillBlank: FillBlankChallengeDataSchema.optional(),
+    freeText: ChallengeFreeTextDataForValidationSchema.optional(),
+  })
+  .refine(
+    (data) => {
+      switch (data.format) {
+        case "drag-drop":
+          return data.dragDrop !== undefined
+        case "fill-blank":
+          return data.fillBlank !== undefined
+        case "free-text":
+          return data.freeText !== undefined
+        default:
+          return false
+      }
+    },
+    {
+      message:
+        "Challenge must include format-specific data matching the format field (dragDrop, fillBlank, or freeText)",
+    }
+  );
+
 // Stage type → Schema mapping
-import type { z } from "zod";
 type ZodSchema = z.ZodType<unknown>
 const STAGE_SCHEMAS: Record<string, ZodSchema> = {
-  briefing: BriefingConfigSchema,
+  briefing: z.union([BriefingConfigSchema, MdxRefSchema]),
   diagram: DiagramConfigSchema,
   "drag-drop": DragDropConfigSchema,
   "fill-blank": FillBlankConfigSchema,
   "free-text": FreeTextConfigSchema,
-  quiz: QuizConfigSchema,
-  debrief: DebriefConfigSchema,
+  "fix-bug": FreeTextConfigSchema,
+  quiz: QuizConfigForValidationSchema,
+  debrief: z.union([DebriefConfigSchema, MdxRefSchema]),
   compare: CompareConfigSchema,
 };
 
@@ -169,7 +251,7 @@ function validateChallenge(filePath: string): void {
     return;
   }
 
-  const result = ChallengeSchema.safeParse(data);
+  const result = ChallengeSchemaForValidation.safeParse(data);
   if (!result.success) {
     for (const issue of result.error.issues) {
       logError(relative, `${issue.path.join(".")} — ${issue.message}`);

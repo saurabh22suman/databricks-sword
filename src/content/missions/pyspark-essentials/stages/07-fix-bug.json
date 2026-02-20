@@ -1,0 +1,11 @@
+{
+  "description": "A parameterized filter is wired to the wrong column. Fix the WHERE clause so country_param filters the country column, not region.",
+  "starterCode": "SELECT * FROM orders WHERE region = :country_param;",
+  "expectedPattern": "where\\s+country\\s*=\\s*:country_param",
+  "simulatedOutput": "Issue: Parameter updates do not change results for selected country.",
+  "hints": [
+    "Match the parameter to the country column.",
+    "Keep the named parameter :country_param.",
+    "Only one column reference is wrong."
+  ]
+}

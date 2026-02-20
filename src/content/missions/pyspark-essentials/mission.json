@@ -48,6 +48,12 @@
       "file": "stages/04-fill-blank.json"
     },
     {
+      "id": "07-fix-bug",
+      "type": "fix-bug",
+      "title": "Fix a DataFrame Transformation Bug",
+      "file": "stages/07-fix-bug.json"
+    },
+    {
       "id": "05-quiz",
       "type": "quiz",
       "title": "Knowledge Check",

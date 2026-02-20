@@ -46,6 +46,12 @@
       "configFile": "stages/04-fill-blank.json"
     },
     {
+      "id": "fix-bug",
+      "type": "fix-bug",
+      "title": "Fix a Cross-Team Access Bug",
+      "configFile": "stages/07-fix-bug.json"
+    },
+    {
       "id": "quiz",
       "type": "quiz",
       "title": "Knowledge Check",

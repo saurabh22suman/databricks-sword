@@ -80,6 +80,7 @@ describe("Mission Types", () => {
         "drag-drop",
         "fill-blank",
         "free-text",
+        "fix-bug",
         "quiz",
         "compare",
         "debrief",
@@ -561,7 +562,7 @@ describe("Mission Types", () => {
   })
 
   describe("QuizConfigSchema", () => {
-    it("validates correct quiz config", () => {
+    it("validates correct quiz config with numeric correctAnswer", () => {
       const config: QuizConfig = {
         questions: [
           {
@@ -576,6 +577,30 @@ describe("Mission Types", () => {
             question: "How does streaming work?",
             options: ["A", "B", "C"],
             correctAnswer: 1,
+            explanation: "Streaming...",
+          },
+        ],
+        passingScore: 70,
+      }
+
+      expect(() => QuizConfigSchema.parse(config)).not.toThrow()
+    })
+
+    it("validates correct quiz config with string correctAnswer", () => {
+      const config: QuizConfig = {
+        questions: [
+          {
+            id: "q1",
+            question: "What is Delta Lake?",
+            options: ["A", "B", "C", "D"],
+            correctAnswer: "A",
+            explanation: "Delta Lake is...",
+          },
+          {
+            id: "q2",
+            question: "How does streaming work?",
+            options: ["A", "B", "C"],
+            correctAnswer: "B",
             explanation: "Streaming...",
           },
         ],

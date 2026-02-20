@@ -10,6 +10,7 @@
 
 "use client";
 
+import { useSyncNow } from "@/components/auth";
 import {
     ArchitectureDiagram,
     CompareChallenge,
@@ -99,7 +100,7 @@ export type StagePlayerClientProps = {
 };
 
 /** Stage types that support Databricks mode */
-const CODE_STAGE_TYPES = ["drag-drop", "fill-blank", "free-text", "code"];
+const CODE_STAGE_TYPES = ["drag-drop", "fill-blank", "free-text", "fix-bug", "code"];
 
 /**
  * Client-side stage player that renders the correct component for each
@@ -121,6 +122,7 @@ export function StagePlayerClient({
   sideQuests = [],
 }: StagePlayerClientProps): React.ReactElement {
   const router = useRouter();
+  const { syncNow } = useSyncNow();
   const [activeSideQuest, setActiveSideQuest] = useState<SideQuestWithContent | null>(null);
 
   /** Navigate to the next stage */
@@ -133,9 +135,10 @@ export function StagePlayerClient({
     // Play stage completion sound
     playSound("stage-complete")
 
-    // Award XP for stage completion
+    // Award XP for stage completion and immediately push to server
     if (stageXpReward > 0) {
       awardStageXp(missionId, stageId, stageXpReward);
+      void syncNow();
     }
 
     // Check for "after" side quest triggered by this stage
@@ -305,6 +308,7 @@ export function StagePlayerClient({
       );
 
     case "free-text":
+    case "fix-bug":
       return (
         <>
           <FreeTextChallenge

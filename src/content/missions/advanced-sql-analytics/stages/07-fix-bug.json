@@ -1,0 +1,11 @@
+{
+  "description": "A ranking query is using one global window. Fix the OVER clause so row numbers reset per region while still ordering by views descending.",
+  "starterCode": "SELECT region, title, views, ROW_NUMBER() OVER (ORDER BY views DESC) AS rn FROM title_metrics;",
+  "expectedPattern": "row_number\\s*\\(\\s*\\)\\s*over\\s*\\(\\s*partition\\s+by\\s+region\\s+order\\s+by\\s+views\\s+desc",
+  "simulatedOutput": "Issue: Global ranking detected. Expected rankings to reset for each region.",
+  "hints": [
+    "Use PARTITION BY for region-level ranking.",
+    "Keep ORDER BY views DESC inside the window.",
+    "You only need to fix the OVER(...) clause."
+  ]
+}

@@ -1,0 +1,11 @@
+{
+  "description": "A semantic metric is inflated because tax is added twice. Fix the formula so metric_revenue is calculated as subtotal plus tax once.",
+  "starterCode": "metric_revenue = subtotal + tax + tax",
+  "expectedPattern": "metric_revenue\\s*=\\s*subtotal\\s*\\+\\s*tax",
+  "simulatedOutput": "Issue: Revenue metric is consistently 8-10% too high.",
+  "hints": [
+    "Tax should be included only once.",
+    "Keep subtotal in the formula.",
+    "Remove the duplicate tax term."
+  ]
+}

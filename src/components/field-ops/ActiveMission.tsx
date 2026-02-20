@@ -5,6 +5,7 @@
 
 "use client"
 
+import { useSyncNow } from "@/components/auth"
 import type { Industry, IndustryConfig } from "@/lib/field-ops/types"
 import { getStreakMultiplier } from "@/lib/gamification"
 import { updateSandbox } from "@/lib/sandbox"
@@ -48,6 +49,7 @@ export function ActiveMission({
   config,
 }: ActiveMissionProps): React.ReactElement {
   const router = useRouter()
+  const { syncNow } = useSyncNow()
   const [data, setData] = useState<DeploymentData | null>(null)
   const [isValidating, setIsValidating] = useState(false)
   const [isCleaning, setIsCleaning] = useState(false)
@@ -134,6 +136,8 @@ export function ActiveMission({
           completedFieldOps: newCompletedFieldOps,
         }
       })
+      // Immediately push XP to server so it isn't lost on logout
+      void syncNow()
 
       // Show success and redirect
       alert(`Mission complete! +${result.xpAwarded} XP`)
