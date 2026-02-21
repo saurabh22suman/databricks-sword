@@ -11,6 +11,8 @@
 
 import type { Session } from "next-auth"
 
+export const MOCK_USER_ID = "mock-user-001"
+
 /**
  * Whether mock auth is active.
  * Only true when MOCK_AUTH=true.
@@ -23,7 +25,7 @@ export const isMockAuth: boolean = process.env.MOCK_AUTH === "true"
  */
 export const MOCK_SESSION: Session = {
   user: {
-    id: "mock-user-001",
+    id: MOCK_USER_ID,
     name: "Mock Swordsman",
     email: "mock@dbsword.local",
     image: "https://api.dicebear.com/7.x/bottts/svg?seed=mock",

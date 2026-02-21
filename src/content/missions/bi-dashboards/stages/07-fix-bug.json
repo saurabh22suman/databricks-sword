@@ -1,11 +1,11 @@
 {
-  "description": "A data quality rule is inverted and quarantines valid purchases. Fix the valid_amount expectation so only rows with amount greater than zero pass.",
-  "starterCode": "CONSTRAINT valid_amount EXPECT (amount <= 0)",
-  "expectedPattern": "constraint\\s+valid_amount\\s+expect\\s*\\(\\s*amount\\s*>\\s*0\\s*\\)",
-  "simulatedOutput": "Issue: 92% of rows quarantined unexpectedly.",
+  "description": "A Lakeview filter parameter is wired to the wrong field. Fix the WHERE clause so :region filters store_region.",
+  "starterCode": "SELECT * FROM gold.sales_facts WHERE sale_date >= :region;",
+  "expectedPattern": "where\\s+store_region\\s*=\\s*:region\\b",
+  "simulatedOutput": "Issue: Changing the Region dashboard parameter does not change regional results.",
   "hints": [
-    "Positive purchase amounts should pass.",
-    "Check the comparison operator.",
-    "Keep the same constraint name."
+    "Region parameters should filter the region column, not dates.",
+    "Keep the parameter name as :region.",
+    "Only the predicate needs to be corrected."
   ]
 }

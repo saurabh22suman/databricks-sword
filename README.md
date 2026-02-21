@@ -77,6 +77,7 @@ src/
 │   ├── sandbox/       # localStorage progress + Turso sync
 │   ├── missions/      # Mission loader & validation
 │   ├── challenges/    # Challenge loader & validation
+│   ├── intel/         # Intel/Challenge topic alignment
 │   ├── srs/           # SM-2 spaced repetition engine
 │   ├── db/            # Drizzle ORM schema & client
 │   └── auth/          # Auth.js v5 configuration

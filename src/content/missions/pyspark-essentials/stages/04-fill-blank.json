@@ -87,6 +87,8 @@
     "filter() and where() are interchangeable in PySpark",
     "select() projects specific columns from a DataFrame",
     "groupBy() followed by agg() creates aggregations",
+    "partitioning and shuffle behavior affect aggregation performance",
+    "broadcast joins avoid large shuffles when one table is small",
     "write.mode() controls overwrite vs append behavior"
   ]
 }

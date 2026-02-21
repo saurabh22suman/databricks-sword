@@ -13,12 +13,11 @@ vi.mock("@/lib/databricks", () => ({
 }));
 
 // Mock the db module
+const mockOnConflictDoUpdate = vi.fn(() => Promise.resolve());
 const mockDb = {
   insert: vi.fn(() => ({
     values: vi.fn(() => ({
-      onConflictDoUpdate: vi.fn(() => ({
-        set: vi.fn(() => Promise.resolve()),
-      })),
+      onConflictDoUpdate: mockOnConflictDoUpdate,
     })),
   })),
   select: vi.fn(() => ({
@@ -56,6 +55,7 @@ async function mockUnauthenticated(): Promise<void> {
 describe("POST /api/databricks/connect", () => {
   beforeEach(async () => {
     vi.clearAllMocks();
+    mockOnConflictDoUpdate.mockResolvedValue(undefined);
     await mockAuthenticated();
   });
 
@@ -125,6 +125,48 @@ describe("POST /api/databricks/connect", () => {
     expect(data.error).toBe("Unauthorized");
   });
 
+  it("returns 400 for non-https workspaceUrl", async () => {
+    const { validateConnection } = await import("@/lib/databricks");
+    const mockedValidate = vi.mocked(validateConnection);
+
+    const { POST } = await import("../connect/route");
+    const request = new NextRequest("http://localhost/api/databricks/connect", {
+      method: "POST",
+      body: JSON.stringify({
+        workspaceUrl: "http://dbc-abc123.cloud.databricks.com",
+        pat: "dapi_test_token",
+      }),
+    });
+
+    const response = await POST(request);
+    const data = await response.json();
+
+    expect(response.status).toBe(400);
+    expect(data.error).toBe("Databricks workspace URL must use HTTPS");
+    expect(mockedValidate).not.toHaveBeenCalled();
+  });
+
+  it("returns 400 for disallowed workspace hostname", async () => {
+    const { validateConnection } = await import("@/lib/databricks");
+    const mockedValidate = vi.mocked(validateConnection);
+
+    const { POST } = await import("../connect/route");
+    const request = new NextRequest("http://localhost/api/databricks/connect", {
+      method: "POST",
+      body: JSON.stringify({
+        workspaceUrl: "https://evil.example.com",
+        pat: "dapi_test_token",
+      }),
+    });
+
+    const response = await POST(request);
+    const data = await response.json();
+
+    expect(response.status).toBe(400);
+    expect(data.error).toBe("Invalid Databricks workspace URL hostname");
+    expect(mockedValidate).not.toHaveBeenCalled();
+  });
+
   it("validates connection before storing", async () => {
     const { validateConnection, encryptPat } = await import("@/lib/databricks");
     const mockedValidate = vi.mocked(validateConnection);
@@ -191,6 +233,31 @@ describe("POST /api/databricks/connect", () => {
     await POST(request);
 
     expect(mockedEncrypt).toHaveBeenCalledWith("dapi_secret_token");
+  });
+
+  it("returns 500 when persistence fails", async () => {
+    const { validateConnection, encryptPat } = await import("@/lib/databricks");
+    const mockedValidate = vi.mocked(validateConnection);
+    const mockedEncrypt = vi.mocked(encryptPat);
+
+    mockedValidate.mockResolvedValue({ valid: true });
+    mockedEncrypt.mockReturnValue("encrypted_pat");
+    mockOnConflictDoUpdate.mockRejectedValueOnce(new Error("DB unavailable"));
+
+    const { POST } = await import("../connect/route");
+    const request = new NextRequest("http://localhost/api/databricks/connect", {
+      method: "POST",
+      body: JSON.stringify({
+        workspaceUrl: "https://dbc-abc123.cloud.databricks.com",
+        pat: "dapi_valid_token",
+      }),
+    });
+
+    const response = await POST(request);
+    const data = await response.json();
+
+    expect(response.status).toBe(500);
+    expect(data.error).toBe("Failed to persist Databricks connection");
   });
 
   it("returns 200 on successful connection", async () => {

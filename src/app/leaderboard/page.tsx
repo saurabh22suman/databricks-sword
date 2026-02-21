@@ -66,7 +66,7 @@ export default function LeaderboardPage(): React.ReactElement {
             Loading leaderboard...
           </div>
         ) : error ? (
-          <div className="cut-corner border border-red-500/40 bg-red-500/10 p-6 text-red-200">
+          <div className="cut-corner border border-red-500/40 bg-red-500/10 p-6 text-red-200" role="alert">
             {error}
           </div>
         ) : entries.length === 0 ? (
@@ -80,7 +80,7 @@ export default function LeaderboardPage(): React.ReactElement {
                 <li key={entry.userId} className="p-4 sm:p-5">
                   <Link
                     href={`/u/${entry.userId}`}
-                    className="group flex flex-col gap-4 sm:flex-row sm:items-center sm:justify-between"
+                    className="group flex flex-col gap-4 rounded-sm focus-visible:outline-none focus-visible:ring-1 focus-visible:ring-anime-cyan/60 sm:flex-row sm:items-center sm:justify-between"
                   >
                     <div className="flex items-center gap-4">
                       <div className="w-10 text-center font-mono text-sm text-anime-cyan">#{index + 1}</div>
@@ -105,7 +105,7 @@ export default function LeaderboardPage(): React.ReactElement {
                       </div>
                     </div>
 
-                    <div className="grid grid-cols-3 gap-4 text-sm sm:min-w-[320px]">
+                    <div className="grid grid-cols-3 gap-4 text-sm sm:min-w-72">
                       <div>
                         <p className="text-xs uppercase tracking-wide text-gray-500">XP</p>
                         <p className="font-mono text-anime-cyan">{entry.totalXp.toLocaleString()}</p>

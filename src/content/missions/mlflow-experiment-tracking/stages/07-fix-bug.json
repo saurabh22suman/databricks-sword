@@ -1,11 +1,11 @@
 {
-  "description": "A serving endpoint is routing all traffic to the challenger model. Fix the traffic split so champion gets 90 percent and challenger gets 10 percent.",
-  "starterCode": "{\"name\": \"credit-risk-endpoint\", \"traffic_config\": {\"routes\": [{\"model\": \"champion\", \"traffic_percentage\": 0}, {\"model\": \"challenger\", \"traffic_percentage\": 100}]}}",
-  "expectedPattern": "\\\"champion\\\"\\s*,\\s*\\\"traffic_percentage\\\"\\s*:\\s*90",
-  "simulatedOutput": "Issue: Champion model receives 0% traffic.",
+  "description": "A model quality score is logged as a parameter, so run comparison dashboards miss it. Fix the MLflow call to log auc as a metric.",
+  "starterCode": "with mlflow.start_run(run_name=\"credit-v4\"):\n    mlflow.log_param(\"auc\", auc_score)",
+  "expectedPattern": "mlflow\\.log_metric\\s*\\(\\s*\\\"auc\\\"\\s*,\\s*auc_score\\s*\\)",
+  "simulatedOutput": "Issue: AUC is not appearing in metric charts when comparing runs.",
   "hints": [
-    "Champion should receive the majority of requests.",
-    "Set challenger to a small canary percentage.",
-    "Use a 90/10 split."
+    "Hyperparameters go in log_param; performance values go in log_metric.",
+    "Keep the metric key as \"auc\".",
+    "Do not change the run structure."
   ]
 }

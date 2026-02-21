@@ -122,6 +122,20 @@ describe("ChallengeGridClient", () => {
         screen.queryByText("Delta Lake Test Challenge")
       ).not.toBeInTheDocument()
     })
+
+    it("applies initial category filter from props", () => {
+      render(
+        <ChallengeGridClient
+          challenges={mockChallenges}
+          initialCategory="sql"
+        />,
+      )
+
+      expect(screen.queryByText("PySpark Test Challenge 1")).not.toBeInTheDocument()
+      expect(screen.getByText("SQL Test Challenge")).toBeInTheDocument()
+      expect(screen.queryByText("Delta Lake Test Challenge")).not.toBeInTheDocument()
+      expect(screen.getByText("1 challenge")).toBeInTheDocument()
+    })
   })
 
   describe("difficulty filtering", () => {
@@ -188,6 +202,25 @@ describe("ChallengeGridClient", () => {
       expect(screen.getByText("PySpark Test Challenge 1")).toBeInTheDocument()
       expect(screen.getByText("SQL Test Challenge")).toBeInTheDocument()
       expect(screen.getByText("Delta Lake Test Challenge")).toBeInTheDocument()
+    })
+
+    it("resets to initial category when clearing filters", () => {
+      render(
+        <ChallengeGridClient
+          challenges={mockChallenges}
+          initialCategory="sql"
+        />,
+      )
+
+      const [, difficultySelect] = screen.getAllByRole("combobox")
+      fireEvent.change(difficultySelect, { target: { value: "S" } })
+
+      fireEvent.click(screen.getByText("Clear Filters"))
+
+      expect(screen.queryByText("PySpark Test Challenge 1")).not.toBeInTheDocument()
+      expect(screen.getByText("SQL Test Challenge")).toBeInTheDocument()
+      expect(screen.queryByText("Delta Lake Test Challenge")).not.toBeInTheDocument()
+      expect(screen.getByText("1 challenge")).toBeInTheDocument()
     })
   })
 

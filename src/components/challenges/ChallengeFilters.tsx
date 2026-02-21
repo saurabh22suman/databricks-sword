@@ -5,26 +5,28 @@
 
 "use client"
 
+import type { ChallengeCategory } from "@/lib/challenges/types"
+import { ChallengeCategorySchema } from "@/lib/challenges/types"
 import { cn } from "@/lib/utils"
 import { ChevronDown } from "lucide-react"
 import React from "react"
 
 export type ChallengeFiltersProps = {
   /** Currently selected category (null = all) */
-  selectedCategory: string | null
+  selectedCategory: ChallengeCategory | null
   /** Currently selected difficulty (null = all) */
   selectedDifficulty: string | null
   /** Currently selected completion status (null = all) */
   selectedStatus: string | null
   /** Callback when category filter changes */
-  onCategoryChange: (category: string | null) => void
+  onCategoryChange: (category: ChallengeCategory | null) => void
   /** Callback when difficulty filter changes */
   onDifficultyChange: (difficulty: string | null) => void
   /** Callback when status filter changes */
   onStatusChange: (status: string | null) => void
 }
 
-const CATEGORIES = [
+const CATEGORIES: ReadonlyArray<{ value: ChallengeCategory; label: string }> = [
   { value: "pyspark", label: "PySpark" },
   { value: "sql", label: "SQL" },
   { value: "delta-lake", label: "Delta Lake" },
@@ -32,7 +34,7 @@ const CATEGORIES = [
   { value: "mlflow", label: "MLflow" },
   { value: "unity-catalog", label: "Unity Catalog" },
   { value: "architecture", label: "Architecture" },
-] as const
+]
 
 const DIFFICULTIES = [
   { value: "B", label: "B — Beginner" },
@@ -59,20 +61,34 @@ export function ChallengeFilters({
   return (
     <div className="flex flex-wrap gap-4">
       {/* Category Dropdown */}
-      <div className="relative">
-        <label className="block text-xs text-anime-500 uppercase tracking-wider mb-1.5">
+      <div className="relative w-full sm:w-auto">
+        <label
+          htmlFor="challenge-filter-category"
+          className="mb-1.5 block text-xs uppercase tracking-wider text-anime-500"
+        >
           Category
         </label>
         <div className="relative">
           <select
+            id="challenge-filter-category"
             value={selectedCategory ?? ""}
-            onChange={(e) => onCategoryChange(e.target.value || null)}
+            onChange={(e) => {
+              const value = e.target.value
+              if (!value) {
+                onCategoryChange(null)
+                return
+              }
+
+              const parsed = ChallengeCategorySchema.safeParse(value)
+              if (parsed.success) {
+                onCategoryChange(parsed.data)
+              }
+            }}
             className={cn(
-              "appearance-none w-48 px-4 py-2.5 pr-10 rounded-sm",
-              "bg-anime-900 border border-anime-700",
-              "text-anime-100 text-sm font-medium",
-              "focus:outline-none focus:border-anime-cyan focus:ring-1 focus:ring-anime-cyan/50",
-              "transition-colors cursor-pointer",
+              "w-full appearance-none rounded-sm px-4 py-2.5 pr-10 sm:w-48",
+              "border border-anime-700 bg-anime-900",
+              "cursor-pointer text-sm font-medium text-anime-100",
+              "transition-colors focus:outline-none focus:border-anime-cyan focus:ring-1 focus:ring-anime-cyan/50",
               selectedCategory && "border-anime-cyan text-anime-cyan"
             )}
           >
@@ -88,20 +104,23 @@ export function ChallengeFilters({
       </div>
 
       {/* Difficulty Dropdown */}
-      <div className="relative">
-        <label className="block text-xs text-anime-500 uppercase tracking-wider mb-1.5">
+      <div className="relative w-full sm:w-auto">
+        <label
+          htmlFor="challenge-filter-difficulty"
+          className="mb-1.5 block text-xs uppercase tracking-wider text-anime-500"
+        >
           Difficulty
         </label>
         <div className="relative">
           <select
+            id="challenge-filter-difficulty"
             value={selectedDifficulty ?? ""}
             onChange={(e) => onDifficultyChange(e.target.value || null)}
             className={cn(
-              "appearance-none w-44 px-4 py-2.5 pr-10 rounded-sm",
-              "bg-anime-900 border border-anime-700",
-              "text-anime-100 text-sm font-medium",
-              "focus:outline-none focus:border-anime-cyan focus:ring-1 focus:ring-anime-cyan/50",
-              "transition-colors cursor-pointer",
+              "w-full appearance-none rounded-sm px-4 py-2.5 pr-10 sm:w-44",
+              "border border-anime-700 bg-anime-900",
+              "cursor-pointer text-sm font-medium text-anime-100",
+              "transition-colors focus:outline-none focus:border-anime-cyan focus:ring-1 focus:ring-anime-cyan/50",
               selectedDifficulty === "S" && "border-anime-accent text-anime-accent",
               selectedDifficulty === "A" && "border-anime-purple text-anime-purple",
               selectedDifficulty === "B" && "border-anime-cyan text-anime-cyan"
@@ -119,20 +138,23 @@ export function ChallengeFilters({
       </div>
 
       {/* Status Dropdown */}
-      <div className="relative">
-        <label className="block text-xs text-anime-500 uppercase tracking-wider mb-1.5">
+      <div className="relative w-full sm:w-auto">
+        <label
+          htmlFor="challenge-filter-status"
+          className="mb-1.5 block text-xs uppercase tracking-wider text-anime-500"
+        >
           Status
         </label>
         <div className="relative">
           <select
+            id="challenge-filter-status"
             value={selectedStatus ?? ""}
             onChange={(e) => onStatusChange(e.target.value || null)}
             className={cn(
-              "appearance-none w-40 px-4 py-2.5 pr-10 rounded-sm",
-              "bg-anime-900 border border-anime-700",
-              "text-anime-100 text-sm font-medium",
-              "focus:outline-none focus:border-anime-cyan focus:ring-1 focus:ring-anime-cyan/50",
-              "transition-colors cursor-pointer",
+              "w-full appearance-none rounded-sm px-4 py-2.5 pr-10 sm:w-40",
+              "border border-anime-700 bg-anime-900",
+              "cursor-pointer text-sm font-medium text-anime-100",
+              "transition-colors focus:outline-none focus:border-anime-cyan focus:ring-1 focus:ring-anime-cyan/50",
               selectedStatus === "completed" && "border-anime-green text-anime-green",
               selectedStatus === "not-started" && "border-anime-yellow text-anime-yellow"
             )}

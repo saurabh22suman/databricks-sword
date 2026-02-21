@@ -8,6 +8,7 @@
  */
 
 import type { Industry } from "../field-ops/types"
+import type { Mission } from "./types"
 import { MISSION_TRACK_MAP, type Track } from "./tracks"
 
 /**
@@ -351,6 +352,18 @@ export function getNodeById(id: string): MapNode | undefined {
  */
 export function getPrerequisites(missionId: string): string[] {
   return PREREQUISITE_EDGES.filter(([, to]) => to === missionId).map(([from]) => from)
+}
+
+/**
+ * Get prerequisite mission IDs from loaded mission data with static edge fallback.
+ */
+export function getMissionPrerequisites(
+  missionId: string,
+  missionLookup?: Map<string, Mission>
+): string[] {
+  const fromMissionData = missionLookup?.get(missionId)?.prerequisites
+  if (Array.isArray(fromMissionData)) return fromMissionData
+  return getPrerequisites(missionId)
 }
 
 /**

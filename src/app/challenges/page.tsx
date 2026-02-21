@@ -5,6 +5,7 @@
 
 import { ChallengeGridClient } from "@/components/challenges/ChallengeGridClient"
 import { getAllChallenges } from "@/lib/challenges"
+import { ChallengeCategorySchema } from "@/lib/challenges/types"
 import type { Metadata } from "next"
 
 export const metadata: Metadata = {
@@ -13,12 +14,25 @@ export const metadata: Metadata = {
     "Practice Databricks skills with standalone challenges across PySpark, SQL, Delta Lake, Streaming, and more.",
 }
 
+type ChallengesPageProps = {
+  searchParams: Promise<Record<string, string | string[] | undefined>>
+}
+
 /**
  * Challenge library page — Server Component.
  * Loads all challenges server-side, client grid handles filtering.
  */
-export default async function ChallengesPage(): Promise<React.ReactElement> {
+export default async function ChallengesPage({
+  searchParams,
+}: ChallengesPageProps): Promise<React.ReactElement> {
   const challenges = await getAllChallenges()
+  const resolvedSearchParams = await searchParams
+  const categoryParam = resolvedSearchParams.category
+  const categoryValue = Array.isArray(categoryParam) ? categoryParam[0] : categoryParam
+  const parsedCategory = categoryValue
+    ? ChallengeCategorySchema.safeParse(categoryValue)
+    : null
+  const initialCategory = parsedCategory?.success ? parsedCategory.data : null
 
   return (
     <div className="min-h-screen bg-anime-950 cyber-grid pt-20">
@@ -36,7 +50,7 @@ export default async function ChallengesPage(): Promise<React.ReactElement> {
         </div>
 
         {/* Client Grid with Filters */}
-        <ChallengeGridClient challenges={challenges} />
+        <ChallengeGridClient challenges={challenges} initialCategory={initialCategory} />
       </div>
     </div>
   )

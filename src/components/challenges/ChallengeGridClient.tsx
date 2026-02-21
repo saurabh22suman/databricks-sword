@@ -5,7 +5,7 @@
 
 "use client"
 
-import type { Challenge } from "@/lib/challenges"
+import type { Challenge, ChallengeCategory } from "@/lib/challenges/types"
 import { loadSandbox } from "@/lib/sandbox"
 import type { ChallengeResult } from "@/lib/sandbox/types"
 import { useRouter } from "next/navigation"
@@ -16,6 +16,8 @@ import { ChallengeFilters } from "./ChallengeFilters"
 export type ChallengeGridClientProps = {
   /** All available challenges (loaded server-side) */
   challenges: Challenge[]
+  /** Initial category selection from route query params */
+  initialCategory?: ChallengeCategory | null
 }
 
 /**
@@ -23,9 +25,10 @@ export type ChallengeGridClientProps = {
  */
 export function ChallengeGridClient({
   challenges,
+  initialCategory = null,
 }: ChallengeGridClientProps): React.ReactElement {
   const router = useRouter()
-  const [selectedCategory, setSelectedCategory] = useState<string | null>(null)
+  const [selectedCategory, setSelectedCategory] = useState<ChallengeCategory | null>(initialCategory)
   const [selectedDifficulty, setSelectedDifficulty] = useState<string | null>(null)
   const [selectedStatus, setSelectedStatus] = useState<string | null>(null)
   const [completedIds, setCompletedIds] = useState<Set<string>>(new Set())
@@ -69,13 +72,28 @@ export function ChallengeGridClient({
       </div>
 
       {/* Results Count */}
-      <div className="mb-4 text-sm text-anime-500">
-        {filteredChallenges.length} challenge{filteredChallenges.length !== 1 ? "s" : ""}
+      <div className="mb-4 flex flex-wrap items-center justify-between gap-2 text-sm">
+        <p className="text-anime-500" role="status" aria-live="polite">
+          {filteredChallenges.length} challenge{filteredChallenges.length !== 1 ? "s" : ""}
+        </p>
+
+        {(selectedCategory || selectedDifficulty || selectedStatus) && (
+          <button
+            onClick={() => {
+              setSelectedCategory(initialCategory)
+              setSelectedDifficulty(null)
+              setSelectedStatus(null)
+            }}
+            className="text-xs font-medium text-anime-cyan hover:text-anime-cyan/80 focus-visible:outline-none focus-visible:ring-1 focus-visible:ring-anime-cyan/60"
+          >
+            Reset filters
+          </button>
+        )}
       </div>
 
       {/* Grid */}
       {filteredChallenges.length > 0 ? (
-        <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
+        <div className="grid grid-cols-1 gap-6 md:grid-cols-2 lg:grid-cols-3">
           {filteredChallenges.map((challenge) => (
             <ChallengeCard
               key={challenge.id}
@@ -99,11 +117,11 @@ export function ChallengeGridClient({
           </p>
           <button
             onClick={() => {
-              setSelectedCategory(null)
+              setSelectedCategory(initialCategory)
               setSelectedDifficulty(null)
               setSelectedStatus(null)
             }}
-            className="mt-4 px-4 py-2 rounded text-sm bg-anime-800 text-anime-cyan border border-anime-700 hover:bg-anime-700 transition-colors"
+            className="mt-4 rounded border border-anime-700 bg-anime-800 px-4 py-2 text-sm text-anime-cyan transition-colors hover:bg-anime-700 focus-visible:outline-none focus-visible:ring-1 focus-visible:ring-anime-cyan/60"
           >
             Clear Filters
           </button>

@@ -1,11 +1,11 @@
 {
-  "description": "A JOIN is using mismatched keys and inflating the result set. Fix the ON clause to join orders and customers by customer_id.",
-  "starterCode": "SELECT * FROM orders o JOIN customers c ON o.order_id = c.customer_id;",
-  "expectedPattern": "on\\s+o\\.customer_id\\s*=\\s*c\\.customer_id",
-  "simulatedOutput": "Issue: Row count exploded due to mismatched join keys.",
+  "description": "The governed revenue metric violates the semantic definition by adding returns instead of subtracting them. Fix net_revenue to subtract both discount_amount and returns_amount.",
+  "starterCode": "SELECT business_unit, SUM(order_total) - SUM(discount_amount) + SUM(returns_amount) AS net_revenue FROM gold.orders GROUP BY business_unit",
+  "expectedPattern": "sum\\s*\\(\\s*order_total\\s*\\)\\s*-\\s*sum\\s*\\(\\s*discount_amount\\s*\\)\\s*-\\s*sum\\s*\\(\\s*returns_amount\\s*\\)",
+  "simulatedOutput": "Issue: Business units report inflated net_revenue and metric definitions no longer match contracts.",
   "hints": [
-    "Join facts to dimensions using customer_id.",
-    "order_id is not the right relationship key here.",
-    "Only the ON clause needs to change."
+    "Net revenue is gross minus discounts minus returns.",
+    "Preserve business_unit grouping.",
+    "Only fix the arithmetic in the metric formula."
   ]
 }

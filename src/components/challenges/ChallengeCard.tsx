@@ -10,6 +10,16 @@ import { MAX_CHALLENGE_XP_COMPLETIONS } from "@/lib/sandbox/types"
 import { cn } from "@/lib/utils"
 import React from "react"
 
+const CATEGORY_LABELS: Record<ChallengeCategory, string> = {
+  pyspark: "PySpark",
+  sql: "SQL",
+  "delta-lake": "Delta Lake",
+  streaming: "Streaming",
+  mlflow: "MLflow",
+  "unity-catalog": "Unity Catalog",
+  architecture: "Architecture",
+}
+
 export type ChallengeCardProps = {
   /** Challenge data to display */
   challenge: Challenge
@@ -60,7 +70,7 @@ export function ChallengeCard({
             alt=""
             className="w-4 h-4 opacity-70"
           />
-          {challenge.category}
+          {CATEGORY_LABELS[challenge.category as ChallengeCategory] ?? challenge.category}
         </span>
         <span
           className={cn(

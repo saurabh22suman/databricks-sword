@@ -1,3 +1,4 @@
+import type { ChallengeCategory } from "@/lib/challenges"
 import { render, screen } from "@testing-library/react"
 import userEvent from "@testing-library/user-event"
 import { describe, expect, it, vi } from "vitest"
@@ -5,7 +6,7 @@ import { ChallengeFilters } from "../ChallengeFilters"
 
 describe("ChallengeFilters", () => {
   const defaultProps = {
-    selectedCategory: null as string | null,
+    selectedCategory: null as ChallengeCategory | null,
     selectedDifficulty: null as string | null,
     selectedStatus: null as string | null,
     onCategoryChange: vi.fn(),
@@ -48,7 +49,7 @@ describe("ChallengeFilters", () => {
   })
 
   it("applies selected category styles", () => {
-    render(<ChallengeFilters {...defaultProps} selectedCategory="sql" />)
+    render(<ChallengeFilters {...defaultProps} selectedCategory={"sql" as ChallengeCategory} />)
     const [categorySelect] = screen.getAllByRole("combobox")
     expect(categorySelect.className).toMatch(/anime-cyan/i)
   })
@@ -59,9 +60,9 @@ describe("ChallengeFilters", () => {
     render(
       <ChallengeFilters
         {...defaultProps}
-        selectedCategory="pyspark"
+        selectedCategory={"pyspark" as ChallengeCategory}
         onCategoryChange={onCategoryChange}
-      />
+      />,
     )
 
     const [categorySelect] = screen.getAllByRole("combobox")

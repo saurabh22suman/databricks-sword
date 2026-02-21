@@ -18,11 +18,11 @@ import {
     type MapNode as MapNodeType,
     getAllMapNodes,
     getMapEdges,
-    getPrerequisites,
+    getMissionPrerequisites,
 } from "@/lib/missions/mapLayout"
 import { TRACKS, type Track } from "@/lib/missions/tracks"
 import type { Mission, MissionRank } from "@/lib/missions/types"
-import { initializeSandbox, loadSandbox } from "@/lib/sandbox"
+import { SANDBOX_KEY, initializeSandbox, loadSandbox } from "@/lib/sandbox"
 import type { SandboxData } from "@/lib/sandbox/types"
 import { cn } from "@/lib/utils"
 import {
@@ -49,6 +49,7 @@ type MissionMapProps = {
   missions: Mission[]
   fieldOps: IndustryConfig[]
   className?: string
+  isGuest?: boolean
 }
 
 /**
@@ -136,6 +137,7 @@ export function MissionMap({
   missions,
   fieldOps,
   className,
+  isGuest = false,
 }: MissionMapProps): React.ReactElement {
   const containerRef = useRef<HTMLDivElement>(null)
   const [viewport, setViewport] = useState<Viewport>({
@@ -152,10 +154,40 @@ export function MissionMap({
   const [dragStart, setDragStart] = useState({ x: 0, y: 0 })
   const [sandbox, setSandbox] = useState<SandboxData | null>(null)
 
-  // Load sandbox data on mount — initialize for new users so missions show as available
-  useEffect(() => {
+  const refreshSandbox = useCallback(() => {
     setSandbox(loadSandbox() ?? initializeSandbox())
   }, [])
+
+  // Load sandbox data on mount and refresh when tab regains focus or sandbox storage changes
+  useEffect(() => {
+    refreshSandbox()
+
+    const handleFocus = () => {
+      refreshSandbox()
+    }
+
+    const handleVisibilityChange = () => {
+      if (document.visibilityState === "visible") {
+        refreshSandbox()
+      }
+    }
+
+    const handleStorage = (event: StorageEvent) => {
+      if (!event.key || event.key === SANDBOX_KEY) {
+        refreshSandbox()
+      }
+    }
+
+    window.addEventListener("focus", handleFocus)
+    document.addEventListener("visibilitychange", handleVisibilityChange)
+    window.addEventListener("storage", handleStorage)
+
+    return () => {
+      window.removeEventListener("focus", handleFocus)
+      document.removeEventListener("visibilitychange", handleVisibilityChange)
+      window.removeEventListener("storage", handleStorage)
+    }
+  }, [refreshSandbox])
 
   // Computed state
   const completedMissions = useMemo(() => {
@@ -203,9 +235,11 @@ export function MissionMap({
         // Always show node if it's locked — just dimmed
         const mission = missionLookup.get(node.id)
         const xpReq = mission?.xpRequired || 0
-        const prereqs = getPrerequisites(node.id)
+        const prereqs = getMissionPrerequisites(node.id, missionLookup)
         const currentXp = sandbox?.userStats?.totalXp ?? 0
-        const isLocked = currentXp < xpReq || (prereqs.length > 0 && !prereqs.every((id) => completedMissions.has(id)))
+        const isLocked =
+          currentXp < xpReq ||
+          (prereqs.length > 0 && !prereqs.every((id) => completedMissions.has(id)))
         if (isLocked) return true
         return activeFilters.has(node.track)
       }),
@@ -322,7 +356,9 @@ export function MissionMap({
           const fieldOp = fieldOpsLookup.get(node.industry || "")
 
           const prerequisites =
-            node.type === "mission" ? getPrerequisites(node.id) : []
+            node.type === "mission"
+              ? getMissionPrerequisites(node.id, missionLookup)
+              : []
 
           const xpRequired =
             node.type === "mission"
@@ -379,6 +415,7 @@ export function MissionMap({
               xpReward={xpReward}
               estimatedMinutes={estimatedMinutes}
               progress={progress}
+              isGuest={isGuest}
             />
           )
         })}

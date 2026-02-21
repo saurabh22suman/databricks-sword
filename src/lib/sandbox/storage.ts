@@ -1,5 +1,6 @@
 import type { SandboxData } from "./types"
 import { SandboxDataSchema } from "./types"
+import { validateStreakData } from "../gamification/streaks"
 
 /**
  * Browser Sandbox Storage
@@ -92,6 +93,23 @@ export function loadSandbox(): SandboxData | null {
 
     const parsed = JSON.parse(stored)
     const validated = SandboxDataSchema.parse(parsed)
+
+    // Validate and decay streak if needed
+    const today = new Date().toISOString().split("T")[0]
+    const validatedStreakData = validateStreakData(validated.streakData, today)
+
+    // If streak was corrected, update the sandbox
+    if (validatedStreakData !== validated.streakData) {
+      return {
+        ...validated,
+        streakData: validatedStreakData,
+        userStats: {
+          ...validated.userStats,
+          currentStreak: validatedStreakData.currentStreak,
+          longestStreak: validatedStreakData.longestStreak,
+        },
+      }
+    }
 
     return validated
   } catch (error) {

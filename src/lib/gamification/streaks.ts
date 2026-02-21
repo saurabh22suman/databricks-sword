@@ -212,7 +212,7 @@ export function useFreeze(streakData: StreakData): StreakData {
  */
 export function earnFreeze(streakData: StreakData): StreakData {
   const MAX_FREEZES = 2
-  
+
   if (streakData.freezesAvailable >= MAX_FREEZES) {
     return streakData
   }
@@ -220,5 +220,70 @@ export function earnFreeze(streakData: StreakData): StreakData {
   return {
     ...streakData,
     freezesAvailable: streakData.freezesAvailable + 1,
+  }
+}
+
+/**
+ * Validates and corrects streak data based on elapsed time.
+ * Call this on login/mount to ensure stale streaks are decayed.
+ *
+ * @param streakData - User's current streak data
+ * @param today - ISO date string of current date (YYYY-MM-DD)
+ * @returns Updated StreakData with decayed streak if needed
+ *
+ * @example
+ * ```ts
+ * // Last active 3 days ago - streak breaks
+ * validateStreakData({ currentStreak: 5, lastActiveDate: "2026-02-09", ... }, "2026-02-12")
+ * // => { currentStreak: 0, longestStreak: 5, lastActiveDate: "2026-02-09", ... }
+ *
+ * // Last active yesterday - streak maintained
+ * validateStreakData({ currentStreak: 5, lastActiveDate: "2026-02-11", ... }, "2026-02-12")
+ * // => { currentStreak: 5, ... } (no change needed)
+ *
+ * // Last active today - streak unchanged
+ * validateStreakData({ currentStreak: 5, lastActiveDate: "2026-02-12", ... }, "2026-02-12")
+ * // => { currentStreak: 5, ... } (no change needed)
+ * ```
+ */
+export function validateStreakData(
+  streakData: StreakData,
+  today: string,
+): StreakData {
+  // No lastActiveDate means new user or no activity yet
+  if (!streakData.lastActiveDate) {
+    return streakData
+  }
+
+  const lastActive = new Date(streakData.lastActiveDate)
+  const todayDate = new Date(today)
+
+  // Calculate day difference
+  const diffTime = todayDate.getTime() - lastActive.getTime()
+  const diffDays = Math.floor(diffTime / (1000 * 60 * 60 * 24))
+
+  // Active today - no change needed
+  if (diffDays === 0) {
+    return streakData
+  }
+
+  // Active yesterday - streak continues unchanged
+  if (diffDays === 1) {
+    return streakData
+  }
+
+  // Missed exactly 1 day (2 days apart) - can use freeze
+  if (diffDays === 2 && streakData.freezesAvailable > 0) {
+    return {
+      ...streakData,
+      freezesAvailable: streakData.freezesAvailable - 1,
+      freezesUsed: streakData.freezesUsed + 1,
+    }
+  }
+
+  // Streak broken - reset to 0
+  return {
+    ...streakData,
+    currentStreak: 0,
   }
 }

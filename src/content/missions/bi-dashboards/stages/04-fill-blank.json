@@ -73,10 +73,10 @@
     "timezone_id sets the cron schedule's timezone context"
   ],
   "learnings": [
-    "CREATE OR REPLACE VIEW creates named queries",
-    "Parameters use {{ parameter_name }} syntax",
-    "COALESCE handles NULL values in calculations",
-    "DATE_TRUNC groups timestamps by time period",
-    "FORMAT_NUMBER presents numbers readably"
+    "CREATE OR REPLACE VIEW creates reusable query definitions",
+    "Databricks SQL parameters use :param_name syntax",
+    "DATE_TRUNC groups timestamps into dashboard-friendly time buckets",
+    "SQL Alerts evaluate query result conditions against thresholds",
+    "timezone_id keeps scheduled dashboard refreshes aligned to business hours"
   ]
 }

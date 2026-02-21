@@ -35,6 +35,7 @@ type MapNodeProps = {
   estimatedMinutes?: number
   progress?: number // 0-100 for in-progress
   onClick?: () => void
+  isGuest?: boolean
 }
 
 /**
@@ -66,6 +67,7 @@ export function MapNode({
   estimatedMinutes = 0,
   progress = 0,
   onClick,
+  isGuest = false,
 }: MapNodeProps): React.ReactElement {
   const [isHovered, setIsHovered] = useState(false)
   const hideTimeoutRef = useRef<NodeJS.Timeout | null>(null)
@@ -93,7 +95,7 @@ export function MapNode({
   }, [])
 
   const handleClick = (): void => {
-    if (state === "locked") return
+    if (state === "locked" || isGuest) return
     if (onClick) {
       onClick()
     } else if (node.type === "mission") {
@@ -154,13 +156,13 @@ export function MapNode({
       onMouseEnter={handleMouseEnter}
       onMouseLeave={handleMouseLeave}
       onClick={handleClick}
-      style={{ cursor: state === "locked" ? "default" : "pointer" }}
+      style={{ cursor: state === "locked" || isGuest ? "default" : "pointer" }}
     >
       {/* Invisible larger hit area for stable hover */}
       <circle r={radius + 16} fill="transparent" />
 
       {/* Hover highlight ring — no CSS transform, stays in place */}
-      {isHovered && state !== "locked" && (
+      {isHovered && (state !== "locked" || isGuest) && (
         <circle
           r={radius + 6}
           fill="none"
@@ -292,7 +294,7 @@ export function MapNode({
       )}
 
       {/* Hover tooltip — 2x size */}
-      {isHovered && state !== "locked" && (
+      {isHovered && (state !== "locked" || isGuest) && (
         <g transform={`translate(${radius + 20}, -100)`} style={{ pointerEvents: "none" }}>
           <rect
             x="0"

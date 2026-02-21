@@ -1,11 +1,11 @@
 {
-  "description": "Autoloader ingestion fails because the cloudFiles format value is misspelled. Fix the option so cloudFiles.format is set to csv.",
-  "starterCode": "spark.readStream.format(\"cloudFiles\").option(\"cloudFiles.format\", \"csvv\").load(input_path)",
-  "expectedPattern": "option\\s*\\(\\s*\\\"cloudfiles\\.format\\\"\\s*,\\s*\\\"csv\\\"\\s*\\)",
-  "simulatedOutput": "Issue: Unknown source format 'csvv'.",
+  "description": "A GRANT statement gives table read access to the wrong group. Fix the principal so SELECT on federal_data.citizen_records.records is granted to auditors_group.",
+  "starterCode": "GRANT SELECT ON TABLE federal_data.citizen_records.records TO interns_group;",
+  "expectedPattern": "grant\\s+select\\s+on\\s+table\\s+federal_data\\.citizen_records\\.records\\s+to\\s+auditors_group",
+  "simulatedOutput": "Issue: Audit team cannot query required records for compliance review.",
   "hints": [
-    "There is a typo in the format value.",
-    "Use a supported file format string.",
-    "Keep using cloudFiles reader."
+    "Keep privilege and table unchanged.",
+    "Only the target principal is incorrect.",
+    "Use the compliance-focused group name auditors_group."
   ]
 }

@@ -70,3 +70,6 @@ docker-compose-prod-exp.yml
 .playwright-mcp/
 test-results/
 e2e/screenshots/
+
+# Claude Code local overrides
+.claude/settings.local.json

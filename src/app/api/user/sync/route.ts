@@ -1,10 +1,74 @@
 import { authenticateApiRequest } from "@/lib/auth/api-auth"
+import { calculateStreak } from "@/lib/gamification/streaks"
 import { getDb } from "@/lib/db/client"
 import { sandboxSnapshots } from "@/lib/db/schema"
+import type { SandboxData } from "@/lib/sandbox/types"
 import { SandboxDataSchema } from "@/lib/sandbox/types"
 import { desc, eq } from "drizzle-orm"
 import { nanoid } from "nanoid"
 import { NextRequest, NextResponse } from "next/server"
+
+function sanitizeSandboxAggregates(sandbox: SandboxData): SandboxData {
+  let totalXp = 0
+  let totalMissionsCompleted = 0
+  let totalChallengesCompleted = 0
+
+  for (const mission of Object.values(sandbox.missionProgress)) {
+    for (const stage of Object.values(mission.stageProgress)) {
+      totalXp += stage.xpEarned
+    }
+
+    if (mission.completed) {
+      totalMissionsCompleted += 1
+    }
+  }
+
+  for (const challenge of Object.values(sandbox.challengeResults)) {
+    totalXp += challenge.xpEarned
+
+    if (challenge.completed) {
+      totalChallengesCompleted += 1
+    }
+  }
+
+  totalXp += sandbox.achievements.length
+
+  // Server-side streak validation
+  const today = new Date().toISOString().split("T")[0] // YYYY-MM-DD
+  let streakData = { ...sandbox.streakData }
+
+  if (sandbox.streakData.lastActiveDate) {
+    const result = calculateStreak(sandbox.streakData.lastActiveDate, today, {
+      freezesAvailable: sandbox.streakData.freezesAvailable,
+    })
+
+    if (result.freezeUsed) {
+      streakData.freezesAvailable -= 1
+      streakData.freezesUsed += 1
+    }
+
+    streakData.currentStreak = result.newStreak
+    streakData.lastActiveDate = today
+
+    if (streakData.currentStreak > streakData.longestStreak) {
+      streakData.longestStreak = streakData.currentStreak
+    }
+  }
+
+  return {
+    ...sandbox,
+    streakData,
+    userStats: {
+      ...sandbox.userStats,
+      totalXp,
+      totalMissionsCompleted,
+      totalChallengesCompleted,
+      totalAchievements: sandbox.achievements.length,
+      currentStreak: streakData.currentStreak,
+      longestStreak: streakData.longestStreak,
+    },
+  }
+}
 
 /**
  * POST /api/user/sync
@@ -28,6 +92,7 @@ export async function POST(request: NextRequest): Promise<NextResponse> {
     }
 
     const sandboxData = validationResult.data
+    const sanitizedSandboxData = sanitizeSandboxAggregates(sandboxData)
     const userId = authResult.userId
 
     // Upsert sandbox snapshot
@@ -36,13 +101,17 @@ export async function POST(request: NextRequest): Promise<NextResponse> {
       .values({
         id: nanoid(),
         userId,
-        snapshotData: JSON.stringify(sandboxData),
+        snapshotData: JSON.stringify(sanitizedSandboxData),
+        totalXp: sanitizedSandboxData.userStats.totalXp,
+        currentStreak: sanitizedSandboxData.streakData.currentStreak,
         updatedAt: new Date(),
       })
       .onConflictDoUpdate({
         target: sandboxSnapshots.userId,
         set: {
-          snapshotData: JSON.stringify(sandboxData),
+          snapshotData: JSON.stringify(sanitizedSandboxData),
+          totalXp: sanitizedSandboxData.userStats.totalXp,
+          currentStreak: sanitizedSandboxData.streakData.currentStreak,
           updatedAt: new Date(),
         },
       })

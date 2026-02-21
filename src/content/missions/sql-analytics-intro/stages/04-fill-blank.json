@@ -82,10 +82,10 @@
     "BETWEEN is inclusive: checks value >= start AND value <= end"
   ],
   "learnings": [
-    "WITH clause defines Common Table Expressions",
-    "ROW_NUMBER() assigns unique sequential numbers",
-    "OVER() clause specifies the window for calculations",
-    "PARTITION BY groups rows for window functions",
-    "ORDER BY within OVER() determines row sequence"
+    "COUNT(DISTINCT order_id) avoids duplicate order counts after joins",
+    "INNER JOIN keeps only matching rows across tables",
+    "SUM(price * quantity) computes line-level revenue correctly",
+    "DATE(order_date) normalizes timestamps for daily aggregation",
+    "BETWEEN filters rows within an inclusive date range"
   ]
 }

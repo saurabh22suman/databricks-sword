@@ -1,11 +1,11 @@
 {
-  "description": "A DataFrame filter is keeping rows with missing ages. Fix the null check so only rows where age is not null are kept.",
-  "starterCode": "df.filter(F.col(\"age\").isNull())",
-  "expectedPattern": "filter\\s*\\(\\s*f\\.col\\s*\\(\\s*\\\"age\\\"\\s*\\)\\.isnotnull\\s*\\(\\s*\\)\\s*\\)",
-  "simulatedOutput": "Issue: Output still contains missing ages.",
+  "description": "A JOIN uses the wrong key and drops valid customer-order matches. Fix the ON clause to join customers and orders by customer_id.",
+  "starterCode": "SELECT c.name, o.order_id FROM customers c INNER JOIN orders o ON c.customer_id = o.order_id",
+  "expectedPattern": "on\\s+c\\.customer_id\\s*=\\s*o\\.customer_id",
+  "simulatedOutput": "Issue: Customer order counts are far lower than expected.",
   "hints": [
-    "You want non-null records.",
-    "Swap to the opposite null check.",
-    "Keep filtering on the age column."
+    "Join customer dimension to orders fact on customer_id.",
+    "order_id should not be matched to customer_id.",
+    "Only the join predicate needs correction."
   ]
 }
