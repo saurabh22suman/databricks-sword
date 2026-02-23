@@ -1,11 +1,11 @@
 {
-  "description": "A catalog grant targets the wrong team. Fix the GRANT statement so USE CATALOG on enterprise_core goes to analytics_team.",
-  "starterCode": "GRANT USE CATALOG ON CATALOG enterprise_core TO data_science_team;",
-  "expectedPattern": "to\\s+analytics_team",
-  "simulatedOutput": "Issue: Analytics team cannot access enterprise_core catalog.",
+  "description": "The silver_transform task starts before bronze_ingest completes because depends_on points to the wrong task. Fix the dependency so silver_transform waits for bronze_ingest.",
+  "starterCode": "{\"task_key\":\"silver_transform\",\"depends_on\":[{\"task_key\":\"publish_gold\"}]}",
+  "expectedPattern": "\\\"depends_on\\\"\\s*:\\s*\\[\\s*\\{\\s*\\\"task_key\\\"\\s*:\\s*\\\"bronze_ingest\\\"",
+  "simulatedOutput": "Issue: silver_transform starts before ingestion completes.",
   "hints": [
-    "The wrong principal is in the GRANT statement.",
-    "Replace it with analytics_team.",
-    "Keep the catalog and privilege unchanged."
+    "silver_transform should depend on bronze_ingest.",
+    "Do not depend on downstream publish_gold task.",
+    "Only the task_key inside depends_on needs to change."
   ]
 }

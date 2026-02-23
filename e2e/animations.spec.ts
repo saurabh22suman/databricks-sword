@@ -157,15 +157,18 @@ test.describe("Challenge Completion Celebration", () => {
   }) => {
     await completeFillBlankChallenge(page);
 
-    await expect(
-      page.getByTestId("challenge-complete-celebration"),
-    ).toBeVisible({ timeout: 5_000 });
+    const overlay = page.getByTestId("challenge-complete-celebration");
+    await expect(overlay).toBeVisible({ timeout: 5_000 });
 
-    // Click "Continue" on the celebration overlay
-    await page.getByRole("button", { name: "Continue" }).click();
+    const continueButton = overlay.getByRole("button", { name: "Continue" });
+    await expect(continueButton).toBeVisible();
 
-    // Should navigate to /challenges
-    await page.waitForURL("**/challenges", { timeout: 10_000 });
+    // Overlay uses entry animation + auto-dismiss; force click avoids flaky stability checks.
+    await Promise.all([
+      page.waitForURL("**/challenges", { timeout: 10_000 }),
+      continueButton.click({ force: true }),
+    ]);
+
     await expect(page).toHaveURL(/\/challenges$/);
   });
 

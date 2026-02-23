@@ -1,11 +1,11 @@
 {
-  "description": "A parameterized filter is wired to the wrong column. Fix the WHERE clause so country_param filters the country column, not region.",
-  "starterCode": "SELECT * FROM orders WHERE region = :country_param;",
-  "expectedPattern": "where\\s+country\\s*=\\s*:country_param",
-  "simulatedOutput": "Issue: Parameter updates do not change results for selected country.",
+  "description": "A large dataset is pulled to the driver before filtering, causing out-of-memory failures. Fix the pipeline to filter in Spark before any action.",
+  "starterCode": "purchase_events = events_df.collect().filter(F.col(\"event_type\") == \"purchase\")",
+  "expectedPattern": "events_df\\.filter\\s*\\(\\s*F\\.col\\(\\\"event_type\\\"\\)\\s*==\\s*\\\"purchase\\\"\\s*\\)",
+  "simulatedOutput": "Issue: Driver OOM when processing billions of rows.",
   "hints": [
-    "Match the parameter to the country column.",
-    "Keep the named parameter :country_param.",
-    "Only one column reference is wrong."
+    "collect() is an action that brings all rows to the driver.",
+    "Keep the logic as a DataFrame transformation.",
+    "Filter on event_type inside Spark execution."
   ]
 }

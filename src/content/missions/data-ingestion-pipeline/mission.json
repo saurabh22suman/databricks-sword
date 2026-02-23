@@ -51,7 +51,7 @@
     {
       "id": "07-fix-bug",
       "type": "fix-bug",
-      "title": "Fix a Faulty Auto Loader Option",
+      "title": "Fix a Broken MERGE Insert Clause",
       "file": "stages/07-fix-bug.json"
     },
     {

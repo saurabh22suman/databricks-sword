@@ -20,6 +20,9 @@ export async function POST(
   request: NextRequest,
   context: RouteContext
 ): Promise<NextResponse> {
+  let deploymentId: string | null = null
+  let shouldRecoverToDeployed = false
+
   try {
     const authResult = await authenticateApiRequest()
     if (!authResult.authenticated) {
@@ -29,7 +32,8 @@ export async function POST(
     const db = getDb()
     const userId = authResult.userId
 
-    const { deploymentId } = await context.params
+    const params = await context.params
+    deploymentId = params.deploymentId
 
     // Get deployment
     const deployment = await getDeploymentStatus(deploymentId)
@@ -73,6 +77,7 @@ export async function POST(
 
     // Update status to validating
     await updateDeploymentStatus(deploymentId, "validating")
+    shouldRecoverToDeployed = true
 
     // Run validations
     const results = await runValidation(
@@ -85,6 +90,7 @@ export async function POST(
 
     // Update status back to deployed
     await updateDeploymentStatus(deploymentId, "deployed")
+    shouldRecoverToDeployed = false
 
     return NextResponse.json({
       success: true,
@@ -96,6 +102,14 @@ export async function POST(
       allPassed: results.every((r) => r.passed),
     })
   } catch (error) {
+    if (deploymentId && shouldRecoverToDeployed) {
+      try {
+        await updateDeploymentStatus(deploymentId, "deployed")
+      } catch (recoveryError) {
+        console.error("Validation status recovery error:", recoveryError)
+      }
+    }
+
     console.error("Validation error:", error)
     return NextResponse.json(
       { error: error instanceof Error ? error.message : "Validation failed" },

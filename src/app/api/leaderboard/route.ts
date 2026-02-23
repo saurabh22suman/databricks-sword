@@ -7,6 +7,7 @@
 import { apiError, apiOk } from "@/lib/api/responses"
 import { getDb } from "@/lib/db/client"
 import { sandboxSnapshots, users } from "@/lib/db/schema"
+import { MOCK_USER_ID } from "@/lib/auth/mockSession"
 import { getRankForXp } from "@/lib/gamification/ranks"
 import { SandboxDataSchema } from "@/lib/sandbox/types"
 import { desc, eq, sql } from "drizzle-orm"
@@ -14,24 +15,25 @@ import { NextResponse } from "next/server"
 
 export async function GET(): Promise<NextResponse> {
   try {
-    const xpExpr = sql<number>`cast(json_extract(${sandboxSnapshots.snapshotData}, '$.userStats.totalXp') as integer)`
-
-    // Fetch top players by XP directly in SQL to avoid full in-memory sort/scan work.
+    // Fetch all real users and include snapshot stats when available.
+    // Keep ordering by snapshot_data JSON extraction for backward compatibility
+    // with DBs that have not yet applied total_xp/current_streak columns.
     const rows = await getDb()
       .select({
         snapshotData: sandboxSnapshots.snapshotData,
-        userId: sandboxSnapshots.userId,
+        userId: users.id,
         userName: users.name,
         userImage: users.image,
       })
-      .from(sandboxSnapshots)
-      .innerJoin(users, eq(sandboxSnapshots.userId, users.id))
-      .orderBy(desc(xpExpr))
-      .limit(50)
+      .from(users)
+      .leftJoin(sandboxSnapshots, eq(sandboxSnapshots.userId, users.id))
+      .where(sql`${users.id} != ${MOCK_USER_ID}`)
+      .orderBy(desc(sql<number>`coalesce(cast(json_extract(${sandboxSnapshots.snapshotData}, '$.userStats.totalXp') as integer), 0)`))
 
     const [countRow] = await getDb()
       .select({ totalPlayers: sql<number>`count(*)` })
-      .from(sandboxSnapshots)
+      .from(users)
+      .where(sql`${users.id} != ${MOCK_USER_ID}`)
 
     type LeaderboardEntry = {
       userId: string
@@ -46,19 +48,33 @@ export async function GET(): Promise<NextResponse> {
     const entries: LeaderboardEntry[] = []
 
     for (const row of rows) {
+      const baseEntry = {
+        userId: row.userId,
+        name: row.userName,
+        image: row.userImage,
+        totalXp: 0,
+        rank: getRankForXp(0),
+        missionsCompleted: 0,
+        currentStreak: 0,
+      }
+
+      if (!row.snapshotData) {
+        entries.push(baseEntry)
+        continue
+      }
+
       try {
         const sandbox = SandboxDataSchema.parse(JSON.parse(row.snapshotData))
+        const totalXp = sandbox.userStats.totalXp
         entries.push({
-          userId: row.userId,
-          name: row.userName,
-          image: row.userImage,
-          totalXp: sandbox.userStats.totalXp,
-          rank: getRankForXp(sandbox.userStats.totalXp),
+          ...baseEntry,
+          totalXp,
+          rank: getRankForXp(totalXp),
           missionsCompleted: sandbox.userStats.totalMissionsCompleted,
           currentStreak: sandbox.streakData.currentStreak,
         })
       } catch {
-        // Skip invalid snapshots
+        entries.push(baseEntry)
       }
     }
 

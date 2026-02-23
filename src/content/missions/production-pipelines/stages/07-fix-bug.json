@@ -1,11 +1,11 @@
 {
-  "description": "Analysts cannot query the revenue table because SELECT was granted at the wrong level. Fix the GRANT so it targets table finance.reporting.monthly_revenue directly.",
-  "starterCode": "GRANT SELECT ON SCHEMA finance.reporting TO analysts;",
-  "expectedPattern": "grant\\s+select\\s+on\\s+table\\s+finance\\.reporting\\.monthly_revenue\\s+to\\s+analysts",
-  "simulatedOutput": "Issue: Permission denied for table finance.reporting.monthly_revenue.",
+  "description": "CDC updates are applied out of order due to the wrong sequence column. Fix apply_changes so sequence_by uses updated_at.",
+  "starterCode": "dlt.apply_changes(target=\"silver_orders\", source=\"bronze_order_events\", keys=[\"order_id\"], sequence_by=\"created_at\")",
+  "expectedPattern": "sequence_by\\s*=\\s*\\\"updated_at\\\"",
+  "simulatedOutput": "Issue: Late-arriving status updates overwrite newer order states.",
   "hints": [
-    "Grant access directly to the target table.",
-    "Use the full three-level object name.",
-    "Keep the principal as analysts."
+    "Use the event ordering column that reflects change time.",
+    "keys should stay as order_id.",
+    "Only sequence_by needs to change."
   ]
 }

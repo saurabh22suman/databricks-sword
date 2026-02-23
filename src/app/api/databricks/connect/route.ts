@@ -3,13 +3,14 @@ import { encryptPat, validateConnection } from "@/lib/databricks";
 import { NextRequest, NextResponse } from "next/server";
 import { z } from "zod";
 
+const ALLOWED_DATABRICKS_HOST_SUFFIXES = [
+  ".cloud.databricks.com",
+  ".azuredatabricks.net",
+  ".gcp.databricks.com",
+] as const;
+
 const connectRequestSchema = z.object({
-  workspaceUrl: z
-    .string()
-    .url()
-    .regex(/\.cloud\.databricks\.com|\.azuredatabricks\.net|\.gcp\.databricks\.com/, {
-      message: "Invalid Databricks workspace URL",
-    }),
+  workspaceUrl: z.string().min(1, "workspaceUrl is required"),
   pat: z.string().min(1, "Personal Access Token is required"),
   warehouseId: z.string().regex(/^[a-f0-9]{16}$/i, "Invalid warehouse ID format").optional(),
   catalogName: z.string().regex(/^[a-z_][a-z0-9_]*$/i, "Invalid catalog name").default("dev"),
@@ -41,6 +42,25 @@ export async function POST(request: NextRequest): Promise<NextResponse> {
 
     const { workspaceUrl, pat, warehouseId, catalogName } = parsed.data;
 
+    let parsedWorkspaceUrl: URL;
+    try {
+      parsedWorkspaceUrl = new URL(workspaceUrl);
+    } catch {
+      return NextResponse.json({ error: "Invalid Databricks workspace URL" }, { status: 400 });
+    }
+
+    if (parsedWorkspaceUrl.protocol !== "https:") {
+      return NextResponse.json({ error: "Databricks workspace URL must use HTTPS" }, { status: 400 });
+    }
+
+    const hasAllowedHostSuffix = ALLOWED_DATABRICKS_HOST_SUFFIXES.some((suffix) =>
+      parsedWorkspaceUrl.hostname.endsWith(suffix)
+    );
+
+    if (!hasAllowedHostSuffix) {
+      return NextResponse.json({ error: "Invalid Databricks workspace URL hostname" }, { status: 400 });
+    }
+
     // Validate the connection
     const validation = await validateConnection(workspaceUrl, pat);
     if (!validation.valid) {
@@ -50,7 +70,7 @@ export async function POST(request: NextRequest): Promise<NextResponse> {
     // Encrypt the PAT
     const encryptedPat = encryptPat(pat);
 
-    // Store in database (dynamic import to avoid issues when db is not configured)
+    // Store in database
     try {
       const { getDb, databricksConnections } = await import("@/lib/db");
       const { randomUUID } = await import("crypto");
@@ -77,9 +97,15 @@ export async function POST(request: NextRequest): Promise<NextResponse> {
             lastValidatedAt: new Date(),
           },
         });
-    } catch {
-      // If DB is not configured, just log and continue
-      console.warn("Database not configured, connection not persisted");
+    } catch (error) {
+      console.error(
+        "[api/databricks/connect] Failed to persist Databricks connection",
+        error instanceof Error ? error.message : "Unknown error"
+      );
+      return NextResponse.json(
+        { error: "Failed to persist Databricks connection" },
+        { status: 500 }
+      );
     }
 
     return NextResponse.json({

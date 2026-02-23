@@ -86,6 +86,13 @@ Stage types: `briefing`, `diagram`, `drag-drop`, `fill-blank`, `free-text`, `qui
 
 Categories: pyspark, sql, delta-lake, streaming, mlflow, unity-catalog, architecture
 
+### Intel/Challenge Topic Alignment (`src/lib/intel/`)
+
+Baseline Intel topics (`delta-lake`, `pyspark`, `sql`, `mlflow`, `architecture`) must have challenge coverage at runtime. The `topicAlignment.ts` helper computes missing baseline topics and maps Intel categories to challenge category filters. Non-baseline topics (e.g., `general`, future admin-added categories) are allowed without challenge requirements.
+
+- `getIntelTopicCoverage(challenges)` → returns missing baseline topics
+- `getChallengeCategoryForIntelTopic(topic)` → maps Intel topic to challenge category or `null`
+
 ### Spaced Repetition (`src/lib/srs/`)
 
 SM-2 algorithm. Concepts from completed missions auto-become flashcards.
@@ -233,6 +240,7 @@ src/
 │   ├── sandbox/                # Browser storage + sync
 │   ├── missions/               # Mission loader + validation
 │   ├── challenges/             # Challenge loader + validation
+│   ├── intel/                  # Intel/Challenge topic alignment
 │   ├── srs/                    # Spaced repetition engine
 │   ├── db/                     # Drizzle schema & client
 │   └── utils.ts                # General utilities
@@ -250,6 +258,7 @@ src/
 | `src/lib/sandbox/` | localStorage + Turso sync |
 | `src/lib/missions/` | Mission loader, types, validation |
 | `src/lib/challenges/` | Challenge loader, validation |
+| `src/lib/intel/` | Intel/Challenge topic alignment helpers |
 | `src/lib/srs/` | SM-2 spaced repetition |
 
 ## Important Notes

@@ -15,6 +15,7 @@ const publicRoutes = [
   "/blog",
   "/intel",
   "/leaderboard",
+  "/map",
   "/u",
   "/faq", // Legacy redirect for backwards compatibility
   "/api/health",

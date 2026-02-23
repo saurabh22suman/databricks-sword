@@ -17,7 +17,6 @@ import type {
  * TODO: Load from mission.json files when content is created.
  */
 export function getValidationQueries(industry: Industry): ValidationConfig[] {
-  // Placeholder - will be loaded from content files
   const validations: Record<Industry, ValidationConfig[]> = {
     retail: [
       {
@@ -32,11 +31,12 @@ export function getValidationQueries(industry: Industry): ValidationConfig[] {
         description: "Verify inventory data is deduplicated",
         query: "SELECT COUNT(DISTINCT sku) as count FROM {catalog}.{schema_prefix}_silver.inventory",
         expectedResult: "count",
+        expectedValue: 1,
       },
       {
-        checkName: "Gold reorder recommendations",
-        description: "Verify reorder recommendations table exists",
-        query: "SELECT COUNT(*) as count FROM {catalog}.{schema_prefix}_gold.reorder_recommendations",
+        checkName: "Gold reorder recommendations exist",
+        description: "Verify reorder recommendations table has data",
+        query: "SELECT COUNT(*) as count FROM {catalog}.{schema_prefix}_gold.reorder_recommendations WHERE recommended_qty > 0",
         expectedResult: "count",
         expectedValue: 1,
       },
@@ -51,25 +51,157 @@ export function getValidationQueries(industry: Industry): ValidationConfig[] {
       },
       {
         checkName: "Silver sessions calculated",
-        description: "Verify session metrics are computed",
-        query: "SELECT COUNT(*) as count FROM {catalog}.{schema_prefix}_silver.sessions",
+        description: "Verify session metrics exist with valid durations",
+        query: "SELECT COUNT(*) as count FROM {catalog}.{schema_prefix}_silver.sessions WHERE duration_minutes > 0",
         expectedResult: "count",
         expectedValue: 1,
       },
       {
-        checkName: "Gold retention cohorts",
-        description: "Verify retention cohorts exist",
-        query: "SELECT COUNT(*) as count FROM {catalog}.{schema_prefix}_gold.retention_cohorts",
+        checkName: "Gold retention cohorts exist",
+        description: "Verify 7-day retention cohorts are calculated",
+        query: "SELECT COUNT(DISTINCT cohort_date) as count FROM {catalog}.{schema_prefix}_gold.retention_cohorts",
         expectedResult: "count",
         expectedValue: 1,
       },
     ],
-    healthcare: [],
-    fintech: [],
-    automotive: [],
-    manufacturing: [],
-    telecom: [],
-    agritech: [],
+    healthcare: [
+      {
+        checkName: "Bronze EHR data ingested",
+        description: "Verify EHR records table exists with data",
+        query: "SELECT COUNT(*) as count FROM {catalog}.{schema_prefix}_bronze.ehr_records",
+        expectedResult: "count",
+        expectedValue: 1,
+      },
+      {
+        checkName: "Silver patients deduplicated",
+        description: "Verify patients table has unique patient_id",
+        query: "SELECT COUNT(DISTINCT patient_id) as count FROM {catalog}.{schema_prefix}_silver.patients",
+        expectedResult: "count",
+        expectedValue: 1,
+      },
+      {
+        checkName: "Gold patient_360 with masked PII",
+        description: "Verify patient_360 exists with masked SSN",
+        query: "SELECT COUNT(*) as count FROM {catalog}.{schema_prefix}_gold.patient_360 WHERE masked_ssn LIKE 'XXX-XX-%'",
+        expectedResult: "count",
+        expectedValue: 1,
+      },
+    ],
+    fintech: [
+      {
+        checkName: "Bronze transactions ingested",
+        description: "Verify transactions table has data",
+        query: "SELECT COUNT(*) as count FROM {catalog}.{schema_prefix}_bronze.transactions",
+        expectedResult: "count",
+        expectedValue: 1,
+      },
+      {
+        checkName: "Silver features calculated",
+        description: "Verify transaction_features has velocity columns",
+        query: "SELECT COUNT(*) as count FROM {catalog}.{schema_prefix}_silver.transaction_features WHERE velocity_1h IS NOT NULL",
+        expectedResult: "count",
+        expectedValue: 1,
+      },
+      {
+        checkName: "Gold alerts generated",
+        description: "Verify fraud_alerts table has flagged transactions",
+        query: "SELECT COUNT(*) as count FROM {catalog}.{schema_prefix}_gold.fraud_alerts WHERE risk_score > 0",
+        expectedResult: "count",
+        expectedValue: 1,
+      },
+    ],
+    automotive: [
+      {
+        checkName: "Bronze telemetry ingested",
+        description: "Verify telemetry table has data with valid timestamps",
+        query: "SELECT COUNT(*) as count FROM {catalog}.{schema_prefix}_bronze.vehicle_telemetry WHERE timestamp IS NOT NULL",
+        expectedResult: "count",
+        expectedValue: 1,
+      },
+      {
+        checkName: "Silver anomalies detected",
+        description: "Verify anomaly_events table has detected anomalies",
+        query: "SELECT COUNT(*) as count FROM {catalog}.{schema_prefix}_silver.anomaly_events",
+        expectedResult: "count",
+        expectedValue: 1,
+      },
+      {
+        checkName: "Gold maintenance predictions",
+        description: "Verify predictive_maintenance table has service predictions",
+        query: "SELECT COUNT(*) as count FROM {catalog}.{schema_prefix}_gold.predictive_maintenance WHERE days_to_service > 0",
+        expectedResult: "count",
+        expectedValue: 1,
+      },
+    ],
+    manufacturing: [
+      {
+        checkName: "Bronze sensor data ingested",
+        description: "Verify raw_sensor_readings has parsed timestamps",
+        query: "SELECT COUNT(*) as count FROM {catalog}.{schema_prefix}_bronze.raw_sensor_readings WHERE timestamp_parsed IS NOT NULL",
+        expectedResult: "count",
+        expectedValue: 1,
+      },
+      {
+        checkName: "Silver SPC metrics calculated",
+        description: "Verify SPC metrics include control limits",
+        query: "SELECT COUNT(*) as count FROM {catalog}.{schema_prefix}_silver.spc_metrics WHERE ucl IS NOT NULL AND lcl IS NOT NULL",
+        expectedResult: "count",
+        expectedValue: 1,
+      },
+      {
+        checkName: "Gold batch quality available",
+        description: "Verify batch quality summary has defect rate values",
+        query: "SELECT COUNT(*) as count FROM {catalog}.{schema_prefix}_gold.batch_quality_summary WHERE defect_rate IS NOT NULL",
+        expectedResult: "count",
+        expectedValue: 1,
+      },
+    ],
+    telecom: [
+      {
+        checkName: "Bronze cell tower metrics ingested",
+        description: "Verify Auto Loader populated cell_tower_metrics",
+        query: "SELECT COUNT(*) as count FROM {catalog}.{schema_prefix}_bronze.cell_tower_metrics",
+        expectedResult: "count",
+        expectedValue: 1,
+      },
+      {
+        checkName: "Silver network KPIs calculated",
+        description: "Verify network_kpis contains regional metrics",
+        query: "SELECT COUNT(*) as count FROM {catalog}.{schema_prefix}_silver.network_kpis WHERE region IS NOT NULL",
+        expectedResult: "count",
+        expectedValue: 1,
+      },
+      {
+        checkName: "Gold regional performance built",
+        description: "Verify regional_performance contains region aggregates",
+        query: "SELECT COUNT(DISTINCT region) as count FROM {catalog}.{schema_prefix}_gold.regional_performance",
+        expectedResult: "count",
+        expectedValue: 1,
+      },
+    ],
+    agritech: [
+      {
+        checkName: "Bronze soil sensors loaded",
+        description: "Verify soil_sensors has ingested records",
+        query: "SELECT COUNT(*) as count FROM {catalog}.{schema_prefix}_bronze.soil_sensors",
+        expectedResult: "count",
+        expectedValue: 1,
+      },
+      {
+        checkName: "Silver enrichment completed",
+        description: "Verify sensor_weather_enriched has weather joins",
+        query: "SELECT COUNT(*) as count FROM {catalog}.{schema_prefix}_silver.sensor_weather_enriched WHERE weather_temp_max_c IS NOT NULL",
+        expectedResult: "count",
+        expectedValue: 1,
+      },
+      {
+        checkName: "Gold yield features generated",
+        description: "Verify yield_prediction_features has rows",
+        query: "SELECT COUNT(*) as count FROM {catalog}.{schema_prefix}_gold.yield_prediction_features",
+        expectedResult: "count",
+        expectedValue: 1,
+      },
+    ],
   }
 
   return validations[industry] || []

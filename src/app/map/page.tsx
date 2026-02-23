@@ -1,4 +1,5 @@
 import { MissionMap } from "@/components/map"
+import { auth } from "@/lib/auth"
 import { getAllIndustries } from "@/lib/field-ops/industries"
 import { getAllMissions } from "@/lib/missions"
 import { Metadata } from "next"
@@ -18,14 +19,17 @@ export const metadata: Metadata = {
  * then renders the interactive MissionMap client component.
  */
 export default async function MapPage(): Promise<React.ReactElement> {
-  const [missions, fieldOps] = await Promise.all([
+  const sessionPromise = auth()
+  const [missions, fieldOps, session] = await Promise.all([
     getAllMissions(),
     Promise.resolve(getAllIndustries()),
+    sessionPromise,
   ])
+  const isGuest = !session?.user
 
   return (
     <main className="h-[calc(100vh-4rem)] w-full overflow-hidden mt-16">
-      <MissionMap missions={missions} fieldOps={fieldOps} />
+      <MissionMap missions={missions} fieldOps={fieldOps} isGuest={isGuest} />
     </main>
   )
 }

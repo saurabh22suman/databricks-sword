@@ -11,6 +11,7 @@
 
 import { useSession } from "next-auth/react"
 import { useCallback, useEffect, useRef } from "react"
+import { validateStreakData } from "../gamification/streaks"
 import { initializeSandbox, loadSandbox, saveSandbox } from "./storage"
 import { mergeConflicts, shouldSync, syncFromServer, syncToServer } from "./sync"
 
@@ -68,11 +69,25 @@ export function useSandboxSync(): UseSandboxSyncResult {
 
         if (remote) {
           const merged = mergeConflicts(local, remote)
+
+          // Validate and decay streak if needed
+          const today = new Date().toISOString().split("T")[0]
+          const validatedStreakData = validateStreakData(merged.streakData, today)
+          const validatedMerged = {
+            ...merged,
+            streakData: validatedStreakData,
+            userStats: {
+              ...merged.userStats,
+              currentStreak: validatedStreakData.currentStreak,
+              longestStreak: validatedStreakData.longestStreak,
+            },
+          }
+
           const lastSynced = new Date().toISOString()
-          saveSandbox({ ...merged, lastSynced })
+          saveSandbox({ ...validatedMerged, lastSynced })
 
           // Push merged result back so server always has latest
-          await syncToServer(userId, { ...merged, lastSynced })
+          await syncToServer(userId, { ...validatedMerged, lastSynced })
         } else if (local.userStats.totalXp > 0) {
           // No remote snapshot exists — push local data to server
           const result = await syncToServer(userId, local)

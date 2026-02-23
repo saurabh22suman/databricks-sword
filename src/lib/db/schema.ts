@@ -42,6 +42,8 @@ export const sandboxSnapshots = sqliteTable("sandbox_snapshots", {
     .notNull()
     .references(() => users.id),
   snapshotData: text("snapshot_data").notNull(), // JSON string of SandboxData
+  totalXp: integer("total_xp").notNull().default(0),
+  currentStreak: integer("current_streak").notNull().default(0),
   updatedAt: integer("updated_at", { mode: "timestamp" })
     .notNull()
     .$defaultFn(() => new Date()),

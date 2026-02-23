@@ -1,11 +1,11 @@
 {
-  "description": "A semantic metric is inflated because tax is added twice. Fix the formula so metric_revenue is calculated as subtotal plus tax once.",
-  "starterCode": "metric_revenue = subtotal + tax + tax",
-  "expectedPattern": "metric_revenue\\s*=\\s*subtotal\\s*\\+\\s*tax",
-  "simulatedOutput": "Issue: Revenue metric is consistently 8-10% too high.",
+  "description": "A serving endpoint is routing all traffic to the challenger model. Fix the traffic split so champion gets 90 percent and challenger gets 10 percent.",
+  "starterCode": "{\"name\": \"credit-risk-endpoint\", \"traffic_config\": {\"routes\": [{\"model\": \"champion\", \"traffic_percentage\": 0}, {\"model\": \"challenger\", \"traffic_percentage\": 100}]}}",
+  "expectedPattern": "\\\"champion\\\"\\s*,\\s*\\\"traffic_percentage\\\"\\s*:\\s*90",
+  "simulatedOutput": "Issue: Champion model receives 0% traffic.",
   "hints": [
-    "Tax should be included only once.",
-    "Keep subtotal in the formula.",
-    "Remove the duplicate tax term."
+    "Champion should receive the majority of requests.",
+    "Set challenger to a small canary percentage.",
+    "Use a 90/10 split."
   ]
 }

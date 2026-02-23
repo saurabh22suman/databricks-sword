@@ -5,6 +5,7 @@
  * and exported functions for the horizontal pipeline layout.
  */
 
+import type { Mission } from "../types"
 import { describe, expect, it } from "vitest"
 import {
     getAllMapNodes,
@@ -13,6 +14,7 @@ import {
     getFieldOpsNodes,
     getMapEdges,
     getMissionNodes,
+    getMissionPrerequisites,
     getNodeById,
     getPrerequisites,
     getZoneById,
@@ -243,6 +245,49 @@ describe("mapLayout — pipeline layout", () => {
 
     it("getPrerequisites should return correct prerequisites", () => {
       const prereqs = getPrerequisites("pyspark-essentials")
+      expect(prereqs).toContain("lakehouse-fundamentals")
+    })
+
+    it("getMissionPrerequisites should prefer mission config over static edges", () => {
+      const missionLookup = new Map<string, Mission>([
+        [
+          "ml-foundations",
+          {
+            id: "ml-foundations",
+            title: "ML Foundations",
+            subtitle: "",
+            description: "",
+            industry: "finance",
+            rank: "B",
+            xpRequired: 0,
+            xpReward: 0,
+            estimatedMinutes: 1,
+            primaryFeatures: [],
+            prerequisites: ["pyspark-essentials", "advanced-transformations"],
+            databricksEnabled: false,
+            stages: [
+              {
+                id: "s1",
+                title: "Stage 1",
+                type: "briefing",
+                configFile: "stages/01-briefing.json",
+                xpReward: 0,
+                estimatedMinutes: 1,
+              },
+            ],
+            sideQuests: [],
+            achievements: [],
+          },
+        ],
+      ])
+
+      const prereqs = getMissionPrerequisites("ml-foundations", missionLookup)
+      expect(prereqs).toEqual(["pyspark-essentials", "advanced-transformations"])
+      expect(prereqs).not.toContain("lakehouse-fundamentals")
+    })
+
+    it("getMissionPrerequisites should fall back to static map edges", () => {
+      const prereqs = getMissionPrerequisites("pyspark-essentials")
       expect(prereqs).toContain("lakehouse-fundamentals")
     })
 

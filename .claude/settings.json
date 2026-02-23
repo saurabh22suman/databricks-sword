@@ -1,0 +1,19 @@
+{
+  "model": "opus",
+  "permissions": {
+    "allow": [
+      "Bash(pnpm test:run)",
+      "Bash(pnpm tsc --noEmit)",
+      "Bash(pnpm typecheck)",
+      "Bash(pnpm lint)",
+      "Bash(pnpm validate)",
+      "Bash(pnpm validate:content)",
+      "Bash(pnpm test:e2e)",
+      "Bash(docker compose -f docker-compose.yml up -d --build)",
+      "Bash(docker compose -f docker-compose.yml ps)",
+      "Bash(docker compose -f docker-compose.yml down)"
+    ],
+    "deny": [],
+    "ask": []
+  }
+}

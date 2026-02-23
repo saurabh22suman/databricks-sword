@@ -48,7 +48,7 @@
     {
       "id": "fix-bug",
       "type": "fix-bug",
-      "title": "Fix a Cross-Team Access Bug",
+      "title": "Fix a Broken Workflow Dependency",
       "configFile": "stages/07-fix-bug.json"
     },
     {

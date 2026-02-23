@@ -1,11 +1,11 @@
 {
-  "description": "An aggregation is collapsing all stores into one row. Fix the grouping so sales are aggregated by store_id and return one row per store.",
-  "starterCode": "df.groupBy().agg(F.sum(\"sales\").alias(\"total_sales\"))",
-  "expectedPattern": "groupby\\s*\\(\\s*\\\"store_id\\\"\\s*\\)",
-  "simulatedOutput": "Issue: Only one output row returned. Expected one row per store_id.",
+  "description": "A running total is calculated across all stores instead of per store. Fix the window definition so running_total is partitioned by store_id and ordered by sale_date.",
+  "starterCode": "window_spec = Window.orderBy(\"sale_date\")\ndf = df.withColumn(\"running_total\", F.sum(\"amount\").over(window_spec))",
+  "expectedPattern": "window\\.partitionby\\s*\\(\\s*\\\"store_id\\\"\\s*\\)\\s*\\.orderby\\s*\\(\\s*\\\"sale_date\\\"\\s*\\)",
+  "simulatedOutput": "Issue: running_total keeps increasing across different stores.",
   "hints": [
-    "The aggregation is missing a grouping key.",
-    "Group by store_id before summing sales.",
-    "Keep the sum(sales) aggregation."
+    "Use PARTITION BY semantics in the window spec.",
+    "Keep ordering by sale_date within each store.",
+    "The aggregation function sum(amount) is already correct."
   ]
 }

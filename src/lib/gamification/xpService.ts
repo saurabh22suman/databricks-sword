@@ -13,7 +13,7 @@ import type { SandboxData } from "@/lib/sandbox/types"
 import { MAX_CHALLENGE_XP_COMPLETIONS } from "@/lib/sandbox/types"
 import { ACHIEVEMENTS, checkAchievement } from "./achievements"
 import { getRankForXp } from "./ranks"
-import { getStreakMultiplier } from "./streaks"
+import { calculateStreak, getStreakMultiplier, useFreeze } from "./streaks"
 import type { UserProfile, XpEvent } from "./types"
 
 /** Bonus XP for completing a stage on the first attempt */
@@ -100,6 +100,70 @@ function checkAndUnlockAchievements(): void {
   }))
 }
 
+/**
+ * Updates streak data based on user activity.
+ *
+ * Called after every XP award to maintain streak state.
+ * - If already active today, returns data unchanged
+ * - If active yesterday, increments streak
+ * - If older, uses calculateStreak with freeze support
+ *
+ * @param data - Current sandbox data
+ * @returns Updated sandbox data with new streak info
+ */
+function updateStreakOnActivity(data: SandboxData): SandboxData {
+  const today = new Date().toISOString().split("T")[0]
+  const lastActiveDate = data.streakData.lastActiveDate
+
+  // If already active today, no changes needed
+  if (lastActiveDate === today) {
+    return data
+  }
+
+  // Calculate days between last activity and today
+  const lastActive = new Date(lastActiveDate)
+  const todayDate = new Date(today)
+  const diffTime = todayDate.getTime() - lastActive.getTime()
+  const diffDays = Math.floor(diffTime / (1000 * 60 * 60 * 24))
+
+  let newStreak = data.streakData.currentStreak
+  let streakData = data.streakData
+
+  if (diffDays === 1) {
+    // Active yesterday - increment streak
+    newStreak += 1
+  } else {
+    // Older than yesterday - use calculateStreak
+    const result = calculateStreak(lastActiveDate, today, {
+      freezesAvailable: streakData.freezesAvailable,
+    })
+
+    if (result.maintained && result.freezeUsed) {
+      // Used a freeze to maintain streak
+      newStreak += 1
+      streakData = useFreeze(streakData)
+    } else if (result.maintained) {
+      // Shouldn't happen for diffDays > 1, but handle it
+      newStreak += 1
+    } else {
+      // Streak broken - start fresh
+      newStreak = 1
+    }
+  }
+
+  const longestStreak = Math.max(streakData.longestStreak, newStreak)
+
+  return {
+    ...data,
+    streakData: {
+      ...streakData,
+      currentStreak: newStreak,
+      longestStreak,
+      lastActiveDate: today,
+    },
+  }
+}
+
 type StageXpOptions = {
   firstTry?: boolean
   noHints?: boolean
@@ -140,7 +204,8 @@ export function awardStageXp(
   }
 
   updateSandbox((data) => {
-    const missionProgress = { ...data.missionProgress }
+    const withStreak = updateStreakOnActivity(data)
+    const missionProgress = { ...withStreak.missionProgress }
     const existing = missionProgress[missionId] ?? {
       started: true,
       completed: false,
@@ -172,11 +237,11 @@ export function awardStageXp(
     }
 
     return {
-      ...data,
+      ...withStreak,
       missionProgress,
       userStats: {
-        ...data.userStats,
-        totalXp: data.userStats.totalXp + amount,
+        ...withStreak.userStats,
+        totalXp: withStreak.userStats.totalXp + amount,
       },
     }
   })
@@ -211,7 +276,8 @@ export function awardMissionXp(
   }
 
   updateSandbox((data) => {
-    const missionProgress = { ...data.missionProgress }
+    const withStreak = updateStreakOnActivity(data)
+    const missionProgress = { ...withStreak.missionProgress }
     const existing = missionProgress[missionId] ?? {
       started: true,
       completed: false,
@@ -228,12 +294,12 @@ export function awardMissionXp(
     }
 
     return {
-      ...data,
+      ...withStreak,
       missionProgress,
       userStats: {
-        ...data.userStats,
-        totalXp: data.userStats.totalXp + amount,
-        totalMissionsCompleted: data.userStats.totalMissionsCompleted + 1,
+        ...withStreak.userStats,
+        totalXp: withStreak.userStats.totalXp + amount,
+        totalMissionsCompleted: withStreak.userStats.totalMissionsCompleted + 1,
       },
     }
   })
@@ -274,7 +340,8 @@ export function awardChallengeXp(
   }
 
   updateSandbox((data) => {
-    const challengeResults = { ...data.challengeResults }
+    const withStreak = updateStreakOnActivity(data)
+    const challengeResults = { ...withStreak.challengeResults }
     const prev = challengeResults[challengeId]
 
     challengeResults[challengeId] = {
@@ -288,14 +355,14 @@ export function awardChallengeXp(
     }
 
     return {
-      ...data,
+      ...withStreak,
       challengeResults,
       userStats: {
-        ...data.userStats,
-        totalXp: data.userStats.totalXp + amount,
+        ...withStreak.userStats,
+        totalXp: withStreak.userStats.totalXp + amount,
         totalChallengesCompleted: prev?.completed
-          ? data.userStats.totalChallengesCompleted
-          : data.userStats.totalChallengesCompleted + 1,
+          ? withStreak.userStats.totalChallengesCompleted
+          : withStreak.userStats.totalChallengesCompleted + 1,
       },
     }
   })
