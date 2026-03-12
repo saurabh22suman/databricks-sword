@@ -4,15 +4,52 @@
  * Clean up deployment resources (drop schemas, remove bundle).
  */
 
+import { apiError, apiOk } from "@/lib/api/responses"
 import { authenticateApiRequest } from "@/lib/auth/api-auth"
 import { decryptPat } from "@/lib/databricks"
 import { databricksConnections, getDb } from "@/lib/db"
-import { cleanupDeployment, getDeploymentStatus } from "@/lib/field-ops/deployment"
+import {
+  cleanupDeployment,
+  DeploymentConflictError,
+  getDeploymentStatus,
+} from "@/lib/field-ops/deployment"
 import { eq } from "drizzle-orm"
 import { NextRequest, NextResponse } from "next/server"
 
 type RouteContext = {
   params: Promise<{ deploymentId: string }>
+}
+
+function resolveRequestContext(
+  request: NextRequest
+):
+  | {
+      ok: true
+      value: {
+        idempotencyKey: string
+        requestId: string
+        correlationId: string
+      }
+    }
+  | {
+      ok: false
+      response: NextResponse
+    } {
+  const idempotencyKey = request.headers.get("idempotency-key")?.trim()
+  if (!idempotencyKey) {
+    return {
+      ok: false,
+      response: apiError("Missing required Idempotency-Key header", 400, "BAD_REQUEST"),
+    }
+  }
+
+  const requestId = request.headers.get("x-request-id")?.trim() || crypto.randomUUID()
+  const correlationId = request.headers.get("x-correlation-id")?.trim() || requestId
+
+  return {
+    ok: true,
+    value: { idempotencyKey, requestId, correlationId },
+  }
 }
 
 export async function POST(
@@ -22,26 +59,28 @@ export async function POST(
   try {
     const authResult = await authenticateApiRequest()
     if (!authResult.authenticated) {
-      return NextResponse.json({ error: authResult.error }, { status: authResult.status })
+      return apiError(authResult.error, authResult.status, "UNAUTHORIZED")
     }
 
     const db = getDb()
     const userId = authResult.userId
+    const requestContextResult = resolveRequestContext(request)
+    if (!requestContextResult.ok) {
+      return requestContextResult.response
+    }
+    const requestContext = requestContextResult.value
 
     const { deploymentId } = await context.params
 
-    // Get deployment
     const deployment = await getDeploymentStatus(deploymentId)
     if (!deployment) {
-      return NextResponse.json({ error: "Deployment not found" }, { status: 404 })
+      return apiError("Deployment not found", 404, "NOT_FOUND")
     }
 
-    // Check deployment belongs to user
     if (deployment.userId !== userId) {
-      return NextResponse.json({ error: "Forbidden" }, { status: 403 })
+      return apiError("Forbidden", 403, "FORBIDDEN")
     }
 
-    // Get Databricks connection
     const [connection] = await db
       .select()
       .from(databricksConnections)
@@ -49,10 +88,7 @@ export async function POST(
       .limit(1)
 
     if (!connection) {
-      return NextResponse.json(
-        { error: "Databricks connection not configured" },
-        { status: 400 }
-      )
+      return apiError("Databricks connection not configured", 400, "BAD_REQUEST")
     }
 
     const databricksConfig = {
@@ -62,18 +98,44 @@ export async function POST(
       catalog: deployment.catalogName,
     }
 
-    // Clean up deployment
-    await cleanupDeployment(deploymentId, databricksConfig)
+    const cleanup = await cleanupDeployment(deploymentId, userId, databricksConfig, requestContext)
 
-    return NextResponse.json({
-      success: true,
+    if (!cleanup.result.success) {
+      return NextResponse.json(
+        {
+          success: false,
+          error: "Cleanup partially failed",
+          errorCode: "CONFLICT",
+          failures: cleanup.result.failures,
+          metadata: {
+            requestId: cleanup.requestId,
+            correlationId: cleanup.correlationId,
+            operationId: cleanup.operationId,
+            replayed: cleanup.replayed,
+          },
+        },
+        { status: 409 }
+      )
+    }
+
+    return apiOk({
       message: "Deployment cleaned up successfully",
+      failures: [],
+      metadata: {
+        requestId: cleanup.requestId,
+        correlationId: cleanup.correlationId,
+        operationId: cleanup.operationId,
+        replayed: cleanup.replayed,
+      },
     })
   } catch (error) {
-    console.error("Cleanup error:", error)
-    return NextResponse.json(
-      { error: error instanceof Error ? error.message : "Cleanup failed" },
-      { status: 500 }
-    )
+    if (error instanceof DeploymentConflictError) {
+      return apiError(error.message, 409, "CONFLICT")
+    }
+
+    console.error("Cleanup error", {
+      message: error instanceof Error ? error.message : "Cleanup failed",
+    })
+    return apiError(error instanceof Error ? error.message : "Cleanup failed", 500, "INTERNAL_ERROR")
   }
 }

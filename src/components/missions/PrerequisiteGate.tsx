@@ -3,7 +3,7 @@
  * @description Server component that enforces mission prerequisites
  */
 
-import { getMission } from "@/lib/missions/loader"
+import { getAllMissions, getMission } from "@/lib/missions/loader"
 import { checkPrerequisites } from "@/lib/missions/prerequisites"
 import { cn } from "@/lib/utils"
 import { Lock } from "lucide-react"
@@ -24,8 +24,13 @@ export async function PrerequisiteGate({
   completedMissions,
   children,
 }: PrerequisiteGateProps): Promise<React.ReactElement> {
-  const mission = await getMission(missionId)
-  const result = await checkPrerequisites(missionId, completedMissions)
+  const [mission, allMissions, result] = await Promise.all([
+    getMission(missionId),
+    getAllMissions(),
+    checkPrerequisites(missionId, completedMissions),
+  ])
+
+  const missionTitleLookup = new Map(allMissions.map((m) => [m.id, m.title]))
 
   // If prerequisites are met, render children normally
   if (result.met) {
@@ -74,7 +79,7 @@ export async function PrerequisiteGate({
                       isCompleted ? "text-anime-green line-through" : "text-anime-100",
                     )}
                   >
-                    {prereqId}
+                    {missionTitleLookup.get(prereqId) ?? prereqId}
                   </Link>
                   {!isCompleted && (
                     <span className="text-sm text-anime-accent">(Locked)</span>

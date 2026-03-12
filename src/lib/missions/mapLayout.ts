@@ -268,8 +268,10 @@ export function getAllMapNodes(): MapNode[] {
 }
 
 /**
- * Prerequisite edges for the mission DAG.
+ * Legacy static prerequisite edges for the mission DAG.
  * Each entry is [prerequisite, mission] meaning "prerequisite must be done before mission".
+ *
+ * Used only as a fallback when mission JSON is unavailable.
  */
 const PREREQUISITE_EDGES: Array<[string, string]> = [
   // From lakehouse-fundamentals
@@ -324,8 +326,32 @@ const PREREQUISITE_EDGES: Array<[string, string]> = [
 
 /**
  * Get all edges (prerequisite connections) for the map.
+ *
+ * Uses mission JSON prerequisites when mission data is provided.
+ * Falls back to legacy static edges for backward compatibility.
  */
-export function getMapEdges(): MapEdge[] {
+export function getMapEdges(missionLookup?: Map<string, Mission>): MapEdge[] {
+  if (missionLookup) {
+    const dynamicEdges: MapEdge[] = []
+    const seen = new Set<string>()
+
+    for (const missionId of missionLookup.keys()) {
+      const prerequisites = getMissionPrerequisites(missionId, missionLookup)
+      for (const prereqId of prerequisites) {
+        const key = `${prereqId}->${missionId}`
+        if (seen.has(key)) continue
+        seen.add(key)
+        dynamicEdges.push({
+          from: prereqId,
+          to: missionId,
+          track: MISSION_TRACK_MAP[missionId] ?? "de",
+        })
+      }
+    }
+
+    return dynamicEdges
+  }
+
   return PREREQUISITE_EDGES.map(([from, to]) => ({
     from,
     to,
@@ -355,7 +381,8 @@ export function getPrerequisites(missionId: string): string[] {
 }
 
 /**
- * Get prerequisite mission IDs from loaded mission data with static edge fallback.
+ * Get prerequisite mission IDs with mission JSON as authoritative source.
+ * Falls back to legacy static edges only when mission JSON is unavailable.
  */
 export function getMissionPrerequisites(
   missionId: string,

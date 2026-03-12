@@ -10,6 +10,7 @@ vi.mock("@/lib/auth", () => ({
 // Mock database
 const mockDb = {
   select: vi.fn(),
+  update: vi.fn(),
 }
 vi.mock("@/lib/db/client", () => ({
   getDb: vi.fn(() => mockDb),
@@ -153,17 +154,25 @@ describe("GET /api/user/profile", () => {
       expires: "",
     } as unknown as Awaited<ReturnType<typeof auth>>)
 
-    mockDb.select.mockReturnValue({
-      from: vi.fn().mockReturnValue({
-        where: vi.fn().mockReturnValue({
-          orderBy: vi.fn().mockReturnValue({
-            limit: vi.fn().mockResolvedValue([
-              { snapshotData: validSandboxJson },
-            ]),
+    mockDb.select
+      .mockReturnValueOnce({
+        from: vi.fn().mockReturnValue({
+          where: vi.fn().mockReturnValue({
+            limit: vi.fn().mockResolvedValue([{ leaderboardOptIn: true }]),
           }),
         }),
-      }),
-    })
+      })
+      .mockReturnValueOnce({
+        from: vi.fn().mockReturnValue({
+          where: vi.fn().mockReturnValue({
+            orderBy: vi.fn().mockReturnValue({
+              limit: vi.fn().mockResolvedValue([
+                { snapshotData: validSandboxJson },
+              ]),
+            }),
+          }),
+        }),
+      })
 
     const { GET } = await import("@/app/api/user/profile/route")
     const request = new NextRequest("http://localhost:3000/api/user/profile")
@@ -176,5 +185,70 @@ describe("GET /api/user/profile", () => {
     expect(data.rank).toBeDefined()
     expect(data.completedMissions).toContain("lakehouse-fundamentals")
     expect(data.rankProgress).toBeDefined()
+    expect(data.leaderboardOptIn).toBe(true)
+  })
+})
+
+describe("PATCH /api/user/profile", () => {
+  beforeEach(() => {
+    vi.clearAllMocks()
+  })
+
+  it("returns 401 when not authenticated", async () => {
+    vi.mocked(auth).mockResolvedValue(null as unknown as Awaited<ReturnType<typeof auth>>)
+
+    const { PATCH } = await import("@/app/api/user/profile/route")
+    const request = new NextRequest("http://localhost:3000/api/user/profile", {
+      method: "PATCH",
+      body: JSON.stringify({ leaderboardOptIn: false }),
+      headers: { "Content-Type": "application/json" },
+    })
+
+    const response = await PATCH(request)
+    expect(response.status).toBe(401)
+  })
+
+  it("returns 400 for invalid payload", async () => {
+    vi.mocked(auth).mockResolvedValue({
+      user: { id: "user-123", name: "Test User", image: "/avatar.png" },
+      expires: "",
+    } as unknown as Awaited<ReturnType<typeof auth>>)
+
+    const { PATCH } = await import("@/app/api/user/profile/route")
+    const request = new NextRequest("http://localhost:3000/api/user/profile", {
+      method: "PATCH",
+      body: JSON.stringify({ leaderboardOptIn: "nope" }),
+      headers: { "Content-Type": "application/json" },
+    })
+
+    const response = await PATCH(request)
+    expect(response.status).toBe(400)
+    expect(await response.json()).toEqual({ error: "Invalid request" })
+  })
+
+  it("updates leaderboard opt-in and returns updated value", async () => {
+    vi.mocked(auth).mockResolvedValue({
+      user: { id: "user-123", name: "Test User", image: "/avatar.png" },
+      expires: "",
+    } as unknown as Awaited<ReturnType<typeof auth>>)
+
+    mockDb.update.mockReturnValue({
+      set: vi.fn().mockReturnValue({
+        where: vi.fn().mockReturnValue({
+          returning: vi.fn().mockResolvedValue([{ leaderboardOptIn: false }]),
+        }),
+      }),
+    })
+
+    const { PATCH } = await import("@/app/api/user/profile/route")
+    const request = new NextRequest("http://localhost:3000/api/user/profile", {
+      method: "PATCH",
+      body: JSON.stringify({ leaderboardOptIn: false }),
+      headers: { "Content-Type": "application/json" },
+    })
+
+    const response = await PATCH(request)
+    expect(response.status).toBe(200)
+    expect(await response.json()).toEqual({ leaderboardOptIn: false })
   })
 })

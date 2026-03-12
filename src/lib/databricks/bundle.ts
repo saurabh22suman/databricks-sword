@@ -5,16 +5,57 @@
 
 import fs from "fs/promises"
 import path from "path"
-import type { DatabricksConnection, DeploymentResult, Industry } from "../field-ops/types"
+import { loadFieldOpsContent } from "../field-ops/content"
+import type {
+  CleanupFailure,
+  CleanupResult,
+  DatabricksConnection,
+  DeploymentResult,
+  Industry,
+} from "../field-ops/types"
 import {
-    createSchema,
-    createVolume,
-    createWorkspaceDirectory,
-    deleteWorkspaceDirectory,
-    dropSchema,
-    uploadFile,
-    uploadNotebook,
+  createSchema,
+  createVolume,
+  createWorkspaceDirectory,
+  deleteWorkspaceDirectory,
+  dropSchema,
+  uploadFile,
+  uploadNotebook,
 } from "./cli"
+
+async function assertRequiredAssets(
+  industry: Industry,
+  contentDir: string
+): Promise<{ missingNotebooks: string[]; missingDataFiles: string[] }> {
+  const mission = await loadFieldOpsContent(industry)
+
+  const [missingNotebooks, missingDataFiles] = await Promise.all([
+    Promise.all(
+      mission.notebooks.map(async (notebook) => {
+        const notebookPath = path.join(contentDir, "notebooks", notebook)
+        try {
+          await fs.access(notebookPath)
+          return null
+        } catch {
+          return notebook
+        }
+      })
+    ).then((items) => items.filter((item): item is string => Boolean(item))),
+    Promise.all(
+      mission.dataFiles.map(async (dataFile) => {
+        const dataPath = path.join(contentDir, "data", dataFile)
+        try {
+          await fs.access(dataPath)
+          return null
+        } catch {
+          return dataFile
+        }
+      })
+    ).then((items) => items.filter((item): item is string => Boolean(item))),
+  ])
+
+  return { missingNotebooks, missingDataFiles }
+}
 
 /**
  * Generate a Databricks Asset Bundle for a Field Ops mission.
@@ -25,54 +66,46 @@ export async function generateBundle(
   userId: string,
   config: DatabricksConnection
 ): Promise<string> {
-  // Generate unique schema prefix
   const timestamp = Date.now().toString(36)
   const userPrefix = userId.substring(0, 8)
   const schemaPrefix = `fo_${industry}_${userPrefix}_${timestamp}`
 
-  // Use /tmp for Docker compatibility (nextjs user can write there)
   const tempDir = path.join("/tmp", "dbsword-bundles", schemaPrefix)
   await fs.mkdir(tempDir, { recursive: true })
 
-  // Generate databricks.yml
   const databricksYml = generateDatabricksYml(industry, schemaPrefix, config)
   await fs.writeFile(path.join(tempDir, "databricks.yml"), databricksYml)
 
-  // Copy mission content
   const contentDir = path.join(process.cwd(), "src", "content", "field-ops", industry)
-  
-  // Copy notebooks
-  try {
-    const notebooksDir = path.join(contentDir, "notebooks")
-    const targetNotebooksDir = path.join(tempDir, "notebooks")
-    await fs.mkdir(targetNotebooksDir, { recursive: true })
-    const notebooks = await fs.readdir(notebooksDir)
-    for (const notebook of notebooks) {
-      await fs.copyFile(
-        path.join(notebooksDir, notebook),
-        path.join(targetNotebooksDir, notebook)
-      )
-    }
-    console.log(`[Bundle] Copied ${notebooks.length} notebooks`)
-  } catch (error) {
-    console.warn(`Warning: Could not copy notebooks for ${industry}:`, error)
+  const mission = await loadFieldOpsContent(industry)
+
+  const requiredAssetCheck = await assertRequiredAssets(industry, contentDir)
+  if (requiredAssetCheck.missingDataFiles.length > 0 || requiredAssetCheck.missingNotebooks.length > 0) {
+    throw new Error(
+      JSON.stringify({
+        code: "MISSING_REQUIRED_ASSETS",
+        missingDataFiles: requiredAssetCheck.missingDataFiles,
+        missingNotebooks: requiredAssetCheck.missingNotebooks,
+      })
+    )
   }
 
-  // Copy data files
-  try {
-    const dataDir = path.join(contentDir, "data")
-    const targetDataDir = path.join(tempDir, "data")
-    await fs.mkdir(targetDataDir, { recursive: true })
-    const dataFiles = await fs.readdir(dataDir)
-    for (const file of dataFiles) {
-      await fs.copyFile(
-        path.join(dataDir, file),
-        path.join(targetDataDir, file)
-      )
-    }
-    console.log(`[Bundle] Copied ${dataFiles.length} data files`)
-  } catch (error) {
-    console.warn(`Warning: Could not copy data files for ${industry}:`, error)
+  const targetNotebooksDir = path.join(tempDir, "notebooks")
+  await fs.mkdir(targetNotebooksDir, { recursive: true })
+  for (const notebook of mission.notebooks) {
+    await fs.copyFile(
+      path.join(contentDir, "notebooks", notebook),
+      path.join(targetNotebooksDir, notebook)
+    )
+  }
+
+  const targetDataDir = path.join(tempDir, "data")
+  await fs.mkdir(targetDataDir, { recursive: true })
+  for (const file of mission.dataFiles) {
+    await fs.copyFile(
+      path.join(contentDir, "data", file),
+      path.join(targetDataDir, file)
+    )
   }
 
   return tempDir
@@ -87,11 +120,9 @@ export async function deployBundle(
   config: DatabricksConnection
 ): Promise<DeploymentResult> {
   try {
-    // Extract schema prefix from bundle path
     const schemaPrefix = path.basename(bundlePath)
     console.log(`[Deploy] Starting deployment for ${schemaPrefix}`)
 
-    // Create the three schemas
     const schemas = ["bronze", "silver", "gold"]
     for (const schema of schemas) {
       const fullSchemaName = `${schemaPrefix}_${schema}`
@@ -99,68 +130,35 @@ export async function deployBundle(
       await createSchema(config, config.catalog, fullSchemaName)
     }
 
-    // Create volume in bronze schema for raw data
     const bronzeSchema = `${schemaPrefix}_bronze`
     const volumeName = "raw_data"
     console.log(`[Deploy] Creating volume: ${bronzeSchema}.${volumeName}`)
     await createVolume(config, config.catalog, bronzeSchema, volumeName)
 
-    // Upload data files to the volume
     const localDataDir = path.join(bundlePath, "data")
-    try {
-      const dataFiles = await fs.readdir(localDataDir)
-      for (const file of dataFiles) {
-        const localFilePath = path.join(localDataDir, file)
-        const volumePath = `/Volumes/${config.catalog}/${bronzeSchema}/${volumeName}/${file}`
-        console.log(`[Deploy] Uploading data file: ${file}`)
-        try {
-          await uploadFile(config, localFilePath, volumePath)
-          console.log(`[Deploy] Successfully uploaded: ${file}`)
-        } catch (uploadError) {
-          console.error(`[Deploy] Failed to upload ${file}:`, uploadError)
-          throw uploadError
-        }
-      }
-    } catch (error) {
-      // Only catch readdir failures (no data directory)
-      if ((error as NodeJS.ErrnoException).code === "ENOENT") {
-        console.warn(`[Deploy] No data directory found at ${localDataDir}`)
-      } else {
-        throw error
-      }
+    const dataFiles = await fs.readdir(localDataDir)
+    for (const file of dataFiles) {
+      const localFilePath = path.join(localDataDir, file)
+      const volumePath = `/Volumes/${config.catalog}/${bronzeSchema}/${volumeName}/${file}`
+      console.log(`[Deploy] Uploading data file: ${file}`)
+      await uploadFile(config, localFilePath, volumePath)
+      console.log(`[Deploy] Successfully uploaded: ${file}`)
     }
 
-    // Create workspace directory for notebooks
-    // Use schemaPrefix to create unique folder per deployment
     const workspaceDir = `/Workspace/Shared/field-ops/${schemaPrefix}`
     console.log(`[Deploy] Creating workspace directory: ${workspaceDir}`)
     await createWorkspaceDirectory(config, workspaceDir)
 
-    // Upload notebooks
     const localNotebooksDir = path.join(bundlePath, "notebooks")
-    try {
-      const notebooks = await fs.readdir(localNotebooksDir)
-      for (const notebook of notebooks) {
-        const localNotebookPath = path.join(localNotebooksDir, notebook)
-        const notebookName = notebook.replace(/\.(py|sql|scala|r)$/i, "")
-        const language = getNotebookLanguage(notebook)
-        const workspacePath = `${workspaceDir}/${notebookName}`
-        console.log(`[Deploy] Uploading notebook: ${notebookName}`)
-        try {
-          await uploadNotebook(config, localNotebookPath, workspacePath, language)
-          console.log(`[Deploy] Successfully uploaded notebook: ${notebookName}`)
-        } catch (uploadError) {
-          console.error(`[Deploy] Failed to upload notebook ${notebookName}:`, uploadError)
-          throw uploadError
-        }
-      }
-    } catch (error) {
-      // Only catch readdir failures (no notebooks directory)
-      if ((error as NodeJS.ErrnoException).code === "ENOENT") {
-        console.warn(`[Deploy] No notebooks directory found at ${localNotebooksDir}`)
-      } else {
-        throw error
-      }
+    const notebooks = await fs.readdir(localNotebooksDir)
+    for (const notebook of notebooks) {
+      const localNotebookPath = path.join(localNotebooksDir, notebook)
+      const notebookName = notebook.replace(/\.(py|sql|scala|r)$/i, "")
+      const language = getNotebookLanguage(notebook)
+      const workspacePath = `${workspaceDir}/${notebookName}`
+      console.log(`[Deploy] Uploading notebook: ${notebookName}`)
+      await uploadNotebook(config, localNotebookPath, workspacePath, language)
+      console.log(`[Deploy] Successfully uploaded notebook: ${notebookName}`)
     }
 
     console.log(`[Deploy] Deployment complete for ${schemaPrefix}`)
@@ -196,17 +194,14 @@ function getNotebookLanguage(filename: string): "PYTHON" | "SQL" | "SCALA" | "R"
 
 /**
  * Destroy a deployed bundle and clean up all resources.
- * Drops bronze/silver/gold schemas, deletes workspace notebooks directory,
- * and removes the local bundle directory.
  */
 export async function destroyBundle(
   bundlePath: string,
   config: DatabricksConnection
-): Promise<void> {
-  // Extract schema prefix from bundle path
+): Promise<CleanupResult> {
   const schemaPrefix = path.basename(bundlePath)
+  const failures: CleanupFailure[] = []
 
-  // Drop all schemas (volumes are deleted implicitly with managed schemas)
   const schemas = ["bronze", "silver", "gold"]
   for (const schema of schemas) {
     const fullSchemaName = `${schemaPrefix}_${schema}`
@@ -215,25 +210,40 @@ export async function destroyBundle(
       await dropSchema(config, config.catalog, fullSchemaName)
       console.log(`[Cleanup] Dropped schema: ${fullSchemaName}`)
     } catch (error) {
-      console.error(`[Cleanup] Failed to drop schema ${fullSchemaName}:`, error)
+      failures.push({
+        resourceType: "schema",
+        resourceName: `${config.catalog}.${fullSchemaName}`,
+        errorMessage: error instanceof Error ? error.message : "Failed to drop schema",
+      })
     }
   }
 
-  // Delete workspace notebook directory
   const workspaceDir = `/Workspace/Shared/field-ops/${schemaPrefix}`
   try {
     console.log(`[Cleanup] Deleting workspace directory: ${workspaceDir}`)
     await deleteWorkspaceDirectory(config, workspaceDir)
     console.log(`[Cleanup] Deleted workspace directory: ${workspaceDir}`)
   } catch (error) {
-    console.error(`[Cleanup] Failed to delete workspace directory:`, error)
+    failures.push({
+      resourceType: "workspace_dir",
+      resourceName: workspaceDir,
+      errorMessage: error instanceof Error ? error.message : "Failed to delete workspace directory",
+    })
   }
 
-  // Clean up local bundle directory
   try {
     await fs.rm(bundlePath, { recursive: true, force: true })
   } catch (error) {
-    console.error(`[Cleanup] Failed to remove local bundle directory ${bundlePath}:`, error)
+    failures.push({
+      resourceType: "local_bundle",
+      resourceName: bundlePath,
+      errorMessage: error instanceof Error ? error.message : "Failed to remove local bundle directory",
+    })
+  }
+
+  return {
+    success: failures.length === 0,
+    failures,
   }
 }
 
@@ -260,12 +270,12 @@ resources:
       catalog_name: ${config.catalog}
       name: ${schemaPrefix}_bronze
       comment: "Bronze layer - raw data ingestion"
-      
+
     silver:
       catalog_name: ${config.catalog}
       name: ${schemaPrefix}_silver
       comment: "Silver layer - cleaned and transformed data"
-      
+
     gold:
       catalog_name: ${config.catalog}
       name: ${schemaPrefix}_gold

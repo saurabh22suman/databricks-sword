@@ -70,36 +70,6 @@ export function MissionBriefing({
         </section>
       )}
 
-      {/* Mission Objective */}
-      {config.objective && (
-        <section className="cut-corner bg-anime-900 border-l-4 border-anime-accent p-6">
-          <h2 className="font-heading text-2xl text-anime-cyan mb-4">
-            Mission Objective
-          </h2>
-          <p className="text-anime-100 text-lg font-medium">
-            {config.objective}
-          </p>
-        </section>
-      )}
-
-      {/* Learning Goals */}
-      {config.learningGoals && config.learningGoals.length > 0 && (
-        <section>
-          <h2 className="font-heading text-2xl text-anime-cyan mb-4">
-            Learning Goals
-          </h2>
-          <ul role="list" className="space-y-3">
-            {config.learningGoals.map((goal, index) => (
-              <li key={index} className="flex items-start gap-3">
-                <span className="flex-shrink-0 w-6 h-6 rounded-full bg-anime-cyan/20 border border-anime-cyan flex items-center justify-center text-anime-cyan font-bold text-sm mt-0.5">
-                  {index + 1}
-                </span>
-                <span className="text-anime-300 flex-1">{goal}</span>
-              </li>
-            ))}
-          </ul>
-        </section>
-      )}
 
       {/* Industry Context (Optional) */}
       {config.industryContext && (
@@ -182,7 +152,7 @@ export function MissionBriefing({
             "disabled:opacity-50 disabled:cursor-not-allowed"
           )}
         >
-          {isLoading ? "Preparing..." : "Begin Mission"}
+          {isLoading ? "Preparing..." : "Continue"}
         </button>
       </div>
     </div>

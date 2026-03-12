@@ -12,12 +12,13 @@ vi.mock("@/lib/missions/prerequisites", () => ({
   checkPrerequisites: vi.fn(),
 }))
 
-// Mock getMission
+// Mock loader helpers
 vi.mock("@/lib/missions/loader", () => ({
   getMission: vi.fn(),
+  getAllMissions: vi.fn(),
 }))
 
-import { getMission } from "@/lib/missions/loader"
+import { getAllMissions, getMission } from "@/lib/missions/loader"
 import { checkPrerequisites } from "@/lib/missions/prerequisites"
 import type { Mission } from "@/lib/missions/types"
 
@@ -43,6 +44,7 @@ describe("PrerequisiteGate", () => {
   describe("Prerequisites Met", () => {
     it("renders children when all prerequisites are met", async () => {
       vi.mocked(getMission).mockResolvedValue(mockMission)
+      vi.mocked(getAllMissions).mockResolvedValue([mockMission])
       vi.mocked(checkPrerequisites).mockResolvedValue({
         met: true,
         missing: [],
@@ -67,6 +69,7 @@ describe("PrerequisiteGate", () => {
       }
 
       vi.mocked(getMission).mockResolvedValue(noPrerequMission)
+      vi.mocked(getAllMissions).mockResolvedValue([noPrerequMission])
       vi.mocked(checkPrerequisites).mockResolvedValue({
         met: true,
         missing: [],
@@ -87,6 +90,7 @@ describe("PrerequisiteGate", () => {
   describe("Prerequisites Not Met", () => {
     it("shows locked screen when prerequisites are not met", async () => {
       vi.mocked(getMission).mockResolvedValue(mockMission)
+      vi.mocked(getAllMissions).mockResolvedValue([mockMission])
       vi.mocked(checkPrerequisites).mockResolvedValue({
         met: false,
         missing: ["prereq-1", "prereq-2"],
@@ -104,8 +108,17 @@ describe("PrerequisiteGate", () => {
       expect(screen.queryByTestId("mission-content")).not.toBeInTheDocument()
     })
 
-    it("displays list of missing prerequisites", async () => {
+    it("displays missing prerequisite titles with ID fallback", async () => {
       vi.mocked(getMission).mockResolvedValue(mockMission)
+      vi.mocked(getAllMissions).mockResolvedValue([
+        mockMission,
+        {
+          ...mockMission,
+          id: "prereq-1",
+          title: "Prerequisite One",
+          prerequisites: [],
+        },
+      ])
       vi.mocked(checkPrerequisites).mockResolvedValue({
         met: false,
         missing: ["prereq-1", "prereq-2"],
@@ -119,13 +132,13 @@ describe("PrerequisiteGate", () => {
         }),
       )
 
-      // Should show the prerequisite mission IDs
-      expect(screen.getByText(/prereq-1/i)).toBeInTheDocument()
+      expect(screen.getByText("Prerequisite One")).toBeInTheDocument()
       expect(screen.getByText(/prereq-2/i)).toBeInTheDocument()
     })
 
     it("shows lock icon when prerequisites not met", async () => {
       vi.mocked(getMission).mockResolvedValue(mockMission)
+      vi.mocked(getAllMissions).mockResolvedValue([mockMission])
       vi.mocked(checkPrerequisites).mockResolvedValue({
         met: false,
         missing: ["prereq-1"],
@@ -146,6 +159,7 @@ describe("PrerequisiteGate", () => {
 
     it("links to missing prerequisite missions", async () => {
       vi.mocked(getMission).mockResolvedValue(mockMission)
+      vi.mocked(getAllMissions).mockResolvedValue([mockMission])
       vi.mocked(checkPrerequisites).mockResolvedValue({
         met: false,
         missing: ["prereq-1"],

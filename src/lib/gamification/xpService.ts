@@ -264,6 +264,19 @@ export function awardMissionXp(
   baseXp: number,
 ): XpEvent {
   const sandbox = loadSandbox() ?? initializeSandbox()
+  const existingMission = sandbox.missionProgress[missionId]
+  const alreadyCompleted = existingMission?.completed === true
+
+  if (alreadyCompleted) {
+    return {
+      type: "mission",
+      amount: 0,
+      multiplier: getStreakMultiplier(sandbox.streakData.currentStreak),
+      source: missionId,
+      timestamp: new Date().toISOString(),
+    }
+  }
+
   const multiplier = getStreakMultiplier(sandbox.streakData.currentStreak)
   const amount = Math.floor(baseXp * multiplier)
 
@@ -284,6 +297,10 @@ export function awardMissionXp(
       stageProgress: {},
       sideQuestsCompleted: [],
       totalXpEarned: 0,
+    }
+
+    if (existing.completed) {
+      return withStreak
     }
 
     missionProgress[missionId] = {

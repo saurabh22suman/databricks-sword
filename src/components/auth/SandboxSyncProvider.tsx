@@ -14,10 +14,13 @@ import React, { createContext, useContext } from "react"
 type SandboxSyncContextValue = {
   /** Push current sandbox to server immediately */
   syncNow: () => Promise<void>
+  /** Whether initial pull/merge sync completed for current auth session */
+  isInitialSyncComplete: boolean
 }
 
 const SandboxSyncContext = createContext<SandboxSyncContextValue>({
   syncNow: async () => {},
+  isInitialSyncComplete: false,
 })
 
 /**
@@ -39,9 +42,9 @@ export function SandboxSyncProvider({
 }: {
   children: React.ReactNode
 }): React.ReactElement {
-  const { syncNow } = useSandboxSync()
+  const { syncNow, isInitialSyncComplete } = useSandboxSync()
   return (
-    <SandboxSyncContext.Provider value={{ syncNow }}>
+    <SandboxSyncContext.Provider value={{ syncNow, isInitialSyncComplete }}>
       {children}
     </SandboxSyncContext.Provider>
   )

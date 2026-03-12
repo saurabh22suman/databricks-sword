@@ -6,8 +6,11 @@
 import { getUserSandbox } from "@/app/api/user/helpers"
 import { MissionBriefing } from "@/components/field-ops/MissionBriefing"
 import { auth } from "@/lib/auth"
+import { MOCK_SESSION, isMockAuth } from "@/lib/auth/mockSession"
+import { databricksConnections, getDb } from "@/lib/db"
 import { getIndustryConfig, isIndustryUnlocked } from "@/lib/field-ops/industries"
 import type { Industry } from "@/lib/field-ops/types"
+import { eq } from "drizzle-orm"
 import { Metadata } from "next"
 import { notFound, redirect } from "next/navigation"
 
@@ -29,7 +32,7 @@ export async function generateMetadata(props: PageProps): Promise<Metadata> {
 export default async function IndustryMissionPage(
   props: PageProps
 ): Promise<React.ReactElement> {
-  const session = await auth()
+  const session = isMockAuth ? MOCK_SESSION : await auth()
   if (!session?.user?.id) {
     redirect("/auth/signin")
   }
@@ -50,6 +53,18 @@ export default async function IndustryMissionPage(
       }
     } catch (error) {
       console.error("Error fetching user sandbox:", error)
+    }
+
+    const [connection] = await getDb()
+      .select()
+      .from(databricksConnections)
+      .where(eq(databricksConnections.userId, session.user.id))
+      .limit(1)
+
+    const setupReadiness = {
+      hasConnection: Boolean(connection),
+      hasCatalog: Boolean(connection?.catalogName?.trim()),
+      hasWarehouse: Boolean(connection?.warehouseId?.trim()),
     }
 
     // Check if unlocked
@@ -75,7 +90,7 @@ export default async function IndustryMissionPage(
       )
     }
 
-    return <MissionBriefing industry={industry} config={config} />
+    return <MissionBriefing industry={industry} config={config} setupReadiness={setupReadiness} />
   } catch (error) {
     notFound()
   }

@@ -1,4 +1,5 @@
-import { integer, sqliteTable, text, uniqueIndex } from "drizzle-orm/sqlite-core"
+import { sql } from "drizzle-orm"
+import { index, integer, sqliteTable, text, uniqueIndex } from "drizzle-orm/sqlite-core"
 
 /**
  * Users table for optional authentication.
@@ -11,6 +12,7 @@ export const users = sqliteTable("users", {
   emailVerified: integer("email_verified", { mode: "timestamp" }),
   name: text("name"),
   image: text("image"),
+  leaderboardOptIn: integer("leaderboard_opt_in", { mode: "boolean" }).notNull().default(true),
   createdAt: integer("created_at", { mode: "timestamp" })
     .notNull()
     .$defaultFn(() => new Date()),
@@ -205,6 +207,8 @@ export const fieldOpsValidations = sqliteTable("field_ops_validations", {
   deploymentId: text("deployment_id")
     .notNull()
     .references(() => fieldOpsDeployments.id, { onDelete: "cascade" }),
+  runId: text("run_id").notNull(),
+  checkKey: text("check_key").notNull(),
   checkName: text("check_name").notNull(),
   query: text("query").notNull(),
   passed: integer("passed", { mode: "boolean" }).notNull(),
@@ -212,5 +216,107 @@ export const fieldOpsValidations = sqliteTable("field_ops_validations", {
     .notNull()
     .$defaultFn(() => new Date()),
   errorMessage: text("error_message"),
-})
+}, (table) => [
+  index("field_ops_validations_deployment_run_idx").on(table.deploymentId, table.runId),
+  index("field_ops_validations_deployment_run_check_idx").on(table.deploymentId, table.runId, table.checkKey),
+])
+
+/**
+ * Field Operations completion ledger.
+ * Canonical server-side source of truth for one-time Field Ops XP awards.
+ */
+export const fieldOpsCompletions = sqliteTable("field_ops_completions", {
+  id: text("id")
+    .primaryKey()
+    .$defaultFn(() => crypto.randomUUID()),
+  userId: text("user_id")
+    .notNull()
+    .references(() => users.id, { onDelete: "cascade" }),
+  deploymentId: text("deployment_id")
+    .notNull()
+    .references(() => fieldOpsDeployments.id, { onDelete: "cascade" }),
+  industry: text("industry").notNull(),
+  xpAwarded: integer("xp_awarded").notNull(),
+  completedAt: integer("completed_at", { mode: "timestamp" })
+    .notNull()
+    .$defaultFn(() => new Date()),
+}, (table) => [
+  uniqueIndex("field_ops_completions_user_industry_unique").on(table.userId, table.industry),
+])
+
+/**
+ * Field Operations operation metadata.
+ * Records idempotency, lifecycle, timing, and failure classification for orchestration.
+ */
+export const fieldOpsOperations = sqliteTable("field_ops_operations", {
+  id: text("id")
+    .primaryKey()
+    .$defaultFn(() => crypto.randomUUID()),
+  deploymentId: text("deployment_id")
+    .notNull()
+    .references(() => fieldOpsDeployments.id, { onDelete: "cascade" }),
+  userId: text("user_id")
+    .notNull()
+    .references(() => users.id, { onDelete: "cascade" }),
+  operationType: text("operation_type").notNull(), // deploy | validate | cleanup
+  state: text("state").notNull().default("started"), // started | succeeded | failed
+  requestId: text("request_id").notNull(),
+  idempotencyKey: text("idempotency_key").notNull(),
+  correlationId: text("correlation_id").notNull(),
+  startedAt: integer("started_at", { mode: "timestamp" })
+    .notNull()
+    .$defaultFn(() => new Date()),
+  completedAt: integer("completed_at", { mode: "timestamp" }),
+  durationMs: integer("duration_ms"),
+  failureClass: text("failure_class"),
+  failureCode: text("failure_code"),
+  failureMessage: text("failure_message"),
+  attemptCount: integer("attempt_count").notNull().default(1),
+  retryCount: integer("retry_count").notNull().default(0),
+  estimatedCostUnits: integer("estimated_cost_units").notNull().default(0),
+  metadata: text("metadata"), // JSON object
+  createdAt: integer("created_at", { mode: "timestamp" })
+    .notNull()
+    .$defaultFn(() => new Date()),
+  updatedAt: integer("updated_at", { mode: "timestamp" })
+    .notNull()
+    .$defaultFn(() => new Date()),
+}, (table) => [
+  uniqueIndex("field_ops_operations_operation_idempotency_unique").on(
+    table.deploymentId,
+    table.operationType,
+    table.idempotencyKey
+  ),
+  index("field_ops_operations_deployment_type_state_idx").on(
+    table.deploymentId,
+    table.operationType,
+    table.state,
+    table.startedAt
+  ),
+  index("field_ops_operations_user_started_idx").on(table.userId, table.startedAt),
+  index("field_ops_operations_started_at_idx").on(table.startedAt),
+  index("field_ops_operations_active_operation_lock_idx").on(table.deploymentId).where(
+    sql`${table.state} = 'started'`
+  ),
+])
+
+/**
+ * Coupon redemption records.
+ * Canonical server-side source of truth for one-time XP coupon awards.
+ */
+export const couponRedemptions = sqliteTable("coupon_redemptions", {
+  id: text("id")
+    .primaryKey()
+    .$defaultFn(() => crypto.randomUUID()),
+  userId: text("user_id")
+    .notNull()
+    .references(() => users.id, { onDelete: "cascade" }),
+  code: text("code").notNull(),
+  xpAwarded: integer("xp_awarded").notNull(),
+  redeemedAt: integer("redeemed_at", { mode: "timestamp" })
+    .notNull()
+    .$defaultFn(() => new Date()),
+}, (table) => [
+  uniqueIndex("coupon_redemptions_user_code_unique").on(table.userId, table.code),
+])
 

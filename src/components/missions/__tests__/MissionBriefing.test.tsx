@@ -39,50 +39,45 @@ describe("MissionBriefing", () => {
       ).toBeInTheDocument();
     });
 
-    it("renders mission objective", () => {
+    it("does not render mission objective", () => {
       render(<MissionBriefing config={mockBriefingConfig} />);
       expect(
-        screen.getByText(/Build a fault-tolerant, real-time data pipeline/)
-      ).toBeInTheDocument();
-    });
-
-    it("renders objective heading", () => {
-      render(<MissionBriefing config={mockBriefingConfig} />);
-      expect(screen.getByText("Mission Objective")).toBeInTheDocument();
+        screen.queryByText(/Build a fault-tolerant, real-time data pipeline/)
+      ).not.toBeInTheDocument();
+      expect(screen.queryByText("Mission Objective")).not.toBeInTheDocument();
     });
   });
 
   describe("Learning Goals", () => {
-    it("renders learning goals heading", () => {
+    it("does not render learning goals heading", () => {
       render(<MissionBriefing config={mockBriefingConfig} />);
-      expect(screen.getByText("Learning Goals")).toBeInTheDocument();
+      expect(screen.queryByText("Learning Goals")).not.toBeInTheDocument();
     });
 
-    it("renders all learning goals as list items", () => {
+    it("does not render learning goals list items", () => {
       render(<MissionBriefing config={mockBriefingConfig} />);
       expect(
-        screen.getByText("Understand Delta Lake architecture and ACID transactions")
-      ).toBeInTheDocument();
+        screen.queryByText("Understand Delta Lake architecture and ACID transactions")
+      ).not.toBeInTheDocument();
       expect(
-        screen.getByText("Master Structured Streaming for real-time data processing")
-      ).toBeInTheDocument();
+        screen.queryByText("Master Structured Streaming for real-time data processing")
+      ).not.toBeInTheDocument();
       expect(
-        screen.getByText("Implement exactly-once semantics with checkpointing")
-      ).toBeInTheDocument();
+        screen.queryByText("Implement exactly-once semantics with checkpointing")
+      ).not.toBeInTheDocument();
       expect(
-        screen.getByText("Design schemas for efficient querying and compliance")
-      ).toBeInTheDocument();
+        screen.queryByText("Design schemas for efficient querying and compliance")
+      ).not.toBeInTheDocument();
     });
 
-    it("renders learning goals with bullet points", () => {
-      const { container } = render(<MissionBriefing config={mockBriefingConfig} />);
-      const listItems = container.querySelectorAll("li");
-      expect(listItems.length).toBe(4);
+    it("does not render learning goals list", () => {
+      render(<MissionBriefing config={mockBriefingConfig} />);
+      expect(screen.queryByRole("list")).not.toBeInTheDocument();
     });
 
-    it("handles single learning goal", () => {
+    it("does not render single learning goal", () => {
       render(<MissionBriefing config={mockMinimalConfig} />);
-      expect(screen.getByText("Goal 1")).toBeInTheDocument();
+      expect(screen.queryByText("Goal 1")).not.toBeInTheDocument();
     });
   });
 
@@ -142,7 +137,7 @@ describe("MissionBriefing", () => {
   describe("Call to Action", () => {
     it("renders start button", () => {
       render(<MissionBriefing config={mockBriefingConfig} />);
-      expect(screen.getByRole("button", { name: /begin mission/i })).toBeInTheDocument();
+      expect(screen.getByRole("button", { name: /continue/i })).toBeInTheDocument();
     });
 
     it("calls onStart when button is clicked", () => {
@@ -151,7 +146,7 @@ describe("MissionBriefing", () => {
         started = true;
       };
       render(<MissionBriefing config={mockBriefingConfig} onStart={handleStart} />);
-      screen.getByRole("button", { name: /begin mission/i }).click();
+      screen.getByRole("button", { name: /continue/i }).click();
       expect(started).toBe(true);
     });
 
@@ -167,16 +162,16 @@ describe("MissionBriefing", () => {
   });
 
   describe("Styling", () => {
-    it("applies cyberpunk theme classes", () => {
+    it("applies mission briefing layout styling", () => {
       const { container } = render(<MissionBriefing config={mockBriefingConfig} />);
-      const element = container.querySelector(".bg-anime-900");
-      expect(element).toBeInTheDocument();
+      const wrapper = container.querySelector(".space-y-8");
+      expect(wrapper).toBeInTheDocument();
     });
 
-    it("applies cut-corner styling to objective section", () => {
+    it("does not render objective cut-corner section", () => {
       const { container } = render(<MissionBriefing config={mockBriefingConfig} />);
       const cutCorner = container.querySelector(".cut-corner");
-      expect(cutCorner).toBeInTheDocument();
+      expect(cutCorner).not.toBeInTheDocument();
     });
 
     it("applies neon glow to headings", () => {
@@ -193,15 +188,14 @@ describe("MissionBriefing", () => {
       expect(headings.length).toBeGreaterThan(0);
     });
 
-    it("uses semantic list for learning goals", () => {
+    it("does not render semantic list for learning goals", () => {
       render(<MissionBriefing config={mockBriefingConfig} />);
-      const list = screen.getByRole("list");
-      expect(list).toBeInTheDocument();
+      expect(screen.queryByRole("list")).not.toBeInTheDocument();
     });
 
     it("provides accessible button labels", () => {
       render(<MissionBriefing config={mockBriefingConfig} />);
-      const button = screen.getByRole("button", { name: /begin mission/i });
+      const button = screen.getByRole("button", { name: /continue/i });
       expect(button).toHaveAccessibleName();
     });
   });

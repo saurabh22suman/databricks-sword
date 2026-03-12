@@ -6,8 +6,8 @@
 "use client"
 
 import { useSyncNow } from "@/components/auth"
+import { buildFieldOpsLinks } from "@/lib/field-ops/links"
 import type { Industry, IndustryConfig } from "@/lib/field-ops/types"
-import { getStreakMultiplier } from "@/lib/gamification"
 import { updateSandbox } from "@/lib/sandbox"
 import { useRouter } from "next/navigation"
 import { useEffect, useState } from "react"
@@ -15,10 +15,24 @@ import { ConfirmDialog } from "../ui/ConfirmDialog"
 import { ObjectivesList } from "./ObjectivesList"
 import { ValidationResults } from "./ValidationResults"
 
+type MissionValidationSummary = {
+  checkKey: string
+  checkName: string
+}
+
+type MissionContentSummary = {
+  objectives: string[]
+  hints: string[]
+  hintsInNotebooks: boolean
+  hintsNote?: string
+  validations: MissionValidationSummary[]
+}
+
 type ActiveMissionProps = {
   deploymentId: string
   industry: Industry
   config: IndustryConfig
+  mission: MissionContentSummary
 }
 
 type DeploymentData = {
@@ -30,23 +44,43 @@ type DeploymentData = {
     deployedAt?: string | null
     completedAt?: string | null
     errorMessage?: string | null
-    // Connection info for dynamic links
     workspaceUrl?: string
     catalogName?: string
     warehouseId?: string
   }
+  validationRun?: {
+    runId: string
+    totalChecks: number
+    passedChecks: number
+  } | null
   validations: Array<{
+    checkKey: string
     checkName: string
     passed: boolean
     executedAt: string
     errorMessage?: string | null
   }>
+  operations?: Array<{
+    id: string
+    type: string
+    state: string
+    requestId: string
+    correlationId: string
+    durationMs: number | null
+    retryCount: number
+    failureClass: string | null
+  }>
+  metadata?: {
+    requestId: string
+    staleOperationsMarked: number
+  }
 }
 
 export function ActiveMission({
   deploymentId,
   industry,
   config,
+  mission,
 }: ActiveMissionProps): React.ReactElement {
   const router = useRouter()
   const { syncNow } = useSyncNow()
@@ -58,10 +92,8 @@ export function ActiveMission({
   const [cleanupSuccess, setCleanupSuccess] = useState(false)
   const [error, setError] = useState<string | null>(null)
 
-  // Load deployment status
   useEffect(() => {
     loadStatus()
-    // Poll for updates every 10 seconds
     const interval = setInterval(loadStatus, 10000)
     return () => clearInterval(interval)
   }, [deploymentId])
@@ -79,12 +111,21 @@ export function ActiveMission({
   }
 
   const handleValidate = async () => {
+    const idempotencyKey = crypto.randomUUID()
+    const requestId = crypto.randomUUID()
+    const correlationId = requestId
+
     setIsValidating(true)
     setError(null)
 
     try {
       const response = await fetch(`/api/field-ops/validate/${deploymentId}`, {
         method: "POST",
+        headers: {
+          "Idempotency-Key": idempotencyKey,
+          "X-Request-Id": requestId,
+          "X-Correlation-Id": correlationId,
+        },
       })
 
       const result = await response.json()
@@ -93,7 +134,6 @@ export function ActiveMission({
         throw new Error(result.error || "Validation failed")
       }
 
-      // Reload status to get updated validations
       await loadStatus()
     } catch (err) {
       setError(err instanceof Error ? err.message : "Validation failed")
@@ -103,12 +143,21 @@ export function ActiveMission({
   }
 
   const handleComplete = async () => {
+    const idempotencyKey = crypto.randomUUID()
+    const requestId = crypto.randomUUID()
+    const correlationId = requestId
+
     setIsCompleting(true)
     setError(null)
 
     try {
       const response = await fetch(`/api/field-ops/complete/${deploymentId}`, {
         method: "POST",
+        headers: {
+          "Idempotency-Key": idempotencyKey,
+          "X-Request-Id": requestId,
+          "X-Correlation-Id": correlationId,
+        },
       })
 
       const result = await response.json()
@@ -117,30 +166,21 @@ export function ActiveMission({
         throw new Error(result.error || "Failed to complete mission")
       }
 
-      // Award XP to sandbox with streak multiplier
-      const baseXp = result.xpAwarded || config.xpReward
-      updateSandbox((data) => {
-        const multiplier = getStreakMultiplier(data.streakData.currentStreak)
-        const finalXp = Math.floor(baseXp * multiplier)
-        // Add industry to completed field ops if not already there
-        const completedFieldOps = data.completedFieldOps || []
-        const newCompletedFieldOps = completedFieldOps.includes(config.industry)
-          ? completedFieldOps
-          : [...completedFieldOps, config.industry]
+      updateSandbox((sandbox) => {
+        const completedFieldOps = sandbox.completedFieldOps || []
+        const alreadyCompleted = completedFieldOps.includes(industry)
+
         return {
-          ...data,
-          userStats: {
-            ...data.userStats,
-            totalXp: data.userStats.totalXp + finalXp,
-          },
-          completedFieldOps: newCompletedFieldOps,
+          ...sandbox,
+          completedFieldOps: alreadyCompleted
+            ? completedFieldOps
+            : [...completedFieldOps, industry],
         }
       })
-      // Immediately push XP to server so it isn't lost on logout
       void syncNow()
 
-      // Show success and redirect
-      alert(`Mission complete! +${result.xpAwarded} XP`)
+      const awardedXp = result.xpAwarded || config.xpReward
+      alert(result.alreadyAwarded ? "Mission already completed previously." : `Mission complete! +${awardedXp} XP`)
       router.push("/field-ops")
     } catch (err) {
       setError(err instanceof Error ? err.message : "Failed to complete mission")
@@ -150,21 +190,32 @@ export function ActiveMission({
   }
 
   const handleCleanup = async () => {
+    const idempotencyKey = crypto.randomUUID()
+    const requestId = crypto.randomUUID()
+    const correlationId = requestId
+
     setIsCleaning(true)
     setError(null)
 
     try {
       const response = await fetch(`/api/field-ops/cleanup/${deploymentId}`, {
         method: "POST",
+        headers: {
+          "Idempotency-Key": idempotencyKey,
+          "X-Request-Id": requestId,
+          "X-Correlation-Id": correlationId,
+        },
       })
 
       const result = await response.json()
 
       if (!response.ok) {
-        throw new Error(result.error || "Cleanup failed")
+        const failureSummary = Array.isArray(result.failures)
+          ? result.failures.map((failure: { resourceType: string; resourceName: string }) => `${failure.resourceType}:${failure.resourceName}`).join(", ")
+          : "Cleanup failed"
+        throw new Error(result.error ? `${result.error} (${failureSummary})` : failureSummary)
       }
 
-      // Show success state briefly, then redirect
       setShowCleanupConfirm(false)
       setCleanupSuccess(true)
       setTimeout(() => {
@@ -188,23 +239,37 @@ export function ActiveMission({
 
   const deployment = data.deployment
   const validations = data.validations
+  const operations = data.operations ?? []
   const allPassed = validations.length > 0 && validations.every((v) => v.passed)
 
-  // Placeholder objectives
-  const objectives = [
-    "Ingest raw data into Bronze layer",
-    "Clean and deduplicate data in Silver layer",
-    "Create business-ready tables in Gold layer",
-    "Implement data quality checks",
-    "Pass all validation queries",
-  ]
+  const validationByKey = validations.reduce<Record<string, boolean>>((acc, validation) => {
+    acc[validation.checkKey] = validation.passed
+    return acc
+  }, {})
 
-  const completed = validations.map((v) => v.passed)
+  const objectiveChecks = mission.validations.length > 0
+    ? mission.validations
+    : mission.objectives.map((objective, index) => ({
+        checkKey: `objective_${index}`,
+        checkName: objective,
+      }))
+
+  const objectives = objectiveChecks.map((validation) => validation.checkName)
+  const completed = objectiveChecks.map((validation) => validationByKey[validation.checkKey] ?? false)
+
+  const links = buildFieldOpsLinks({
+    workspaceUrl: deployment.workspaceUrl,
+    catalogName: deployment.catalogName,
+    schemaPrefix: deployment.schemaPrefix,
+  })
+
+  const hints = mission.hints.length > 0
+    ? mission.hints
+    : ["Use the notebook comments and query results to diagnose failures."]
 
   return (
     <div className="py-12">
       <div className="container mx-auto px-4 max-w-6xl">
-        {/* Header */}
         <div className="mb-8">
           <a
             href="/field-ops"
@@ -220,15 +285,18 @@ export function ActiveMission({
                   {config.title}
                 </h1>
                 <p className="text-anime-300">Status: {deployment.status}</p>
+                {data.validationRun && (
+                  <p className="text-anime-500 text-sm">
+                    Latest run: {data.validationRun.passedChecks}/{data.validationRun.totalChecks} checks passed
+                  </p>
+                )}
               </div>
             </div>
           </div>
         </div>
 
         <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
-          {/* Left Column - Objectives & Links */}
           <div className="space-y-6">
-            {/* Objectives */}
             <div className="cut-corner bg-anime-900 border border-anime-700 p-6">
               <h2 className="font-heading text-2xl text-anime-cyan mb-3">
                 🎯 Objectives ({completed.filter(Boolean).length}/{objectives.length})
@@ -236,52 +304,75 @@ export function ActiveMission({
               <ObjectivesList objectives={objectives} completed={completed} />
             </div>
 
-            {/* Quick Links */}
             <div className="cut-corner bg-anime-900 border border-anime-700 p-6">
               <h2 className="font-heading text-2xl text-anime-cyan mb-3">
                 🔗 Quick Links
               </h2>
               <p className="text-anime-500 text-sm mb-3">
-                Schema: <code className="text-anime-cyan">{deployment.schemaPrefix}</code>
+                Schema prefix: <code className="text-anime-cyan">{deployment.schemaPrefix}</code>
               </p>
               <ul className="space-y-2">
-                {deployment.workspaceUrl && (
+                {links.workspace && (
                   <li>
                     <a
-                      href={deployment.workspaceUrl.replace(/\/+$/, "")}
+                      href={links.workspace}
                       className="text-anime-cyan hover:text-anime-accent"
                       target="_blank"
                       rel="noopener noreferrer"
                     >
-                      → Open in Databricks
+                      → Open Databricks Workspace
                     </a>
                   </li>
                 )}
-                {deployment.workspaceUrl && (
+                {links.notebooks && (
                   <li>
                     <a
-                      href={`${deployment.workspaceUrl.replace(/\/+$/, "")}/#workspace`}
+                      href={links.notebooks}
                       className="text-anime-cyan hover:text-anime-accent"
                       target="_blank"
                       rel="noopener noreferrer"
                     >
-                      → View Notebooks
+                      → Open Deployed Notebooks
                     </a>
                   </li>
                 )}
-                {deployment.workspaceUrl && deployment.catalogName && (
+                {links.explorerBronze && (
                   <li>
                     <a
-                      href={`${deployment.workspaceUrl.replace(/\/+$/, "")}/explore/data/${deployment.catalogName}/${deployment.schemaPrefix}`}
+                      href={links.explorerBronze}
                       className="text-anime-cyan hover:text-anime-accent"
                       target="_blank"
                       rel="noopener noreferrer"
                     >
-                      → Catalog Explorer
+                      → Bronze Schema Explorer
                     </a>
                   </li>
                 )}
-                {!deployment.workspaceUrl && (
+                {links.explorerSilver && (
+                  <li>
+                    <a
+                      href={links.explorerSilver}
+                      className="text-anime-cyan hover:text-anime-accent"
+                      target="_blank"
+                      rel="noopener noreferrer"
+                    >
+                      → Silver Schema Explorer
+                    </a>
+                  </li>
+                )}
+                {links.explorerGold && (
+                  <li>
+                    <a
+                      href={links.explorerGold}
+                      className="text-anime-cyan hover:text-anime-accent"
+                      target="_blank"
+                      rel="noopener noreferrer"
+                    >
+                      → Gold Schema Explorer
+                    </a>
+                  </li>
+                )}
+                {!links.workspace && (
                   <li className="text-anime-500 italic">
                     No connection info available
                   </li>
@@ -289,22 +380,22 @@ export function ActiveMission({
               </ul>
             </div>
 
-            {/* Hints */}
             <div className="cut-corner bg-anime-900 border border-anime-700 p-6">
               <h2 className="font-heading text-2xl text-anime-cyan mb-3">
                 💡 Hints
               </h2>
               <ol className="space-y-2 text-anime-300 list-decimal list-inside">
-                <li>Check the Bronze layer for data ingestion issues</li>
-                <li>Look for duplicate records in transformations</li>
-                <li>Validate schema names match the deployment prefix</li>
+                {hints.map((hint, index) => (
+                  <li key={index}>{hint}</li>
+                ))}
               </ol>
+              {mission.hintsInNotebooks && mission.hintsNote && (
+                <p className="text-anime-500 text-sm mt-3">{mission.hintsNote}</p>
+              )}
             </div>
           </div>
 
-          {/* Right Column - Validation & Actions */}
           <div className="space-y-6">
-            {/* Actions */}
             <div className="cut-corner bg-anime-900 border border-anime-700 p-6">
               <h2 className="font-heading text-2xl text-anime-cyan mb-4">
                 ⚙️ Actions
@@ -338,12 +429,38 @@ export function ActiveMission({
               </div>
             </div>
 
-            {/* Validation Results */}
             {validations.length > 0 && (
               <ValidationResults validations={validations} />
             )}
 
-            {/* Error Message */}
+            {operations.length > 0 && (
+              <div className="cut-corner bg-anime-900 border border-anime-700 p-6">
+                <h2 className="font-heading text-2xl text-anime-cyan mb-3">Recent Operations</h2>
+                <div className="space-y-3">
+                  {operations.map((operation) => (
+                    <div
+                      key={operation.id}
+                      className="rounded border border-anime-700/70 bg-anime-950/70 p-3"
+                    >
+                      <div className="flex items-center justify-between text-sm">
+                        <p className="text-anime-cyan font-medium uppercase tracking-wide">
+                          {operation.type.replaceAll("_", " ")}
+                        </p>
+                        <p className="text-anime-300 uppercase">{operation.state}</p>
+                      </div>
+                      <div className="mt-2 grid grid-cols-1 gap-1 text-xs text-anime-400 sm:grid-cols-2">
+                        <p>Duration: {operation.durationMs ?? "—"}ms</p>
+                        <p>Retries: {operation.retryCount}</p>
+                        <p>Failure class: {operation.failureClass ?? "none"}</p>
+                        <p>Request ID: {operation.requestId}</p>
+                        <p className="sm:col-span-2">Correlation ID: {operation.correlationId}</p>
+                      </div>
+                    </div>
+                  ))}
+                </div>
+              </div>
+            )}
+
             {error && (
               <div className="cut-corner bg-anime-accent/10 border border-anime-accent p-4">
                 <p className="text-anime-accent">{error}</p>
@@ -353,7 +470,6 @@ export function ActiveMission({
         </div>
       </div>
 
-      {/* Cleanup Confirmation Dialog */}
       <ConfirmDialog
         open={showCleanupConfirm}
         title="🗑️ Cleanup Resources"
@@ -366,7 +482,6 @@ export function ActiveMission({
         onCancel={() => setShowCleanupConfirm(false)}
       />
 
-      {/* Cleanup Success Toast */}
       {cleanupSuccess && (
         <div className="fixed bottom-6 left-1/2 -translate-x-1/2 z-50">
           <div className="cut-corner bg-anime-900 border border-anime-green px-6 py-3 shadow-neon-cyan/30">

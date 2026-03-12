@@ -8,6 +8,7 @@ import type { SandboxData } from "@/lib/sandbox/types"
 import { cn } from "@/lib/utils"
 import { useRouter } from "next/navigation"
 import { useEffect, useState } from "react"
+import { useSyncNow } from "@/components/auth"
 import { MissionCard } from "./MissionCard"
 
 export type MissionGridProps = {
@@ -24,23 +25,32 @@ export type MissionGridProps = {
  */
 export function MissionGrid({ missions, userXp = 0 }: MissionGridProps): React.ReactElement {
   const router = useRouter()
+  const { isInitialSyncComplete } = useSyncNow()
   const [activeFilter, setActiveFilter] = useState<Track | "all">("all")
   const [resolvedXp, setResolvedXp] = useState(userXp)
   const [sandboxData, setSandboxData] = useState<SandboxData | null>(null)
 
-  /** Load real XP and progress from browser sandbox on mount */
+  /** Load real XP/progress after initial auth sync settles */
   useEffect(() => {
+    if (!isInitialSyncComplete) return
     const sandbox = loadSandbox()
     if (sandbox) {
       setResolvedXp(sandbox.userStats.totalXp)
       setSandboxData(sandbox)
     }
-  }, [])
+  }, [isInitialSyncComplete])
 
   const filteredMissions =
     activeFilter === "all"
       ? missions
       : missions.filter((m) => getTrackForMission(m.id) === activeFilter)
+
+  const missionTitleLookup = new Map(missions.map((m) => [m.id, m.title]))
+  const completedMissions = new Set(
+    Object.entries(sandboxData?.missionProgress ?? {})
+      .filter(([, progress]) => progress.completed)
+      .map(([id]) => id),
+  )
 
   /** Group filtered missions by track for display */
   const groupedByTrack = getAllTracks().reduce(
@@ -118,11 +128,19 @@ export function MissionGrid({ missions, userXp = 0 }: MissionGridProps): React.R
               {trackMissions.map((mission) => {
                 const missionProgress = sandboxData?.missionProgress[mission.id]
                 const isCompleted = missionProgress?.completed ?? false
+                const missingPrereqs = mission.prerequisites.filter(
+                  (id) => !completedMissions.has(id),
+                )
+
                 return (
                   <MissionCard
                     key={mission.id}
                     mission={mission}
-                    userXp={resolvedXp}
+                    userXp={isInitialSyncComplete ? resolvedXp : userXp}
+                    prerequisitesMet={missingPrereqs.length === 0}
+                    missingPrerequisiteTitles={missingPrereqs.map(
+                      (id) => missionTitleLookup.get(id) ?? id,
+                    )}
                     completed={isCompleted}
                     onClick={() => router.push(`/missions/${mission.id}`)}
                   />

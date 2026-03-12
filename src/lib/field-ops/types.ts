@@ -56,6 +56,7 @@ export type FieldOpsMission = {
  * Validation configuration for a Field Ops mission.
  */
 export type ValidationConfig = {
+  checkKey: string
   checkName: string
   description: string
   query: string
@@ -91,6 +92,8 @@ export type Deployment = {
 export type ValidationResult = {
   id: string
   deploymentId: string
+  runId: string
+  checkKey: string
   checkName: string
   query: string
   passed: boolean
@@ -127,6 +130,17 @@ export type IndustryConfig = {
 /**
  * Bundle deployment result.
  */
+export type CleanupFailure = {
+  resourceType: "schema" | "workspace_dir" | "local_bundle"
+  resourceName: string
+  errorMessage: string
+}
+
+export type CleanupResult = {
+  success: boolean
+  failures: CleanupFailure[]
+}
+
 export type DeploymentResult = {
   success: boolean
   bundlePath?: string

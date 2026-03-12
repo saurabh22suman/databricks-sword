@@ -7,6 +7,7 @@ vi.mock("@/lib/sandbox", () => ({
   loadSandbox: () => mockLoadSandbox(),
 }))
 
+
 // Mock next/navigation
 const mockPush = vi.fn()
 vi.mock("next/navigation", () => ({
@@ -203,5 +204,14 @@ describe("ProfilePageClient", () => {
     await waitFor(() => {
       expect(screen.getByTestId("xp-bar")).toHaveTextContent("0 XP")
     })
+  })
+
+  it("does not render coupon section", () => {
+    mockLoadSandbox.mockReturnValue(null)
+
+    render(<ProfilePageClient />)
+
+    expect(screen.queryByPlaceholderText("Enter code")).not.toBeInTheDocument()
+    expect(screen.queryByRole("button", { name: "Redeem" })).not.toBeInTheDocument()
   })
 })

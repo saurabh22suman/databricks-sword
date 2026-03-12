@@ -1,13 +1,13 @@
 /**
  * @file useDisconnect.ts
- * @description Hook that handles the full disconnect (sign-out) flow:
+ * @description Hook that handles the full account sign-out flow:
  *
  * 1. Shows the SyncProgressDialog (via returned `isSyncing` state)
  * 2. Syncs localStorage sandbox data to Turso DB
  * 3. Clears localStorage sandbox
  * 4. Calls NextAuth signOut
  *
- * Used by ProfileSidebar and Settings page "Disconnect" / "Sign Out" buttons.
+ * Used by ProfileSidebar and Settings page "Sign out account" buttons.
  */
 
 "use client"

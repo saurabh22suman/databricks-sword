@@ -65,25 +65,12 @@ export function MissionQuiz({
   
   const [isComplete, setIsComplete] = React.useState(false);
   const [finalScore, setFinalScore] = React.useState(0);
+  const [aiHint, setAiHint] = React.useState<string | null>(null);
+  const [isLoadingAiHint, setIsLoadingAiHint] = React.useState(false);
 
   // Map mission QuizConfig to Quiz component props
   // The types are already compatible since they use the same QuizQuestion type
   const quizQuestions = config.questions;
-
-  React.useEffect(() => {
-    // This effect will be triggered when the quiz component completes
-    // We need a way to detect completion from the Quiz component
-    // For now, this is a placeholder
-    if (isComplete && onComplete) {
-      const percentage = Math.round((finalScore / quizQuestions.length) * 100);
-      onComplete({
-        passed: percentage >= config.passingScore,
-        score: finalScore,
-        totalQuestions: quizQuestions.length,
-        percentage,
-      });
-    }
-  }, [isComplete, finalScore, quizQuestions.length, config.passingScore, onComplete]);
 
   // Since we need to intercept the quiz completion to call onComplete,
   // we need to either:
@@ -174,6 +161,41 @@ export function MissionQuiz({
     setIsComplete(false);
   }, []);
 
+  const handleRequestAiHint = React.useCallback(async (): Promise<void> => {
+    setIsLoadingAiHint(true);
+
+    try {
+      const response = await fetch("/api/hints/groq", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({
+          challengeType: "quiz",
+          prompt: currentQuestion.question,
+          learnerInput:
+            selectedAnswer === null
+              ? undefined
+              : shuffledOptions[selectedAnswer]?.text,
+        }),
+      });
+
+      if (!response.ok) {
+        setAiHint(null);
+        return;
+      }
+
+      const result = (await response.json()) as {
+        enabled?: boolean;
+        hint?: string | null;
+      };
+
+      setAiHint(result.enabled ? result.hint ?? null : null);
+    } catch {
+      setAiHint(null);
+    } finally {
+      setIsLoadingAiHint(false);
+    }
+  }, [currentQuestion.question, selectedAnswer, shuffledOptions]);
+
   if (isComplete) {
     const percentage = Math.round((finalScore / quizQuestions.length) * 100);
     const passed = percentage >= config.passingScore;
@@ -211,15 +233,22 @@ export function MissionQuiz({
               onClick={handleRestart}
               className="rounded-lg border border-anime-700 bg-anime-800 px-6 py-2 text-sm font-medium text-anime-300 transition-all duration-300 hover:bg-anime-700"
             >
-              Retry Quiz
+              {passed ? "Retry Quiz" : "Retry to Pass"}
             </button>
-            <button
-              onClick={handleContinue}
-              className="rounded-lg bg-anime-green px-8 py-2 text-sm font-bold text-anime-950 uppercase tracking-wider transition-all duration-300 hover:shadow-neon-cyan hover:scale-105"
-            >
-              Continue to Next Stage →
-            </button>
+            {passed && (
+              <button
+                onClick={handleContinue}
+                className="rounded-lg bg-anime-green px-8 py-2 text-sm font-bold text-anime-950 uppercase tracking-wider transition-all duration-300 hover:shadow-neon-cyan hover:scale-105"
+              >
+                Continue to Next Stage →
+              </button>
+            )}
           </div>
+          {!passed && (
+            <p className="mt-3 text-sm font-medium text-anime-accent">
+              You need at least {config.passingScore}% to continue. Review the explanations and try again.
+            </p>
+          )}
         </div>
 
         {/* Learnings (shown after quiz completion) */}
@@ -295,6 +324,26 @@ export function MissionQuiz({
           <p className="text-sm text-anime-300">{currentQuestion.explanation}</p>
         </div>
       )}
+
+      <div className="mt-4 flex flex-col gap-3">
+        <div className="flex justify-end">
+          <button
+            onClick={handleRequestAiHint}
+            disabled={isLoadingAiHint}
+            className="text-right text-sm text-anime-cyan hover:text-anime-purple transition-colors disabled:text-anime-500"
+          >
+            {isLoadingAiHint ? "Loading AI hint..." : "Request optional AI hint"}
+          </button>
+        </div>
+
+        {aiHint && (
+          <div className="rounded-lg border border-anime-cyan/40 bg-anime-cyan/10 p-3">
+            <p className="text-sm text-anime-200">
+              <span className="font-medium text-anime-cyan">AI Hint (advisory):</span> {aiHint}
+            </p>
+          </div>
+        )}
+      </div>
 
       <div className="mt-6 flex justify-end">
         {!isSubmitted ? (

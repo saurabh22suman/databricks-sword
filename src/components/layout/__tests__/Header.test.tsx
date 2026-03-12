@@ -1,4 +1,4 @@
-import { render, screen } from "@testing-library/react"
+import { fireEvent, render, screen } from "@testing-library/react"
 import { describe, expect, it, vi } from "vitest"
 import { Header } from "../Header"
 
@@ -30,12 +30,17 @@ vi.mock("next-auth/react", () => ({
   signOut: vi.fn(),
 }))
 
+const mockUpdateSetting = vi.hoisted(() => vi.fn())
+const mockStopMusic = vi.hoisted(() => vi.fn())
+
 // Mock lucide-react icons
 vi.mock("lucide-react", () => ({
   Menu: () => <span data-testid="menu-icon" />,
   Sword: () => <span data-testid="sword-icon" />,
   User: () => <span data-testid="user-icon" />,
   X: () => <span data-testid="x-icon" />,
+  Volume2: () => <span data-testid="volume2-icon" />,
+  VolumeX: () => <span data-testid="volumex-icon" />,
   Shield: () => <span data-testid="shield-icon" />,
   Swords: () => <span data-testid="swords-icon" />,
   Target: () => <span data-testid="target-icon" />,
@@ -47,7 +52,42 @@ vi.mock("lucide-react", () => ({
   LogOut: () => <span data-testid="logout-icon" />,
 }))
 
+vi.mock("@/lib/settings", () => ({
+  useSettings: () => ({
+    settings: {
+      animationsEnabled: true,
+      sfxEnabled: true,
+      musicEnabled: true,
+      musicVolume: 35,
+      reduceMotion: false,
+      dyslexiaFont: false,
+      contrastMode: false,
+      subtitlesEnabled: true,
+    },
+    updateSetting: mockUpdateSetting,
+    resetSettings: vi.fn(),
+  }),
+}))
+
+vi.mock("@/lib/sound", () => ({
+  stopMusic: mockStopMusic,
+}))
+
 describe("Header", () => {
+  it("renders top-right mute button", () => {
+    render(<Header />)
+    expect(screen.getByRole("button", { name: "Mute all audio" })).toBeInTheDocument()
+  })
+
+  it("mutes both SFX and music from header control", () => {
+    render(<Header />)
+
+    fireEvent.click(screen.getByRole("button", { name: "Mute all audio" }))
+
+    expect(mockUpdateSetting).toHaveBeenCalledWith("sfxEnabled", false)
+    expect(mockUpdateSetting).toHaveBeenCalledWith("musicEnabled", false)
+    expect(mockStopMusic).toHaveBeenCalled()
+  })
   it("renders the site logo/title", () => {
     render(<Header />)
     expect(screen.getByText("SWORD")).toBeInTheDocument()

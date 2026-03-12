@@ -19,7 +19,7 @@ export type StageTrackerProps = {
   currentStageId: string;
   completedStageIds: string[];
   missionId: string;
-  onNavigate: (stageId: string) => void;
+  onNavigate?: (stageId: string) => void;
 };
 
 /**
@@ -30,6 +30,7 @@ export function StageTracker({
   stages,
   currentStageId,
   completedStageIds,
+  missionId,
   onNavigate,
 }: StageTrackerProps): React.ReactElement {
   const getStageStatus = (stageId: string): "completed" | "current" | "upcoming" => {
@@ -40,9 +41,16 @@ export function StageTracker({
 
   const handleClick = (stageId: string) => {
     const status = getStageStatus(stageId);
-    if (status === "completed" || status === "current") {
-      onNavigate(stageId);
+    if (status !== "completed" && status !== "current") {
+      return;
     }
+
+    if (onNavigate) {
+      onNavigate(stageId);
+      return;
+    }
+
+    window.location.assign(`/missions/${missionId}/stage/${stageId}`);
   };
 
   return (

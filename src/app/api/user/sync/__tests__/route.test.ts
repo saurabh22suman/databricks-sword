@@ -15,13 +15,25 @@ const mockDb = {
   select: vi.fn(),
   update: vi.fn(),
 }
+
+function mockRewardXp(totalCouponXp: number, totalFieldOpsXp: number): void {
+  const whereCoupon = vi.fn().mockResolvedValue([{ totalCouponXp }])
+  const fromCoupon = vi.fn().mockReturnValue({ where: whereCoupon })
+
+  const whereFieldOps = vi.fn().mockResolvedValue([{ totalFieldOpsXp }])
+  const fromFieldOps = vi.fn().mockReturnValue({ where: whereFieldOps })
+
+  vi.mocked(mockDb.select)
+    .mockReturnValueOnce({ from: fromCoupon } as any)
+    .mockReturnValueOnce({ from: fromFieldOps } as any)
+}
 vi.mock("@/lib/db/client", () => ({
   getDb: vi.fn(() => mockDb),
 }))
 
 describe("Sandbox Sync API Route", () => {
   beforeEach(() => {
-    vi.clearAllMocks()
+    vi.resetAllMocks()
   })
 
   describe("POST /api/user/sync", () => {
@@ -40,6 +52,7 @@ describe("Sandbox Sync API Route", () => {
     })
 
     it("should return 400 when request body is invalid", async () => {
+      mockRewardXp(0, 0)
       vi.mocked(auth).mockResolvedValue({
         user: { id: "user-123", email: "test@example.com" },
         expires: "2025-01-01",
@@ -57,6 +70,7 @@ describe("Sandbox Sync API Route", () => {
     })
 
     it("should upsert sandbox data and return 200 when valid", async () => {
+      mockRewardXp(0, 0)
       const userId = "user-123"
       vi.mocked(auth).mockResolvedValue({
         user: { id: userId, email: "test@example.com" },
@@ -84,6 +98,7 @@ describe("Sandbox Sync API Route", () => {
           freezesUsed: 0,
         },
         achievements: [],
+        completedFieldOps: [],
         flashcardProgress: {},
         lastSynced: new Date().toISOString(),
       }
@@ -107,6 +122,7 @@ describe("Sandbox Sync API Route", () => {
     })
 
     it("should sanitize forged aggregate stats before persisting", async () => {
+      mockRewardXp(0, 0)
       const userId = "user-123"
       vi.mocked(auth).mockResolvedValue({
         user: { id: userId, email: "test@example.com" },
@@ -178,11 +194,12 @@ describe("Sandbox Sync API Route", () => {
         streakData: {
           currentStreak: 4,
           longestStreak: 9,
-          lastActiveDate: "2026-02-20",
+          lastActiveDate: new Date(Date.now() - 24 * 60 * 60 * 1000).toISOString().split("T")[0],
           freezesAvailable: 1,
           freezesUsed: 1,
         },
-        achievements: ["a-1", "a-2"],
+        achievements: ["first-blood", "getting-started"],
+        completedFieldOps: ["retail", "retail", "gaming"],
         flashcardProgress: {},
         lastSynced: new Date().toISOString(),
       }
@@ -199,15 +216,12 @@ describe("Sandbox Sync API Route", () => {
       const insertedPayload = values.mock.calls[0][0]
       const persistedSnapshot = JSON.parse(insertedPayload.snapshotData)
 
-      // Server-side streak validation recalculates streak based on lastActiveDate
-      // lastActiveDate: "2026-02-20" vs today (Feb 21) = 1 day gap
-      // Active yesterday, so streak continues without freeze: newStreak = 2
       expect(persistedSnapshot.userStats).toMatchObject({
-        totalXp: 77,
+        totalXp: 185,
         totalMissionsCompleted: 1,
         totalChallengesCompleted: 1,
         totalAchievements: 2,
-        currentStreak: 2, // Recalculated by server-side validation (active yesterday)
+        currentStreak: 2,
         longestStreak: 9,
         totalTimeSpentMinutes: 120,
       })
@@ -215,6 +229,77 @@ describe("Sandbox Sync API Route", () => {
       // No freeze used since user was active yesterday
       expect(persistedSnapshot.streakData.freezesAvailable).toBe(1)
       expect(persistedSnapshot.streakData.freezesUsed).toBe(1)
+    })
+
+    it("should include coupon XP in authoritative totalXp recomputation", async () => {
+      mockRewardXp(11000, 0)
+      const userId = "user-123"
+      vi.mocked(auth).mockResolvedValue({
+        user: { id: userId, email: "test@example.com" },
+        expires: "2025-01-01",
+      } as any)
+
+      const onConflictDoUpdate = vi.fn().mockResolvedValue(undefined)
+      const values = vi.fn().mockReturnValue({ onConflictDoUpdate })
+      vi.mocked(mockDb.insert).mockReturnValue({ values } as any)
+
+      const sandboxData = {
+        version: 1,
+        missionProgress: {
+          missionA: {
+            started: true,
+            completed: true,
+            stageProgress: {},
+            sideQuestsCompleted: [],
+            totalXpEarned: 50,
+          },
+        },
+        challengeResults: {
+          challenge1: {
+            attempted: true,
+            completed: true,
+            xpEarned: 25,
+            hintsUsed: 0,
+            attempts: 1,
+            completionCount: 1,
+          },
+        },
+        userStats: {
+          totalXp: 0,
+          totalMissionsCompleted: 0,
+          totalChallengesCompleted: 0,
+          totalAchievements: 0,
+          currentStreak: 0,
+          longestStreak: 0,
+          totalTimeSpentMinutes: 20,
+        },
+        streakData: {
+          currentStreak: 0,
+          longestStreak: 0,
+          lastActiveDate: "",
+          freezesAvailable: 2,
+          freezesUsed: 0,
+        },
+        achievements: ["first-blood"],
+        completedFieldOps: [],
+        flashcardProgress: {},
+        lastSynced: new Date().toISOString(),
+      }
+
+      const request = new NextRequest("http://localhost:3000/api/user/sync", {
+        method: "POST",
+        body: JSON.stringify(sandboxData),
+      })
+
+      const response = await POST(request)
+      expect(response.status).toBe(200)
+
+      const insertedPayload = values.mock.calls[0][0]
+      const persistedSnapshot = JSON.parse(insertedPayload.snapshotData)
+
+      // 50 mission + 25 challenge + 75 achievement(first-blood) + 11000 coupons
+      expect(persistedSnapshot.userStats.totalXp).toBe(11150)
+      expect(insertedPayload.totalXp).toBe(11150)
     })
   })
 
@@ -288,6 +373,7 @@ describe("Sandbox Sync API Route", () => {
           freezesUsed: 1,
         },
         achievements: ["first-blood"],
+        completedFieldOps: [],
         flashcardProgress: {},
         lastSynced: new Date().toISOString(),
       }

@@ -1,7 +1,7 @@
 /**
  * SyncProgressDialog Component
  *
- * Non-dismissable modal shown during disconnect flow.
+ * Non-dismissable modal shown during account sign-out flow.
  * Displays "Saving your Progress" with a pulsing animation
  * while sandbox data syncs to Turso DB before sign-out.
  */
@@ -89,7 +89,7 @@ export function SyncProgressDialog({
               id="sync-dialog-desc"
               className="text-anime-400 text-sm text-center font-mono"
             >
-              Syncing data to server before disconnect...
+              Syncing data to server before signing out...
             </p>
 
             {/* Animated progress bar */}

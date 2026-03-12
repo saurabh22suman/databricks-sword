@@ -217,6 +217,7 @@ export default function ProfilePageClient(): React.ReactElement {
     setSandbox(data)
   }
 
+
   if (!loaded) {
     return (
       <div className="min-h-screen bg-anime-950 py-8 flex items-center justify-center">
@@ -332,6 +333,7 @@ export default function ProfilePageClient(): React.ReactElement {
             className="bg-anime-900 border border-anime-700 rounded-lg p-6 cut-corner"
           />
         </div>
+
 
         {/* Activity Calendar & Recent Missions */}
         <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">

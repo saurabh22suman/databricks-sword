@@ -277,6 +277,7 @@ describe("MissionQuiz", () => {
       await user.click(screen.getByRole("button", { name: /continue/i }));
 
       await waitFor(() => {
+        expect(onComplete).toHaveBeenCalledTimes(1);
         expect(onComplete).toHaveBeenCalledWith({
           passed: true,
           score: 3,
@@ -284,6 +285,30 @@ describe("MissionQuiz", () => {
           percentage: 100,
         });
       });
+    });
+
+    it("does not expose Continue or call onComplete when quiz is failed", async () => {
+      const user = userEvent.setup();
+      const onComplete = vi.fn();
+      render(<MissionQuiz config={mockQuizConfig} onComplete={onComplete} />);
+
+      await user.click(screen.getByText("A Dictionary"));
+      await user.click(screen.getByRole("button", { name: /submit/i }));
+      await user.click(screen.getByRole("button", { name: /next/i }));
+
+      await user.click(screen.getByText("spark.read.delta()"));
+      await user.click(screen.getByRole("button", { name: /submit/i }));
+      await user.click(screen.getByRole("button", { name: /next/i }));
+
+      await user.click(screen.getByText("50%"));
+      await user.click(screen.getByRole("button", { name: /submit/i }));
+      await user.click(screen.getByRole("button", { name: /finish/i }));
+
+      await waitFor(() => {
+        expect(screen.getByText(/you need at least 70% to continue/i)).toBeInTheDocument();
+      });
+      expect(screen.queryByRole("button", { name: /continue/i })).not.toBeInTheDocument();
+      expect(onComplete).not.toHaveBeenCalled();
     });
   });
 

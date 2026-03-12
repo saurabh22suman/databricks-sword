@@ -37,7 +37,7 @@ describe("ChallengeCard", () => {
 
   it("renders the category", () => {
     render(<ChallengeCard challenge={mockChallenge} />)
-    expect(screen.getByText("pyspark")).toBeInTheDocument()
+    expect(screen.getByText("PySpark")).toBeInTheDocument()
   })
 
   it("renders the format tag", () => {

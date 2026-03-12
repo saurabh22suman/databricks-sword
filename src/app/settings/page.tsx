@@ -1,11 +1,12 @@
 "use client"
 
+import { useSyncNow } from "@/components/auth"
 import { SyncProgressDialog } from "@/components/auth/SyncProgressDialog"
 import { ConnectionForm, ConnectionStatus } from "@/components/databricks"
 import { RankBadge } from "@/components/gamification/RankBadge"
 import { getRankForXp } from "@/lib/gamification"
 import type { SandboxData } from "@/lib/sandbox"
-import { loadSandbox, saveSandbox } from "@/lib/sandbox"
+import { loadSandbox, saveSandbox, updateSandbox } from "@/lib/sandbox"
 import { useDisconnect } from "@/lib/sandbox/useDisconnect"
 import { SETTINGS_STORAGE_KEY, useSettings } from "@/lib/settings"
 import { cn } from "@/lib/utils"
@@ -35,10 +36,28 @@ export default function SettingsPage(): React.ReactElement {
   const { data: session } = useSession()
   const { settings, updateSetting, resetSettings } = useSettings()
   const { disconnect, isSyncing } = useDisconnect()
+  const { syncNow } = useSyncNow()
   const [sandbox, setSandbox] = useState<SandboxData | null>(null)
   const [showDangerConfirm, setShowDangerConfirm] = useState(false)
   const [exportMsg, setExportMsg] = useState("")
   const [databricksUrl, setDatabricksUrl] = useState<string | null>(null)
+  const [couponCode, setCouponCode] = useState("")
+  const [isRedeemingCoupon, setIsRedeemingCoupon] = useState(false)
+  const [couponStatus, setCouponStatus] = useState<{
+    type: "success" | "error"
+    message: string
+  } | null>(null)
+  const [leaderboardOptIn, setLeaderboardOptIn] = useState(true)
+  const [isUpdatingLeaderboardOptIn, setIsUpdatingLeaderboardOptIn] = useState(false)
+  const [leaderboardStatus, setLeaderboardStatus] = useState<{
+    type: "success" | "error"
+    message: string
+  } | null>(null)
+  const [isBulkCleaningAssets, setIsBulkCleaningAssets] = useState(false)
+  const [bulkCleanupStatus, setBulkCleanupStatus] = useState<{
+    type: "success" | "error"
+    message: string
+  } | null>(null)
 
   useEffect(() => {
     setSandbox(loadSandbox())
@@ -67,6 +86,201 @@ export default function SettingsPage(): React.ReactElement {
 
   const totalXp = sandbox?.userStats.totalXp ?? 0
   const rank = getRankForXp(totalXp)
+
+  useEffect(() => {
+    if (!session?.user?.id) return
+
+    const loadProfilePreferences = async (): Promise<void> => {
+      try {
+        const response = await fetch("/api/user/profile")
+        if (!response.ok) return
+
+        const data = await response.json()
+        if (data && typeof data.leaderboardOptIn === "boolean") {
+          setLeaderboardOptIn(data.leaderboardOptIn)
+        }
+      } catch {
+        // Ignore errors and keep default
+      }
+    }
+
+    void loadProfilePreferences()
+  }, [session?.user?.id])
+
+  const handleLeaderboardOptInChange = useCallback(async (nextValue: boolean): Promise<void> => {
+    if (!session?.user?.id || isUpdatingLeaderboardOptIn) return
+
+    const previousValue = leaderboardOptIn
+    setLeaderboardOptIn(nextValue)
+    setIsUpdatingLeaderboardOptIn(true)
+    setLeaderboardStatus(null)
+
+    try {
+      const response = await fetch("/api/user/profile", {
+        method: "PATCH",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ leaderboardOptIn: nextValue }),
+      })
+
+      const payload = await response.json().catch(() => null)
+
+      if (!response.ok) {
+        setLeaderboardOptIn(previousValue)
+        setLeaderboardStatus({ type: "error", message: payload?.error ?? "Unable to update leaderboard setting." })
+        return
+      }
+
+      const persistedValue = typeof payload?.leaderboardOptIn === "boolean"
+        ? payload.leaderboardOptIn
+        : nextValue
+
+      setLeaderboardOptIn(persistedValue)
+      setLeaderboardStatus({ type: "success", message: "Leaderboard setting updated." })
+    } catch {
+      setLeaderboardOptIn(previousValue)
+      setLeaderboardStatus({ type: "error", message: "Unable to update leaderboard setting." })
+    } finally {
+      setIsUpdatingLeaderboardOptIn(false)
+    }
+  }, [isUpdatingLeaderboardOptIn, leaderboardOptIn, session?.user?.id])
+
+  const handleRedeemCoupon = useCallback(async (): Promise<void> => {
+    const normalizedCode = couponCode.trim().toUpperCase()
+    if (!normalizedCode) {
+      setCouponStatus({ type: "error", message: "Enter a coupon code." })
+      return
+    }
+
+    setIsRedeemingCoupon(true)
+    setCouponStatus(null)
+
+    try {
+      const response = await fetch("/api/user/coupon/redeem", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ code: normalizedCode }),
+      })
+
+      const payload = await response.json().catch(() => null)
+
+      if (response.status === 401) {
+        setCouponStatus({ type: "error", message: "Sign in required to redeem coupons." })
+        return
+      }
+
+      if (payload?.reason === "invalid_code") {
+        setCouponStatus({ type: "error", message: "Invalid coupon code." })
+        return
+      }
+
+      if (!response.ok) {
+        setCouponStatus({ type: "error", message: payload?.error ?? "Unable to redeem coupon." })
+        return
+      }
+
+      if (payload?.applied === false && payload?.reason === "already_redeemed") {
+        setCouponStatus({ type: "error", message: "Coupon already redeemed." })
+        return
+      }
+
+      if (payload?.applied && typeof payload?.xpAwarded === "number") {
+        updateSandbox((data) => ({
+          ...data,
+          userStats: {
+            ...data.userStats,
+            totalXp: data.userStats.totalXp + payload.xpAwarded,
+          },
+        }))
+
+        const refreshedSandbox = loadSandbox()
+        setSandbox(refreshedSandbox)
+        setCouponCode("")
+        setCouponStatus({
+          type: "success",
+          message: `Coupon applied! +${payload.xpAwarded.toLocaleString()} XP`,
+        })
+
+        await syncNow()
+        return
+      }
+
+      setCouponStatus({ type: "error", message: "Unable to redeem coupon." })
+    } catch {
+      setCouponStatus({ type: "error", message: "Unable to redeem coupon." })
+    } finally {
+      setIsRedeemingCoupon(false)
+    }
+  }, [couponCode, syncNow])
+
+  const handleBulkCleanupAssets = useCallback(async (): Promise<void> => {
+    const idempotencyKey = crypto.randomUUID()
+    const requestId = crypto.randomUUID()
+    const correlationId = requestId
+    if (isBulkCleaningAssets) {
+      return
+    }
+
+    const confirmed = window.confirm(
+      "Clean up all Field Ops Databricks assets for your deployments? This cannot be undone."
+    )
+
+    if (!confirmed) {
+      return
+    }
+
+    setIsBulkCleaningAssets(true)
+    setBulkCleanupStatus(null)
+
+    try {
+      const response = await fetch("/api/field-ops/cleanup", {
+        method: "POST",
+        headers: {
+          "Content-Type": "application/json",
+          "Idempotency-Key": idempotencyKey,
+          "X-Request-Id": requestId,
+          "X-Correlation-Id": correlationId,
+        },
+      })
+
+      const payload = await response.json().catch(() => null)
+
+      if (!response.ok) {
+        if (response.status === 409 && payload?.failed) {
+          setBulkCleanupStatus({
+            type: "error",
+            message: `Cleanup completed with ${payload.failed} failure${payload.failed === 1 ? "" : "s"}.`,
+          })
+          return
+        }
+
+        setBulkCleanupStatus({
+          type: "error",
+          message: payload?.error ?? "Unable to clean up assets.",
+        })
+        return
+      }
+
+      if (typeof payload?.cleaned === "number") {
+        setBulkCleanupStatus({
+          type: "success",
+          message: `Cleanup finished. ${payload.cleaned} deployment${payload.cleaned === 1 ? "" : "s"} cleaned.`,
+        })
+        return
+      }
+
+      setBulkCleanupStatus({
+        type: "success",
+        message: payload?.message ?? "Cleanup finished.",
+      })
+    } catch {
+      setBulkCleanupStatus({
+        type: "error",
+        message: "Unable to clean up assets.",
+      })
+    } finally {
+      setIsBulkCleaningAssets(false)
+    }
+  }, [isBulkCleaningAssets])
 
   /**
    * Export progress as JSON file.
@@ -192,7 +406,7 @@ export default function SettingsPage(): React.ReactElement {
                   disabled={isSyncing}
                   className="px-4 py-2 bg-anime-accent/20 border border-anime-accent text-anime-accent rounded-lg text-sm font-bold hover:bg-anime-accent/30 transition-all disabled:opacity-50 disabled:cursor-not-allowed"
                 >
-                  Sign Out
+                  Sign out account
                 </button>
               </div>
             ) : (
@@ -265,6 +479,25 @@ export default function SettingsPage(): React.ReactElement {
               enabled={settings.showHints}
               onChange={(v) => updateSetting("showHints", v)}
             />
+            {session?.user && (
+              <>
+                <ToggleRow
+                  icon={<Shield className="w-4 h-4" />}
+                  label="Participate in Leaderboard"
+                  description="Show your profile on the global leaderboard"
+                  enabled={leaderboardOptIn}
+                  onChange={(v) => {
+                    void handleLeaderboardOptInChange(v)
+                  }}
+                  disabled={isUpdatingLeaderboardOptIn}
+                />
+                {leaderboardStatus && (
+                  <div className={`px-6 py-2 text-xs ${leaderboardStatus.type === "success" ? "text-anime-green" : "text-anime-accent"}`}>
+                    {leaderboardStatus.message}
+                  </div>
+                )}
+              </>
+            )}
 
             {/* Font Size Slider */}
             <div className="flex items-center gap-4 px-6 py-4">
@@ -325,7 +558,7 @@ export default function SettingsPage(): React.ReactElement {
           
           {/* Auto-cleanup toggle */}
           {session?.user && (
-            <div className="mt-4 bg-anime-900 border border-anime-700 rounded-lg p-4 cut-corner">
+            <div className="mt-4 bg-anime-900 border border-anime-700 rounded-lg p-4 cut-corner space-y-4">
               <div className="flex items-center justify-between">
                 <div className="flex-1">
                   <div className="text-sm font-bold text-anime-100 flex items-center gap-2">
@@ -351,8 +584,69 @@ export default function SettingsPage(): React.ReactElement {
                   />
                 </button>
               </div>
+
+              <div className="border-t border-anime-700 pt-4">
+                <div className="flex items-center justify-between gap-4">
+                  <div>
+                    <div className="text-sm font-bold text-anime-100">Clean up assets</div>
+                    <div className="text-xs text-anime-400">
+                      Destroy Databricks assets from all your eligible Field Ops deployments.
+                    </div>
+                  </div>
+                  <button
+                    onClick={() => {
+                      void handleBulkCleanupAssets()
+                    }}
+                    disabled={isBulkCleaningAssets}
+                    className="px-4 py-2 bg-anime-accent/20 border border-anime-accent text-anime-accent rounded-lg text-sm font-bold hover:bg-anime-accent/30 transition-all disabled:opacity-60 disabled:cursor-not-allowed"
+                  >
+                    {isBulkCleaningAssets ? "Cleaning up..." : "Clean up assets"}
+                  </button>
+                </div>
+                {bulkCleanupStatus && (
+                  <p className={`mt-3 text-xs ${bulkCleanupStatus.type === "success" ? "text-anime-green" : "text-anime-accent"}`}>
+                    {bulkCleanupStatus.message}
+                  </p>
+                )}
+              </div>
             </div>
           )}
+        </section>
+
+        {/* Coupon Redemption */}
+        <section className="mb-8">
+          <SectionHeader label="Coupons" icon={<Zap className="w-4 h-4" />} />
+          <div className="bg-anime-900 border border-anime-700 rounded-lg p-6 cut-corner">
+            <div className="max-w-xl mx-auto">
+              <div className="flex flex-col sm:flex-row gap-3">
+                <input
+                  type="text"
+                  value={couponCode}
+                  onChange={(event) => setCouponCode(event.target.value)}
+                  placeholder="Enter code"
+                  className="flex-1 px-4 py-2 bg-anime-800 border border-anime-700 rounded-lg text-anime-cyan placeholder:text-anime-purple/70 uppercase"
+                />
+                <button
+                  onClick={() => {
+                    void handleRedeemCoupon()
+                  }}
+                  disabled={isRedeemingCoupon}
+                  className="px-4 py-2 bg-anime-cyan text-anime-950 rounded-lg font-bold disabled:opacity-60"
+                >
+                  {isRedeemingCoupon ? "Redeeming..." : "Redeem"}
+                </button>
+              </div>
+              {couponStatus && (
+                <p
+                  className={`mt-3 text-sm text-center ${
+                    couponStatus.type === "success" ? "text-anime-green" : "text-anime-accent"
+                  }`}
+                >
+                  {couponStatus.message}
+                </p>
+              )}
+            </div>
+          </div>
         </section>
 
         {/* Data Management Section */}
@@ -474,12 +768,14 @@ function ToggleRow({
   description,
   enabled,
   onChange,
+  disabled = false,
 }: {
   icon: React.ReactNode
   label: string
   description: string
   enabled: boolean
   onChange: (value: boolean) => void
+  disabled?: boolean
 }): React.ReactElement {
   return (
     <div className="flex items-center gap-4 px-6 py-4">
@@ -490,9 +786,11 @@ function ToggleRow({
       </div>
       <button
         onClick={() => onChange(!enabled)}
+        disabled={disabled}
         className={cn(
           "relative w-11 h-6 rounded-full transition-colors duration-200",
           enabled ? "bg-anime-cyan" : "bg-anime-700",
+          disabled && "opacity-60 cursor-not-allowed",
         )}
         aria-label={`Toggle ${label}`}
       >

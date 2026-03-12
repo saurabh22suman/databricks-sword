@@ -5,7 +5,9 @@
 
 import { ActiveMission } from "@/components/field-ops/ActiveMission"
 import { auth } from "@/lib/auth"
-import { fieldOpsDeployments, getDb, users } from "@/lib/db"
+import { MOCK_SESSION, isMockAuth } from "@/lib/auth/mockSession"
+import { fieldOpsDeployments, getDb } from "@/lib/db"
+import { loadFieldOpsContent } from "@/lib/field-ops/content"
 import { getIndustryConfig } from "@/lib/field-ops/industries"
 import type { Industry } from "@/lib/field-ops/types"
 import { and, desc, eq, notInArray } from "drizzle-orm"
@@ -23,22 +25,15 @@ export const metadata: Metadata = {
 export default async function ActiveMissionPage(
   props: PageProps
 ): Promise<React.ReactElement> {
-  const session = await auth()
-  if (!session?.user?.email) {
+  const session = isMockAuth ? MOCK_SESSION : await auth()
+  if (!session?.user?.id) {
     redirect("/auth/signin")
   }
 
-  // Get user
+  const userId = session.user.id
+
+  // Get user deployments
   const db = getDb()
-  const [user] = await db
-    .select()
-    .from(users)
-    .where(eq(users.email, session.user.email))
-    .limit(1)
-
-  if (!user) {
-    redirect("/auth/signin")
-  }
 
   const params = await props.params
   const industry = params.industry as Industry
@@ -49,7 +44,7 @@ export default async function ActiveMissionPage(
     .from(fieldOpsDeployments)
     .where(
       and(
-        eq(fieldOpsDeployments.userId, user.id),
+        eq(fieldOpsDeployments.userId, userId),
         eq(fieldOpsDeployments.industry, industry),
         notInArray(fieldOpsDeployments.status, ["cleaned_up", "completed", "failed"])
       )
@@ -62,13 +57,26 @@ export default async function ActiveMissionPage(
     redirect(`/field-ops/${industry}`)
   }
 
-  const config = getIndustryConfig(industry)
+  const [config, mission] = await Promise.all([
+    Promise.resolve(getIndustryConfig(industry)),
+    loadFieldOpsContent(industry),
+  ])
 
   return (
     <ActiveMission
       deploymentId={deployment.id}
       industry={industry}
       config={config}
+      mission={{
+        objectives: mission.objectives,
+        hints: mission.hints,
+        hintsInNotebooks: mission.hintsInNotebooks,
+        hintsNote: mission.hintsNote,
+        validations: mission.validations.map((validation) => ({
+          checkKey: validation.checkKey,
+          checkName: validation.checkName,
+        })),
+      }}
     />
   )
 }

@@ -7,6 +7,7 @@ import { getUserSandbox } from "@/app/api/user/helpers"
 import { ConnectionStatus } from "@/components/field-ops/ConnectionStatus"
 import { IndustryCard } from "@/components/field-ops/IndustryCard"
 import { auth } from "@/lib/auth"
+import { MOCK_SESSION, isMockAuth } from "@/lib/auth/mockSession"
 import { databricksConnections, getDb } from "@/lib/db"
 import { getAllIndustries } from "@/lib/field-ops/industries"
 import { eq } from "drizzle-orm"
@@ -19,7 +20,7 @@ export const metadata: Metadata = {
 }
 
 export default async function FieldOpsPage(): Promise<React.ReactElement> {
-  const session = await auth()
+  const session = isMockAuth ? MOCK_SESSION : await auth()
   if (!session?.user?.id) {
     redirect("/auth/signin")
   }
@@ -45,7 +46,8 @@ export default async function FieldOpsPage(): Promise<React.ReactElement> {
       .select()
       .from(databricksConnections)
       .where(eq(databricksConnections.userId, userId))
-    isConnected = connections.length > 0
+    const connection = connections[0]
+    isConnected = Boolean(connection && connection.catalogName?.trim() && connection.warehouseId?.trim())
   } catch (error) {
     console.error("Error checking Databricks connection:", error)
   }
@@ -64,7 +66,7 @@ export default async function FieldOpsPage(): Promise<React.ReactElement> {
         </div>
 
         {/* Connection Status Banner */}
-        <ConnectionStatus isConnected={isConnected} />
+        <ConnectionStatus isConnected={isConnected} refreshOnInitialSync />
 
         {/* Industries Grid */}
         <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-6 mt-8">
