@@ -15,7 +15,7 @@ describe("GET /api/leaderboard", () => {
     vi.clearAllMocks()
   })
 
-  it("returns leaderboard entries using snapshot JSON fields", async () => {
+  it("returns leaderboard entries using snapshot JSON fields for opted-in users", async () => {
     const rows = [
       {
         userId: "u-1",
@@ -88,7 +88,7 @@ describe("GET /api/leaderboard", () => {
 
     const body = await response.json()
 
-    expect(body.totalPlayers).toBe(2)
+    expect(body.totalPlayers).toBe(2) // Count reflects opted-in users only
     expect(body.entries).toHaveLength(2)
 
     expect(body.entries[0]).toMatchObject({
@@ -106,6 +106,52 @@ describe("GET /api/leaderboard", () => {
       missionsCompleted: 0,
       currentStreak: 0,
     })
+  })
+
+  it("only returns opted-in users", async () => {
+    const rows = [
+      {
+        userId: "u-1",
+        userName: "Alice",
+        userImage: null,
+        snapshotData: null,
+      },
+    ]
+
+    const firstQuery = {
+      from: vi.fn(() => ({
+        leftJoin: vi.fn(() => ({
+          where: vi.fn(() => ({
+            orderBy: vi.fn(async () => rows),
+          })),
+        })),
+      })),
+    }
+
+    const secondQuery = {
+      from: vi.fn(() => ({
+        where: vi.fn(async () => [{ totalPlayers: 1 }]),
+      })),
+    }
+
+    const select = vi
+      .fn()
+      .mockReturnValueOnce(firstQuery)
+      .mockReturnValueOnce(secondQuery)
+
+    vi.doMock("@/lib/db/client", () => ({
+      getDb: () => ({ select }),
+    }))
+
+    const { GET } = await import("../route")
+    const response = await GET()
+
+    expect(response.status).toBe(200)
+    const body = await response.json()
+
+    expect(body.entries).toHaveLength(1)
+    expect(body.totalPlayers).toBe(1)
+    expect(body.entries[0].userId).toBe("u-1")
   })
 
   it("gracefully handles malformed snapshot JSON", async () => {

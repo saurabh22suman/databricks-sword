@@ -34,6 +34,16 @@ const serverEnvSchema = z.object({
   NODE_ENV: z
     .enum(["development", "production", "test"])
     .default("development"),
+
+  // Optional AI hints (advisory only)
+  GROQ_API_KEY: z.string().optional(),
+  GROQ_HINTS_ENABLED: z
+    .enum(["true", "false", ""])
+    .optional()
+    .default("false")
+    .transform((v) => v === "true"),
+  GROQ_HINTS_MODEL: z.string().optional(),
+  GROQ_HINTS_FALLBACK_MODELS: z.string().optional(),
 })
 
 /**

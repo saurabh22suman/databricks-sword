@@ -4,12 +4,22 @@
  * Get deployment status and validation results.
  */
 
+import { apiError, apiOk } from "@/lib/api/responses"
 import { authenticateApiRequest } from "@/lib/auth/api-auth"
-import { getDeploymentStatus, getValidationResults } from "@/lib/field-ops/deployment"
+import {
+  getDeploymentOperations,
+  getDeploymentStatus,
+  getLatestValidationRun,
+  markStaleDeploymentOperations,
+} from "@/lib/field-ops/deployment"
 import { NextRequest, NextResponse } from "next/server"
 
 type RouteContext = {
   params: Promise<{ deploymentId: string }>
+}
+
+function resolveRequestId(request: NextRequest): string {
+  return request.headers.get("x-request-id")?.trim() || crypto.randomUUID()
 }
 
 export async function GET(
@@ -19,25 +29,26 @@ export async function GET(
   try {
     const authResult = await authenticateApiRequest()
     if (!authResult.authenticated) {
-      return NextResponse.json({ error: authResult.error }, { status: authResult.status })
+      return apiError(authResult.error, authResult.status, "UNAUTHORIZED")
     }
 
+    const requestId = resolveRequestId(request)
     const { deploymentId } = await context.params
 
-    // Get deployment
     const deployment = await getDeploymentStatus(deploymentId)
     if (!deployment) {
-      return NextResponse.json({ error: "Deployment not found" }, { status: 404 })
+      return apiError("Deployment not found", 404, "NOT_FOUND")
     }
 
     if (deployment.userId !== authResult.userId) {
-      return NextResponse.json({ error: "Forbidden" }, { status: 403 })
+      return apiError("Forbidden", 403, "FORBIDDEN")
     }
 
-    // Get validation results
-    const validations = await getValidationResults(deploymentId)
+    const staleMarked = await markStaleDeploymentOperations(deploymentId)
+    const latestRun = await getLatestValidationRun(deploymentId)
+    const operations = await getDeploymentOperations(deploymentId, 5)
 
-    return NextResponse.json({
+    return apiOk({
       deployment: {
         id: deployment.id,
         industry: deployment.industry,
@@ -46,23 +57,45 @@ export async function GET(
         deployedAt: deployment.deployedAt,
         completedAt: deployment.completedAt,
         errorMessage: deployment.errorMessage,
-        // Connection info for dynamic links
         workspaceUrl: deployment.workspaceUrl,
         catalogName: deployment.catalogName,
         warehouseId: deployment.warehouseId,
       },
-      validations: validations.map((v: { checkName: string; passed: boolean; executedAt: Date; errorMessage?: string | null }) => ({
+      validationRun: latestRun
+        ? {
+            runId: latestRun.runId,
+            totalChecks: latestRun.results.length,
+            passedChecks: latestRun.results.filter((result) => result.passed).length,
+          }
+        : null,
+      validations: (latestRun?.results ?? []).map((v) => ({
+        checkKey: v.checkKey,
         checkName: v.checkName,
         passed: v.passed,
         executedAt: v.executedAt,
         errorMessage: v.errorMessage,
       })),
+      operations: operations.map((operation) => ({
+        id: operation.id,
+        type: operation.operationType,
+        state: operation.state,
+        requestId: operation.requestId,
+        correlationId: operation.correlationId,
+        startedAt: operation.startedAt,
+        completedAt: operation.completedAt,
+        durationMs: operation.durationMs,
+        failureClass: operation.failureClass,
+        retryCount: operation.retryCount,
+      })),
+      metadata: {
+        requestId,
+        staleOperationsMarked: staleMarked,
+      },
     })
   } catch (error) {
-    console.error("Status error:", error)
-    return NextResponse.json(
-      { error: "Failed to fetch deployment status" },
-      { status: 500 }
-    )
+    console.error("Status error", {
+      message: error instanceof Error ? error.message : "Failed to fetch deployment status",
+    })
+    return apiError("Failed to fetch deployment status", 500, "INTERNAL_ERROR")
   }
 }

@@ -10,7 +10,7 @@
 "use client"
 
 import { useSession } from "next-auth/react"
-import { useCallback, useEffect, useRef } from "react"
+import { useCallback, useEffect, useRef, useState } from "react"
 import { validateStreakData } from "../gamification/streaks"
 import { initializeSandbox, loadSandbox, saveSandbox } from "./storage"
 import { mergeConflicts, shouldSync, syncFromServer, syncToServer } from "./sync"
@@ -20,6 +20,8 @@ export type UseSandboxSyncResult = {
   syncNow: () => Promise<void>
   /** Whether a sync operation is in progress */
   isSyncing: boolean
+  /** Whether initial pull/merge sync has completed for this auth session */
+  isInitialSyncComplete: boolean
 }
 
 /**
@@ -35,6 +37,7 @@ export function useSandboxSync(): UseSandboxSyncResult {
   const { data: session, status } = useSession()
   const isSyncingRef = useRef(false)
   const hasPulledRef = useRef(false)
+  const [isInitialSyncComplete, setIsInitialSyncComplete] = useState(false)
 
   const userId = session?.user?.id
 
@@ -57,8 +60,14 @@ export function useSandboxSync(): UseSandboxSyncResult {
 
   // Pull remote on mount when authenticated
   useEffect(() => {
+    if (status === "unauthenticated") {
+      setIsInitialSyncComplete(true)
+      return
+    }
+
     if (status !== "authenticated" || !userId || hasPulledRef.current) return
     hasPulledRef.current = true
+    setIsInitialSyncComplete(false)
 
     const pullAndMerge = async (): Promise<void> => {
       isSyncingRef.current = true
@@ -97,6 +106,7 @@ export function useSandboxSync(): UseSandboxSyncResult {
         }
       } finally {
         isSyncingRef.current = false
+        setIsInitialSyncComplete(true)
       }
     }
 
@@ -126,5 +136,9 @@ export function useSandboxSync(): UseSandboxSyncResult {
     }
   }, [status, userId])
 
-  return { syncNow, isSyncing: isSyncingRef.current }
+  return {
+    syncNow,
+    isSyncing: isSyncingRef.current,
+    isInitialSyncComplete,
+  }
 }

@@ -312,7 +312,7 @@ export function ProfileSidebar({ isOpen, onClose }: ProfileSidebarProps): React.
           <NavItem href="/settings" icon={<Settings className="w-4 h-4" />} label="Settings" onClick={handleClose} />
         </nav>
 
-        {/* ── Sign Out ── */}
+        {/* ── Sign out account ── */}
         <div className="px-4 pb-6 pt-2 border-t border-white/5">
           <button
             onClick={() => {
@@ -323,7 +323,7 @@ export function ProfileSidebar({ isOpen, onClose }: ProfileSidebarProps): React.
             className="w-full flex items-center gap-3 px-4 py-3 text-anime-accent hover:bg-anime-accent/10 transition-colors rounded font-mono text-sm uppercase tracking-wider disabled:opacity-50 disabled:cursor-not-allowed"
           >
             <LogOut className="w-4 h-4" />
-            <span>Disconnect</span>
+            <span>Sign out account</span>
           </button>
 
           <p className="mt-4 px-4 text-[9px] font-mono text-anime-700/50 uppercase tracking-widest text-center">

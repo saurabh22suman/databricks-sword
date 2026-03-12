@@ -3,7 +3,9 @@
  * @description Mission select page - displays all available missions in a grid or map view
  */
 
+import { getUserSandbox } from "@/app/api/user/helpers";
 import { MissionsView } from "@/components/missions/MissionsView";
+import { auth } from "@/lib/auth";
 import { getAllIndustries } from "@/lib/field-ops/industries";
 import { getAllMissions } from "@/lib/missions";
 import type { Metadata } from "next";
@@ -20,13 +22,15 @@ export const metadata: Metadata = {
  * Toggle between views for different visualizations.
  */
 export default async function MissionsPage(): Promise<React.ReactElement> {
-  const [missions, fieldOps] = await Promise.all([
+  const session = await auth();
+
+  const [missions, fieldOps, sandbox] = await Promise.all([
     getAllMissions(),
     Promise.resolve(getAllIndustries()),
+    session?.user?.id ? getUserSandbox(session.user.id) : Promise.resolve(null),
   ]);
 
-  // TODO: Get user XP from profile/session (for now, hardcode 0)
-  const userXp = 0;
+  const userXp = sandbox?.userStats.totalXp ?? 0;
 
   return (
     <div className="min-h-screen bg-anime-950 cyber-grid pt-20">

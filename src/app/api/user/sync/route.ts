@@ -1,37 +1,49 @@
 import { authenticateApiRequest } from "@/lib/auth/api-auth"
+import { isMockAuth } from "@/lib/auth/mockSession"
 import { calculateStreak } from "@/lib/gamification/streaks"
 import { getDb } from "@/lib/db/client"
-import { sandboxSnapshots } from "@/lib/db/schema"
+import { couponRedemptions, fieldOpsCompletions, sandboxSnapshots } from "@/lib/db/schema"
+import { ACHIEVEMENTS } from "@/lib/gamification/achievements"
 import type { SandboxData } from "@/lib/sandbox/types"
 import { SandboxDataSchema } from "@/lib/sandbox/types"
-import { desc, eq } from "drizzle-orm"
+import { desc, eq, sql } from "drizzle-orm"
 import { nanoid } from "nanoid"
 import { NextRequest, NextResponse } from "next/server"
 
-function sanitizeSandboxAggregates(sandbox: SandboxData): SandboxData {
-  let totalXp = 0
-  let totalMissionsCompleted = 0
-  let totalChallengesCompleted = 0
+type SanitizeSandboxOptions = {
+  couponXp: number
+  fieldOpsXp: number
+}
 
-  for (const mission of Object.values(sandbox.missionProgress)) {
-    for (const stage of Object.values(mission.stageProgress)) {
-      totalXp += stage.xpEarned
-    }
+function sanitizeSandboxAggregates(
+  sandbox: SandboxData,
+  options: SanitizeSandboxOptions,
+): SandboxData {
+  const missionXp = Object.values(sandbox.missionProgress).reduce(
+    (sum, mission) => sum + mission.totalXpEarned,
+    0,
+  )
 
-    if (mission.completed) {
-      totalMissionsCompleted += 1
-    }
-  }
+  const challengeXp = Object.values(sandbox.challengeResults).reduce(
+    (sum, challenge) => sum + challenge.xpEarned,
+    0,
+  )
 
-  for (const challenge of Object.values(sandbox.challengeResults)) {
-    totalXp += challenge.xpEarned
+  const achievementXp = sandbox.achievements.reduce((sum, achievementId) => {
+    const achievement = ACHIEVEMENTS.find((item) => item.id === achievementId)
+    return sum + (achievement?.xpBonus ?? 0)
+  }, 0)
 
-    if (challenge.completed) {
-      totalChallengesCompleted += 1
-    }
-  }
+  const totalXp =
+    missionXp + challengeXp + achievementXp + options.fieldOpsXp + options.couponXp
 
-  totalXp += sandbox.achievements.length
+  const totalMissionsCompleted = Object.values(sandbox.missionProgress).filter(
+    (mission) => mission.completed,
+  ).length
+
+  const totalChallengesCompleted = Object.values(sandbox.challengeResults).filter(
+    (challenge) => challenge.completed,
+  ).length
 
   // Server-side streak validation
   const today = new Date().toISOString().split("T")[0] // YYYY-MM-DD
@@ -92,8 +104,47 @@ export async function POST(request: NextRequest): Promise<NextResponse> {
     }
 
     const sandboxData = validationResult.data
-    const sanitizedSandboxData = sanitizeSandboxAggregates(sandboxData)
     const userId = authResult.userId
+
+    if (isMockAuth) {
+      const lastSynced = new Date().toISOString()
+      return NextResponse.json(
+        { success: true, lastSynced } satisfies { success: boolean; lastSynced: string },
+        { status: 200 },
+      )
+    }
+
+    let couponXp = 0
+    let fieldOpsXp = 0
+
+    try {
+      const [couponXpResult, fieldOpsXpResult] = await Promise.all([
+        getDb()
+          .select({
+            totalCouponXp: sql<number>`coalesce(sum(${couponRedemptions.xpAwarded}), 0)`,
+          })
+          .from(couponRedemptions)
+          .where(eq(couponRedemptions.userId, userId)),
+        getDb()
+          .select({
+            totalFieldOpsXp: sql<number>`coalesce(sum(${fieldOpsCompletions.xpAwarded}), 0)`,
+          })
+          .from(fieldOpsCompletions)
+          .where(eq(fieldOpsCompletions.userId, userId)),
+      ])
+
+      couponXp = couponXpResult[0]?.totalCouponXp ?? 0
+      fieldOpsXp = fieldOpsXpResult[0]?.totalFieldOpsXp ?? 0
+    } catch (error) {
+      if (!isMockAuth) {
+        throw error
+      }
+    }
+
+    const sanitizedSandboxData = sanitizeSandboxAggregates(sandboxData, {
+      couponXp,
+      fieldOpsXp,
+    })
 
     // Upsert sandbox snapshot
     await getDb()

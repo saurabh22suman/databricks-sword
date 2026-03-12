@@ -145,6 +145,20 @@ describe("MissionCard", () => {
       expect(screen.getByRole("button", { name: /locked/i })).toBeDisabled();
     });
 
+    it("renders locked state when prerequisites are missing", () => {
+      render(
+        <MissionCard
+          mission={mockMission}
+          userXp={1000}
+          prerequisitesMet={false}
+          missingPrerequisiteTitles={["Lakehouse Fundamentals", "pyspark-essentials"]}
+        />
+      );
+
+      expect(screen.getByText(/Missing prerequisites: Lakehouse Fundamentals, pyspark-essentials/i)).toBeInTheDocument();
+      expect(screen.getByRole("button", { name: /locked/i })).toBeDisabled();
+    });
+
     it("defaults to unlocked when userXp prop is not provided", () => {
       render(<MissionCard mission={mockMission} />);
       expect(screen.getByRole("button", { name: /start/i })).toBeEnabled();

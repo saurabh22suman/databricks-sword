@@ -60,6 +60,8 @@ export function FillBlankChallenge({
   const [validated, setValidated] = useState(false);
   const [attempts, setAttempts] = useState(0);
   const [completed, setCompleted] = useState(false);
+  const [aiHint, setAiHint] = useState<string | null>(null);
+  const [isLoadingAiHint, setIsLoadingAiHint] = useState(false);
 
   // Shuffle options for each blank once on mount
   const shuffledBlanks = useMemo(() => {
@@ -162,6 +164,38 @@ export function FillBlankChallenge({
         score: calculatedScore,
         attempts,
       });
+    }
+  };
+
+  const handleRequestAiHint = async () => {
+    setIsLoadingAiHint(true);
+
+    try {
+      const response = await fetch("/api/hints/groq", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({
+          challengeType: "fill-blank",
+          prompt: config.description,
+          learnerInput: JSON.stringify(answers),
+        }),
+      });
+
+      if (!response.ok) {
+        setAiHint(null);
+        return;
+      }
+
+      const result = (await response.json()) as {
+        enabled?: boolean;
+        hint?: string | null;
+      };
+
+      setAiHint(result.enabled ? result.hint ?? null : null);
+    } catch {
+      setAiHint(null);
+    } finally {
+      setIsLoadingAiHint(false);
     }
   };
 
@@ -268,7 +302,29 @@ export function FillBlankChallenge({
       {/* Hint Section - Progressive hints (one at a time) */}
       {settings.showHints && config.hints.length > 0 && (
         <div className="space-y-3">
-          {/* Show current hint only */}
+          <div className="flex items-center justify-between gap-4">
+            {hintsRevealed < config.hints.length ? (
+              <button
+                onClick={() => setHintsRevealed((prev) => prev + 1)}
+                className="text-anime-cyan hover:text-anime-purple transition-colors text-sm"
+              >
+                {hintsRevealed === 0
+                  ? `Show Hint (${config.hints.length} available)`
+                  : `Next Hint (${config.hints.length - hintsRevealed} remaining)`}
+              </button>
+            ) : (
+              <span />
+            )}
+
+            <button
+              onClick={handleRequestAiHint}
+              disabled={isLoadingAiHint}
+              className="text-anime-cyan hover:text-anime-purple transition-colors text-sm disabled:text-anime-500 text-right"
+            >
+              {isLoadingAiHint ? "Loading AI hint..." : "Request optional AI hint"}
+            </button>
+          </div>
+
           {hintsRevealed > 0 && (
             <Callout type="info">
               <p className="text-sm">
@@ -276,17 +332,13 @@ export function FillBlankChallenge({
               </p>
             </Callout>
           )}
-          
-          {/* Show next hint button if more available */}
-          {hintsRevealed < config.hints.length && (
-            <button
-              onClick={() => setHintsRevealed((prev) => prev + 1)}
-              className="text-anime-cyan hover:text-anime-purple transition-colors text-sm"
-            >
-              {hintsRevealed === 0 
-                ? `Show Hint (${config.hints.length} available)` 
-                : `Next Hint (${config.hints.length - hintsRevealed} remaining)`}
-            </button>
+
+          {aiHint && (
+            <Callout type="info">
+              <p className="text-sm">
+                <span className="text-anime-cyan font-medium">AI Hint (advisory):</span> {aiHint}
+              </p>
+            </Callout>
           )}
         </div>
       )}

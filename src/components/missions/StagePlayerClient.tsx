@@ -24,7 +24,7 @@ import {
     SideQuestModal,
 } from "@/components/missions";
 import type { BundleStatus } from "@/lib/databricks/types";
-import { awardStageXp } from "@/lib/gamification/xpService";
+import { awardMissionXp, awardStageXp } from "@/lib/gamification/xpService";
 import type {
     BriefingConfig,
     CompareConfig,
@@ -89,6 +89,10 @@ export type StagePlayerClientProps = {
   stageId: string;
   /** Base XP reward for this stage (from mission config) */
   stageXpReward?: number;
+  /** Whether this is the final stage in the mission */
+  isFinalStage?: boolean;
+  /** Base XP reward for mission completion */
+  missionXpReward?: number;
   /** Execution mode: simulated (default) or databricks */
   executionMode?: "simulated" | "databricks";
   /** Current bundle deployment status (for databricks mode) */
@@ -116,6 +120,8 @@ export function StagePlayerClient({
   missionId,
   stageId,
   stageXpReward = 0,
+  isFinalStage = false,
+  missionXpReward = 0,
   executionMode = "simulated",
   bundleStatus,
   workspaceUrl,
@@ -135,9 +141,14 @@ export function StagePlayerClient({
     // Play stage completion sound
     playSound("stage-complete")
 
-    // Award XP for stage completion and immediately push to server
+    // Award XP for stage completion and mission completion (final stage only)
     if (stageXpReward > 0) {
       awardStageXp(missionId, stageId, stageXpReward);
+    }
+    if (isFinalStage && missionXpReward > 0) {
+      awardMissionXp(missionId, missionXpReward);
+    }
+    if (stageXpReward > 0 || (isFinalStage && missionXpReward > 0)) {
       void syncNow();
     }
 
@@ -151,14 +162,14 @@ export function StagePlayerClient({
     } else {
       navigateNext();
     }
-  }, [stageId, stageXpReward, missionId, sideQuests, navigateNext]);
+  }, [stageId, stageXpReward, missionId, isFinalStage, missionXpReward, sideQuests, navigateNext, syncNow]);
 
   const handleXpAward = (_xp: number): void => {
     // XP is now handled by awardStageXp in handleComplete
   };
 
-  /** Quiz completion — persist quiz score then proceed */
-  const handleQuizComplete = useCallback((result?: { percentage?: number }): void => {
+  /** Quiz completion — persist quiz score, only continue when passed */
+  const handleQuizComplete = useCallback((result?: { percentage?: number; passed?: boolean }): void => {
     if (result?.percentage !== undefined) {
       updateSandbox((data) => {
         const mp = data.missionProgress[missionId]
@@ -184,16 +195,57 @@ export function StagePlayerClient({
         }
       })
     }
-    handleComplete(result)
+
+    if (result?.passed) {
+      handleComplete(result)
+    }
   }, [missionId, stageId, handleComplete]);
 
-  /** Side quest completed — award XP and continue */
+  /** Side quest completed — persist mission progress and continue */
   const handleSideQuestComplete = useCallback((xpAwarded: number): void => {
     playSound("stage-complete")
-    void xpAwarded; // XP already awarded to sandbox in side quest component
+
+    const completedQuestId = activeSideQuest?.id
+    if (completedQuestId && xpAwarded > 0) {
+      updateSandbox((data) => {
+        const missionProgress = data.missionProgress[missionId] ?? {
+          started: true,
+          completed: false,
+          stageProgress: {},
+          sideQuestsCompleted: [],
+          totalXpEarned: 0,
+        }
+
+        const sideQuestsCompleted = missionProgress.sideQuestsCompleted.includes(completedQuestId)
+          ? missionProgress.sideQuestsCompleted
+          : [...missionProgress.sideQuestsCompleted, completedQuestId]
+
+        const shouldAwardXp = !missionProgress.sideQuestsCompleted.includes(completedQuestId)
+        const xpToAward = shouldAwardXp ? xpAwarded : 0
+
+        return {
+          ...data,
+          missionProgress: {
+            ...data.missionProgress,
+            [missionId]: {
+              ...missionProgress,
+              started: true,
+              sideQuestsCompleted,
+              totalXpEarned: missionProgress.totalXpEarned + xpToAward,
+            },
+          },
+          userStats: {
+            ...data.userStats,
+            totalXp: data.userStats.totalXp + xpToAward,
+          },
+        }
+      })
+      void syncNow()
+    }
+
     setActiveSideQuest(null);
     navigateNext();
-  }, [navigateNext]);
+  }, [activeSideQuest, missionId, navigateNext, syncNow]);
 
   /** Side quest skipped — continue to next stage */
   const handleSideQuestSkip = useCallback((): void => {

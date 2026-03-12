@@ -46,6 +46,8 @@ export function FreeTextChallenge({
   const [isCorrect, setIsCorrect] = useState(false);
   const [attempts, setAttempts] = useState(0);
   const [completed, setCompleted] = useState(false);
+  const [aiHint, setAiHint] = useState<string | null>(null);
+  const [isLoadingAiHint, setIsLoadingAiHint] = useState(false);
 
   /**
    * Handle code execution (simulated)
@@ -107,6 +109,38 @@ export function FreeTextChallenge({
   const handleNextHint = () => {
     if (currentHintIndex < config.hints.length - 1) {
       setCurrentHintIndex(currentHintIndex + 1);
+    }
+  };
+
+  const handleRequestAiHint = async () => {
+    setIsLoadingAiHint(true);
+
+    try {
+      const response = await fetch("/api/hints/groq", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({
+          challengeType: "free-text",
+          prompt: config.description,
+          learnerInput: code,
+        }),
+      });
+
+      if (!response.ok) {
+        setAiHint(null);
+        return;
+      }
+
+      const result = (await response.json()) as {
+        enabled?: boolean;
+        hint?: string | null;
+      };
+
+      setAiHint(result.enabled ? result.hint ?? null : null);
+    } catch {
+      setAiHint(null);
+    } finally {
+      setIsLoadingAiHint(false);
     }
   };
 
@@ -190,29 +224,53 @@ export function FreeTextChallenge({
       )}
 
       {/* Hint Section - Progressive hints (one at a time) */}
-      {settings.showHints && config.hints.length > 0 && currentHintIndex < 0 && (
-        <button
-          onClick={handleShowHint}
-          className="text-anime-cyan hover:text-anime-purple transition-colors text-sm"
-        >
-          Show Hint ({config.hints.length} available)
-        </button>
-      )}
-
-      {settings.showHints && currentHintIndex >= 0 && (
+      {settings.showHints && (
         <div className="space-y-3">
-          <Callout type="info">
-            <p className="text-sm">
-              <span className="text-anime-cyan font-medium">Hint {currentHintIndex + 1}/{config.hints.length}:</span> {config.hints[currentHintIndex]}
-            </p>
-          </Callout>
-          {currentHintIndex < config.hints.length - 1 && (
+          <div className="flex items-center justify-between gap-4">
+            {config.hints.length > 0 && currentHintIndex < 0 ? (
+              <button
+                onClick={handleShowHint}
+                className="text-anime-cyan hover:text-anime-purple transition-colors text-sm"
+              >
+                Show Hint ({config.hints.length} available)
+              </button>
+            ) : (
+              <span />
+            )}
+
             <button
-              onClick={handleNextHint}
-              className="text-anime-cyan hover:text-anime-purple transition-colors text-sm"
+              onClick={handleRequestAiHint}
+              disabled={isLoadingAiHint}
+              className="text-anime-cyan hover:text-anime-purple transition-colors text-sm disabled:text-anime-500 text-right"
             >
-              Next Hint ({config.hints.length - currentHintIndex - 1} remaining)
+              {isLoadingAiHint ? "Loading AI hint..." : "Request optional AI hint"}
             </button>
+          </div>
+
+          {currentHintIndex >= 0 && config.hints.length > 0 && (
+            <>
+              <Callout type="info">
+                <p className="text-sm">
+                  <span className="text-anime-cyan font-medium">Hint {currentHintIndex + 1}/{config.hints.length}:</span> {config.hints[currentHintIndex]}
+                </p>
+              </Callout>
+              {currentHintIndex < config.hints.length - 1 && (
+                <button
+                  onClick={handleNextHint}
+                  className="text-anime-cyan hover:text-anime-purple transition-colors text-sm"
+                >
+                  Next Hint ({config.hints.length - currentHintIndex - 1} remaining)
+                </button>
+              )}
+            </>
+          )}
+
+          {aiHint && (
+            <Callout type="info">
+              <p className="text-sm">
+                <span className="text-anime-cyan font-medium">AI Hint (advisory):</span> {aiHint}
+              </p>
+            </Callout>
           )}
         </div>
       )}

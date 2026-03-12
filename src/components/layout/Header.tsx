@@ -1,7 +1,9 @@
 "use client"
 
 import { ProfileSidebar } from "@/components/auth/ProfileSidebar"
-import { Menu, User, X } from "lucide-react"
+import { useSettings } from "@/lib/settings"
+import { stopMusic } from "@/lib/sound"
+import { Menu, User, Volume2, VolumeX, X } from "lucide-react"
 import { useSession } from "next-auth/react"
 import Image from "next/image"
 import Link from "next/link"
@@ -15,8 +17,23 @@ import { useState } from "react"
  */
 export function Header(): React.ReactElement {
   const { data: session, status } = useSession()
+  const { settings, updateSetting } = useSettings()
   const [sidebarOpen, setSidebarOpen] = useState(false)
   const [mobileMenuOpen, setMobileMenuOpen] = useState(false)
+
+  const audioMuted = !settings.sfxEnabled && !settings.musicEnabled
+
+  const toggleAudioMute = (): void => {
+    if (audioMuted) {
+      updateSetting("sfxEnabled", true)
+      updateSetting("musicEnabled", true)
+      return
+    }
+
+    updateSetting("sfxEnabled", false)
+    updateSetting("musicEnabled", false)
+    stopMusic()
+  }
 
   return (
     <>
@@ -92,6 +109,15 @@ export function Header(): React.ReactElement {
 
           {/* Actions */}
           <div className="flex items-center gap-4">
+            <button
+              onClick={toggleAudioMute}
+              className="p-2 rounded-md text-gray-400 hover:text-white hover:bg-anime-800/60 transition-colors"
+              aria-label={audioMuted ? "Unmute all audio" : "Mute all audio"}
+              title={audioMuted ? "Unmute all audio" : "Mute all audio"}
+            >
+              {audioMuted ? <VolumeX className="w-5 h-5" /> : <Volume2 className="w-5 h-5" />}
+            </button>
+
             {/* Mobile Menu Toggle */}
             <button
               onClick={() => setMobileMenuOpen(!mobileMenuOpen)}

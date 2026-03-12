@@ -3,18 +3,34 @@
  * Shows Databricks connection status banner.
  */
 
+"use client"
+
+import { useSyncNow } from "@/components/auth"
 import { cn } from "@/lib/utils"
 import Link from "next/link"
+import { useRouter } from "next/navigation"
+import { useEffect, useRef } from "react"
 
 type ConnectionStatusProps = {
   isConnected: boolean
   workspaceUrl?: string
+  refreshOnInitialSync?: boolean
 }
 
 export function ConnectionStatus({
   isConnected,
   workspaceUrl,
+  refreshOnInitialSync = false,
 }: ConnectionStatusProps): React.ReactElement {
+  const { isInitialSyncComplete } = useSyncNow()
+  const router = useRouter()
+  const hasRefreshedRef = useRef(false)
+
+  useEffect(() => {
+    if (!refreshOnInitialSync || !isInitialSyncComplete || hasRefreshedRef.current) return
+    hasRefreshedRef.current = true
+    router.refresh()
+  }, [isInitialSyncComplete, refreshOnInitialSync, router])
   return (
     <div
       className={cn(

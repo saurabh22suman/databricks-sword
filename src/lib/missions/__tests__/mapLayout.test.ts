@@ -195,7 +195,7 @@ describe("mapLayout — pipeline layout", () => {
   })
 
   describe("edges", () => {
-    it("should return 37 prerequisite edges", () => {
+    it("should return 35 prerequisite edges", () => {
       const edges = getMapEdges()
       expect(edges).toHaveLength(35)
     })
@@ -284,6 +284,76 @@ describe("mapLayout — pipeline layout", () => {
       const prereqs = getMissionPrerequisites("ml-foundations", missionLookup)
       expect(prereqs).toEqual(["pyspark-essentials", "advanced-transformations"])
       expect(prereqs).not.toContain("lakehouse-fundamentals")
+    })
+
+    it("getMapEdges should use mission JSON prerequisites when provided", () => {
+      const missionLookup = new Map<string, Mission>([
+        [
+          "lakehouse-fundamentals",
+          {
+            id: "lakehouse-fundamentals",
+            title: "Lakehouse Fundamentals",
+            subtitle: "",
+            description: "",
+            industry: "finance",
+            rank: "B",
+            xpRequired: 0,
+            xpReward: 0,
+            estimatedMinutes: 1,
+            primaryFeatures: [],
+            prerequisites: [],
+            databricksEnabled: false,
+            stages: [
+              {
+                id: "s1",
+                title: "Stage 1",
+                type: "briefing",
+                configFile: "stages/01-briefing.json",
+                xpReward: 0,
+                estimatedMinutes: 1,
+              },
+            ],
+            sideQuests: [],
+            achievements: [],
+          },
+        ],
+        [
+          "ml-foundations",
+          {
+            id: "ml-foundations",
+            title: "ML Foundations",
+            subtitle: "",
+            description: "",
+            industry: "finance",
+            rank: "B",
+            xpRequired: 0,
+            xpReward: 0,
+            estimatedMinutes: 1,
+            primaryFeatures: [],
+            prerequisites: ["lakehouse-fundamentals"],
+            databricksEnabled: false,
+            stages: [
+              {
+                id: "s1",
+                title: "Stage 1",
+                type: "briefing",
+                configFile: "stages/01-briefing.json",
+                xpReward: 0,
+                estimatedMinutes: 1,
+              },
+            ],
+            sideQuests: [],
+            achievements: [],
+          },
+        ],
+      ])
+
+      const edges = getMapEdges(missionLookup)
+      expect(edges).toHaveLength(1)
+      expect(edges[0]).toMatchObject({
+        from: "lakehouse-fundamentals",
+        to: "ml-foundations",
+      })
     })
 
     it("getMissionPrerequisites should fall back to static map edges", () => {

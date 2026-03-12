@@ -16,11 +16,8 @@ vi.mock("@/lib/databricks", () => ({
 
 vi.mock("@/lib/field-ops/deployment", () => ({
   getDeploymentStatus: vi.fn(),
-  updateDeploymentStatus: vi.fn(),
-}))
-
-vi.mock("@/lib/field-ops/validation", () => ({
-  runValidation: vi.fn(),
+  validateDeployment: vi.fn(),
+  DeploymentConflictError: class DeploymentConflictError extends Error {},
 }))
 
 vi.mock("drizzle-orm", () => ({
@@ -32,126 +29,84 @@ describe("Field Ops validate route", () => {
     vi.clearAllMocks()
   })
 
-  it("recovers status back to deployed when validation throws", async () => {
-    const errorSpy = vi.spyOn(console, "error").mockImplementation(() => {})
-
+  it("returns runId and check keys on success", async () => {
     const { authenticateApiRequest } = await import("@/lib/auth/api-auth")
     const { getDb } = await import("@/lib/db")
     const { decryptPat } = await import("@/lib/databricks")
-    const { getDeploymentStatus, updateDeploymentStatus } = await import("@/lib/field-ops/deployment")
-    const { runValidation } = await import("@/lib/field-ops/validation")
+    const { getDeploymentStatus, validateDeployment } = await import("@/lib/field-ops/deployment")
 
-    vi.mocked(authenticateApiRequest).mockResolvedValue({
-      authenticated: true,
-      userId: "user-1",
-    })
-
+    vi.mocked(authenticateApiRequest).mockResolvedValue({ authenticated: true, userId: "user-1" })
     vi.mocked(getDeploymentStatus).mockResolvedValue({
       id: "deployment-1",
       userId: "user-1",
       industry: "retail",
       status: "deployed",
       schemaPrefix: "field_ops_retail_abcd1234",
-      deployedAt: new Date(),
-      completedAt: null,
-      errorMessage: null,
-      workspaceUrl: "https://example.databricks.com",
       catalogName: "dev",
-      warehouseId: "wh-123",
     } as never)
 
     const limit = vi.fn().mockResolvedValue([
-      {
-        workspaceUrl: "https://example.databricks.com/",
-        encryptedPat: "encrypted-pat",
-        warehouseId: "wh-123",
-      },
+      { workspaceUrl: "https://example.databricks.com/", encryptedPat: "encrypted-pat", warehouseId: "wh-123" },
     ])
     const where = vi.fn().mockReturnValue({ limit })
     const from = vi.fn().mockReturnValue({ where })
     const select = vi.fn().mockReturnValue({ from })
     vi.mocked(getDb).mockReturnValue({ select } as never)
-
     vi.mocked(decryptPat).mockReturnValue("decrypted-pat")
-    vi.mocked(runValidation).mockRejectedValue(new Error("validation crashed"))
+
+    vi.mocked(validateDeployment).mockResolvedValue({
+      runId: "run-1",
+      results: [
+        {
+          checkKey: "bronze_sales_data_exists",
+          checkName: "Bronze sales data exists",
+          passed: true,
+          errorMessage: null,
+        },
+      ],
+      allPassed: true,
+      operationId: "op-validate-1",
+      requestId: "req-validate-1",
+      correlationId: "corr-validate-1",
+      replayed: false,
+    } as never)
 
     const response = await POST(
       new Request("http://localhost:3000/api/field-ops/validate/deployment-1", {
         method: "POST",
+        headers: {
+          "Idempotency-Key": "validate-1",
+          "X-Request-Id": "req-validate-1",
+          "X-Correlation-Id": "corr-validate-1",
+        },
       }) as never,
       { params: Promise.resolve({ deploymentId: "deployment-1" }) }
     )
 
-    expect(response.status).toBe(500)
-    expect(await response.json()).toEqual({ error: "validation crashed" })
-
-    expect(updateDeploymentStatus).toHaveBeenCalledTimes(2)
-    expect(updateDeploymentStatus).toHaveBeenNthCalledWith(1, "deployment-1", "validating")
-    expect(updateDeploymentStatus).toHaveBeenNthCalledWith(2, "deployment-1", "deployed")
-
-    errorSpy.mockRestore()
-  })
-
-  it("returns original validation error even if status recovery fails", async () => {
-    const errorSpy = vi.spyOn(console, "error").mockImplementation(() => {})
-
-    const { authenticateApiRequest } = await import("@/lib/auth/api-auth")
-    const { getDb } = await import("@/lib/db")
-    const { decryptPat } = await import("@/lib/databricks")
-    const { getDeploymentStatus, updateDeploymentStatus } = await import("@/lib/field-ops/deployment")
-    const { runValidation } = await import("@/lib/field-ops/validation")
-
-    vi.mocked(authenticateApiRequest).mockResolvedValue({
-      authenticated: true,
-      userId: "user-1",
+    expect(response.status).toBe(200)
+    const body = await response.json()
+    expect(body.runId).toBe("run-1")
+    expect(body.results[0]).toMatchObject({
+      checkKey: "bronze_sales_data_exists",
+      checkName: "Bronze sales data exists",
+      passed: true,
+    })
+    expect(body.metadata).toEqual({
+      requestId: "req-validate-1",
+      correlationId: "corr-validate-1",
+      operationId: "op-validate-1",
+      replayed: false,
     })
 
-    vi.mocked(getDeploymentStatus).mockResolvedValue({
-      id: "deployment-1",
-      userId: "user-1",
-      industry: "retail",
-      status: "deployed",
-      schemaPrefix: "field_ops_retail_abcd1234",
-      deployedAt: new Date(),
-      completedAt: null,
-      errorMessage: null,
-      workspaceUrl: "https://example.databricks.com",
-      catalogName: "dev",
-      warehouseId: "wh-123",
-    } as never)
-
-    const limit = vi.fn().mockResolvedValue([
+    expect(validateDeployment).toHaveBeenCalledWith(
+      "deployment-1",
+      "user-1",
+      expect.any(Object),
       {
-        workspaceUrl: "https://example.databricks.com/",
-        encryptedPat: "encrypted-pat",
-        warehouseId: "wh-123",
-      },
-    ])
-    const where = vi.fn().mockReturnValue({ limit })
-    const from = vi.fn().mockReturnValue({ where })
-    const select = vi.fn().mockReturnValue({ from })
-    vi.mocked(getDb).mockReturnValue({ select } as never)
-
-    vi.mocked(decryptPat).mockReturnValue("decrypted-pat")
-    vi.mocked(runValidation).mockRejectedValue(new Error("validation crashed"))
-    vi.mocked(updateDeploymentStatus)
-      .mockResolvedValueOnce(undefined)
-      .mockRejectedValueOnce(new Error("recovery failed"))
-
-    const response = await POST(
-      new Request("http://localhost:3000/api/field-ops/validate/deployment-1", {
-        method: "POST",
-      }) as never,
-      { params: Promise.resolve({ deploymentId: "deployment-1" }) }
+        idempotencyKey: "validate-1",
+        requestId: "req-validate-1",
+        correlationId: "corr-validate-1",
+      }
     )
-
-    expect(response.status).toBe(500)
-    expect(await response.json()).toEqual({ error: "validation crashed" })
-
-    expect(updateDeploymentStatus).toHaveBeenCalledTimes(2)
-    expect(updateDeploymentStatus).toHaveBeenNthCalledWith(1, "deployment-1", "validating")
-    expect(updateDeploymentStatus).toHaveBeenNthCalledWith(2, "deployment-1", "deployed")
-
-    errorSpy.mockRestore()
   })
 })

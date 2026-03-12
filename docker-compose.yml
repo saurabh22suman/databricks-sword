@@ -25,6 +25,7 @@ services:
       - NEXT_TELEMETRY_DISABLED=1
       - NEXT_PUBLIC_SITE_URL=${NEXT_PUBLIC_SITE_URL:-http://localhost:3000}
       - AUTH_TRUST_HOST=true
+      - MOCK_AUTH=${MOCK_AUTH:-}
     env_file:
       - .env
     networks:

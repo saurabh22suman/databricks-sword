@@ -32,6 +32,9 @@ export function DeployButton({
   const [error, setError] = useState<string | null>(null)
 
   const handleDeploy = async () => {
+    const idempotencyKey = crypto.randomUUID()
+    const requestId = crypto.randomUUID()
+    const correlationId = requestId
     if (!isConnected) {
       setError("Please connect Databricks in Settings first")
       return
@@ -43,7 +46,12 @@ export function DeployButton({
     try {
       const response = await fetch("/api/field-ops/deploy", {
         method: "POST",
-        headers: { "Content-Type": "application/json" },
+        headers: {
+          "Content-Type": "application/json",
+          "Idempotency-Key": idempotencyKey,
+          "X-Request-Id": requestId,
+          "X-Correlation-Id": correlationId,
+        },
         body: JSON.stringify({ industry }),
       })
 

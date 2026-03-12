@@ -158,6 +158,19 @@ describe("XP Event Service", () => {
       expect(event.multiplier).toBe(2.0)
       expect(event.amount).toBe(200)
     })
+
+    it("awards mission XP only once per mission", () => {
+      const firstEvent = awardMissionXp("mission-1", 200)
+      const totalXpAfterFirst = sandbox.userStats.totalXp
+      const missionsCompletedAfterFirst = sandbox.userStats.totalMissionsCompleted
+
+      const secondEvent = awardMissionXp("mission-1", 200)
+
+      expect(firstEvent.amount).toBe(200)
+      expect(secondEvent.amount).toBe(0)
+      expect(sandbox.userStats.totalXp).toBe(totalXpAfterFirst)
+      expect(sandbox.userStats.totalMissionsCompleted).toBe(missionsCompletedAfterFirst)
+    })
   })
 
   describe("awardChallengeXp", () => {

@@ -16,7 +16,7 @@ describe("SyncProgressDialog", () => {
   it("displays syncing description", () => {
     render(<SyncProgressDialog open={true} />)
     expect(
-      screen.getByText("Syncing data to server before disconnect...")
+      screen.getByText("Syncing data to server before signing out...")
     ).toBeInTheDocument()
   })
 

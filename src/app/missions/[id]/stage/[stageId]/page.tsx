@@ -4,7 +4,7 @@
  * Also loads side quest content for any side quests defined in the mission.
  */
 
-import type { SideQuestWithContent } from "@/components/missions";
+import { StageTracker, type SideQuestWithContent } from "@/components/missions";
 import type { StagePlayerClientProps } from "@/components/missions/StagePlayerClient";
 import { StagePlayerClient } from "@/components/missions/StagePlayerClient";
 import { getMission, getStageConfig } from "@/lib/missions";
@@ -151,6 +151,19 @@ export default async function StagePage({
           <div className="inline-block px-3 py-1 rounded-full bg-anime-cyan/20 text-anime-cyan text-xs font-medium uppercase tracking-wider">
             {currentStage.type}
           </div>
+
+          <StageTracker
+            stages={mission.stages.map((stage) => ({
+              id: stage.id,
+              title: stage.title,
+              type: stage.type,
+            }))}
+            currentStageId={currentStage.id}
+            completedStageIds={mission.stages
+              .slice(0, currentStageIndex)
+              .map((stage) => stage.id)}
+            missionId={mission.id}
+          />
         </div>
 
         {/* Stage Content — rendered client-side */}
@@ -161,6 +174,9 @@ export default async function StagePage({
           nextUrl={nextUrl}
           missionId={mission.id}
           stageId={currentStage.id}
+          stageXpReward={currentStage.xpReward}
+          isFinalStage={!nextStage}
+          missionXpReward={mission.xpReward}
           sideQuests={sideQuestsWithContent}
         />
       </div>

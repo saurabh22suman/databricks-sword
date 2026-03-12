@@ -224,7 +224,7 @@ export function MissionMap({
     return map
   }, [mapNodes])
 
-  const edges = useMemo(() => getMapEdges(), [])
+  const edges = useMemo(() => getMapEdges(missionLookup), [missionLookup])
 
   // Filter nodes by active tracks — locked nodes are always shown (dimmed), not hidden
   const filteredNodes = useMemo(
@@ -456,6 +456,8 @@ export function MissionMap({
               : "text-anime-300 hover:text-anime-cyan"
           )}
           title="Toggle Minimap"
+          aria-label="Toggle minimap"
+          aria-pressed={showMinimap}
         >
           <MapIcon size={18} />
         </button>
@@ -469,6 +471,8 @@ export function MissionMap({
               : "text-anime-300 hover:text-anime-purple"
           )}
           title="Map Controls Help"
+          aria-label="Toggle map controls help"
+          aria-pressed={showHelp}
         >
           <HelpCircle size={18} />
         </button>
@@ -503,6 +507,8 @@ export function MissionMap({
                         )
                       : "bg-anime-800/50 text-anime-500 hover:bg-anime-800"
                   )}
+                  aria-label={`Toggle ${trackInfo.shortName} track filter`}
+                  aria-pressed={isActive}
                 >
                   {trackInfo.shortName}
                 </button>
@@ -609,8 +615,8 @@ export function MissionMap({
                     Pan &amp; Navigate
                   </div>
                   <div className="text-anime-400">
-                    Click and drag to pan. Scroll to zoom. Use the minimap for
-                    quick navigation.
+                    Click and drag to pan. Use the minimap for quick
+                    navigation.
                   </div>
                 </div>
               </div>
@@ -622,8 +628,8 @@ export function MissionMap({
                 <div>
                   <div className="font-medium text-anime-100">Zoom Controls</div>
                   <div className="text-anime-400">
-                    Mouse wheel to zoom. Use buttons on the right for precise
-                    control.
+                    Use zoom buttons on the right for precise control and reset
+                    the view when needed.
                   </div>
                 </div>
               </div>
@@ -637,8 +643,8 @@ export function MissionMap({
                     Interact with Nodes
                   </div>
                   <div className="text-anime-400">
-                    Hover to see details. Click to navigate. Missions flow left →
-                    right through the pipeline.
+                    Hover or focus to see details. Click, Enter, or Space to
+                    navigate unlocked nodes. Missions flow left → right.
                   </div>
                 </div>
               </div>

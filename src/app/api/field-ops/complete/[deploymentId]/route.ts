@@ -4,17 +4,52 @@
  * Mark mission as complete and award XP.
  */
 
+import { apiError, apiOk } from "@/lib/api/responses"
 import { authenticateApiRequest } from "@/lib/auth/api-auth"
+import { fieldOpsCompletions, getDb } from "@/lib/db"
 import {
-    allValidationsPassed,
-    completeDeployment,
-    getDeploymentStatus,
+  allValidationsPassed,
+  completeDeployment,
+  getDeploymentStatus,
 } from "@/lib/field-ops/deployment"
 import { getIndustryConfig } from "@/lib/field-ops/industries"
+import { and, eq } from "drizzle-orm"
 import { NextRequest, NextResponse } from "next/server"
 
 type RouteContext = {
   params: Promise<{ deploymentId: string }>
+}
+
+function resolveRequestContext(
+  request: NextRequest
+):
+  | {
+      ok: true
+      value: {
+        idempotencyKey: string
+        requestId: string
+        correlationId: string
+      }
+    }
+  | {
+      ok: false
+      response: NextResponse
+    } {
+  const idempotencyKey = request.headers.get("idempotency-key")?.trim()
+  if (!idempotencyKey) {
+    return {
+      ok: false,
+      response: apiError("Missing required Idempotency-Key header", 400, "BAD_REQUEST"),
+    }
+  }
+
+  const requestId = request.headers.get("x-request-id")?.trim() || crypto.randomUUID()
+  const correlationId = request.headers.get("x-correlation-id")?.trim() || requestId
+
+  return {
+    ok: true,
+    value: { idempotencyKey, requestId, correlationId },
+  }
 }
 
 export async function POST(
@@ -24,53 +59,95 @@ export async function POST(
   try {
     const authResult = await authenticateApiRequest()
     if (!authResult.authenticated) {
-      return NextResponse.json({ error: authResult.error }, { status: authResult.status })
+      return apiError(authResult.error, authResult.status, "UNAUTHORIZED")
     }
 
+    const requestContextResult = resolveRequestContext(request)
+    if (!requestContextResult.ok) {
+      return requestContextResult.response
+    }
+
+    const requestContext = requestContextResult.value
     const userId = authResult.userId
 
     const { deploymentId } = await context.params
 
-    // Get deployment
     const deployment = await getDeploymentStatus(deploymentId)
     if (!deployment) {
-      return NextResponse.json({ error: "Deployment not found" }, { status: 404 })
+      return apiError("Deployment not found", 404, "NOT_FOUND")
     }
 
-    // Check deployment belongs to user
     if (deployment.userId !== userId) {
-      return NextResponse.json({ error: "Forbidden" }, { status: 403 })
+      return apiError("Forbidden", 403, "FORBIDDEN")
     }
 
-    // Check all validations passed
     const passed = await allValidationsPassed(deploymentId)
     if (!passed) {
-      return NextResponse.json(
-        { error: "All validations must pass before completing" },
-        { status: 400 }
+      return apiError(
+        "All validations from the latest run must pass before completing",
+        400,
+        "BAD_REQUEST"
       )
     }
 
-    // Mark as complete
+    const config = getIndustryConfig(deployment.industry)
+    const db = getDb()
+
+    const existing = await db
+      .select()
+      .from(fieldOpsCompletions)
+      .where(
+        and(
+          eq(fieldOpsCompletions.userId, userId),
+          eq(fieldOpsCompletions.industry, deployment.industry)
+        )
+      )
+      .limit(1)
+
+    const alreadyAwarded = existing.length > 0
+
+    if (!alreadyAwarded) {
+      await db
+        .insert(fieldOpsCompletions)
+        .values({
+          userId,
+          deploymentId,
+          industry: deployment.industry,
+          xpAwarded: config.xpReward,
+        })
+        .onConflictDoNothing({
+          target: [fieldOpsCompletions.userId, fieldOpsCompletions.industry],
+        })
+    }
+
     const completed = await completeDeployment(deploymentId)
 
-    // Get industry config for XP reward
-    const config = getIndustryConfig(deployment.industry)
+    const [ledger] = await db
+      .select()
+      .from(fieldOpsCompletions)
+      .where(
+        and(
+          eq(fieldOpsCompletions.userId, userId),
+          eq(fieldOpsCompletions.industry, deployment.industry)
+        )
+      )
+      .limit(1)
 
-    // TODO: Award XP to user profile
-    // TODO: Apply streak multiplier
-    // TODO: Check for badge unlock
-
-    return NextResponse.json({
-      success: true,
-      xpAwarded: config.xpReward,
+    return apiOk({
+      xpAwarded: ledger?.xpAwarded ?? config.xpReward,
+      alreadyAwarded,
       completedAt: completed.completedAt,
+      metadata: {
+        requestId: requestContext.requestId,
+        correlationId: requestContext.correlationId,
+      },
     })
   } catch (error) {
     console.error("Complete error:", error)
-    return NextResponse.json(
-      { error: error instanceof Error ? error.message : "Failed to complete mission" },
-      { status: 500 }
+    return apiError(
+      error instanceof Error ? error.message : "Failed to complete mission",
+      500,
+      "INTERNAL_ERROR"
     )
   }
 }

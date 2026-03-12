@@ -4,11 +4,15 @@
  * Run validation queries for a deployment.
  */
 
+import { apiError, apiOk } from "@/lib/api/responses"
 import { authenticateApiRequest } from "@/lib/auth/api-auth"
 import { decryptPat } from "@/lib/databricks"
 import { databricksConnections, getDb } from "@/lib/db"
-import { getDeploymentStatus, updateDeploymentStatus } from "@/lib/field-ops/deployment"
-import { runValidation } from "@/lib/field-ops/validation"
+import {
+  DeploymentConflictError,
+  getDeploymentStatus,
+  validateDeployment,
+} from "@/lib/field-ops/deployment"
 import { eq } from "drizzle-orm"
 import { NextRequest, NextResponse } from "next/server"
 
@@ -16,45 +20,68 @@ type RouteContext = {
   params: Promise<{ deploymentId: string }>
 }
 
+function resolveRequestContext(
+  request: NextRequest
+):
+  | {
+      ok: true
+      value: {
+        idempotencyKey: string
+        requestId: string
+        correlationId: string
+      }
+    }
+  | {
+      ok: false
+      response: NextResponse
+    } {
+  const idempotencyKey = request.headers.get("idempotency-key")?.trim()
+  if (!idempotencyKey) {
+    return {
+      ok: false,
+      response: apiError("Missing required Idempotency-Key header", 400, "BAD_REQUEST"),
+    }
+  }
+
+  const requestId = request.headers.get("x-request-id")?.trim() || crypto.randomUUID()
+  const correlationId = request.headers.get("x-correlation-id")?.trim() || requestId
+
+  return {
+    ok: true,
+    value: { idempotencyKey, requestId, correlationId },
+  }
+}
+
 export async function POST(
   request: NextRequest,
   context: RouteContext
 ): Promise<NextResponse> {
-  let deploymentId: string | null = null
-  let shouldRecoverToDeployed = false
-
   try {
     const authResult = await authenticateApiRequest()
     if (!authResult.authenticated) {
-      return NextResponse.json({ error: authResult.error }, { status: authResult.status })
+      return apiError(authResult.error, authResult.status, "UNAUTHORIZED")
     }
 
     const db = getDb()
     const userId = authResult.userId
+    const requestContextResult = resolveRequestContext(request)
+    if (!requestContextResult.ok) {
+      return requestContextResult.response
+    }
+    const requestContext = requestContextResult.value
 
     const params = await context.params
-    deploymentId = params.deploymentId
+    const deploymentId = params.deploymentId
 
-    // Get deployment
     const deployment = await getDeploymentStatus(deploymentId)
     if (!deployment) {
-      return NextResponse.json({ error: "Deployment not found" }, { status: 404 })
+      return apiError("Deployment not found", 404, "NOT_FOUND")
     }
 
-    // Check deployment belongs to user
     if (deployment.userId !== userId) {
-      return NextResponse.json({ error: "Forbidden" }, { status: 403 })
+      return apiError("Forbidden", 403, "FORBIDDEN")
     }
 
-    // Check deployment is in correct state
-    if (deployment.status !== "deployed") {
-      return NextResponse.json(
-        { error: "Deployment must be in 'deployed' state" },
-        { status: 400 }
-      )
-    }
-
-    // Get Databricks connection
     const [connection] = await db
       .select()
       .from(databricksConnections)
@@ -62,10 +89,7 @@ export async function POST(
       .limit(1)
 
     if (!connection) {
-      return NextResponse.json(
-        { error: "Databricks connection not configured" },
-        { status: 400 }
-      )
+      return apiError("Databricks connection not configured", 400, "BAD_REQUEST")
     }
 
     const databricksConfig = {
@@ -75,45 +99,32 @@ export async function POST(
       catalog: deployment.catalogName,
     }
 
-    // Update status to validating
-    await updateDeploymentStatus(deploymentId, "validating")
-    shouldRecoverToDeployed = true
+    const validation = await validateDeployment(deploymentId, userId, databricksConfig, requestContext)
 
-    // Run validations
-    const results = await runValidation(
-      deploymentId,
-      deployment.industry,
-      deployment.catalogName,
-      deployment.schemaPrefix,
-      databricksConfig
-    )
-
-    // Update status back to deployed
-    await updateDeploymentStatus(deploymentId, "deployed")
-    shouldRecoverToDeployed = false
-
-    return NextResponse.json({
-      success: true,
-      results: results.map((r) => ({
+    return apiOk({
+      runId: validation.runId,
+      results: validation.results.map((r) => ({
+        checkKey: r.checkKey,
         checkName: r.checkName,
         passed: r.passed,
         errorMessage: r.errorMessage,
       })),
-      allPassed: results.every((r) => r.passed),
+      allPassed: validation.allPassed,
+      metadata: {
+        requestId: validation.requestId,
+        correlationId: validation.correlationId,
+        operationId: validation.operationId,
+        replayed: validation.replayed,
+      },
     })
   } catch (error) {
-    if (deploymentId && shouldRecoverToDeployed) {
-      try {
-        await updateDeploymentStatus(deploymentId, "deployed")
-      } catch (recoveryError) {
-        console.error("Validation status recovery error:", recoveryError)
-      }
+    if (error instanceof DeploymentConflictError) {
+      return apiError(error.message, 409, "CONFLICT")
     }
 
-    console.error("Validation error:", error)
-    return NextResponse.json(
-      { error: error instanceof Error ? error.message : "Validation failed" },
-      { status: 500 }
-    )
+    console.error("Validation error", {
+      message: error instanceof Error ? error.message : "Validation failed",
+    })
+    return apiError(error instanceof Error ? error.message : "Validation failed", 500, "INTERNAL_ERROR")
   }
 }

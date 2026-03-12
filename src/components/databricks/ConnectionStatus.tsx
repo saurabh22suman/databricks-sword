@@ -124,7 +124,7 @@ export function ConnectionStatus({
             onClick={onDisconnect}
             className="text-sm text-anime-400 hover:text-red-400 transition-colors"
           >
-            Disconnect
+            Disconnect workspace
           </button>
         )}
       </div>

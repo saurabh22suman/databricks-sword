@@ -15,7 +15,7 @@ import type { MissionRank } from "@/lib/missions/types"
 import { cn } from "@/lib/utils"
 import { Check, Lock, Play } from "lucide-react"
 import { useRouter } from "next/navigation"
-import { useCallback, useRef, useState } from "react"
+import { type KeyboardEvent, useCallback, useMemo, useRef, useState } from "react"
 
 /**
  * Node state for visual rendering.
@@ -94,8 +94,27 @@ export function MapNode({
     }, 100)
   }, [])
 
+  const isInteractive = state !== "locked" && !isGuest
+
+  const ariaLabel = useMemo(() => {
+    const stateLabel =
+      state === "in-progress"
+        ? `In progress ${progress}%`
+        : state === "available"
+          ? "Available"
+          : state === "completed"
+            ? "Completed"
+            : "Locked"
+
+    if (node.type === "field-ops") {
+      return `${title}. Field Ops node. ${stateLabel}. Requires ${xpRequired} XP. Rewards ${xpReward} XP.`
+    }
+
+    return `${title}. Mission node. ${stateLabel}. Requires ${xpRequired} XP. Rewards ${xpReward} XP. Estimated ${estimatedMinutes} minutes.`
+  }, [estimatedMinutes, node.type, progress, state, title, xpRequired, xpReward])
+
   const handleClick = (): void => {
-    if (state === "locked" || isGuest) return
+    if (!isInteractive) return
     if (onClick) {
       onClick()
     } else if (node.type === "mission") {
@@ -104,6 +123,30 @@ export function MapNode({
       router.push(`/field-ops/${node.industry}`)
     }
   }
+
+  const handleFocus = useCallback(() => {
+    if (hideTimeoutRef.current) {
+      clearTimeout(hideTimeoutRef.current)
+      hideTimeoutRef.current = null
+    }
+    setIsHovered(true)
+  }, [])
+
+  const handleBlur = useCallback(() => {
+    hideTimeoutRef.current = setTimeout(() => {
+      setIsHovered(false)
+    }, 100)
+  }, [])
+
+  const handleKeyDown = useCallback(
+    (event: KeyboardEvent<SVGGElement>) => {
+      if (!isInteractive) return
+      if (event.key !== "Enter" && event.key !== " ") return
+      event.preventDefault()
+      handleClick()
+    },
+    [handleClick, isInteractive]
+  )
 
   // Background fill color by state and track
   const getFillColor = (): string => {
@@ -155,8 +198,15 @@ export function MapNode({
       transform={`translate(${node.x}, ${node.y})`}
       onMouseEnter={handleMouseEnter}
       onMouseLeave={handleMouseLeave}
+      onFocus={handleFocus}
+      onBlur={handleBlur}
+      onKeyDown={handleKeyDown}
       onClick={handleClick}
-      style={{ cursor: state === "locked" || isGuest ? "default" : "pointer" }}
+      tabIndex={isInteractive ? 0 : -1}
+      role="button"
+      aria-label={ariaLabel}
+      aria-disabled={!isInteractive}
+      style={{ cursor: isInteractive ? "pointer" : "default" }}
     >
       {/* Invisible larger hit area for stable hover */}
       <circle r={radius + 16} fill="transparent" />

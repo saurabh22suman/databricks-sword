@@ -20,6 +20,14 @@ export interface MissionCardProps {
    */
   userXp?: number;
   /**
+   * Whether all prerequisites are completed
+   */
+  prerequisitesMet?: boolean;
+  /**
+   * Missing prerequisite titles/IDs for lock reason details
+   */
+  missingPrerequisiteTitles?: string[];
+  /**
    * Mission progress percentage (0-100)
    */
   progress?: number;
@@ -77,11 +85,15 @@ function getIndustryLabel(industry: Mission["industry"]): string {
 export function MissionCard({
   mission,
   userXp,
+  prerequisitesMet = true,
+  missingPrerequisiteTitles = [],
   progress,
   completed,
   onClick,
 }: MissionCardProps): React.ReactElement {
-  const isLocked = userXp !== undefined && userXp < mission.xpRequired;
+  const xpLocked = userXp !== undefined && userXp < mission.xpRequired;
+  const prereqLocked = !prerequisitesMet;
+  const isLocked = xpLocked || prereqLocked;
   const isInProgress = progress !== undefined && progress > 0 && progress < 100;
   const isCompleted = completed || progress === 100;
 
@@ -217,9 +229,14 @@ export function MissionCard({
 
       {/* Locked State Message */}
       {isLocked && (
-        <p className="text-xs text-anime-500 mt-3 text-center">
-          Requires {mission.xpRequired} XP to unlock
-        </p>
+        <div className="text-xs text-anime-500 mt-3 text-center space-y-1">
+          {xpLocked && <p>Requires {mission.xpRequired} XP to unlock</p>}
+          {prereqLocked && (
+            <p>
+              Missing prerequisites: {missingPrerequisiteTitles.join(", ") || "Unknown prerequisite"}
+            </p>
+          )}
+        </div>
       )}
     </div>
   );
