@@ -7,20 +7,20 @@ import fs from "fs/promises"
 import path from "path"
 import { loadFieldOpsContent } from "../field-ops/content"
 import type {
-  CleanupFailure,
-  CleanupResult,
-  DatabricksConnection,
-  DeploymentResult,
-  Industry,
+    CleanupFailure,
+    CleanupResult,
+    DatabricksConnection,
+    DeploymentResult,
+    Industry,
 } from "../field-ops/types"
 import {
-  createSchema,
-  createVolume,
-  createWorkspaceDirectory,
-  deleteWorkspaceDirectory,
-  dropSchema,
-  uploadFile,
-  uploadNotebook,
+    createSchema,
+    createVolume,
+    createWorkspaceDirectory,
+    deleteWorkspaceDirectory,
+    dropSchema,
+    uploadFile,
+    uploadNotebook,
 } from "./cli"
 
 async function assertRequiredAssets(

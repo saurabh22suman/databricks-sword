@@ -8,6 +8,7 @@
  * Visual states: locked, available, in-progress, completed.
  */
 
+import { useSyncNow } from "@/components/auth"
 import { INDUSTRY_CONFIGS } from "@/lib/field-ops/industries"
 import { RANK_COLORS, TRACK_COLORS, type MapNode as MapNodeType } from "@/lib/missions/mapLayout"
 import { TRACKS } from "@/lib/missions/tracks"
@@ -70,8 +71,10 @@ export function MapNode({
   isGuest = false,
 }: MapNodeProps): React.ReactElement {
   const [isHovered, setIsHovered] = useState(false)
+  const [isSyncingBeforeOpen, setIsSyncingBeforeOpen] = useState(false)
   const hideTimeoutRef = useRef<NodeJS.Timeout | null>(null)
   const router = useRouter()
+  const { syncNow } = useSyncNow()
 
   const radius = NODE_RADIUS[node.type]
   const trackColors = node.track ? TRACK_COLORS[node.track] : TRACK_COLORS.de
@@ -94,7 +97,7 @@ export function MapNode({
     }, 100)
   }, [])
 
-  const isInteractive = state !== "locked" && !isGuest
+  const isInteractive = state !== "locked" && !isGuest && !isSyncingBeforeOpen
 
   const ariaLabel = useMemo(() => {
     const stateLabel =
@@ -113,16 +116,32 @@ export function MapNode({
     return `${title}. Mission node. ${stateLabel}. Requires ${xpRequired} XP. Rewards ${xpReward} XP. Estimated ${estimatedMinutes} minutes.`
   }, [estimatedMinutes, node.type, progress, state, title, xpRequired, xpReward])
 
-  const handleClick = (): void => {
+  const handleClick = useCallback(async (): Promise<void> => {
     if (!isInteractive) return
+
     if (onClick) {
       onClick()
-    } else if (node.type === "mission") {
-      router.push(`/missions/${node.id}`)
-    } else if (node.industry) {
+      return
+    }
+
+    if (node.type === "mission") {
+      setIsSyncingBeforeOpen(true)
+      try {
+        const syncSuccess = await syncNow()
+        if (!syncSuccess) {
+          return
+        }
+        router.push(`/missions/${node.id}`)
+      } finally {
+        setIsSyncingBeforeOpen(false)
+      }
+      return
+    }
+
+    if (node.industry) {
       router.push(`/field-ops/${node.industry}`)
     }
-  }
+  }, [isInteractive, node.id, node.industry, node.type, onClick, router, syncNow])
 
   const handleFocus = useCallback(() => {
     if (hideTimeoutRef.current) {
@@ -143,7 +162,7 @@ export function MapNode({
       if (!isInteractive) return
       if (event.key !== "Enter" && event.key !== " ") return
       event.preventDefault()
-      handleClick()
+      void handleClick()
     },
     [handleClick, isInteractive]
   )
@@ -201,7 +220,9 @@ export function MapNode({
       onFocus={handleFocus}
       onBlur={handleBlur}
       onKeyDown={handleKeyDown}
-      onClick={handleClick}
+      onClick={() => {
+        void handleClick()
+      }}
       tabIndex={isInteractive ? 0 : -1}
       role="button"
       aria-label={ariaLabel}

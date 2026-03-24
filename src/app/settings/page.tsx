@@ -11,20 +11,20 @@ import { useDisconnect } from "@/lib/sandbox/useDisconnect"
 import { SETTINGS_STORAGE_KEY, useSettings } from "@/lib/settings"
 import { cn } from "@/lib/utils"
 import {
-    AlertTriangle,
-    Database,
-    Download,
-    Eye,
-    EyeOff,
-    HardDrive,
-    Monitor,
-    Music,
-    Shield,
-    Trash2,
-    Upload,
-    Volume2,
-    VolumeX,
-    Zap
+  AlertTriangle,
+  Database,
+  Download,
+  Eye,
+  EyeOff,
+  HardDrive,
+  Monitor,
+  Music,
+  Shield,
+  Trash2,
+  Upload,
+  Volume2,
+  VolumeX,
+  Zap,
 } from "lucide-react"
 import { useSession } from "next-auth/react"
 import { useCallback, useEffect, useState } from "react"
@@ -48,7 +48,8 @@ export default function SettingsPage(): React.ReactElement {
     message: string
   } | null>(null)
   const [leaderboardOptIn, setLeaderboardOptIn] = useState(true)
-  const [isUpdatingLeaderboardOptIn, setIsUpdatingLeaderboardOptIn] = useState(false)
+  const [isUpdatingLeaderboardOptIn, setIsUpdatingLeaderboardOptIn] =
+    useState(false)
   const [leaderboardStatus, setLeaderboardStatus] = useState<{
     type: "success" | "error"
     message: string
@@ -66,7 +67,7 @@ export default function SettingsPage(): React.ReactElement {
   // Fetch existing Databricks connection on mount
   useEffect(() => {
     if (!session?.user?.id) return
-    
+
     const fetchConnection = async (): Promise<void> => {
       try {
         const response = await fetch(`/api/databricks/status`)
@@ -80,7 +81,7 @@ export default function SettingsPage(): React.ReactElement {
         // Ignore errors - user just won't see connected status
       }
     }
-    
+
     fetchConnection()
   }, [session?.user?.id])
 
@@ -107,42 +108,55 @@ export default function SettingsPage(): React.ReactElement {
     void loadProfilePreferences()
   }, [session?.user?.id])
 
-  const handleLeaderboardOptInChange = useCallback(async (nextValue: boolean): Promise<void> => {
-    if (!session?.user?.id || isUpdatingLeaderboardOptIn) return
+  const handleLeaderboardOptInChange = useCallback(
+    async (nextValue: boolean): Promise<void> => {
+      if (!session?.user?.id || isUpdatingLeaderboardOptIn) return
 
-    const previousValue = leaderboardOptIn
-    setLeaderboardOptIn(nextValue)
-    setIsUpdatingLeaderboardOptIn(true)
-    setLeaderboardStatus(null)
+      const previousValue = leaderboardOptIn
+      setLeaderboardOptIn(nextValue)
+      setIsUpdatingLeaderboardOptIn(true)
+      setLeaderboardStatus(null)
 
-    try {
-      const response = await fetch("/api/user/profile", {
-        method: "PATCH",
-        headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({ leaderboardOptIn: nextValue }),
-      })
+      try {
+        const response = await fetch("/api/user/profile", {
+          method: "PATCH",
+          headers: { "Content-Type": "application/json" },
+          body: JSON.stringify({ leaderboardOptIn: nextValue }),
+        })
 
-      const payload = await response.json().catch(() => null)
+        const payload = await response.json().catch(() => null)
 
-      if (!response.ok) {
+        if (!response.ok) {
+          setLeaderboardOptIn(previousValue)
+          setLeaderboardStatus({
+            type: "error",
+            message: payload?.error ?? "Unable to update leaderboard setting.",
+          })
+          return
+        }
+
+        const persistedValue =
+          typeof payload?.leaderboardOptIn === "boolean"
+            ? payload.leaderboardOptIn
+            : nextValue
+
+        setLeaderboardOptIn(persistedValue)
+        setLeaderboardStatus({
+          type: "success",
+          message: "Leaderboard setting updated.",
+        })
+      } catch {
         setLeaderboardOptIn(previousValue)
-        setLeaderboardStatus({ type: "error", message: payload?.error ?? "Unable to update leaderboard setting." })
-        return
+        setLeaderboardStatus({
+          type: "error",
+          message: "Unable to update leaderboard setting.",
+        })
+      } finally {
+        setIsUpdatingLeaderboardOptIn(false)
       }
-
-      const persistedValue = typeof payload?.leaderboardOptIn === "boolean"
-        ? payload.leaderboardOptIn
-        : nextValue
-
-      setLeaderboardOptIn(persistedValue)
-      setLeaderboardStatus({ type: "success", message: "Leaderboard setting updated." })
-    } catch {
-      setLeaderboardOptIn(previousValue)
-      setLeaderboardStatus({ type: "error", message: "Unable to update leaderboard setting." })
-    } finally {
-      setIsUpdatingLeaderboardOptIn(false)
-    }
-  }, [isUpdatingLeaderboardOptIn, leaderboardOptIn, session?.user?.id])
+    },
+    [isUpdatingLeaderboardOptIn, leaderboardOptIn, session?.user?.id],
+  )
 
   const handleRedeemCoupon = useCallback(async (): Promise<void> => {
     const normalizedCode = couponCode.trim().toUpperCase()
@@ -164,7 +178,10 @@ export default function SettingsPage(): React.ReactElement {
       const payload = await response.json().catch(() => null)
 
       if (response.status === 401) {
-        setCouponStatus({ type: "error", message: "Sign in required to redeem coupons." })
+        setCouponStatus({
+          type: "error",
+          message: "Sign in required to redeem coupons.",
+        })
         return
       }
 
@@ -174,11 +191,17 @@ export default function SettingsPage(): React.ReactElement {
       }
 
       if (!response.ok) {
-        setCouponStatus({ type: "error", message: payload?.error ?? "Unable to redeem coupon." })
+        setCouponStatus({
+          type: "error",
+          message: payload?.error ?? "Unable to redeem coupon.",
+        })
         return
       }
 
-      if (payload?.applied === false && payload?.reason === "already_redeemed") {
+      if (
+        payload?.applied === false &&
+        payload?.reason === "already_redeemed"
+      ) {
         setCouponStatus({ type: "error", message: "Coupon already redeemed." })
         return
       }
@@ -195,12 +218,21 @@ export default function SettingsPage(): React.ReactElement {
         const refreshedSandbox = loadSandbox()
         setSandbox(refreshedSandbox)
         setCouponCode("")
+
+        const syncSuccess = await syncNow()
+        if (!syncSuccess) {
+          setCouponStatus({
+            type: "error",
+            message:
+              "Coupon applied but sync failed. Your XP will sync when you next visit the site.",
+          })
+          return
+        }
+
         setCouponStatus({
           type: "success",
           message: `Coupon applied! +${payload.xpAwarded.toLocaleString()} XP`,
         })
-
-        await syncNow()
         return
       }
 
@@ -221,7 +253,7 @@ export default function SettingsPage(): React.ReactElement {
     }
 
     const confirmed = window.confirm(
-      "Clean up all Field Ops Databricks assets for your deployments? This cannot be undone."
+      "Clean up all Field Ops Databricks assets for your deployments? This cannot be undone.",
     )
 
     if (!confirmed) {
@@ -291,7 +323,9 @@ export default function SettingsPage(): React.ReactElement {
       setExportMsg("No progress data to export.")
       return
     }
-    const blob = new Blob([JSON.stringify(data, null, 2)], { type: "application/json" })
+    const blob = new Blob([JSON.stringify(data, null, 2)], {
+      type: "application/json",
+    })
     const url = URL.createObjectURL(blob)
     const a = document.createElement("a")
     a.href = url
@@ -348,26 +382,24 @@ export default function SettingsPage(): React.ReactElement {
       const sandboxStr = localStorage.getItem("dbsword-sandbox") ?? ""
       const settingsStr = localStorage.getItem(SETTINGS_STORAGE_KEY) ?? ""
       const bytes = new Blob([sandboxStr, settingsStr]).size
-      return bytes < 1024
-        ? `${bytes} B`
-        : `${(bytes / 1024).toFixed(1)} KB`
+      return bytes < 1024 ? `${bytes} B` : `${(bytes / 1024).toFixed(1)} KB`
     } catch {
       return "N/A"
     }
   })()
 
   return (
-    <div className="min-h-screen bg-anime-950 cyber-grid pt-20">
-      <div className="grain-overlay fixed inset-0 pointer-events-none" />
+    <div className="bg-anime-950 cyber-grid min-h-screen pt-20">
+      <div className="grain-overlay pointer-events-none fixed inset-0" />
 
-      <div className="relative z-10 container mx-auto px-4 py-16 max-w-3xl">
+      <div className="relative z-10 container mx-auto max-w-3xl px-4 py-16">
         {/* Page Header */}
-        <div className="text-center mb-12">
-          <div className="inline-flex items-center gap-2 px-3 py-1 border border-anime-700 rounded-full mb-4 text-xs tracking-widest uppercase text-anime-cyan font-mono">
-            <Monitor className="w-3 h-3" />
+        <div className="mb-12 text-center">
+          <div className="border-anime-700 text-anime-cyan mb-4 inline-flex items-center gap-2 rounded-full border px-3 py-1 font-mono text-xs tracking-widest uppercase">
+            <Monitor className="h-3 w-3" />
             System Config
           </div>
-          <h1 className="font-heading text-5xl font-black text-anime-100 mb-3">
+          <h1 className="font-heading text-anime-100 mb-3 text-5xl font-black">
             <span className="text-anime-cyan">SETTINGS</span>
           </h1>
           <p className="text-anime-400 text-lg">
@@ -377,42 +409,55 @@ export default function SettingsPage(): React.ReactElement {
 
         {/* Account Section */}
         <section className="mb-8">
-          <SectionHeader label="Account" icon={<Shield className="w-4 h-4" />} />
-          <div className="bg-anime-900 border border-anime-700 rounded-lg p-6 cut-corner">
+          <SectionHeader
+            label="Account"
+            icon={<Shield className="h-4 w-4" />}
+          />
+          <div className="bg-anime-900 border-anime-700 cut-corner rounded-lg border p-6">
             {session?.user ? (
               <div className="flex items-center gap-4">
                 {session.user.image ? (
                   <img
                     src={session.user.image}
                     alt=""
-                    className="w-14 h-14 rounded-full border-2 border-anime-cyan"
+                    className="border-anime-cyan h-14 w-14 rounded-full border-2"
                   />
                 ) : (
-                  <div className="w-14 h-14 rounded-full bg-anime-800 border-2 border-anime-cyan flex items-center justify-center">
-                    <Shield className="w-6 h-6 text-anime-cyan" />
+                  <div className="bg-anime-800 border-anime-cyan flex h-14 w-14 items-center justify-center rounded-full border-2">
+                    <Shield className="text-anime-cyan h-6 w-6" />
                   </div>
                 )}
                 <div className="flex-1">
-                  <div className="text-lg font-bold text-anime-100">{session.user.name ?? "Agent"}</div>
-                  <div className="text-sm text-anime-400 font-mono">{session.user.email ?? "No email"}</div>
-                  <div className="flex items-center gap-2 mt-1">
+                  <div className="text-anime-100 text-lg font-bold">
+                    {session.user.name ?? "Agent"}
+                  </div>
+                  <div className="text-anime-400 font-mono text-sm">
+                    {session.user.email ?? "No email"}
+                  </div>
+                  <div className="mt-1 flex items-center gap-2">
                     <RankBadge rank={rank} size={16} />
-                    <span className="text-xs text-anime-cyan font-bold">{rank.title}</span>
-                    <span className="text-xs text-anime-400">— {totalXp.toLocaleString()} XP</span>
+                    <span className="text-anime-cyan text-xs font-bold">
+                      {rank.title}
+                    </span>
+                    <span className="text-anime-400 text-xs">
+                      — {totalXp.toLocaleString()} XP
+                    </span>
                   </div>
                 </div>
                 <button
                   onClick={() => void disconnect()}
                   disabled={isSyncing}
-                  className="px-4 py-2 bg-anime-accent/20 border border-anime-accent text-anime-accent rounded-lg text-sm font-bold hover:bg-anime-accent/30 transition-all disabled:opacity-50 disabled:cursor-not-allowed"
+                  className="bg-anime-accent/20 border-anime-accent text-anime-accent hover:bg-anime-accent/30 rounded-lg border px-4 py-2 text-sm font-bold transition-all disabled:cursor-not-allowed disabled:opacity-50"
                 >
                   Sign out account
                 </button>
               </div>
             ) : (
-              <div className="text-center py-4">
-                <p className="text-anime-400 mb-2">Not signed in. Progress is stored locally.</p>
-                <p className="text-xs text-anime-700 font-mono">
+              <div className="py-4 text-center">
+                <p className="text-anime-400 mb-2">
+                  Not signed in. Progress is stored locally.
+                </p>
+                <p className="text-anime-700 font-mono text-xs">
                   Sign in from the header to enable cross-device sync.
                 </p>
               </div>
@@ -422,58 +467,79 @@ export default function SettingsPage(): React.ReactElement {
 
         {/* Preferences Section */}
         <section className="mb-8">
-          <SectionHeader label="Preferences" icon={<Zap className="w-4 h-4" />} />
-          <div className="bg-anime-900 border border-anime-700 rounded-lg divide-y divide-anime-700 cut-corner overflow-hidden">
+          <SectionHeader
+            label="Preferences"
+            icon={<Zap className="h-4 w-4" />}
+          />
+          <div className="bg-anime-900 border-anime-700 divide-anime-700 cut-corner divide-y overflow-hidden rounded-lg border">
             <ToggleRow
-              icon={settings.sfxEnabled ? <Volume2 className="w-4 h-4" /> : <VolumeX className="w-4 h-4" />}
+              icon={
+                settings.sfxEnabled ? (
+                  <Volume2 className="h-4 w-4" />
+                ) : (
+                  <VolumeX className="h-4 w-4" />
+                )
+              }
               label="Sound Effects"
               description="XP gain, achievement unlock sounds"
               enabled={settings.sfxEnabled}
               onChange={(v) => updateSetting("sfxEnabled", v)}
             />
             <ToggleRow
-              icon={<Music className="w-4 h-4" />}
+              icon={<Music className="h-4 w-4" />}
               label="Background Music"
               description="Ambient cyberpunk soundtrack"
               enabled={settings.musicEnabled}
               onChange={(v) => updateSetting("musicEnabled", v)}
             />
             {settings.musicEnabled && (
-              <div className="flex items-center gap-4 px-6 py-4 bg-anime-950/30">
+              <div className="bg-anime-950/30 flex items-center gap-4 px-6 py-4">
                 <div className="text-anime-cyan">
-                  <Volume2 className="w-4 h-4" />
+                  <Volume2 className="h-4 w-4" />
                 </div>
                 <div className="flex-1">
-                  <div className="text-sm font-bold text-anime-100">Music Volume</div>
-                  <div className="text-xs text-anime-400">Adjust ambient music level</div>
+                  <div className="text-anime-100 text-sm font-bold">
+                    Music Volume
+                  </div>
+                  <div className="text-anime-400 text-xs">
+                    Adjust ambient music level
+                  </div>
                 </div>
                 <div className="flex items-center gap-3">
-                  <VolumeX className="w-3 h-3 text-anime-500" />
+                  <VolumeX className="text-anime-500 h-3 w-3" />
                   <input
                     type="range"
                     min={0}
                     max={100}
                     step={1}
                     value={settings.musicVolume}
-                    onChange={(e) => updateSetting("musicVolume", Number(e.target.value))}
-                    className="w-28 accent-anime-cyan"
+                    onChange={(e) =>
+                      updateSetting("musicVolume", Number(e.target.value))
+                    }
+                    className="accent-anime-cyan w-28"
                   />
-                  <Volume2 className="w-3 h-3 text-anime-500" />
-                  <span className="text-sm font-mono text-anime-cyan w-8 text-right">
+                  <Volume2 className="text-anime-500 h-3 w-3" />
+                  <span className="text-anime-cyan w-8 text-right font-mono text-sm">
                     {settings.musicVolume}
                   </span>
                 </div>
               </div>
             )}
             <ToggleRow
-              icon={<Zap className="w-4 h-4" />}
+              icon={<Zap className="h-4 w-4" />}
               label="Animations"
               description="Glitch, scan-line, and hologram effects"
               enabled={settings.animationsEnabled}
               onChange={(v) => updateSetting("animationsEnabled", v)}
             />
             <ToggleRow
-              icon={settings.showHints ? <Eye className="w-4 h-4" /> : <EyeOff className="w-4 h-4" />}
+              icon={
+                settings.showHints ? (
+                  <Eye className="h-4 w-4" />
+                ) : (
+                  <EyeOff className="h-4 w-4" />
+                )
+              }
               label="Show Hints"
               description="Display hint buttons in challenges"
               enabled={settings.showHints}
@@ -482,7 +548,7 @@ export default function SettingsPage(): React.ReactElement {
             {session?.user && (
               <>
                 <ToggleRow
-                  icon={<Shield className="w-4 h-4" />}
+                  icon={<Shield className="h-4 w-4" />}
                   label="Participate in Leaderboard"
                   description="Show your profile on the global leaderboard"
                   enabled={leaderboardOptIn}
@@ -492,7 +558,9 @@ export default function SettingsPage(): React.ReactElement {
                   disabled={isUpdatingLeaderboardOptIn}
                 />
                 {leaderboardStatus && (
-                  <div className={`px-6 py-2 text-xs ${leaderboardStatus.type === "success" ? "text-anime-green" : "text-anime-accent"}`}>
+                  <div
+                    className={`px-6 py-2 text-xs ${leaderboardStatus.type === "success" ? "text-anime-green" : "text-anime-accent"}`}
+                  >
                     {leaderboardStatus.message}
                   </div>
                 )}
@@ -502,11 +570,15 @@ export default function SettingsPage(): React.ReactElement {
             {/* Font Size Slider */}
             <div className="flex items-center gap-4 px-6 py-4">
               <div className="text-anime-cyan">
-                <Monitor className="w-4 h-4" />
+                <Monitor className="h-4 w-4" />
               </div>
               <div className="flex-1">
-                <div className="text-sm font-bold text-anime-100">Editor Font Size</div>
-                <div className="text-xs text-anime-400">Code playground text size</div>
+                <div className="text-anime-100 text-sm font-bold">
+                  Editor Font Size
+                </div>
+                <div className="text-anime-400 text-xs">
+                  Code playground text size
+                </div>
               </div>
               <div className="flex items-center gap-3">
                 <input
@@ -515,10 +587,12 @@ export default function SettingsPage(): React.ReactElement {
                   max={24}
                   step={1}
                   value={settings.codeEditorFontSize}
-                  onChange={(e) => updateSetting("codeEditorFontSize", Number(e.target.value))}
-                  className="w-24 accent-anime-cyan"
+                  onChange={(e) =>
+                    updateSetting("codeEditorFontSize", Number(e.target.value))
+                  }
+                  className="accent-anime-cyan w-24"
                 />
-                <span className="text-sm font-mono text-anime-cyan w-8 text-right">
+                <span className="text-anime-cyan w-8 text-right font-mono text-sm">
                   {settings.codeEditorFontSize}
                 </span>
               </div>
@@ -528,8 +602,11 @@ export default function SettingsPage(): React.ReactElement {
 
         {/* Databricks Workspace Section */}
         <section className="mb-8">
-          <SectionHeader label="Databricks Workspace" icon={<Database className="w-4 h-4" />} />
-          <div className="bg-anime-900 border border-anime-700 rounded-lg p-6 cut-corner">
+          <SectionHeader
+            label="Databricks Workspace"
+            icon={<Database className="h-4 w-4" />}
+          />
+          <div className="bg-anime-900 border-anime-700 cut-corner rounded-lg border p-6">
             {session?.user ? (
               databricksUrl ? (
                 <ConnectionStatus
@@ -539,9 +616,9 @@ export default function SettingsPage(): React.ReactElement {
                 />
               ) : (
                 <div className="space-y-3">
-                  <p className="text-sm text-anime-400">
-                    Connect your Databricks workspace to run code against real clusters.
-                    Your Personal Access Token is encrypted at rest.
+                  <p className="text-anime-400 text-sm">
+                    Connect your Databricks workspace to run code against real
+                    clusters. Your Personal Access Token is encrypted at rest.
                   </p>
                   <ConnectionForm
                     userId={session.user.id ?? ""}
@@ -550,47 +627,60 @@ export default function SettingsPage(): React.ReactElement {
                 </div>
               )
             ) : (
-              <p className="text-sm text-anime-400 text-center py-3">
+              <p className="text-anime-400 py-3 text-center text-sm">
                 Sign in to connect a Databricks workspace.
               </p>
             )}
           </div>
-          
+
           {/* Auto-cleanup toggle */}
           {session?.user && (
-            <div className="mt-4 bg-anime-900 border border-anime-700 rounded-lg p-4 cut-corner space-y-4">
+            <div className="bg-anime-900 border-anime-700 cut-corner mt-4 space-y-4 rounded-lg border p-4">
               <div className="flex items-center justify-between">
                 <div className="flex-1">
-                  <div className="text-sm font-bold text-anime-100 flex items-center gap-2">
-                    <Zap className="w-4 h-4 text-anime-cyan" />
+                  <div className="text-anime-100 flex items-center gap-2 text-sm font-bold">
+                    <Zap className="text-anime-cyan h-4 w-4" />
                     Auto-cleanup Deployments
                   </div>
-                  <div className="text-xs text-anime-400 mt-1">
-                    Automatically clean up Field Operations deployments 24 hours after completion
+                  <div className="text-anime-400 mt-1 text-xs">
+                    Automatically clean up Field Operations deployments 24 hours
+                    after completion
                   </div>
                 </div>
                 <button
-                  onClick={() => updateSetting("fieldOpsAutoCleanup", !settings.fieldOpsAutoCleanup)}
+                  onClick={() =>
+                    updateSetting(
+                      "fieldOpsAutoCleanup",
+                      !settings.fieldOpsAutoCleanup,
+                    )
+                  }
                   className={cn(
                     "relative inline-flex h-6 w-11 items-center rounded-full transition-colors",
-                    settings.fieldOpsAutoCleanup ? "bg-anime-cyan" : "bg-anime-700"
+                    settings.fieldOpsAutoCleanup
+                      ? "bg-anime-cyan"
+                      : "bg-anime-700",
                   )}
                 >
                   <span
                     className={cn(
                       "inline-block h-4 w-4 transform rounded-full bg-white transition-transform",
-                      settings.fieldOpsAutoCleanup ? "translate-x-6" : "translate-x-1"
+                      settings.fieldOpsAutoCleanup
+                        ? "translate-x-6"
+                        : "translate-x-1",
                     )}
                   />
                 </button>
               </div>
 
-              <div className="border-t border-anime-700 pt-4">
+              <div className="border-anime-700 border-t pt-4">
                 <div className="flex items-center justify-between gap-4">
                   <div>
-                    <div className="text-sm font-bold text-anime-100">Clean up assets</div>
-                    <div className="text-xs text-anime-400">
-                      Destroy Databricks assets from all your eligible Field Ops deployments.
+                    <div className="text-anime-100 text-sm font-bold">
+                      Clean up assets
+                    </div>
+                    <div className="text-anime-400 text-xs">
+                      Destroy Databricks assets from all your eligible Field Ops
+                      deployments.
                     </div>
                   </div>
                   <button
@@ -598,13 +688,17 @@ export default function SettingsPage(): React.ReactElement {
                       void handleBulkCleanupAssets()
                     }}
                     disabled={isBulkCleaningAssets}
-                    className="px-4 py-2 bg-anime-accent/20 border border-anime-accent text-anime-accent rounded-lg text-sm font-bold hover:bg-anime-accent/30 transition-all disabled:opacity-60 disabled:cursor-not-allowed"
+                    className="bg-anime-accent/20 border-anime-accent text-anime-accent hover:bg-anime-accent/30 rounded-lg border px-4 py-2 text-sm font-bold transition-all disabled:cursor-not-allowed disabled:opacity-60"
                   >
-                    {isBulkCleaningAssets ? "Cleaning up..." : "Clean up assets"}
+                    {isBulkCleaningAssets
+                      ? "Cleaning up..."
+                      : "Clean up assets"}
                   </button>
                 </div>
                 {bulkCleanupStatus && (
-                  <p className={`mt-3 text-xs ${bulkCleanupStatus.type === "success" ? "text-anime-green" : "text-anime-accent"}`}>
+                  <p
+                    className={`mt-3 text-xs ${bulkCleanupStatus.type === "success" ? "text-anime-green" : "text-anime-accent"}`}
+                  >
                     {bulkCleanupStatus.message}
                   </p>
                 )}
@@ -615,31 +709,33 @@ export default function SettingsPage(): React.ReactElement {
 
         {/* Coupon Redemption */}
         <section className="mb-8">
-          <SectionHeader label="Coupons" icon={<Zap className="w-4 h-4" />} />
-          <div className="bg-anime-900 border border-anime-700 rounded-lg p-6 cut-corner">
-            <div className="max-w-xl mx-auto">
-              <div className="flex flex-col sm:flex-row gap-3">
+          <SectionHeader label="Coupons" icon={<Zap className="h-4 w-4" />} />
+          <div className="bg-anime-900 border-anime-700 cut-corner rounded-lg border p-6">
+            <div className="mx-auto max-w-xl">
+              <div className="flex flex-col gap-3 sm:flex-row">
                 <input
                   type="text"
                   value={couponCode}
                   onChange={(event) => setCouponCode(event.target.value)}
                   placeholder="Enter code"
-                  className="flex-1 px-4 py-2 bg-anime-800 border border-anime-700 rounded-lg text-anime-cyan placeholder:text-anime-purple/70 uppercase"
+                  className="bg-anime-800 border-anime-700 text-anime-cyan placeholder:text-anime-purple/70 flex-1 rounded-lg border px-4 py-2 uppercase"
                 />
                 <button
                   onClick={() => {
                     void handleRedeemCoupon()
                   }}
                   disabled={isRedeemingCoupon}
-                  className="px-4 py-2 bg-anime-cyan text-anime-950 rounded-lg font-bold disabled:opacity-60"
+                  className="bg-anime-cyan text-anime-950 rounded-lg px-4 py-2 font-bold disabled:opacity-60"
                 >
                   {isRedeemingCoupon ? "Redeeming..." : "Redeem"}
                 </button>
               </div>
               {couponStatus && (
                 <p
-                  className={`mt-3 text-sm text-center ${
-                    couponStatus.type === "success" ? "text-anime-green" : "text-anime-accent"
+                  className={`mt-3 text-center text-sm ${
+                    couponStatus.type === "success"
+                      ? "text-anime-green"
+                      : "text-anime-accent"
                   }`}
                 >
                   {couponStatus.message}
@@ -651,16 +747,19 @@ export default function SettingsPage(): React.ReactElement {
 
         {/* Data Management Section */}
         <section className="mb-8">
-          <SectionHeader label="Data Management" icon={<HardDrive className="w-4 h-4" />} />
-          <div className="bg-anime-900 border border-anime-700 rounded-lg p-6 cut-corner space-y-4">
+          <SectionHeader
+            label="Data Management"
+            icon={<HardDrive className="h-4 w-4" />}
+          />
+          <div className="bg-anime-900 border-anime-700 cut-corner space-y-4 rounded-lg border p-6">
             {/* Storage Info */}
             <div className="flex items-center justify-between text-sm">
               <span className="text-anime-400">Local Storage Used</span>
-              <span className="font-mono text-anime-cyan">{storageUsed}</span>
+              <span className="text-anime-cyan font-mono">{storageUsed}</span>
             </div>
 
             {exportMsg && (
-              <div className="text-sm text-anime-green font-mono text-center py-2 bg-anime-green/10 border border-anime-green/30 rounded-lg">
+              <div className="text-anime-green bg-anime-green/10 border-anime-green/30 rounded-lg border py-2 text-center font-mono text-sm">
                 {exportMsg}
               </div>
             )}
@@ -668,16 +767,16 @@ export default function SettingsPage(): React.ReactElement {
             <div className="grid grid-cols-2 gap-3">
               <button
                 onClick={handleExport}
-                className="flex items-center justify-center gap-2 px-4 py-3 bg-anime-800 border border-anime-700 rounded-lg text-sm font-bold text-anime-cyan hover:border-anime-cyan/50 hover:bg-anime-800/80 transition-all"
+                className="bg-anime-800 border-anime-700 text-anime-cyan hover:border-anime-cyan/50 hover:bg-anime-800/80 flex items-center justify-center gap-2 rounded-lg border px-4 py-3 text-sm font-bold transition-all"
               >
-                <Download className="w-4 h-4" />
+                <Download className="h-4 w-4" />
                 Export Progress
               </button>
               <button
                 onClick={handleImport}
-                className="flex items-center justify-center gap-2 px-4 py-3 bg-anime-800 border border-anime-700 rounded-lg text-sm font-bold text-anime-purple hover:border-anime-purple/50 hover:bg-anime-800/80 transition-all"
+                className="bg-anime-800 border-anime-700 text-anime-purple hover:border-anime-purple/50 hover:bg-anime-800/80 flex items-center justify-center gap-2 rounded-lg border px-4 py-3 text-sm font-bold transition-all"
               >
-                <Upload className="w-4 h-4" />
+                <Upload className="h-4 w-4" />
                 Import Progress
               </button>
             </div>
@@ -686,33 +785,39 @@ export default function SettingsPage(): React.ReactElement {
 
         {/* Danger Zone */}
         <section className="mb-8">
-          <SectionHeader label="Danger Zone" icon={<AlertTriangle className="w-4 h-4" />} accent="anime-accent" />
-          <div className="bg-anime-900 border border-anime-accent/50 rounded-lg p-6 cut-corner">
-            <p className="text-sm text-anime-400 mb-4">
-              This will permanently delete all local progress, achievements, and settings.
-              This action cannot be undone.
+          <SectionHeader
+            label="Danger Zone"
+            icon={<AlertTriangle className="h-4 w-4" />}
+            accent="anime-accent"
+          />
+          <div className="bg-anime-900 border-anime-accent/50 cut-corner rounded-lg border p-6">
+            <p className="text-anime-400 mb-4 text-sm">
+              This will permanently delete all local progress, achievements, and
+              settings. This action cannot be undone.
             </p>
 
             {!showDangerConfirm ? (
               <button
                 onClick={() => setShowDangerConfirm(true)}
-                className="flex items-center gap-2 px-4 py-2 bg-anime-accent/20 border border-anime-accent text-anime-accent rounded-lg text-sm font-bold hover:bg-anime-accent/30 transition-all"
+                className="bg-anime-accent/20 border-anime-accent text-anime-accent hover:bg-anime-accent/30 flex items-center gap-2 rounded-lg border px-4 py-2 text-sm font-bold transition-all"
               >
-                <Trash2 className="w-4 h-4" />
+                <Trash2 className="h-4 w-4" />
                 Reset All Data
               </button>
             ) : (
               <div className="flex items-center gap-3">
-                <span className="text-sm text-anime-accent font-bold">Are you sure?</span>
+                <span className="text-anime-accent text-sm font-bold">
+                  Are you sure?
+                </span>
                 <button
                   onClick={handleReset}
-                  className="px-4 py-2 bg-anime-accent text-anime-950 rounded-lg text-sm font-black hover:bg-anime-accent/80 transition-all"
+                  className="bg-anime-accent text-anime-950 hover:bg-anime-accent/80 rounded-lg px-4 py-2 text-sm font-black transition-all"
                 >
                   YES, DELETE EVERYTHING
                 </button>
                 <button
                   onClick={() => setShowDangerConfirm(false)}
-                  className="px-4 py-2 bg-anime-800 border border-anime-700 text-anime-400 rounded-lg text-sm hover:text-anime-100 transition-all"
+                  className="bg-anime-800 border-anime-700 text-anime-400 hover:text-anime-100 rounded-lg border px-4 py-2 text-sm transition-all"
                 >
                   Cancel
                 </button>
@@ -722,10 +827,12 @@ export default function SettingsPage(): React.ReactElement {
         </section>
 
         {/* App Info Footer */}
-        <div className="text-center text-xs text-anime-700 font-mono space-y-1 mt-16">
+        <div className="text-anime-700 mt-16 space-y-1 text-center font-mono text-xs">
           <p>DATABRICKS SWORD v1.0.0</p>
           <p>BUILT WITH NEXT.JS 15 + TURSO + DRIZZLE</p>
-          <p className="text-anime-400">Dark-only. No telemetry. Your data stays yours.</p>
+          <p className="text-anime-400">
+            Dark-only. No telemetry. Your data stays yours.
+          </p>
         </div>
       </div>
 
@@ -752,9 +859,9 @@ function SectionHeader({
   accent?: string
 }): React.ReactElement {
   return (
-    <div className="flex items-center gap-2 mb-3">
+    <div className="mb-3 flex items-center gap-2">
       <div className={cn("text-" + accent)}>{icon}</div>
-      <h2 className="font-heading text-lg font-bold text-anime-100">{label}</h2>
+      <h2 className="font-heading text-anime-100 text-lg font-bold">{label}</h2>
     </div>
   )
 }
@@ -781,22 +888,22 @@ function ToggleRow({
     <div className="flex items-center gap-4 px-6 py-4">
       <div className="text-anime-cyan">{icon}</div>
       <div className="flex-1">
-        <div className="text-sm font-bold text-anime-100">{label}</div>
-        <div className="text-xs text-anime-400">{description}</div>
+        <div className="text-anime-100 text-sm font-bold">{label}</div>
+        <div className="text-anime-400 text-xs">{description}</div>
       </div>
       <button
         onClick={() => onChange(!enabled)}
         disabled={disabled}
         className={cn(
-          "relative w-11 h-6 rounded-full transition-colors duration-200",
+          "relative h-6 w-11 rounded-full transition-colors duration-200",
           enabled ? "bg-anime-cyan" : "bg-anime-700",
-          disabled && "opacity-60 cursor-not-allowed",
+          disabled && "cursor-not-allowed opacity-60",
         )}
         aria-label={`Toggle ${label}`}
       >
         <div
           className={cn(
-            "absolute top-0.5 left-0.5 w-5 h-5 bg-anime-950 rounded-full transition-transform duration-200",
+            "bg-anime-950 absolute top-0.5 left-0.5 h-5 w-5 rounded-full transition-transform duration-200",
             enabled && "translate-x-5",
           )}
         />

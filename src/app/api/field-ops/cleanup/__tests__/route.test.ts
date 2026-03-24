@@ -116,12 +116,6 @@ describe("Field Ops bulk cleanup route", () => {
         status: "cleaning_up",
         bundlePath: "/tmp/dep-cleaning",
       },
-      {
-        id: "dep-no-bundle",
-        industry: "healthcare",
-        status: "deployed",
-        bundlePath: null,
-      },
     ])
 
     const from = vi
@@ -326,6 +320,79 @@ describe("Field Ops bulk cleanup route", () => {
       requestId: "bulk-req-1",
       correlationId: "bulk-corr-1",
     })
+  })
+
+  it("includes deployments without bundlePath in cleanup eligibility", async () => {
+    const { authenticateApiRequest } = await import("@/lib/auth/api-auth")
+    const { getDb } = await import("@/lib/db")
+    const { decryptPat } = await import("@/lib/databricks")
+    const { cleanupDeployment } = await import("@/lib/field-ops/deployment")
+
+    vi.mocked(authenticateApiRequest).mockResolvedValue({
+      authenticated: true,
+      userId: "user-1",
+    })
+
+    const connectionLimit = vi.fn().mockResolvedValue([
+      {
+        workspaceUrl: "https://example.databricks.com/",
+        encryptedPat: "encrypted-pat",
+        warehouseId: "wh-123",
+      },
+    ])
+
+    const deploymentWhere = vi.fn().mockResolvedValue([
+      {
+        id: "dep-no-bundle",
+        industry: "healthcare",
+        status: "deployed",
+        catalogName: "dev",
+        bundlePath: null,
+      },
+    ])
+
+    const from = vi
+      .fn()
+      .mockReturnValueOnce({
+        where: vi.fn().mockReturnValue({
+          limit: connectionLimit,
+        }),
+      })
+      .mockReturnValueOnce({
+        where: deploymentWhere,
+      })
+
+    const select = vi.fn().mockReturnValue({ from })
+    vi.mocked(getDb).mockReturnValue({ select } as never)
+
+    vi.mocked(decryptPat).mockReturnValue("token")
+    vi.mocked(cleanupDeployment).mockResolvedValue({
+      result: { success: true, failures: [] },
+      operationId: "op-legacy",
+      requestId: "bulk-req-1",
+      correlationId: "bulk-corr-1",
+      replayed: false,
+    } as never)
+
+    const response = await POST(makeRequest())
+
+    expect(response.status).toBe(200)
+    expect(vi.mocked(cleanupDeployment)).toHaveBeenCalledTimes(1)
+    expect(vi.mocked(cleanupDeployment)).toHaveBeenCalledWith(
+      "dep-no-bundle",
+      "user-1",
+      {
+        workspaceUrl: "https://example.databricks.com",
+        token: "token",
+        warehouseId: "wh-123",
+        catalog: "dev",
+      },
+      {
+        idempotencyKey: "bulk-cleanup-key:dep-no-bundle",
+        requestId: "bulk-req-1",
+        correlationId: "bulk-corr-1",
+      },
+    )
   })
 
   it("returns 500 on unexpected internal errors", async () => {

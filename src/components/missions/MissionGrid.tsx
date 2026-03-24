@@ -1,5 +1,6 @@
 "use client"
 
+import { useSyncNow } from "@/components/auth"
 import type { Mission } from "@/lib/missions"
 import type { Track } from "@/lib/missions/tracks"
 import { TRACKS, getAllTracks, getTrackForMission } from "@/lib/missions/tracks"
@@ -7,8 +8,7 @@ import { loadSandbox } from "@/lib/sandbox"
 import type { SandboxData } from "@/lib/sandbox/types"
 import { cn } from "@/lib/utils"
 import { useRouter } from "next/navigation"
-import { useEffect, useState } from "react"
-import { useSyncNow } from "@/components/auth"
+import { useEffect, useMemo, useState } from "react"
 import { MissionCard } from "./MissionCard"
 
 export type MissionGridProps = {
@@ -21,14 +21,18 @@ export type MissionGridProps = {
 /**
  * Client component for rendering the interactive mission grid.
  * Supports filtering by track (DE / ML / BI / All) and groups by rank within each track.
- * Loads actual user XP from browser sandbox on mount.
+ * Loads actual user XP/progress after initial auth sync settles.
  */
-export function MissionGrid({ missions, userXp = 0 }: MissionGridProps): React.ReactElement {
+export function MissionGrid({
+  missions,
+  userXp = 0,
+}: MissionGridProps): React.ReactElement {
   const router = useRouter()
-  const { isInitialSyncComplete } = useSyncNow()
+  const { isInitialSyncComplete, syncNow } = useSyncNow()
   const [activeFilter, setActiveFilter] = useState<Track | "all">("all")
   const [resolvedXp, setResolvedXp] = useState(userXp)
   const [sandboxData, setSandboxData] = useState<SandboxData | null>(null)
+  const [syncingMissionId, setSyncingMissionId] = useState<string | null>(null)
 
   /** Load real XP/progress after initial auth sync settles */
   useEffect(() => {
@@ -52,10 +56,15 @@ export function MissionGrid({ missions, userXp = 0 }: MissionGridProps): React.R
       .map(([id]) => id),
   )
 
+  const sortedByXpRequired = useMemo(
+    () => [...filteredMissions].sort((a, b) => a.xpRequired - b.xpRequired),
+    [filteredMissions],
+  )
+
   /** Group filtered missions by track for display */
   const groupedByTrack = getAllTracks().reduce(
     (acc, track) => {
-      const trackMissions = filteredMissions.filter(
+      const trackMissions = sortedByXpRequired.filter(
         (m) => getTrackForMission(m.id) === track,
       )
       if (trackMissions.length > 0) {
@@ -65,6 +74,19 @@ export function MissionGrid({ missions, userXp = 0 }: MissionGridProps): React.R
     },
     [] as Array<{ track: Track; missions: Mission[] }>,
   )
+
+  const handleMissionOpen = async (missionId: string): Promise<void> => {
+    setSyncingMissionId(missionId)
+    try {
+      const syncSuccess = await syncNow()
+      if (!syncSuccess) {
+        return
+      }
+      router.push(`/missions/${missionId}`)
+    } finally {
+      setSyncingMissionId(null)
+    }
+  }
 
   return (
     <div className="space-y-10">
@@ -121,7 +143,8 @@ export function MissionGrid({ missions, userXp = 0 }: MissionGridProps): React.R
                 {info.name}
               </h2>
               <span className="font-mono text-xs text-gray-500">
-                {trackMissions.length} mission{trackMissions.length !== 1 ? "s" : ""}
+                {trackMissions.length} mission
+                {trackMissions.length !== 1 ? "s" : ""}
               </span>
             </div>
             <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
@@ -142,7 +165,10 @@ export function MissionGrid({ missions, userXp = 0 }: MissionGridProps): React.R
                       (id) => missionTitleLookup.get(id) ?? id,
                     )}
                     completed={isCompleted}
-                    onClick={() => router.push(`/missions/${mission.id}`)}
+                    onClick={() => {
+                      void handleMissionOpen(mission.id)
+                    }}
+                    isLoading={syncingMissionId === mission.id}
                   />
                 )
               })}

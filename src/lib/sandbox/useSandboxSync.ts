@@ -13,11 +13,16 @@ import { useSession } from "next-auth/react"
 import { useCallback, useEffect, useRef, useState } from "react"
 import { validateStreakData } from "../gamification/streaks"
 import { initializeSandbox, loadSandbox, saveSandbox } from "./storage"
-import { mergeConflicts, shouldSync, syncFromServer, syncToServer } from "./sync"
+import {
+  mergeConflicts,
+  shouldSync,
+  syncFromServer,
+  syncToServer,
+} from "./sync"
 
 export type UseSandboxSyncResult = {
   /** Push current sandbox to server immediately */
-  syncNow: () => Promise<void>
+  syncNow: () => Promise<boolean>
   /** Whether a sync operation is in progress */
   isSyncing: boolean
   /** Whether initial pull/merge sync has completed for this auth session */
@@ -35,27 +40,58 @@ export type UseSandboxSyncResult = {
  */
 export function useSandboxSync(): UseSandboxSyncResult {
   const { data: session, status } = useSession()
-  const isSyncingRef = useRef(false)
-  const hasPulledRef = useRef(false)
+  const [isSyncing, setIsSyncing] = useState(false)
   const [isInitialSyncComplete, setIsInitialSyncComplete] = useState(false)
+
+  const hasPulledRef = useRef(false)
+  const inFlightSyncRef = useRef<Promise<boolean> | null>(null)
 
   const userId = session?.user?.id
 
   /** Push local sandbox to server, update lastSynced */
-  const syncNow = useCallback(async (): Promise<void> => {
-    if (!userId || isSyncingRef.current) return
-    isSyncingRef.current = true
-
-    try {
-      const sandbox = loadSandbox() ?? initializeSandbox()
-      const result = await syncToServer(userId, sandbox)
-
-      if (result.success && result.lastSynced) {
-        saveSandbox({ ...sandbox, lastSynced: result.lastSynced })
-      }
-    } finally {
-      isSyncingRef.current = false
+  const syncNow = useCallback(async (): Promise<boolean> => {
+    if (!userId) {
+      console.warn("syncNow: No userId available, skipping sync")
+      return false
     }
+
+    // If a sync is already in progress, wait for it and return its result.
+    // This guarantees callers can force-sync before gated navigation.
+    if (inFlightSyncRef.current) {
+      return inFlightSyncRef.current
+    }
+
+    const runSync = (async (): Promise<boolean> => {
+      setIsSyncing(true)
+
+      try {
+        const sandbox = loadSandbox() ?? initializeSandbox()
+        console.log(
+          "syncNow: Syncing sandbox with totalXp:",
+          sandbox.userStats.totalXp,
+        )
+
+        const result = await syncToServer(userId, sandbox)
+
+        if (result.success && result.lastSynced) {
+          saveSandbox({ ...sandbox, lastSynced: result.lastSynced })
+          console.log("syncNow: Sync successful, lastSynced:", result.lastSynced)
+        } else {
+          console.error("syncNow: Sync failed with result:", result)
+        }
+
+        return result.success
+      } catch (error) {
+        console.error("syncNow: Error during sync:", error)
+        return false
+      } finally {
+        setIsSyncing(false)
+        inFlightSyncRef.current = null
+      }
+    })()
+
+    inFlightSyncRef.current = runSync
+    return runSync
   }, [userId])
 
   // Pull remote on mount when authenticated
@@ -70,7 +106,7 @@ export function useSandboxSync(): UseSandboxSyncResult {
     setIsInitialSyncComplete(false)
 
     const pullAndMerge = async (): Promise<void> => {
-      isSyncingRef.current = true
+      setIsSyncing(true)
 
       try {
         const local = loadSandbox() ?? initializeSandbox()
@@ -81,7 +117,10 @@ export function useSandboxSync(): UseSandboxSyncResult {
 
           // Validate and decay streak if needed
           const today = new Date().toISOString().split("T")[0]
-          const validatedStreakData = validateStreakData(merged.streakData, today)
+          const validatedStreakData = validateStreakData(
+            merged.streakData,
+            today,
+          )
           const validatedMerged = {
             ...merged,
             streakData: validatedStreakData,
@@ -105,7 +144,7 @@ export function useSandboxSync(): UseSandboxSyncResult {
           }
         }
       } finally {
-        isSyncingRef.current = false
+        setIsSyncing(false)
         setIsInitialSyncComplete(true)
       }
     }
@@ -138,7 +177,7 @@ export function useSandboxSync(): UseSandboxSyncResult {
 
   return {
     syncNow,
-    isSyncing: isSyncingRef.current,
+    isSyncing,
     isInitialSyncComplete,
   }
 }

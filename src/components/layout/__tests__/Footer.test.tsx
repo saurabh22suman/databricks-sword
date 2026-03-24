@@ -2,6 +2,8 @@ import { render, screen } from "@testing-library/react"
 import { describe, expect, it, vi } from "vitest"
 import { Footer } from "../Footer"
 
+const mockUsePathname = vi.fn().mockReturnValue("/")
+
 // Mock next/link
 vi.mock("next/link", () => ({
   default: ({
@@ -17,6 +19,10 @@ vi.mock("next/link", () => ({
       {children}
     </a>
   ),
+}))
+
+vi.mock("next/navigation", () => ({
+  usePathname: () => mockUsePathname(),
 }))
 
 describe("Footer", () => {
@@ -84,5 +90,12 @@ describe("Footer", () => {
     expect(
       screen.getByText(new RegExp(`${year}.*DATABRICKS SWORD`)),
     ).toBeInTheDocument()
+  })
+
+  it("does not render on missions routes", () => {
+    mockUsePathname.mockReturnValue("/missions/hello")
+    const { container } = render(<Footer />)
+    expect(container.firstChild).toBeNull()
+    mockUsePathname.mockReturnValue("/")
   })
 })

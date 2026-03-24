@@ -43,6 +43,8 @@ pnpm build            # Production build
 
 **Check `docs/implementation-plan.md` for current progress.**
 
+**For incident debugging and root-cause analysis, use `docs/ai-agent-rca-guide.md`.**
+
 ```bash
 # Find the next task
 grep -n "\[ \]" docs/implementation-plan.md | head -5
@@ -253,7 +255,7 @@ src/
 | File | Purpose |
 |------|---------|
 | `docs/plan.md` | Full architecture and design decisions |
-| `docs/implementation-plan.md` | Task checklist with progress tracking |
+| `docs/ai-agent-rca-guide.md` | Full codebase map + RCA playbook for incidents |
 | `src/lib/gamification/` | Ranks, achievements, streaks logic |
 | `src/lib/sandbox/` | localStorage + Turso sync |
 | `src/lib/missions/` | Mission loader, types, validation |

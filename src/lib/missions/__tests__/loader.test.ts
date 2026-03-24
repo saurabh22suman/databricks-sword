@@ -213,7 +213,7 @@ describe("Mission Loader", () => {
       expect(missions[1].id).toBe("mission-2")
     })
 
-    it("sorts missions by industry then rank", async () => {
+    it("sorts missions by xpRequired, then industry, then rank", async () => {
       const fs = await import("fs")
 
       vi.mocked(fs.default.readdirSync).mockReturnValue([
@@ -232,7 +232,7 @@ describe("Mission Loader", () => {
             description: "D",
             industry: "healthcare",
             rank: "B",
-            xpRequired: 0,
+            xpRequired: 200,
             xpReward: 500,
             estimatedMinutes: 90,
             primaryFeatures: [],
@@ -259,7 +259,7 @@ describe("Mission Loader", () => {
             description: "D",
             industry: "finance",
             rank: "S",
-            xpRequired: 0,
+            xpRequired: 100,
             xpReward: 500,
             estimatedMinutes: 90,
             primaryFeatures: [],
@@ -286,7 +286,7 @@ describe("Mission Loader", () => {
             description: "D",
             industry: "finance",
             rank: "B",
-            xpRequired: 0,
+            xpRequired: 100,
             xpReward: 500,
             estimatedMinutes: 90,
             primaryFeatures: [],
@@ -308,7 +308,8 @@ describe("Mission Loader", () => {
 
       const missions = await getAllMissions()
 
-      // Should be sorted: finance-B, finance-S, healthcare-B
+      // Should be sorted by xpRequired, then industry, then rank:
+      // m3 (100, finance, B), m2 (100, finance, S), m1 (200, healthcare, B)
       expect(missions[0].id).toBe("m3")
       expect(missions[1].id).toBe("m2")
       expect(missions[2].id).toBe("m1")
