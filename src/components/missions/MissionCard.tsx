@@ -39,6 +39,10 @@ export interface MissionCardProps {
    * Click handler for card interaction
    */
   onClick?: () => void;
+  /**
+   * Whether mission action is waiting for sync
+   */
+  isLoading?: boolean;
 }
 
 /**
@@ -90,6 +94,7 @@ export function MissionCard({
   progress,
   completed,
   onClick,
+  isLoading = false,
 }: MissionCardProps): React.ReactElement {
   const xpLocked = userXp !== undefined && userXp < mission.xpRequired;
   const prereqLocked = !prerequisitesMet;
@@ -97,8 +102,10 @@ export function MissionCard({
   const isInProgress = progress !== undefined && progress > 0 && progress < 100;
   const isCompleted = completed || progress === 100;
 
+  const canStart = !isLocked && !isLoading;
+
   const handleClick = () => {
-    if (!isLocked && onClick) {
+    if (canStart && onClick) {
       onClick();
     }
   };
@@ -212,18 +219,26 @@ export function MissionCard({
         {/* Action Button */}
         <button
           onClick={handleClick}
-          disabled={isLocked}
+          disabled={!canStart}
           className={cn(
             "cut-corner px-5 py-2.5 font-heading text-sm font-bold uppercase tracking-wider",
             "transition-all duration-300",
-            isLocked
+            !canStart
               ? "bg-anime-800 text-anime-600 cursor-not-allowed"
               : isInProgress
               ? "bg-anime-cyan text-anime-950 hover:bg-anime-purple hover:shadow-neon-cyan"
               : "bg-anime-accent text-white hover:bg-anime-purple hover:shadow-neon-purple"
           )}
         >
-          {isLocked ? "Locked" : isCompleted ? "Replay" : isInProgress ? "Continue" : "Start"}
+          {isLoading
+            ? "Syncing..."
+            : isLocked
+              ? "Locked"
+              : isCompleted
+                ? "Replay"
+                : isInProgress
+                  ? "Continue"
+                  : "Start"}
         </button>
       </div>
 

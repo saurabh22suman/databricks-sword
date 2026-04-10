@@ -616,9 +616,13 @@ export async function cleanupDeployment(
   replayed: boolean
 }> {
   const deployment = await getDeploymentStatus(deploymentId)
-  if (!deployment || !deployment.bundlePath) {
-    throw new Error("Deployment not found or already cleaned up")
+  if (!deployment) {
+    throw new Error("Deployment not found")
   }
+
+  // Older rows may not have a persisted bundlePath. Derive it from schemaPrefix so
+  // remote Databricks assets can still be cleaned up from Settings bulk cleanup.
+  const bundlePath = deployment.bundlePath ?? `/tmp/dbsword-bundles/${deployment.schemaPrefix}`
 
   const { operation, replayed } = await createOrReuseOperation({
     deploymentId,
@@ -647,7 +651,7 @@ export async function cleanupDeployment(
 
   try {
     const { result: cleanupResult, retries } = await withRetry(3, CLEANUP_RETRY_DELAYS_MS, async () => {
-      return destroyBundle(deployment.bundlePath!, config)
+      return destroyBundle(bundlePath, config)
     })
 
     if (cleanupResult.success) {

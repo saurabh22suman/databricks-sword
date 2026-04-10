@@ -2,7 +2,11 @@ import { authenticateApiRequest } from "@/lib/auth/api-auth"
 import { isMockAuth } from "@/lib/auth/mockSession"
 import { calculateStreak } from "@/lib/gamification/streaks"
 import { getDb } from "@/lib/db/client"
-import { couponRedemptions, fieldOpsCompletions, sandboxSnapshots } from "@/lib/db/schema"
+import {
+  couponRedemptions,
+  fieldOpsCompletions,
+  sandboxSnapshots,
+} from "@/lib/db/schema"
 import { ACHIEVEMENTS } from "@/lib/gamification/achievements"
 import type { SandboxData } from "@/lib/sandbox/types"
 import { SandboxDataSchema } from "@/lib/sandbox/types"
@@ -35,15 +39,19 @@ function sanitizeSandboxAggregates(
   }, 0)
 
   const totalXp =
-    missionXp + challengeXp + achievementXp + options.fieldOpsXp + options.couponXp
+    missionXp +
+    challengeXp +
+    achievementXp +
+    options.fieldOpsXp +
+    options.couponXp
 
   const totalMissionsCompleted = Object.values(sandbox.missionProgress).filter(
     (mission) => mission.completed,
   ).length
 
-  const totalChallengesCompleted = Object.values(sandbox.challengeResults).filter(
-    (challenge) => challenge.completed,
-  ).length
+  const totalChallengesCompleted = Object.values(
+    sandbox.challengeResults,
+  ).filter((challenge) => challenge.completed).length
 
   // Server-side streak validation
   const today = new Date().toISOString().split("T")[0] // YYYY-MM-DD
@@ -91,7 +99,10 @@ export async function POST(request: NextRequest): Promise<NextResponse> {
   // Check authentication
   const authResult = await authenticateApiRequest()
   if (!authResult.authenticated) {
-    return NextResponse.json({ error: authResult.error }, { status: authResult.status })
+    return NextResponse.json(
+      { error: authResult.error },
+      { status: authResult.status },
+    )
   }
 
   try {
@@ -100,7 +111,10 @@ export async function POST(request: NextRequest): Promise<NextResponse> {
     const validationResult = SandboxDataSchema.safeParse(body)
 
     if (!validationResult.success) {
-      return NextResponse.json({ error: "Invalid sandbox data" }, { status: 400 })
+      return NextResponse.json(
+        { error: "Invalid sandbox data" },
+        { status: 400 },
+      )
     }
 
     const sandboxData = validationResult.data
@@ -109,13 +123,22 @@ export async function POST(request: NextRequest): Promise<NextResponse> {
     if (isMockAuth) {
       const lastSynced = new Date().toISOString()
       return NextResponse.json(
-        { success: true, lastSynced } satisfies { success: boolean; lastSynced: string },
+        { success: true, lastSynced } satisfies {
+          success: boolean
+          lastSynced: string
+        },
         { status: 200 },
       )
     }
 
     let couponXp = 0
     let fieldOpsXp = 0
+
+    console.log("[SYNC] Starting sync for userId:", userId)
+    console.log(
+      "[SYNC] Incoming sandbox totalXp:",
+      sandboxData.userStats.totalXp,
+    )
 
     try {
       const [couponXpResult, fieldOpsXpResult] = await Promise.all([
@@ -135,7 +158,10 @@ export async function POST(request: NextRequest): Promise<NextResponse> {
 
       couponXp = couponXpResult[0]?.totalCouponXp ?? 0
       fieldOpsXp = fieldOpsXpResult[0]?.totalFieldOpsXp ?? 0
+      console.log("[SYNC] Coupon XP from DB:", couponXp)
+      console.log("[SYNC] Field ops XP from DB:", fieldOpsXp)
     } catch (error) {
+      console.error("[SYNC] Error fetching XP from DB:", error)
       if (!isMockAuth) {
         throw error
       }
@@ -146,38 +172,63 @@ export async function POST(request: NextRequest): Promise<NextResponse> {
       fieldOpsXp,
     })
 
+    console.log(
+      "[SYNC] Final calculated totalXp:",
+      sanitizedSandboxData.userStats.totalXp,
+    )
+
     // Upsert sandbox snapshot
-    await getDb()
-      .insert(sandboxSnapshots)
-      .values({
-        id: nanoid(),
-        userId,
-        snapshotData: JSON.stringify(sanitizedSandboxData),
-        totalXp: sanitizedSandboxData.userStats.totalXp,
-        currentStreak: sanitizedSandboxData.streakData.currentStreak,
-        updatedAt: new Date(),
-      })
-      .onConflictDoUpdate({
-        target: sandboxSnapshots.userId,
-        set: {
+    try {
+      const snapshotId = nanoid()
+      console.log("[SYNC] Inserting/updating snapshot for user:", userId)
+
+      await getDb()
+        .insert(sandboxSnapshots)
+        .values({
+          id: snapshotId,
+          userId,
           snapshotData: JSON.stringify(sanitizedSandboxData),
           totalXp: sanitizedSandboxData.userStats.totalXp,
           currentStreak: sanitizedSandboxData.streakData.currentStreak,
           updatedAt: new Date(),
-        },
-      })
+        })
+        .onConflictDoUpdate({
+          target: sandboxSnapshots.userId,
+          set: {
+            snapshotData: JSON.stringify(sanitizedSandboxData),
+            totalXp: sanitizedSandboxData.userStats.totalXp,
+            currentStreak: sanitizedSandboxData.streakData.currentStreak,
+            updatedAt: new Date(),
+          },
+        })
+
+      console.log("[SYNC] Snapshot upsert successful")
+    } catch (upsertError) {
+      console.error("[SYNC] Upsert error:", upsertError)
+      throw upsertError
+    }
 
     const lastSynced = new Date().toISOString()
 
     return NextResponse.json(
-      { success: true, lastSynced } satisfies { success: boolean; lastSynced: string },
+      { success: true, lastSynced } satisfies {
+        success: boolean
+        lastSynced: string
+      },
       { status: 200 },
     )
   } catch (error) {
     console.error("Error syncing sandbox data:", error)
+    console.error(
+      "Error stack:",
+      error instanceof Error ? error.stack : "No stack",
+    )
     return NextResponse.json(
-      { error: "Internal server error" },
-      { status: 500 }
+      {
+        error: "Internal server error",
+        details: error instanceof Error ? error.message : String(error),
+      },
+      { status: 500 },
     )
   }
 }
@@ -192,7 +243,10 @@ export async function GET(request: NextRequest): Promise<NextResponse> {
   // Check authentication
   const authResult = await authenticateApiRequest()
   if (!authResult.authenticated) {
-    return NextResponse.json({ error: authResult.error }, { status: authResult.status })
+    return NextResponse.json(
+      { error: authResult.error },
+      { status: authResult.status },
+    )
   }
 
   try {
@@ -218,7 +272,7 @@ export async function GET(request: NextRequest): Promise<NextResponse> {
     console.error("Error fetching sandbox data:", error)
     return NextResponse.json(
       { error: "Internal server error" },
-      { status: 500 }
+      { status: 500 },
     )
   }
 }

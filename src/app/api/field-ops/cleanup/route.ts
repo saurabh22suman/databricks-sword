@@ -86,7 +86,6 @@ export async function POST(request: Request): Promise<NextResponse> {
 
     const eligibleDeployments = deployments.filter(
       (deployment) =>
-        Boolean(deployment.bundlePath) &&
         deployment.status !== "cleaned_up" &&
         deployment.status !== "cleaning_up"
     )

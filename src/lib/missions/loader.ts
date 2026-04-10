@@ -90,7 +90,7 @@ export async function getMission(slug: string): Promise<Mission> {
 
 /**
  * Loads all missions from the content directory.
- * Sorts by industry (alphabetically) then by rank (B → A → S).
+ * Sorts by XP required (ascending), then by industry (alphabetically), then by rank (B → A → S).
  * 
  * @returns Array of all missions
  * 
@@ -118,8 +118,11 @@ export async function getAllMissions(): Promise<Mission[]> {
     }
   }
 
-  // Sort by industry, then by rank
+  // Sort by XP required, then by industry, then by rank
   missions.sort((a, b) => {
+    if (a.xpRequired !== b.xpRequired) {
+      return a.xpRequired - b.xpRequired
+    }
     if (a.industry !== b.industry) {
       return a.industry.localeCompare(b.industry)
     }

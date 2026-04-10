@@ -13,13 +13,13 @@ import React, { createContext, useContext } from "react"
 
 type SandboxSyncContextValue = {
   /** Push current sandbox to server immediately */
-  syncNow: () => Promise<void>
+  syncNow: () => Promise<boolean>
   /** Whether initial pull/merge sync completed for current auth session */
   isInitialSyncComplete: boolean
 }
 
 const SandboxSyncContext = createContext<SandboxSyncContextValue>({
-  syncNow: async () => {},
+  syncNow: async () => false,
   isInitialSyncComplete: false,
 })
 

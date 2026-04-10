@@ -1,10 +1,19 @@
+"use client"
+
 import Link from "next/link"
+import { usePathname } from "next/navigation"
 
 /**
  * Site-wide footer with navigation links and branding.
  * Cyberpunk/anime themed footer matching the new design.
  */
-export function Footer(): React.ReactElement {
+export function Footer(): React.ReactElement | null {
+  const pathname = usePathname()
+
+  if (pathname.startsWith("/missions")) {
+    return null
+  }
+
   return (
     <footer className="bg-anime-900 border-t border-white/5 py-12 relative z-10">
       <div className="container mx-auto px-4">
