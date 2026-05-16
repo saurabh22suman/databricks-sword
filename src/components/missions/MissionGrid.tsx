@@ -61,6 +61,17 @@ export function MissionGrid({
     [filteredMissions],
   )
 
+  // Find the first unlocked, incomplete mission as "recommended" next step
+  const recommendedMissionId = useMemo(() => {
+    for (const mission of sortedByXpRequired) {
+      if (completedMissions.has(mission.id)) continue
+      const xpLocked = resolvedXp < mission.xpRequired
+      const prereqLocked = mission.prerequisites.some((id) => !completedMissions.has(id))
+      if (!xpLocked && !prereqLocked) return mission.id
+    }
+    return null
+  }, [sortedByXpRequired, resolvedXp, completedMissions])
+
   /** Group filtered missions by track for display */
   const groupedByTrack = getAllTracks().reduce(
     (acc, track) => {
@@ -169,6 +180,7 @@ export function MissionGrid({
                       void handleMissionOpen(mission.id)
                     }}
                     isLoading={syncingMissionId === mission.id}
+                    recommended={mission.id === recommendedMissionId}
                   />
                 )
               })}

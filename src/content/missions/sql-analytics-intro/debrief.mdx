@@ -13,14 +13,16 @@ This is **SQL-native data access** on the lakehouse.
 
 ## Real-World Impact
 
-SQL Warehouses are now powering analytics for 30+ analysts. Results after 90 days:
+Moving analytics teams to SQL Warehouses typically shifts effort away from cluster operations and toward query development, dashboard iteration, and shared metric definitions.
 
-- **Zero cluster management overhead** (serverless auto-scales)
-- **75% cost reduction** vs dedicated clusters ($600/week → $150/week)
-- **5x faster onboarding** (analysts productive in 1 day vs 5 days)
-- **12K queries/week** (up from 800 when data eng was the bottleneck)
+In practice, teams often report three immediate benefits:
 
-**Annual savings: $180K** in BI tool licenses + **$23K** in compute costs
+- **Less operational overhead** for analysts and data engineers
+- **Faster onboarding** for SQL-first contributors
+- **Higher query throughput** once self-service access is in place
+- **Clearer ownership of reusable views and semantic logic**
+
+Treat these outcomes as directional goals. Your exact impact depends on workload shape, governance model, and existing BI stack.
 
 ## The Technology
 
@@ -28,7 +30,7 @@ You mastered **SQL Warehouse architecture**:
 
 ### Compute Layer
 - **Serverless SQL clusters** — managed by Databricks, instant-on
-- **Photon query engine** — 3-12x faster than standard Spark SQL
+- **Photon query engine** — vectorized execution for SQL workloads
 - **Automatic scaling** — add/remove nodes based on workload
 - **Result caching** — repeated queries return instantly
 
@@ -45,14 +47,16 @@ You mastered **SQL Warehouse architecture**:
 
 ## Industry Context
 
-SQL Warehouses are the **standard** for lakehouse analytics:
+SQL Warehouses are a common access layer for lakehouse analytics teams that want SQL-first workflows with centralized governance.
 
-- **90% of Delta Lake users** use SQL for at least some queries
-- **50% faster** than Snowflake for complex JOINs (Databricks benchmark)
-- **70% cheaper** than dedicated Spark clusters for ad-hoc queries
-- **Zero cold start** — instant-on vs 2-3 min cluster startup
+Widely adopted patterns include:
 
-**2024 Market:** SQL Warehouses handle 200B+ queries/month across Databricks customers worldwide.
+- **Using SQL for exploratory and BI-focused analysis** on Delta tables
+- **Separating ETL compute from BI compute** to improve workload isolation
+- **Taking advantage of serverless warehouse startup behavior** for interactive querying
+- **Pairing SQL Warehouses with Unity Catalog** for consistent permissions and lineage
+
+Treat warehouse sizing and cost/performance tuning as environment-specific decisions rather than fixed benchmark expectations.
 
 ## What You Learned
 

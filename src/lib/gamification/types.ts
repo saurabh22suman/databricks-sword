@@ -30,6 +30,10 @@ export type Rank = {
     }
   }
   description: string
+  /** Zero-based index in the rank progression */
+  index?: number
+  /** Total number of ranks (for max rank comparison) */
+  totalRanks?: number
 }
 
 export const RankSchema = z.object({

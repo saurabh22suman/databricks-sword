@@ -2,25 +2,27 @@
 
 ## What You Accomplished
 
-You built a **distributed data processing pipeline** using PySpark. TechCorp now has a scalable system that:
+You built a **distributed data processing pipeline** using PySpark. The resulting approach demonstrates how teams can:
 
-- Processed **5 billion events** in 12 minutes (vs 100+ hours sequentially)
-- Used **distributed DataFrames** across 20 machines
-- Applied **lazy evaluation** to optimize the execution plan
-- Wrote **23 million churn-risk predictions** back to Delta Lake
+- Process very large event volumes with parallel execution
+- Use **distributed DataFrames** across cluster resources
+- Apply **lazy evaluation** to optimize the execution plan
+- Persist model-ready or analytics-ready outputs back to Delta Lake
 
 This is the **foundation of big data engineering**.
 
 ## Real-World Impact
 
-Your PySpark pipeline is now in production. Results after 90 days:
+Production PySpark pipelines usually deliver impact through scale, reliability, and faster iteration on transformation logic.
 
-- **-94% processing time** (100 hours → 6 minutes with autoscaling)
-- **$140K/year savings** (replaced 3 ETL tool licenses)
-- **10x data volume handled** (5B → 50B events processed monthly)
-- **Real-time insights** (daily reports → hourly dashboards)
+Teams often report improvements in:
 
-Marketing used your churn predictions to launch targeted campaigns, **reducing churn by 18%** ($2.3M annual revenue saved).
+- **End-to-end processing time** for batch or micro-batch workloads
+- **Operational efficiency** by consolidating legacy ETL patterns
+- **Data volume elasticity** as workloads grow
+- **Decision latency** when refreshed datasets arrive sooner
+
+Measure business impact with workload-specific KPIs (throughput, latency, error rates, and downstream adoption).
 
 ## The Technology
 
@@ -45,14 +47,16 @@ You mastered the **Spark execution model**:
 
 ## Industry Context
 
-PySpark is the **dominant big data processing framework**:
+PySpark is one of the most widely used frameworks for distributed data processing, especially in lakehouse and modern ETL ecosystems.
 
-- **82% of Fortune 500 companies** use Spark for data processing
-- **2,000+ contributors** to Apache Spark (largest big data project)
-- **3x faster than MapReduce** (Hadoop's original processing engine)
-- **100x faster in-memory** (when data fits in cluster RAM)
+Common adoption drivers include:
 
-**2024 Market:** Spark processes 50% of all big data workloads globally (beating Flink, Presto, and legacy Hadoop).
+- **Large open-source ecosystem** and mature APIs
+- **Unified batch + streaming development model**
+- **Strong integration with Delta Lake and SQL workflows**
+- **Portability across cloud data platforms**
+
+Performance outcomes depend heavily on workload design, partition strategy, and cluster configuration, so benchmark in context rather than relying on universal multipliers.
 
 ## What You Learned
 

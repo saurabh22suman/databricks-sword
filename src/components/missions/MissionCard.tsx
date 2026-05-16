@@ -43,6 +43,10 @@ export interface MissionCardProps {
    * Whether mission action is waiting for sync
    */
   isLoading?: boolean;
+  /**
+   * Whether this is the recommended next mission for the learner
+   */
+  recommended?: boolean;
 }
 
 /**
@@ -95,6 +99,7 @@ export function MissionCard({
   completed,
   onClick,
   isLoading = false,
+  recommended = false,
 }: MissionCardProps): React.ReactElement {
   const xpLocked = userXp !== undefined && userXp < mission.xpRequired;
   const prereqLocked = !prerequisitesMet;
@@ -135,8 +140,16 @@ export function MissionCard({
           </svg>
         </div>
       )}
+
+      {/* Recommended badge */}
+      {recommended && (
+        <div className="absolute top-4 left-4 z-10 px-2 py-0.5 bg-anime-cyan/20 border border-anime-cyan text-anime-cyan text-[10px] font-bold uppercase tracking-widest">
+          Next Up
+        </div>
+      )}
+
       {/* Header: Rank Badge + Industry */}
-      <div className="flex items-center justify-between mb-5">
+      <div className="flex items-center justify-between mb-3">
         <div className="flex items-center gap-3">
           <div
             className={cn(
@@ -147,9 +160,17 @@ export function MissionCard({
           >
             {mission.rank}
           </div>
-          <span className="text-xs font-bold text-anime-500 uppercase tracking-widest">
-            {getIndustryLabel(mission.industry)}
-          </span>
+          <div>
+            <span className="text-xs font-bold text-anime-500 uppercase tracking-widest">
+              {getIndustryLabel(mission.industry)}
+            </span>
+            {/* Prerequisite path — always visible when applicable */}
+            {mission.prerequisites.length > 0 && !prereqLocked && !isCompleted && (
+              <p className="text-[10px] text-anime-green mt-0.5">
+                Path: {mission.prerequisites.length} prerequisite{mission.prerequisites.length !== 1 ? "s" : ""} completed
+              </p>
+            )}
+          </div>
         </div>
       </div>
 

@@ -20,6 +20,7 @@ type FlowArrowProps = {
   nodes: Map<string, MapNode>
   isUnlocked: boolean
   isActive?: boolean
+  isRecommended?: boolean
 }
 
 /**
@@ -67,6 +68,7 @@ export function CircuitPath({
   nodes,
   isUnlocked,
   isActive = false,
+  isRecommended = false,
 }: FlowArrowProps): React.ReactElement | null {
   const fromNode = nodes.get(edge.from)
   const toNode = nodes.get(edge.to)
@@ -148,6 +150,26 @@ export function CircuitPath({
           </animateMotion>
         </circle>
       )}
+
+      {/* Pulsing highlight for recommended paths */}
+      {isRecommended && (
+        <>
+          <path
+            d={pathData}
+            fill="none"
+            stroke="var(--anime-cyan)"
+            strokeWidth="4"
+            strokeLinecap="round"
+            opacity="0.4"
+            style={{ filter: "blur(4px)", animation: "pulse-glow 2s ease-in-out infinite" }}
+          />
+          <circle r="3.5" fill="var(--anime-cyan)" opacity="0.9">
+            <animateMotion dur="2.5s" repeatCount="indefinite">
+              <mpath href={`#${pathId}`} />
+            </animateMotion>
+          </circle>
+        </>
+      )}
     </g>
   )
 }
@@ -160,6 +182,7 @@ type CircuitPathsProps = {
   nodes: Map<string, MapNode>
   completedMissions: Set<string>
   currentMission?: string
+  recommendedMission?: string
 }
 
 /**
@@ -170,14 +193,22 @@ export function CircuitPaths({
   nodes,
   completedMissions,
   currentMission,
+  recommendedMission,
 }: CircuitPathsProps): React.ReactElement {
   return (
     <g className="flow-arrows">
       {edges.map((edge) => {
-        const isUnlocked =
-          completedMissions.has(edge.from) || completedMissions.has(edge.to)
-        const isActive =
-          edge.to === currentMission && completedMissions.has(edge.from)
+        const fromDone = completedMissions.has(edge.from)
+        const toDone = completedMissions.has(edge.to)
+        // Energized when the from-node is completed — data has "flowed" along this path
+        const isUnlocked = fromDone
+        // Active spark when this path leads to the mission currently in progress
+        const isActive = isUnlocked && edge.to === currentMission
+        // Highlight the path leading to the recommended next mission
+        const isRecommended =
+          edge.to === recommendedMission &&
+          !toDone &&
+          isUnlocked
 
         return (
           <CircuitPath
@@ -186,6 +217,7 @@ export function CircuitPaths({
             nodes={nodes}
             isUnlocked={isUnlocked}
             isActive={isActive}
+            isRecommended={isRecommended}
           />
         )
       })}

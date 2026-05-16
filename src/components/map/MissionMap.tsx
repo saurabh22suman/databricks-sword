@@ -224,6 +224,33 @@ export function MissionMap({
     return map
   }, [mapNodes])
 
+  // Find the in-progress mission (has stages completed but not fully done)
+  const currentMissionId = useMemo(() => {
+    if (!sandbox?.missionProgress) return undefined
+    for (const [id, progress] of Object.entries(sandbox.missionProgress)) {
+      if (!progress.completed) {
+        const completedStages = Object.values(progress.stageProgress).filter(
+          (s) => s.completed,
+        ).length
+        if (completedStages > 0) return id
+      }
+    }
+    return undefined
+  }, [sandbox])
+
+  // Find the first unlocked-but-not-completed mission as the recommended next step
+  const recommendedMissionId = useMemo(() => {
+    const sorted = [...missions].sort((a, b) => a.xpRequired - b.xpRequired)
+    for (const mission of sorted) {
+      if (completedMissions.has(mission.id)) continue
+      const prereqs = getMissionPrerequisites(mission.id, missionLookup)
+      const xpOk = (sandbox?.userStats?.totalXp ?? 0) >= mission.xpRequired
+      const prereqsOk = prereqs.every((id) => completedMissions.has(id))
+      if (xpOk && prereqsOk) return mission.id
+    }
+    return undefined
+  }, [missions, sandbox, completedMissions, missionLookup])
+
   const edges = useMemo(() => getMapEdges(missionLookup), [missionLookup])
 
   // Filter nodes by active tracks — locked nodes are always shown (dimmed), not hidden
@@ -347,7 +374,8 @@ export function MissionMap({
           edges={filteredEdges}
           nodes={nodesMap}
           completedMissions={completedMissions}
-          currentMission={undefined}
+          currentMission={currentMissionId}
+          recommendedMission={recommendedMissionId}
         />
 
         {/* Pipeline nodes */}
@@ -416,6 +444,7 @@ export function MissionMap({
               estimatedMinutes={estimatedMinutes}
               progress={progress}
               isGuest={isGuest}
+              isRecommended={node.id === recommendedMissionId}
             />
           )
         })}

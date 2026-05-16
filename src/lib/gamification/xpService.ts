@@ -12,6 +12,7 @@ import { initializeSandbox, loadSandbox, updateSandbox } from "@/lib/sandbox/sto
 import type { SandboxData } from "@/lib/sandbox/types"
 import { MAX_CHALLENGE_XP_COMPLETIONS } from "@/lib/sandbox/types"
 import { ACHIEVEMENTS, checkAchievement } from "./achievements"
+import { emitXpEvent } from "./xpEventBus"
 import { getRankForXp } from "./ranks"
 import { calculateStreak, getStreakMultiplier, useFreeze } from "./streaks"
 import type { UserProfile, XpEvent } from "./types"
@@ -248,6 +249,10 @@ export function awardStageXp(
 
   checkAndUnlockAchievements()
 
+  if (amount > 0) {
+    emitXpEvent(event)
+  }
+
   return event
 }
 
@@ -323,6 +328,10 @@ export function awardMissionXp(
 
   checkAndUnlockAchievements()
 
+  if (amount > 0) {
+    emitXpEvent(event)
+  }
+
   return event
 }
 
@@ -385,6 +394,10 @@ export function awardChallengeXp(
   })
 
   checkAndUnlockAchievements()
+
+  if (amount > 0) {
+    emitXpEvent(event)
+  }
 
   return event
 }

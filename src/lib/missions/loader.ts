@@ -113,7 +113,11 @@ export async function getAllMissions(): Promise<Mission[]> {
       const mission = await getMission(slug)
       missions.push(mission)
     } catch (error) {
-      console.error(`Failed to load mission ${slug}:`, error)
+      const reason = error instanceof Error ? error.message : String(error)
+      console.warn("[missions-loader] skipped invalid mission", {
+        slug,
+        reason,
+      })
       // Skip invalid missions
     }
   }

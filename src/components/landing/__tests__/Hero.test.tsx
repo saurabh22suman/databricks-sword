@@ -30,6 +30,7 @@ vi.mock("lucide-react", () => ({
 beforeEach(() => {
   global.fetch = vi.fn(() =>
     Promise.resolve({
+      ok: true,
       json: () => Promise.resolve({ userCount: 5, unitsDeployed: 15 }),
     })
   ) as unknown as typeof fetch
@@ -64,11 +65,13 @@ describe("Hero", () => {
   it("renders the stats section with fetched units deployed", async () => {
     render(<Hero />)
     expect(screen.getByText("Units Deployed")).toBeInTheDocument()
-    expect(screen.getByText("4.9")).toBeInTheDocument()
-    expect(screen.getByText("System Rating")).toBeInTheDocument()
-    // Wait for fetch to complete and check the dynamic value
+    expect(screen.queryByText("System Rating")).not.toBeInTheDocument()
+
+    // Wait for fetch to complete and check dynamic values
     await waitFor(() => {
       expect(screen.getByText("15")).toBeInTheDocument()
+      expect(screen.getByText("Registered Learners")).toBeInTheDocument()
+      expect(screen.getAllByText("5").length).toBeGreaterThan(0)
     })
   })
 
@@ -80,6 +83,19 @@ describe("Hero", () => {
   it("renders the Protocol Sword text", () => {
     render(<Hero />)
     expect(screen.getByText("Protocol Sword")).toBeInTheDocument()
+  })
+
+  it("falls back to default metrics when stats fetch fails", async () => {
+    global.fetch = vi.fn(() => Promise.reject(new Error("network"))) as unknown as typeof fetch
+
+    render(<Hero />)
+
+    await waitFor(() => {
+      expect(global.fetch).toHaveBeenCalledWith("/api/stats")
+    })
+    const statValues = screen.getAllByText("0")
+    expect(statValues.length).toBeGreaterThanOrEqual(2)
+    expect(screen.getByText("Registered Learners")).toBeInTheDocument()
   })
 
   it("renders the status footer", () => {

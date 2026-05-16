@@ -14,14 +14,16 @@ This is the **foundation** of modern data engineering.
 
 ## Real-World Impact
 
-Your pilot convinced the exec team. TechCorp is now migrating to Databricks lakehouse. Results after 6 months:
+Lakehouse migrations usually create value by consolidating fragmented data stacks and reducing handoffs between storage, ETL, and BI systems.
 
-- **-62% storage costs** ($47K/month → $18K/month)
-- **-87% query latency** (15 min avg → 2 min avg)
-- **-90% schema change time** (3 weeks → 2 days)
-- **5-minute data freshness** (down from 24 hours)
+Teams often focus on measurable gains in:
 
-**Annual savings: $348K** in infrastructure costs + **$1.2M** in productivity gains
+- **Storage efficiency and lifecycle management**
+- **Query responsiveness for mixed analytics workloads**
+- **Faster schema/change delivery cycles**
+- **Improved freshness for downstream reporting and operations**
+
+Quantify impact using your own baseline metrics before and after the migration phases.
 
 ## The Technology
 
@@ -34,7 +36,7 @@ You mastered the **lakehouse architecture**:
 - **Versioning** for time travel
 
 ### Compute Layer (Databricks Runtime)
-- **Photon** query engine for 3-10x faster queries
+- **Photon** query engine for vectorized SQL execution
 - **Adaptive Query Execution** for automatic optimization
 - **Cluster management** with autoscaling
 
@@ -45,14 +47,16 @@ You mastered the **lakehouse architecture**:
 
 ## Industry Context
 
-The lakehouse is **replacing traditional warehouses** at scale:
+The lakehouse paradigm is increasingly used when organizations want one platform for batch, streaming, BI, and ML workloads.
 
-- **Uber:** 100+ PB lakehouse on Databricks (unified analytics for 400+ teams)
-- **Shell:** Real-time IoT analytics on 15 billion sensor events/day
-- **T-Mobile:** 100,000+ queries/day on Delta Lake
-- **ING Bank:** Fraud detection with 1-minute latency (was 24 hours)
+Enterprise case studies commonly highlight:
 
-**2024 Market:** $5.2B (growing 23% annually). Gartner predicts lakehouses will replace 70% of data warehouses by 2027.
+- **Large-scale consolidation** of data assets and pipelines
+- **Mixed workload support** across analysts, engineers, and data scientists
+- **Faster iteration loops** for governance and model/feature delivery
+- **Reduced duplication** between lake and warehouse systems
+
+Rather than relying on single market-size estimates, evaluate fit through concrete architecture and operating-model outcomes in your environment.
 
 ## What You Learned
 
