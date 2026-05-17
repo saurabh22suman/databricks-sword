@@ -37,6 +37,7 @@ type MapNodeProps = {
   progress?: number // 0-100 for in-progress
   onClick?: () => void
   isGuest?: boolean
+  isRecommended?: boolean
 }
 
 /**
@@ -69,6 +70,7 @@ export function MapNode({
   progress = 0,
   onClick,
   isGuest = false,
+  isRecommended = false,
 }: MapNodeProps): React.ReactElement {
   const [isHovered, setIsHovered] = useState(false)
   const [isSyncingBeforeOpen, setIsSyncingBeforeOpen] = useState(false)
@@ -244,8 +246,8 @@ export function MapNode({
         />
       )}
 
-      {/* Soft pulsing ring for available nodes */}
-      {state === "available" && (
+      {/* Pulsing ring for available nodes (track-colored) */}
+      {state === "available" && !isRecommended && (
         <circle
           r={radius + 10}
           fill="none"
@@ -254,6 +256,27 @@ export function MapNode({
           opacity="0.4"
           className="ring-pulse"
         />
+      )}
+
+      {/* Bright pulsing ring for recommended next-step node */}
+      {isRecommended && (
+        <>
+          <circle
+            r={radius + 14}
+            fill="none"
+            stroke="var(--anime-cyan)"
+            strokeWidth="2.5"
+            opacity="0.7"
+            className="ring-pulse"
+          />
+          <circle
+            r={radius + 8}
+            fill="none"
+            stroke="white"
+            strokeWidth="1"
+            opacity="0.25"
+          />
+        </>
       )}
 
       {/* Outer circle — main node shape */}

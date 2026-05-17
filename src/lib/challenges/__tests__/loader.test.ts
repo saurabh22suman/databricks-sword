@@ -163,6 +163,31 @@ describe("Challenge Loader", () => {
       expect(challenges[0].id).toBe("valid")
     })
 
+    it("emits structured diagnostics for invalid challenge files", async () => {
+      const warnSpy = vi.spyOn(console, "warn").mockImplementation(() => undefined)
+
+      mockReaddirSync.mockImplementation((dirPath: string) => {
+        if (dirPath === CHALLENGES_DIR) {
+          return [{ name: "sql", isDirectory: () => true }]
+        }
+        return ["broken.json"]
+      })
+
+      mockReadFileSync.mockReturnValue("{ broken json")
+
+      const challenges = await getAllChallenges()
+      expect(challenges).toHaveLength(0)
+      expect(warnSpy).toHaveBeenCalledWith(
+        "[challenges-loader] skipped invalid challenge",
+        expect.objectContaining({
+          filePath: expect.stringContaining("broken.json"),
+          reason: expect.stringContaining("position"),
+        }),
+      )
+
+      warnSpy.mockRestore()
+    })
+
     it("sorts by category then difficulty", async () => {
       mockReaddirSync.mockImplementation((dirPath: string) => {
         if (dirPath === CHALLENGES_DIR) {
@@ -315,6 +340,45 @@ describe("Challenge Loader", () => {
       const challenge = makeDragDropChallenge() as unknown as Challenge
       const result = validateChallengeResponse(challenge, {})
       expect(result.isValid).toBe(false)
+    })
+
+    it("rejects free-text with dangerous ReDoS pattern", () => {
+      const challenge = makeFreeTextChallenge({
+        freeText: {
+          expectedPattern: "(.*)*a",
+          starterCode: "# test",
+          simulatedOutput: "ok",
+        },
+      }) as unknown as Challenge
+      const result = validateChallengeResponse(challenge, { code: "any text" })
+      expect(result.isValid).toBe(false)
+      expect(result.details[0]).toContain("unsafe")
+    })
+
+    it("rejects free-text with catastrophic backtracking pattern", () => {
+      const challenge = makeFreeTextChallenge({
+        freeText: {
+          expectedPattern: "(a+)+$",
+          starterCode: "# test",
+          simulatedOutput: "ok",
+        },
+      }) as unknown as Challenge
+      const result = validateChallengeResponse(challenge, { code: "aaaaa" })
+      expect(result.isValid).toBe(false)
+      expect(result.details[0]).toContain("unsafe")
+    })
+
+    it("accepts safe free-text patterns and validates code correctly", () => {
+      const challenge = makeFreeTextChallenge({
+        freeText: {
+          expectedPattern: "SELECT\\s+\\*\\s+FROM\\s+\\w+",
+          starterCode: "# SQL query",
+          simulatedOutput: "ok",
+        },
+      }) as unknown as Challenge
+      const result = validateChallengeResponse(challenge, { code: "SELECT * FROM users" })
+      expect(result.isValid).toBe(true)
+      expect(result.score).toBe(100)
     })
   })
 })

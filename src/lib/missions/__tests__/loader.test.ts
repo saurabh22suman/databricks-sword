@@ -139,6 +139,61 @@ describe("Mission Loader", () => {
   })
 
   describe("getAllMissions", () => {
+    it("emits structured diagnostics when skipping invalid missions", async () => {
+      const fs = await import("fs")
+      const warnSpy = vi.spyOn(console, "warn").mockImplementation(() => undefined)
+
+      vi.mocked(fs.default.readdirSync).mockReturnValue([
+        { name: "valid-mission", isDirectory: () => true } as any,
+        { name: "broken-mission", isDirectory: () => true } as any,
+      ])
+
+      vi.mocked(fs.default.existsSync).mockReturnValue(true)
+      vi.mocked(fs.default.readFileSync)
+        .mockReturnValueOnce(
+          JSON.stringify({
+            id: "valid-mission",
+            title: "Valid Mission",
+            subtitle: "S",
+            description: "D",
+            industry: "finance",
+            rank: "B",
+            xpRequired: 0,
+            xpReward: 100,
+            estimatedMinutes: 30,
+            primaryFeatures: [],
+            prerequisites: [],
+            stages: [
+              {
+                id: "s1",
+                title: "S1",
+                type: "briefing",
+                configFile: "stages/01.json",
+                xpReward: 10,
+                estimatedMinutes: 5,
+              },
+            ],
+            sideQuests: [],
+            achievements: [],
+          }),
+        )
+        .mockReturnValueOnce("{ invalid-json")
+
+      const missions = await getAllMissions()
+
+      expect(missions).toHaveLength(1)
+      expect(missions[0].id).toBe("valid-mission")
+      expect(warnSpy).toHaveBeenCalledWith(
+        "[missions-loader] skipped invalid mission",
+        expect.objectContaining({
+          slug: "broken-mission",
+          reason: expect.stringContaining("Invalid JSON"),
+        }),
+      )
+
+      warnSpy.mockRestore()
+    })
+
     it("loads all missions from content directory", async () => {
       const fs = await import("fs")
 

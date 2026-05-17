@@ -1,0 +1,40 @@
+- generic [active] [ref=e1]:
+  - main [ref=e2]:
+    - generic [ref=e3]:
+      - generic [ref=e5]: O
+      - heading "Oreo-Reels" [level=1] [ref=e6]
+      - paragraph [ref=e7]: AI-powered memory for your reels. Save any reel, understand it instantly, rediscover it forever.
+    - generic [ref=e8]:
+      - heading "MVP Status" [level=2] [ref=e9]
+      - list [ref=e10]:
+        - listitem [ref=e11]:
+          - generic [ref=e12]: ✓
+          - generic [ref=e13]: Native share sheet integration (Android)
+        - listitem [ref=e14]:
+          - generic [ref=e15]: ✓
+          - generic [ref=e16]: AI tagging & summarization
+        - listitem [ref=e17]:
+          - generic [ref=e18]: ✓
+          - generic [ref=e19]: Pinterest-style masonry grid
+        - listitem [ref=e20]:
+          - generic [ref=e21]: ✓
+          - generic [ref=e22]: Search & filter (intents, platforms, sort)
+        - listitem [ref=e23]:
+          - generic [ref=e24]: ✓
+          - generic [ref=e25]: Collections (boards)
+        - listitem [ref=e26]:
+          - generic [ref=e27]: ✓
+          - generic [ref=e28]: iOS PWA fallback (paste link)
+    - generic [ref=e29]:
+      - link "View Library" [ref=e30] [cursor=pointer]:
+        - /url: /library
+      - link "View on GitHub" [ref=e31] [cursor=pointer]:
+        - /url: https://github.com/soloengine/oreo-reels
+    - generic [ref=e32]:
+      - generic [ref=e33]: Next.js
+      - generic [ref=e34]: Tailwind CSS
+      - generic [ref=e35]: Go
+      - generic [ref=e36]: PostgreSQL
+      - generic [ref=e37]: OpenAI
+      - generic [ref=e38]: Framer Motion
+  - alert [ref=e39]

@@ -247,6 +247,128 @@ describe("MissionQuiz", () => {
         expect(screen.getByText(/keep studying/i)).toBeInTheDocument();
       });
     });
+
+    it("treats score equal to passingScore as pass", async () => {
+      const user = userEvent.setup();
+      const boundaryConfig: QuizConfig = {
+        passingScore: 75,
+        questions: [
+          {
+            id: "q1",
+            question: "Q1",
+            options: ["A1", "B1"],
+            correctAnswer: 0,
+            explanation: "E1",
+          },
+          {
+            id: "q2",
+            question: "Q2",
+            options: ["A2", "B2"],
+            correctAnswer: 0,
+            explanation: "E2",
+          },
+          {
+            id: "q3",
+            question: "Q3",
+            options: ["A3", "B3"],
+            correctAnswer: 0,
+            explanation: "E3",
+          },
+          {
+            id: "q4",
+            question: "Q4",
+            options: ["A4", "B4"],
+            correctAnswer: 0,
+            explanation: "E4",
+          },
+        ],
+      };
+
+      render(<MissionQuiz config={boundaryConfig} />);
+
+      await user.click(screen.getByText("A1"));
+      await user.click(screen.getByRole("button", { name: /submit/i }));
+      await user.click(screen.getByRole("button", { name: /next/i }));
+
+      await user.click(screen.getByText("A2"));
+      await user.click(screen.getByRole("button", { name: /submit/i }));
+      await user.click(screen.getByRole("button", { name: /next/i }));
+
+      await user.click(screen.getByText("A3"));
+      await user.click(screen.getByRole("button", { name: /submit/i }));
+      await user.click(screen.getByRole("button", { name: /next/i }));
+
+      await user.click(screen.getByText("B4")); // wrong on purpose
+      await user.click(screen.getByRole("button", { name: /submit/i }));
+      await user.click(screen.getByRole("button", { name: /finish/i }));
+
+      await waitFor(() => {
+        expect(screen.getByText(/75%/)).toBeInTheDocument();
+      });
+      expect(screen.getByRole("button", { name: /continue/i })).toBeInTheDocument();
+      expect(screen.queryByText(/you need at least 75% to continue/i)).not.toBeInTheDocument();
+    });
+
+    it("treats score below passingScore as fail boundary", async () => {
+      const user = userEvent.setup();
+      const boundaryConfig: QuizConfig = {
+        passingScore: 75,
+        questions: [
+          {
+            id: "q1",
+            question: "QB1",
+            options: ["A1", "B1"],
+            correctAnswer: 0,
+            explanation: "E1",
+          },
+          {
+            id: "q2",
+            question: "QB2",
+            options: ["A2", "B2"],
+            correctAnswer: 0,
+            explanation: "E2",
+          },
+          {
+            id: "q3",
+            question: "QB3",
+            options: ["A3", "B3"],
+            correctAnswer: 0,
+            explanation: "E3",
+          },
+          {
+            id: "q4",
+            question: "QB4",
+            options: ["A4", "B4"],
+            correctAnswer: 0,
+            explanation: "E4",
+          },
+        ],
+      };
+
+      render(<MissionQuiz config={boundaryConfig} />);
+
+      await user.click(screen.getByText("A1"));
+      await user.click(screen.getByRole("button", { name: /submit/i }));
+      await user.click(screen.getByRole("button", { name: /next/i }));
+
+      await user.click(screen.getByText("A2"));
+      await user.click(screen.getByRole("button", { name: /submit/i }));
+      await user.click(screen.getByRole("button", { name: /next/i }));
+
+      await user.click(screen.getByText("B3")); // wrong
+      await user.click(screen.getByRole("button", { name: /submit/i }));
+      await user.click(screen.getByRole("button", { name: /next/i }));
+
+      await user.click(screen.getByText("B4")); // wrong
+      await user.click(screen.getByRole("button", { name: /submit/i }));
+      await user.click(screen.getByRole("button", { name: /finish/i }));
+
+      await waitFor(() => {
+        expect(screen.getByText(/50%/)).toBeInTheDocument();
+      });
+      expect(screen.queryByRole("button", { name: /continue/i })).not.toBeInTheDocument();
+      expect(screen.getByText(/you need at least 75% to continue/i)).toBeInTheDocument();
+    });
   });
 
   describe("Callbacks", () => {

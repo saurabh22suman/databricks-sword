@@ -22,11 +22,10 @@ export async function GET(): Promise<NextResponse> {
 
     return NextResponse.json({
       userCount,
-      // Add 10 to the count for display (base "units deployed")
-      unitsDeployed: 10 + userCount,
+      unitsDeployed: userCount,
     })
   } catch (error) {
     console.error("Failed to fetch stats:", error)
-    return NextResponse.json({ userCount: 0, unitsDeployed: 10 })
+    return NextResponse.json({ userCount: 0, unitsDeployed: 0 })
   }
 }

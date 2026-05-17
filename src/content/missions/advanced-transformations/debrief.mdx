@@ -19,11 +19,11 @@ You built **advanced transformation pipelines** using window functions, UDFs, an
 
 ### UDFs (User-Defined Functions)
 - Python UDFs for custom business logic
-- Pandas UDFs for vectorized performance (100x faster)
+- Pandas UDFs for vectorized performance (significantly faster via Apache Arrow)
 - SQL UDFs for reusable query components
 
 ### Best Practices
-- **Prefer built-in functions** over UDFs (10-100x faster)
+- **Prefer built-in functions** over UDFs (typically much faster)
 - **Use Pandas UDFs** when custom logic is unavoidable
 - **Partition window functions** properly to avoid full shuffles
 - **Broadcast small tables** in joins (<200MB)

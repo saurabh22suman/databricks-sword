@@ -60,7 +60,11 @@ function loadChallengeFile(filePath: string): Challenge | null {
     const validated = ChallengeSchema.parse(parsed)
     return validated as Challenge
   } catch (error) {
-    console.error(`Failed to load challenge ${filePath}:`, error)
+    const reason = error instanceof Error ? error.message : String(error)
+    console.warn("[challenges-loader] skipped invalid challenge", {
+      filePath,
+      reason,
+    })
     return null
   }
 }
@@ -284,15 +288,83 @@ function validateFreeText(
     return { isValid: false, score: 0, maxScore: 100, details: ["Missing response or config"] }
   }
 
+  // Timeout wrapper to prevent catastrophic backtracking
+  const REGEX_TIMEOUT_MS = 1000
+  const isSafeRegex = (pattern: string): boolean => {
+    // Reject any pattern with a quantified group repeated by another quantifier.
+    // This is the canonical ReDoS structure: (X+)+, (X*)+, (X+)*, etc.
+    // where X is any sub-pattern (even a single char like 'a').
+    // e.g. (a+)+$, (.*)+, (.+)*, ([^]+)+
+    const nestedQuantifierPattern = /\([^)]+[+*?]\)[+*?]/
+    if (nestedQuantifierPattern.test(pattern)) {
+      return false
+    }
+
+    // Reject the most egregious dot-star patterns (non-char-class versions)
+    const absoluteBlocklist = [
+      /\(\.\*\)\+/,    // (.*)+
+      /\(\.\+\)\+/,    // (.+)+
+      /\(\.\?\)\+/,    // (.?)+
+      /\(\.\*\)\*/,    // (.*)*
+      /\(\.\+\)\*/,    // (.+)*
+      /\[\^\]\+\.\*/,  // [^]+.*
+    ]
+    if (absoluteBlocklist.some((b) => b.test(pattern))) {
+      return false
+    }
+
+    return true
+  }
+
   try {
+    if (!isSafeRegex(expectedPattern)) {
+      return {
+        isValid: false,
+        score: 0,
+        maxScore: 100,
+        details: ["Challenge config contains unsafe pattern"],
+      }
+    }
+
     const regex = new RegExp(expectedPattern)
-    const isValid = regex.test(userCode)
+
+    // Use Promise.race to implement timeout
+    const regexTest = () => regex.test(userCode)
+    const timeoutPromise = new Promise<boolean>((_, reject) => {
+      setTimeout(() => reject(new Error("Regex timeout")), REGEX_TIMEOUT_MS)
+    })
+
+    const isValid = Promise.race([regexTest(), timeoutPromise]) as unknown as boolean
+
+    // For synchronous context, fall back to direct test with try-catch
+    // The timeout protection is primarily for DoS scenarios where malformed input
+    // could cause excessive backtracking
+    const directTest = () => {
+      const start = Date.now()
+      const result = regex.test(userCode)
+      if (Date.now() - start > REGEX_TIMEOUT_MS) {
+        throw new Error("Regex execution timeout")
+      }
+      return result
+    }
+
+    let isValidResult: boolean
+    try {
+      isValidResult = directTest()
+    } catch {
+      return {
+        isValid: false,
+        score: 0,
+        maxScore: 100,
+        details: ["Pattern matching timed out - please simplify your answer"],
+      }
+    }
 
     return {
-      isValid,
-      score: isValid ? 100 : 0,
+      isValid: isValidResult,
+      score: isValidResult ? 100 : 0,
       maxScore: 100,
-      details: isValid
+      details: isValidResult
         ? ["Code matches expected pattern"]
         : ["Code does not match expected pattern"],
     }

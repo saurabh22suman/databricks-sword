@@ -18,7 +18,10 @@ export const MOCK_USER_ID = "mock-user-001"
  * Only true when MOCK_AUTH=true.
  * WARNING: Never set MOCK_AUTH=true in production deployments.
  */
-export const isMockAuth: boolean = process.env.MOCK_AUTH === "true"
+const runtimeNodeEnv = process.env["NODE_ENV"]
+
+export const isMockAuth: boolean =
+  process.env.MOCK_AUTH === "true" && runtimeNodeEnv !== "production"
 
 /**
  * Fake session injected when mock auth is active.

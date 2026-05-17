@@ -221,7 +221,7 @@ df = spark.read.format("jdbc").option("url", jdbc_url).load()`,
         keyPoints: [
           "C++ vectorized engine (not JVM-based)",
           "Columnar batch processing with SIMD",
-          "2-8x speedup for scan-heavy SQL workloads",
+          "Significant acceleration on many scan-heavy SQL workloads",
           "Native Delta Lake and Parquet optimizations",
           "Enabled by default on SQL Warehouses",
         ],
@@ -500,7 +500,7 @@ spark.readStream.format("delta") \\
         id: 39,
         question: "How does OPTIMIZE work in Delta Lake?",
         answer:
-          "OPTIMIZE compacts small files into larger ones (target ~1GB) for better read performance. It can also Z-order data by specified columns to co-locate related values for faster predicate pushdown. OPTIMIZE is idempotent and safe to run concurrently with reads. On Databricks, predictive optimization can schedule OPTIMIZE automatically based on table usage patterns.",
+          "OPTIMIZE compacts small files into larger ones (target ~256MB, configurable via `targetFileSize`) for better read performance. It can also Z-order data by specified columns to co-locate related values for faster predicate pushdown. OPTIMIZE is idempotent and safe to run concurrently with reads. On Databricks, predictive optimization can schedule OPTIMIZE automatically based on table usage patterns.",
         codeExample: `-- Basic compaction
 OPTIMIZE my_table;
 
@@ -1925,7 +1925,7 @@ df.writeStream \\
         answer:
           "Cost optimization strategies include: using spot/preemptible instances, right-sizing clusters based on workload, enabling autoscaling with appropriate min/max, using SQL warehouses for BI queries, implementing cluster policies, scheduling jobs during off-peak hours, and optimizing data storage with Delta Lake compaction and Z-ordering. Monitor costs with Databricks account console.",
         keyPoints: [
-          "Spot instances save 60-90% on compute",
+          "Spot/preemptible instances can materially reduce compute costs",
           "Autoscaling matches resources to demand",
           "SQL Warehouses for concurrent BI queries",
           "Delta Lake optimization reduces I/O costs",

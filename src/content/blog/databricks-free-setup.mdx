@@ -8,7 +8,7 @@ tags:
   - free-edition
   - getting-started
 category: "tutorials"
-publishedAt: "2025-01-15"
+publishedAt: "2026-05-17"
 featured: true
 ---
 
@@ -37,7 +37,7 @@ Databricks Community Edition is a free, limited version of the full Databricks p
 - No Jobs/Workflows scheduler
 - No Unity Catalog
 - No SQL Warehouses
-- Cluster auto-terminates after 2 hours of inactivity
+- Cluster auto-terminates after an inactivity window configured by the platform
 - Community support only (no SLA)
 
 For Databricks Sword missions, the Community Edition covers all B-rank and most A-rank content.
@@ -92,7 +92,7 @@ Before running any code, you need an active cluster:
 5. Click **Create Cluster**
 6. Wait 3-5 minutes for the cluster to start (status changes from "Pending" to "Running")
 
-> **Note:** The cluster auto-terminates after **2 hours** of inactivity. You can restart it anytime from the Compute page.
+> **Note:** Community Edition clusters can auto-terminate after inactivity. Check your current compute settings in the Databricks UI and restart from the Compute page when needed.
 
 ---
 
@@ -127,16 +127,15 @@ Store the token somewhere safe (password manager recommended).
 
 ---
 
-## Step 6: Enable Real Mode on Missions
+## Step 6: Run Missions Against Your Workspace
 
-Now that you're connected:
+Databricks Sword integrates with your Databricks workspace through the **Profile → Settings → Databricks Connection** panel. Once connected:
 
-1. Open any mission
-2. Look for the **Mode Toggle** at the top of the stage player
-3. Switch from **Simulated** to **Real Databricks**
-4. Your code will now execute against your real Databricks cluster
+1. Your workspace URL and PAT are stored securely.
+2. Select missions that support real execution (no Unity Catalog or Workflows).
+3. Code challenges execute against your real Spark cluster instead of simulation.
 
-> **Important:** Not all stages support real mode. Drag-drop and quiz stages are always simulated. Code challenges (fill-blank, free-text) will execute against your workspace.
+> **Note:** Not all missions support real Databricks execution. Stage types like drag-drop and quiz are always simulated. Code challenges (fill-blank, free-text) can execute against your workspace when connected.
 
 ---
 
@@ -165,7 +164,7 @@ Your Personal Access Token has a set expiration date. Generate a new one:
 
 ### "Cluster not running" Error
 
-Your cluster auto-terminates after 2 hours of inactivity:
+Your cluster may auto-terminate after inactivity:
 
 1. Go to Compute in your Databricks workspace
 2. Find your cluster and click **Start**

@@ -1,53 +1,96 @@
 import { describe, expect, it, vi } from "vitest"
 
-// Mock Auth.js
-vi.mock("@/lib/auth", () => ({
-  auth: vi.fn(),
-}))
+type MiddlewareRequest = {
+  nextUrl: { pathname: string }
+  url: string
+  auth?: unknown
+}
+
+function makeRequest(pathname: string, auth?: unknown): MiddlewareRequest {
+  return {
+    nextUrl: { pathname },
+    url: `https://databricks-sword.test${pathname}`,
+    auth,
+  }
+}
+
+async function loadMiddleware(mockAuth: string, nodeEnv: string): Promise<(req: MiddlewareRequest) => Response> {
+  vi.resetModules()
+  vi.stubEnv("MOCK_AUTH", mockAuth)
+  vi.stubEnv("NODE_ENV", nodeEnv)
+
+  vi.doMock("@/lib/auth", () => ({
+    auth: (handler: (req: MiddlewareRequest) => Response) => handler,
+  }))
+
+  const mod = await import("../middleware")
+  return mod.default as (req: MiddlewareRequest) => Response
+}
 
 describe("Middleware Route Protection", () => {
-  it("should allow unauthenticated access to public routes", async () => {
-    const publicRoutes = ["/", "/blog", "/blog/some-post", "/intel", "/leaderboard", "/faq"]
-    
-    for (const route of publicRoutes) {
-      // These routes do not require authentication
-      expect(route).toBeDefined()
-    }
+  it("allows public routes without authentication", async () => {
+    const middleware = await loadMiddleware("false", "test")
+    const response = middleware(makeRequest("/blog/some-post"))
+
+    expect(response.status).toBe(200)
+    expect(response.headers.get("location")).toBeNull()
   })
 
-  it("should redirect unauthenticated users from protected routes", async () => {
-    const protectedRoutes = [
-      "/missions",
-      "/challenges",
-      "/profile",
-      "/review",
-      "/daily",
-      "/achievements",
-      "/settings",
-    ]
-    
-    for (const route of protectedRoutes) {
-      expect(route).toBeDefined()
-    }
+  it("redirects unauthenticated users from protected pages", async () => {
+    const middleware = await loadMiddleware("false", "test")
+    const response = middleware(makeRequest("/missions"))
+
+    expect(response.status).toBe(307)
+    expect(response.headers.get("location")).toContain("/auth/signin")
+    expect(response.headers.get("location")).toContain("callbackUrl=%2Fmissions")
   })
 
-  it("should return 401 for unauthenticated API requests", async () => {
-    const protectedApiRoutes = [
-      "/api/user/stats",
-      "/api/databricks/connect",
-      "/api/progress/stage",
-    ]
-    
-    for (const route of protectedApiRoutes) {
-      expect(route).toBeDefined()
-    }
+  it("returns 401 for unauthenticated protected API routes", async () => {
+    const middleware = await loadMiddleware("false", "test")
+    const response = middleware(makeRequest("/api/user/sync"))
+
+    expect(response.status).toBe(401)
+    await expect(response.json()).resolves.toEqual({ error: "Unauthorized" })
   })
 
-  it("should allow API auth routes without authentication", async () => {
-    const authRoutes = ["/api/auth/signin", "/api/auth/callback"]
-    
-    for (const route of authRoutes) {
-      expect(route).toBeDefined()
-    }
+  it("always allows auth routes", async () => {
+    const middleware = await loadMiddleware("false", "test")
+
+    const authPageResponse = middleware(makeRequest("/auth/signin"))
+    const authApiResponse = middleware(makeRequest("/api/auth/signin"))
+
+    expect(authPageResponse.status).toBe(200)
+    expect(authApiResponse.status).toBe(200)
+  })
+
+  it("skips middleware for static asset paths", async () => {
+    const middleware = await loadMiddleware("false", "test")
+    const response = middleware(makeRequest("/_next/static/chunks/main.js"))
+
+    expect(response.status).toBe(200)
+  })
+
+  it("allows protected routes for authenticated users", async () => {
+    const middleware = await loadMiddleware("false", "test")
+    const response = middleware(makeRequest("/missions", { user: { id: "u-1" } }))
+
+    expect(response.status).toBe(200)
+    expect(response.headers.get("location")).toBeNull()
+  })
+
+  it("does not allow production mock-auth bypass", async () => {
+    const middleware = await loadMiddleware("true", "production")
+    const response = middleware(makeRequest("/missions"))
+
+    expect(response.status).toBe(307)
+    expect(response.headers.get("location")).toContain("/auth/signin")
+  })
+
+  it("allows mock-auth bypass outside production", async () => {
+    const middleware = await loadMiddleware("true", "development")
+    const response = middleware(makeRequest("/missions"))
+
+    expect(response.status).toBe(200)
+    expect(response.headers.get("location")).toBeNull()
   })
 })

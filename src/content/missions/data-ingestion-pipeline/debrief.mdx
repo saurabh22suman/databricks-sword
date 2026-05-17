@@ -13,14 +13,16 @@ This is the **foundation of a medallion architecture** (bronze → silver → go
 
 ## Real-World Impact
 
-Auto Loader pipelines replaced 50+ manual scripts. Results after 90 days:
+Auto Loader pipelines often replace brittle file-polling scripts and manual ingestion jobs with a more resilient incremental pattern.
 
-- **-95% maintenance time** (40 hours/month → 2 hours/month)  
-- **-87% data latency** (24 hours → 5 minutes)
-- **Zero schema breaks** (auto-evolution handles changes)
-- **3x data volume** handled without adding engineers
+Typical outcomes teams target include:
 
-**Annual savings: $96K** in engineering time + **$45K** in incident response
+- **Lower maintenance load** through managed discovery/checkpoint behavior
+- **Faster data availability** for downstream silver/gold layers
+- **Fewer schema-related ingestion incidents** when evolution is configured correctly
+- **Higher sustainable file throughput** without constant pipeline rewrites
+
+Use your own latency/error-rate baselines to quantify gains after rollout.
 
 ## The Technology
 
@@ -42,14 +44,16 @@ You mastered **Auto Loader** — Databricks' optimized file ingestion:
 
 ## Industry Context
 
-Auto Loader is the **standard** for lakehouse ingestion:
+Auto Loader is widely used for production lakehouse ingestion when teams need incremental file processing with durable checkpointing.
 
-- **10x faster** than manual re-scanning entire directories
-- **Built-in fault tolerance** — cluster failures don't cause data loss
-- **Schema drift handling** — adapts to upstream changes automatically
-- **Cloud-optimized** — uses S3 event notifications, ADLS file events for instant detection
+Common reasons teams adopt it:
 
-**2024 Market:** 80%+ of Databricks customers use Auto Loader for production ingestion.
+- **Incremental discovery** avoids repeatedly scanning full directories
+- **Fault-tolerant streaming semantics** support recovery after job interruptions
+- **Schema drift handling** helps absorb upstream format evolution
+- **Cloud-native notification integration** improves discovery efficiency on object storage
+
+Adoption levels vary by workload and platform maturity, so track fit using your own ingestion SLOs.
 
 ## What You Learned
 

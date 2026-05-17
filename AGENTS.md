@@ -17,7 +17,7 @@
 
 | Layer | Technology |
 |---|---|
-| Framework | Next.js 15 (App Router, React Server Components) |
+| Framework | Next.js 16 (App Router, React Server Components) |
 | Language | TypeScript (strict mode) |
 | Styling | Tailwind CSS 4 (dark-only, anime-950 palette) |
 | Content | JSON configs + MDX in `src/content/` |
@@ -41,14 +41,11 @@ pnpm build            # Production build
 
 ## Implementation Progress
 
-**Check `docs/implementation-plan.md` for current progress.**
+**Check `docs/live-status.md` for canonical implementation status.**
+
+**Check `docs/audit_apr.md` for the April 2026 release audit and remediation checklist.**
 
 **For incident debugging and root-cause analysis, use `docs/ai-agent-rca-guide.md`.**
-
-```bash
-# Find the next task
-grep -n "\[ \]" docs/implementation-plan.md | head -5
-```
 
 ## Core Architecture
 
@@ -142,16 +139,16 @@ pnpm test:coverage    # With coverage
 ### Agent Workflow
 
 ```
-1. Check docs/implementation-plan.md for current progress
-2. Find the next unchecked task [ ]
-3. Create the test file with failing tests (RED)
-4. Run `pnpm test:run` — confirm tests FAIL
-5. Implement the code (GREEN)
-6. Run `pnpm test:run` — confirm tests PASS
-7. Refactor if needed, run tests again
-8. Run `pnpm tsc --noEmit` — confirm no type errors
-9. Update implementation-plan.md with [x] for completed task
-10. Commit: `feat(phase): description`
+1. Check docs/live-status.md for current progress and open items
+2. Check docs/audit_apr.md for remediation checklist
+3. Run pnpm validate (typecheck + lint + tests) to verify baseline
+4. Write failing test (RED)
+5. Run pnpm test:run — confirm tests FAIL
+6. Implement the code (GREEN)
+7. Run pnpm test:run — confirm tests PASS
+8. Run pnpm tsc --noEmit — confirm no type errors
+9. Update docs/live-status.md with any status changes
+10. Commit: `feat(scope): description`
 ```
 
 ## Code Style & Conventions
@@ -254,7 +251,8 @@ src/
 
 | File | Purpose |
 |------|---------|
-| `docs/plan.md` | Full architecture and design decisions |
+| `docs/live-status.md` | Canonical implementation status |
+| `docs/audit_apr.md` | April 2026 public release audit + remediation checklist |
 | `docs/ai-agent-rca-guide.md` | Full codebase map + RCA playbook for incidents |
 | `src/lib/gamification/` | Ranks, achievements, streaks logic |
 | `src/lib/sandbox/` | localStorage + Turso sync |

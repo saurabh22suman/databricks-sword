@@ -60,8 +60,6 @@ export function FillBlankChallenge({
   const [validated, setValidated] = useState(false);
   const [attempts, setAttempts] = useState(0);
   const [completed, setCompleted] = useState(false);
-  const [aiHint, setAiHint] = useState<string | null>(null);
-  const [isLoadingAiHint, setIsLoadingAiHint] = useState(false);
 
   // Shuffle options for each blank once on mount
   const shuffledBlanks = useMemo(() => {
@@ -164,38 +162,6 @@ export function FillBlankChallenge({
         score: calculatedScore,
         attempts,
       });
-    }
-  };
-
-  const handleRequestAiHint = async () => {
-    setIsLoadingAiHint(true);
-
-    try {
-      const response = await fetch("/api/hints/groq", {
-        method: "POST",
-        headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({
-          challengeType: "fill-blank",
-          prompt: config.description,
-          learnerInput: JSON.stringify(answers),
-        }),
-      });
-
-      if (!response.ok) {
-        setAiHint(null);
-        return;
-      }
-
-      const result = (await response.json()) as {
-        enabled?: boolean;
-        hint?: string | null;
-      };
-
-      setAiHint(result.enabled ? result.hint ?? null : null);
-    } catch {
-      setAiHint(null);
-    } finally {
-      setIsLoadingAiHint(false);
     }
   };
 
@@ -315,28 +281,12 @@ export function FillBlankChallenge({
             ) : (
               <span />
             )}
-
-            <button
-              onClick={handleRequestAiHint}
-              disabled={isLoadingAiHint}
-              className="text-anime-cyan hover:text-anime-purple transition-colors text-sm disabled:text-anime-500 text-right"
-            >
-              {isLoadingAiHint ? "Loading AI hint..." : "Request optional AI hint"}
-            </button>
           </div>
 
           {hintsRevealed > 0 && (
             <Callout type="info">
               <p className="text-sm">
                 <span className="text-anime-cyan font-medium">Hint {hintsRevealed}/{config.hints.length}:</span> {config.hints[hintsRevealed - 1]}
-              </p>
-            </Callout>
-          )}
-
-          {aiHint && (
-            <Callout type="info">
-              <p className="text-sm">
-                <span className="text-anime-cyan font-medium">AI Hint (advisory):</span> {aiHint}
               </p>
             </Callout>
           )}

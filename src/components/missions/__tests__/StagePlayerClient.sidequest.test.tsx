@@ -373,6 +373,7 @@ describe("StagePlayerClient — Side Quests", () => {
 
     expect(mockPush).not.toHaveBeenCalled()
     expect(mockAwardStageXp).not.toHaveBeenCalled()
+    expect(mockAwardMissionXp).not.toHaveBeenCalled()
     expect(mockSyncNow).not.toHaveBeenCalled()
   })
 

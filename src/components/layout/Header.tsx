@@ -1,13 +1,16 @@
 "use client"
 
 import { ProfileSidebar } from "@/components/auth/ProfileSidebar"
+import { RankProgressBar } from "@/components/gamification/RankProgressBar"
+import { onXpEvent } from "@/lib/gamification/xpEventBus"
 import { useSettings } from "@/lib/settings"
+import { loadSandbox } from "@/lib/sandbox"
 import { stopMusic } from "@/lib/sound"
 import { Menu, User, Volume2, VolumeX, X } from "lucide-react"
 import { useSession } from "next-auth/react"
 import Image from "next/image"
 import Link from "next/link"
-import { useState } from "react"
+import { useEffect, useState } from "react"
 
 /**
  * Main site header with cyberpunk anime aesthetic.
@@ -20,6 +23,24 @@ export function Header(): React.ReactElement {
   const { settings, updateSetting } = useSettings()
   const [sidebarOpen, setSidebarOpen] = useState(false)
   const [mobileMenuOpen, setMobileMenuOpen] = useState(false)
+  const [userXp, setUserXp] = useState(0)
+
+  // Load XP from sandbox on mount and listen for XP awards
+  useEffect(() => {
+    const sandbox = loadSandbox()
+    if (sandbox) {
+      setUserXp(sandbox.userStats.totalXp)
+    }
+
+    // Subscribe to XP events to keep header bar in sync
+    let lastXp = sandbox?.userStats.totalXp ?? 0
+    const unsubscribe = onXpEvent((event) => {
+      lastXp += event.amount
+      setUserXp(lastXp)
+    })
+
+    return unsubscribe
+  }, [])
 
   const audioMuted = !settings.sfxEnabled && !settings.musicEnabled
 
@@ -106,6 +127,13 @@ export function Header(): React.ReactElement {
               <span className="absolute -bottom-1 left-0 w-0 h-0.5 bg-anime-cyan group-hover:w-full transition-all duration-300" />
             </Link>
           </nav>
+
+          {/* XP Progress bar */}
+          {session?.user && (
+            <div className="hidden lg:flex items-center gap-3 pl-6 border-l border-white/10">
+              <RankProgressBar xp={userXp} className="w-48" />
+            </div>
+          )}
 
           {/* Actions */}
           <div className="flex items-center gap-4">
