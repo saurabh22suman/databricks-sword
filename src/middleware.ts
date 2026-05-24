@@ -5,8 +5,27 @@ import { NextResponse } from "next/server"
  * When MOCK_AUTH=true, skip all auth checks.
  * This allows local/dev testing of protected routes without real OAuth.
  * WARNING: Never set MOCK_AUTH=true in production deployments.
+ *
+ * CRITICAL SECURITY: This feature is blocked in production to prevent accidental auth bypass.
  */
 const isMockAuth = process.env.MOCK_AUTH === "true"
+
+// Security: Block MOCK_AUTH in production - this is a CRITICAL security risk
+if (isMockAuth && process.env.NODE_ENV === "production") {
+  throw new Error(
+    "CRITICAL SECURITY ERROR: MOCK_AUTH is not allowed in production. " +
+    "This would disable all authentication. Remove MOCK_AUTH from your environment variables."
+  )
+}
+
+// =============================================================================
+// RATE LIMITING NOTE:
+// Currently delegated to infrastructure layer (Vercel/API Gateway/nginx).
+// For production, implement at your edge/CDN:
+// - Vercel: Built-in rate limiting or Vercel Edge Functions
+// - Nginx: limit_req_zone directive
+// - API Gateway: Usage plans/throttling
+// =============================================================================
 
 // Public routes accessible without authentication.
 // Everything NOT listed here requires login.

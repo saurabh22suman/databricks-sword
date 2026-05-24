@@ -82,6 +82,11 @@ export function ChallengeCard({
         </span>
       </div>
 
+      {/* Verified date (static for now - can be made dynamic later) */}
+      <div className="flex items-center justify-end mb-2">
+        <span className="text-xs text-anime-600">Verified: May 2025</span>
+      </div>
+
       {/* Title */}
       <h3 className="font-heading text-lg font-bold text-anime-100 mb-2">
         {challenge.title}

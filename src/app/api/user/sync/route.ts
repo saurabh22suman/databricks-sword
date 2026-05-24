@@ -134,11 +134,7 @@ export async function POST(request: NextRequest): Promise<NextResponse> {
     let couponXp = 0
     let fieldOpsXp = 0
 
-    console.log("[SYNC] Starting sync for userId:", userId)
-    console.log(
-      "[SYNC] Incoming sandbox totalXp:",
-      sandboxData.userStats.totalXp,
-    )
+    // Note: Verbose logging removed for production. Use error logs only.
 
     try {
       const [couponXpResult, fieldOpsXpResult] = await Promise.all([
@@ -158,8 +154,6 @@ export async function POST(request: NextRequest): Promise<NextResponse> {
 
       couponXp = couponXpResult[0]?.totalCouponXp ?? 0
       fieldOpsXp = fieldOpsXpResult[0]?.totalFieldOpsXp ?? 0
-      console.log("[SYNC] Coupon XP from DB:", couponXp)
-      console.log("[SYNC] Field ops XP from DB:", fieldOpsXp)
     } catch (error) {
       console.error("[SYNC] Error fetching XP from DB:", error)
       if (!isMockAuth) {
@@ -172,15 +166,9 @@ export async function POST(request: NextRequest): Promise<NextResponse> {
       fieldOpsXp,
     })
 
-    console.log(
-      "[SYNC] Final calculated totalXp:",
-      sanitizedSandboxData.userStats.totalXp,
-    )
-
     // Upsert sandbox snapshot
     try {
       const snapshotId = nanoid()
-      console.log("[SYNC] Inserting/updating snapshot for user:", userId)
 
       await getDb()
         .insert(sandboxSnapshots)
@@ -202,7 +190,6 @@ export async function POST(request: NextRequest): Promise<NextResponse> {
           },
         })
 
-      console.log("[SYNC] Snapshot upsert successful")
     } catch (upsertError) {
       console.error("[SYNC] Upsert error:", upsertError)
       throw upsertError

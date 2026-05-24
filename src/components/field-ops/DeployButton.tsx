@@ -115,6 +115,13 @@ export function DeployButton({
         )}
       </button>
 
+      {/* Warning/Reminder that always shows when connected */}
+      {isConnected && !disabled && !isDeploying && (
+        <p className="text-xs text-anime-500">
+          💡 Will deploy to your workspace (~3-8 min). Run <code className="text-anime-400">/cleanup</code> when done.
+        </p>
+      )}
+
       {error && (
         <p className="text-anime-accent text-sm">{error}</p>
       )}
