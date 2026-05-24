@@ -1,0 +1,20 @@
+{
+  "id": "uc-ft-clean-rooms",
+  "title": "Secure Data Sharing with Clean Rooms",
+  "category": "unity-catalog",
+  "difficulty": "S",
+  "format": "free-text",
+  "description": "Explain how Delta Sharing Clean Rooms enable secure data collaboration with external partners while enforcing row-level security and column masking automatically. Why is this important for regulatory compliance?",
+  "hints": [
+    "Clean rooms provide a secure sandbox environment for collaborators",
+    "Row filters and column masks are automatically enforced",
+    "Recipients can query but cannot export raw data"
+  ],
+  "xpReward": 100,
+  "optimalSolution": "Clean Rooms in Delta Sharing provide a secure collaboration environment where external partners can analyze shared data without receiving raw exports. Row-level security filters data at the query level (e.g., region='US'), and column masking redacts sensitive fields (SSN, salary). This maintains compliance with GDPR, HIPAA, and protects competitive data while enabling legitimate analytics partnerships.",
+  "explanation": "Clean Rooms are essential for secure data collaboration in regulated industries. Unlike basic Delta Sharing where recipients get full table access, Clean Rooms enforce access policies centrally. Providers maintain full control - all queries go through the clean room proxy which applies row/column filters automatically. This is critical for HIPAA compliance (healthcare), GDPR compliance (EU citizen data), and protecting competitive intelligence while enabling B2B data partnerships.",
+  "freeText": {
+    "validationRegex": "row.*(filter|mask)|column.*(filter|mask)|secure|complian|gdpr|hipaa",
+    "sampleAnswer": "Clean rooms enable secure collaboration by enforcing row filters and column masks centrally, ensuring regulatory compliance while allowing analytics."
+  }
+}

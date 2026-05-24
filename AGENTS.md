@@ -45,6 +45,8 @@ pnpm build            # Production build
 
 **Check `docs/audit_apr.md` for the April 2026 release audit and remediation checklist.**
 
+**Check `docs/readiness.md` for the May 2026 production readiness audit.**
+
 **For incident debugging and root-cause analysis, use `docs/ai-agent-rca-guide.md`.**
 
 ## Core Architecture

@@ -85,14 +85,29 @@ export function Hero(): React.ReactElement {
             <span className="text-anime-cyan font-bold">WARNING:</span> Traditional learning methods detected as obsolete. Initiate <span className="text-white font-bold">Protocol Sword</span> to master the Lakehouse.
           </p>
 
-          <div className="flex flex-col sm:flex-row gap-6">
+          {/* Free Badge */}
+          <div className="mb-6 flex items-center gap-3">
+            <span className="px-3 py-1.5 bg-green-900/50 border border-green-600 text-green-400 text-xs font-bold uppercase tracking-wider rounded">
+              🆓 100% Free Forever
+            </span>
+            <span className="text-gray-500 text-sm">No credit card required</span>
+          </div>
+
+          <div className="flex flex-col sm:flex-row gap-4">
             <Link
-              href="/missions"
+              href="/missions/lakehouse-fundamentals"
               className="cut-corner group relative px-8 py-4 bg-anime-accent hover:bg-red-600 transition-all duration-300 text-white font-bold uppercase tracking-wider flex items-center justify-center gap-3 overflow-hidden shadow-[0_0_20px_rgba(255,0,60,0.4)] hover:shadow-[0_0_40px_rgba(255,0,60,0.8),inset_0_0_20px_rgba(255,255,255,0.2)] hover:scale-105 active:scale-95 border-t border-white/20"
             >
               <div className="absolute inset-0 bg-gradient-to-r from-transparent via-white/40 to-transparent translate-x-[-150%] group-hover:animate-shimmer skew-x-[-20deg]" />
-              <span className="relative z-10 drop-shadow-md">Start Mission</span>
+              <span className="relative z-10 drop-shadow-md">Start Here (Beginner)</span>
               <ArrowRight className="w-5 h-5 group-hover:translate-x-1 transition-transform relative z-10" />
+            </Link>
+            <Link
+              href="/cheat-sheet"
+              className="cut-corner group relative px-6 py-4 bg-anime-800 hover:bg-anime-700 transition-all duration-300 text-white font-bold uppercase tracking-wider flex items-center justify-center gap-2 border border-anime-600"
+            >
+              <Cpu className="w-4 h-4" />
+              <span className="relative z-10">Quick Reference</span>
             </Link>
           </div>
 

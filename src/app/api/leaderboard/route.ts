@@ -1,7 +1,7 @@
 /**
  * @file GET /api/leaderboard
- * @description Returns the top players leaderboard from sandbox snapshots.
- * Scans all snapshots, extracts totalXp + user info, sorts descending.
+ * @description Returns paginated leaderboard with cursor-based pagination.
+ * Supports cursor-based pagination for scalability.
  */
 
 import { apiError, apiOk } from "@/lib/api/responses"
@@ -11,14 +11,10 @@ import { sandboxSnapshots, users } from "@/lib/db/schema"
 import { getRankForXp } from "@/lib/gamification/ranks"
 import { SandboxDataSchema } from "@/lib/sandbox/types"
 import { and, desc, eq, ne, sql } from "drizzle-orm"
-import { NextResponse } from "next/server"
+import { NextRequest, NextResponse } from "next/server"
 
-type LeaderboardRow = {
-  snapshotData: string | null
-  userId: string
-  userName: string | null
-  userImage: string | null
-}
+const DEFAULT_PAGE_SIZE = 20
+const MAX_PAGE_SIZE = 100
 
 type LeaderboardEntry = {
   userId: string
@@ -30,15 +26,30 @@ type LeaderboardEntry = {
   currentStreak: number
 }
 
+type LeaderboardResponse = {
+  entries: LeaderboardEntry[]
+  pagination: {
+    cursor: string | null
+    hasMore: boolean
+    totalPlayers: number
+  }
+}
+
 function isMissingLeaderboardOptInColumnError(error: unknown): boolean {
   if (!(error instanceof Error)) {
     return false
   }
-
   return error.message.includes("leaderboard_opt_in")
 }
 
-function mapLeaderboardEntries(rows: LeaderboardRow[]): LeaderboardEntry[] {
+function mapLeaderboardEntries(
+  rows: Array<{
+    snapshotData: string | null
+    userId: string
+    userName: string | null
+    userImage: string | null
+  }>
+): LeaderboardEntry[] {
   const entries: LeaderboardEntry[] = []
 
   for (const row of rows) {
@@ -75,14 +86,61 @@ function mapLeaderboardEntries(rows: LeaderboardRow[]): LeaderboardEntry[] {
   return entries
 }
 
-export async function GET(): Promise<NextResponse> {
+// XP extraction SQL helper
+const xpExtractor = sql<number>`
+  coalesce(
+    cast(json_extract(${sandboxSnapshots.snapshotData}, '$.userStats.totalXp') as integer),
+    0
+  )
+`
+
+export async function GET(request: NextRequest): Promise<NextResponse> {
   try {
+    const { searchParams } = new URL(request.url)
+
+    // Parse pagination parameters
+    const cursor = searchParams.get("cursor")
+    const pageSize = Math.min(
+      parseInt(searchParams.get("pageSize") ?? String(DEFAULT_PAGE_SIZE), 10),
+      MAX_PAGE_SIZE
+    )
+
     const db = getDb()
 
-    let rows: LeaderboardRow[] = []
     let totalPlayers = 0
 
+    // Get total count first
     try {
+      const [countRow] = await db
+        .select({ totalPlayers: sql<number>`count(*)` })
+        .from(users)
+        .where(and(ne(users.id, MOCK_USER_ID), eq(users.leaderboardOptIn, true)))
+
+      totalPlayers = countRow?.totalPlayers ?? 0
+    } catch {
+      // Column might not exist yet
+      totalPlayers = -1
+    }
+
+    // Build query with cursor-based pagination
+    let rows: Array<{
+      snapshotData: string | null
+      userId: string
+      userName: string | null
+      userImage: string | null
+    }> = []
+
+    const cursorXp = cursor ? parseFloat(cursor) : null
+    const hasCursor = cursorXp !== null && !isNaN(cursorXp)
+
+    try {
+      // Query with opt-in column
+      const baseWhere = and(
+        ne(users.id, MOCK_USER_ID),
+        eq(users.leaderboardOptIn, true),
+        hasCursor ? sql`${xpExtractor} < ${cursorXp}` : undefined
+      )
+
       rows = await db
         .select({
           snapshotData: sandboxSnapshots.snapshotData,
@@ -92,20 +150,19 @@ export async function GET(): Promise<NextResponse> {
         })
         .from(users)
         .leftJoin(sandboxSnapshots, eq(sandboxSnapshots.userId, users.id))
-        .where(and(ne(users.id, MOCK_USER_ID), eq(users.leaderboardOptIn, true)))
-        .orderBy(desc(sql<number>`coalesce(cast(json_extract(${sandboxSnapshots.snapshotData}, '$.userStats.totalXp') as integer), 0)`))
-
-      const [countRow] = await db
-        .select({ totalPlayers: sql<number>`count(*)` })
-        .from(users)
-        .where(and(ne(users.id, MOCK_USER_ID), eq(users.leaderboardOptIn, true)))
-
-      totalPlayers = countRow?.totalPlayers ?? 0
+        .where(baseWhere)
+        .orderBy(desc(xpExtractor))
+        .limit(pageSize + 1)
     } catch (error) {
+      // Fallback without opt-in column
       if (!isMissingLeaderboardOptInColumnError(error)) {
-        throw error
+        console.error("Leaderboard query error:", error)
       }
 
+      const baseWhere = hasCursor
+        ? and(ne(users.id, MOCK_USER_ID), sql`${xpExtractor} < ${cursorXp}`)
+        : ne(users.id, MOCK_USER_ID)
+
       rows = await db
         .select({
           snapshotData: sandboxSnapshots.snapshotData,
@@ -115,21 +172,38 @@ export async function GET(): Promise<NextResponse> {
         })
         .from(users)
         .leftJoin(sandboxSnapshots, eq(sandboxSnapshots.userId, users.id))
-        .where(ne(users.id, MOCK_USER_ID))
-        .orderBy(desc(sql<number>`coalesce(cast(json_extract(${sandboxSnapshots.snapshotData}, '$.userStats.totalXp') as integer), 0)`))
+        .where(baseWhere)
+        .orderBy(desc(xpExtractor))
+        .limit(pageSize + 1)
+    }
 
-      const [countRow] = await db
-        .select({ totalPlayers: sql<number>`count(*)` })
-        .from(users)
-        .where(ne(users.id, MOCK_USER_ID))
+    // Check if there are more results
+    let nextCursor: string | null = null
+    let hasMore = false
 
-      totalPlayers = countRow?.totalPlayers ?? 0
+    if (rows.length > pageSize) {
+      hasMore = true
+      rows = rows.slice(0, pageSize)
+      // Set cursor to the last user's XP value
+      const lastRow = rows[rows.length - 1]
+      if (lastRow.snapshotData) {
+        try {
+          const lastSandbox = JSON.parse(lastRow.snapshotData)
+          nextCursor = String(lastSandbox.userStats.totalXp)
+        } catch {
+          nextCursor = null
+        }
+      }
     }
 
     return apiOk({
       entries: mapLeaderboardEntries(rows),
-      totalPlayers,
-    })
+      pagination: {
+        cursor: nextCursor,
+        hasMore,
+        totalPlayers,
+      },
+    } satisfies LeaderboardResponse)
   } catch (error) {
     console.error("Error fetching leaderboard:", error)
     return apiError("Internal server error", 500, "INTERNAL_ERROR")

@@ -1,0 +1,51 @@
+{
+  "id": "arch-ft-dlt-table-types",
+  "title": "Compare DLT Table Types",
+  "category": "architecture",
+  "difficulty": "B",
+  "format": "fill-blank",
+  "description": "Fill in the blanks to distinguish between STREAMING TABLE, MATERIALIZED VIEW, and LIVE TABLE in Delta Live Tables. Know when to use each type.",
+  "hints": [
+    "STREAMING TABLE continuously ingests from external sources",
+    "MATERIALIZED VIEW is pre-computed and refreshed on schedule",
+    "LIVE TABLE updates in real-time as source data changes"
+  ],
+  "xpReward": 100,
+  "optimalSolution": "CREATE OR REFRESH MATERIALIZED VIEW daily_metrics AS SELECT region, sum(amount) as revenue FROM sales GROUP BY region;\n\nCREATE OR REFRESH LIVE TABLE realtime_orders AS SELECT * FROM orders;\n\nCREATE OR REFRESH STREAMING TABLE raw_events AS SELECT * FROM STREAM(read_files('s3://data/', format => 'json'));",
+  "explanation": "DLT offers three table types: STREAMING TABLE continuously ingests from cloud files (Auto Loader). MATERIALIZED VIEW recomputes on refresh - ideal for complex aggregations. LIVE TABLE (formerly Streaming Table) updates in real-time. Choose based on latency needs and query complexity.",
+  "fillBlank": {
+    "codeTemplate": "__BLANK_0__ TABLE daily_sales AS SELECT region, sum(amount) as revenue FROM sales GROUP BY region;\n\n__BLANK_1__ TABLE realtime_orders AS SELECT * FROM orders;\n\n__BLANK_2__ STREAMING TABLE raw_events AS SELECT * FROM STREAM(read_files('s3://data/', format => 'json'));",
+    "blanks": [
+      {
+        "id": 0,
+        "correctAnswer": "MATERIALIZED VIEW",
+        "options": [
+          "MATERIALIZED VIEW",
+          "LIVE TABLE",
+          "STREAMING TABLE",
+          "DYNAMIC TABLE"
+        ]
+      },
+      {
+        "id": 1,
+        "correctAnswer": "LIVE TABLE",
+        "options": [
+          "LIVE TABLE",
+          "STREAMING TABLE",
+          "DYNAMIC TABLE",
+          "MATERIALIZED VIEW"
+        ]
+      },
+      {
+        "id": 2,
+        "correctAnswer": "OR REFRESH",
+        "options": [
+          "OR REFRESH",
+          "CONTINUOUS",
+          "REALTIME",
+          "STREAMING"
+        ]
+      }
+    ]
+  }
+}

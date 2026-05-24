@@ -31,6 +31,8 @@ To bypass OAuth during local development, add to `.env.local`:
 MOCK_AUTH=true
 ```
 
+⚠️ **WARNING:** MOCK_AUTH is **BLOCKED in production**. If set in production, the app will refuse to start.
+
 ## Environment Variables
 
 Copy `.env.example` to `.env.local` and fill in the values:

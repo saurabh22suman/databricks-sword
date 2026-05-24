@@ -120,6 +120,13 @@ export function Header(): React.ReactElement {
               <span className="absolute -bottom-1 left-0 w-0 h-0.5 bg-anime-purple group-hover:w-full transition-all duration-300" />
             </Link>
             <Link
+              href="/cheat-sheet"
+              className="hover:text-anime-cyan relative group transition-colors"
+            >
+              Cheat Sheet
+              <span className="absolute -bottom-1 left-0 w-0 h-0.5 bg-anime-cyan group-hover:w-full transition-all duration-300" />
+            </Link>
+            <Link
               href="/blog"
               className="hover:text-white relative group transition-colors"
             >

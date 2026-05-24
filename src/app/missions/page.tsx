@@ -48,6 +48,33 @@ export default async function MissionsPage(): Promise<React.ReactElement> {
           </p>
         </div>
 
+        {/* Suggested Path for Beginners */}
+        <div className="mb-8 p-4 bg-anime-900/50 border border-anime-700 rounded-lg max-w-3xl mx-auto">
+          <h2 className="text-sm font-semibold text-anime-cyan mb-3 uppercase tracking-wider">
+            Suggested Path
+          </h2>
+          <div className="flex flex-wrap items-center justify-center gap-2 text-sm">
+            <span className="px-3 py-1.5 bg-anime-800 rounded border border-anime-600 text-anime-100">
+              Lakehouse Fundamentals
+            </span>
+            <span className="text-anime-500">→</span>
+            <span className="px-3 py-1.5 bg-anime-800 rounded border border-anime-600 text-anime-100">
+              PySpark Essentials
+            </span>
+            <span className="text-anime-500">→</span>
+            <span className="px-3 py-1.5 bg-anime-800 rounded border border-anime-600 text-anime-100">
+              Delta Lake Deep Dive
+            </span>
+            <span className="text-anime-500">→</span>
+            <span className="px-3 py-1.5 bg-anime-800 rounded border border-anime-600 text-anime-100">
+              MLflow Tracking
+            </span>
+          </div>
+          <p className="text-xs text-anime-500 mt-3 text-center">
+            Start here if you&apos;re new to Databricks
+          </p>
+        </div>
+
         {/* Mission View (Grid/Map toggle) */}
         <MissionsView missions={missions} fieldOps={fieldOps} userXp={userXp} />
 

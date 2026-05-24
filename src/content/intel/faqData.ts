@@ -64,12 +64,13 @@ export const faqData: FAQCategory[] = [
         codeExample: `# Check runtime version in a notebook
 spark.conf.get("spark.databricks.clusterUsageTags.sparkVersion")
 
-# Example: "13.3.x-scala2.12" indicates DBR 13.3`,
+# Example: "15.4.x-scala2.12" indicates DBR 15.4 LTS`,
         keyPoints: [
           "Optimized Spark distribution",
           "Photon engine for faster SQL queries",
           "Pre-installed ML libraries",
           "Multiple flavors: Standard, ML, GPU, Genomics",
+          "Serverless compute available for no cluster management",
         ],
       },
       {
@@ -93,11 +94,19 @@ spark.conf.get("spark.databricks.clusterUsageTags.sparkVersion")
 {
   "num_workers": 4,
   "cluster_name": "my-cluster",
-  "spark_version": "13.3.x-scala2.12",
+  "spark_version": "15.4.x-scala2.12",
   "node_type_id": "i3.xlarge",
   "autoscale": {
     "min_workers": 2,
     "max_workers": 8
+  }
+}
+
+// Serverless option (no cluster management):
+{
+  "compute": {
+    "type": "serverless",
+    "warehouse_size": "small"
   }
 }`,
         keyPoints: [
@@ -105,6 +114,7 @@ spark.conf.get("spark.databricks.clusterUsageTags.sparkVersion")
           "All-purpose clusters for interactive work",
           "Job clusters for automated pipelines",
           "Autoscaling and spot instances for cost optimization",
+          "Serverless compute eliminates cluster management",
         ],
       },
       {
@@ -248,14 +258,14 @@ df = spark.read.format("jdbc").option("url", jdbc_url).load()`,
   "cluster_name": "shared-dev",
   "autotermination_minutes": 60,
   "num_workers": 4,
-  "spark_version": "14.3.x-scala2.12"
+  "spark_version": "15.4.x-scala2.12"
 }
 
 # Job cluster — ephemeral, created per run
 {
   "new_cluster": {
     "num_workers": 8,
-    "spark_version": "14.3.x-scala2.12",
+    "spark_version": "15.4.x-scala2.12",
     "node_type_id": "m5.2xlarge"
   }
 }`,
@@ -311,7 +321,7 @@ df = spark.read.format("jdbc").option("url", jdbc_url).load()`,
   },
   "spark_version": {
     "type": "regex",
-    "pattern": "14\\\\.[0-9]+\\\\.x-scala.*"
+    "pattern": "15\\\\.[0-9]+\\\\.x-scala.*"
   }
 }`,
         keyPoints: [
@@ -348,11 +358,11 @@ df = spark.read.format("jdbc").option("url", jdbc_url).load()`,
 df = spark.read.format("delta").option("versionAsOf", 5).load("/path/to/table")
 
 # Query by timestamp
-df = spark.read.format("delta").option("timestampAsOf", "2024-01-15").load("/path/to/table")
+df = spark.read.format("delta").option("timestampAsOf", "2025-01-15").load("/path/to/table")
 
 # SQL syntax
 SELECT * FROM my_table VERSION AS OF 5
-SELECT * FROM my_table TIMESTAMP AS OF '2024-01-15'`,
+SELECT * FROM my_table TIMESTAMP AS OF '2025-01-15'`,
         keyPoints: [
           "Query any historical version of data",
           "Use version numbers or timestamps",
@@ -508,7 +518,7 @@ OPTIMIZE my_table;
 OPTIMIZE my_table ZORDER BY (date, region);
 
 -- Optimize a specific partition
-OPTIMIZE my_table WHERE date = '2024-01-15';
+OPTIMIZE my_table WHERE date = '2025-01-15';
 
 -- Enable predictive optimization (auto-OPTIMIZE)
 ALTER TABLE my_table SET TBLPROPERTIES (
@@ -682,7 +692,7 @@ df1.join(df2, "id")  # Both DataFrames shuffled for join`,
 result = large_df.join(broadcast(small_df), "customer_id")
 
 # Optimize join with pre-filtering
-df1_filtered = df1.filter(col("date") >= "2024-01-01")
+df1_filtered = df1.filter(col("date") >= "2025-01-01")
 result = df1_filtered.join(df2, "id")
 
 # Check join strategy in explain plan
@@ -1240,7 +1250,7 @@ CREATE OR REPLACE FUNCTION date_range(start_date DATE, end_date DATE)
 RETURNS TABLE (dt DATE)
 RETURN SELECT explode(sequence(start_date, end_date)) AS dt;
 
-SELECT * FROM date_range('2024-01-01', '2024-01-31');`,
+SELECT * FROM date_range('2025-01-01', '2025-01-31');`,
         keyPoints: [
           "Scalar UDFs return a single value per row",
           "Table UDFs return result sets",
@@ -1561,7 +1571,7 @@ with mlflow.start_run(run_name="rf-baseline"):
     
     # Custom metrics
     mlflow.log_metric("custom_f1", 0.94)
-    mlflow.log_param("data_version", "2024-03")
+    mlflow.log_param("data_version", "2025-03")
     
     # Log artifacts
     mlflow.log_artifact("feature_importance.png")
@@ -2251,7 +2261,7 @@ salted_small = small_df.crossJoin(
     spark.range(salt_buckets).withColumnRenamed("id", "salt"))
 result = salted_big.join(salted_small, ["key", "salt"]).drop("salt")
 
-# AQE settings (enabled by default in DBR 12+)
+# AQE settings (enabled by default in DBR 13+))
 spark.conf.set("spark.sql.adaptive.enabled", "true")
 spark.conf.set("spark.sql.adaptive.coalescePartitions.enabled", "true")
 spark.conf.set("spark.sql.adaptive.skewJoin.enabled", "true")`,

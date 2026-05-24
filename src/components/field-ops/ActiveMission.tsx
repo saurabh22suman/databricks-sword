@@ -270,6 +270,23 @@ export function ActiveMission({
   return (
     <div className="py-12">
       <div className="container mx-auto px-4 max-w-6xl">
+        {/* Real Databricks Warning Banner */}
+        <div className="mb-6 p-4 bg-anime-800/80 border border-anime-600 rounded-lg">
+          <div className="flex items-start gap-3">
+            <span className="text-2xl">⚠️</span>
+            <div>
+              <p className="text-anime-100 font-semibold">
+                Running on YOUR Databricks workspace
+              </p>
+              <p className="text-anime-400 text-sm mt-1">
+                This mission deploys real resources to your connected workspace.
+                Estimated cost: <span className="text-anime-cyan">~$0.25-1.00 credit</span>.
+                Use <code className="text-anime-accent">Detach</code> button to clean up when done.
+              </p>
+            </div>
+          </div>
+        </div>
+
         <div className="mb-8">
           <a
             href="/field-ops"

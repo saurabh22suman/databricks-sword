@@ -65,6 +65,24 @@ export default async function FieldOpsPage(): Promise<React.ReactElement> {
           </p>
         </div>
 
+        {/* Cost/Time Info Banner */}
+        <div className="mb-6 p-4 bg-anime-900/50 border border-anime-700 rounded-lg">
+          <div className="flex flex-wrap gap-6 text-sm">
+            <div className="flex items-center gap-2">
+              <span className="text-anime-500">⏱️</span>
+              <span className="text-anime-300">Est. time: 3-8 min per deployment</span>
+            </div>
+            <div className="flex items-center gap-2">
+              <span className="text-anime-500">💰</span>
+              <span className="text-anime-300">Est. cost: ~$0.25-1.00 credit</span>
+            </div>
+            <div className="flex items-center gap-2">
+              <span className="text-anime-500">🧹</span>
+              <span className="text-anime-300">Run /cleanup after use</span>
+            </div>
+          </div>
+        </div>
+
         {/* Connection Status Banner */}
         <ConnectionStatus isConnected={isConnected} refreshOnInitialSync />
 
