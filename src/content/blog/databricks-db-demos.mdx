@@ -1,0 +1,101 @@
+---
+title: "Going Beyond Databricks Sword: Exploring dbdemos for Real-World Examples"
+description: "Discover Databricks dbdemos - the official demo library that complements your learning journey on Databricks Sword."
+author: "Manish Kumar"
+category: "tutorials"
+status: "published"
+publishedAt: "2026-05-26"
+tags: ["databricks", "demos", "learning", "dbdemos"]
+featured: false
+---
+
+# Going Beyond Databricks Sword: Exploring dbdemos for Real-World Examples
+
+If you've completed the Field Operations missions on Databricks Sword and want to explore more real-world examples, Databricks offers an incredible resource called **dbdemos** - and it's free!
+
+## What is dbdemos?
+
+**dbdemos** is a Databricks Labs CLI tool that automatically deploys production-grade demo notebooks to your workspace. Think of it as a pre-built showcase library that demonstrates real-world data engineering and ML patterns.
+
+### Available Demo Categories
+
+| Category | Description |
+|----------|-------------|
+| **aibi** | AI Business Intelligence - Customer support analytics, AI metrics |
+| **demo-FSI** | Financial Services - Banking, insurance use cases |
+| **demo-HLS** | Healthcare/Life Sciences - Patient readmission prediction |
+| **demo-manufacturing** | IoT Platform - Factory sensor data processing |
+| **demo-retail** | Customer 360 - Retail analytics and personalization |
+
+## How to Use dbdemos
+
+### 1. Install the CLI
+
+```bash
+pip install dbdemos
+```
+
+### 2. List Available Demos
+
+```bash
+dbdemos list
+```
+
+### 3. Deploy a Demo
+
+```bash
+# Deploy a specific demo
+dbdemos deploy --demo retail-c360
+
+# Or deploy all
+dbdemos deploy --all
+```
+
+## What's Inside Each Demo?
+
+Each dbdemos package includes:
+
+- **Sample datasets** - Realistic data generated or sampled
+- **Pre-built notebooks** - Working ETL and ML pipelines
+- **Delta Lake tables** - Properly structured bronze/silver/gold layers
+- **ML models** - Trained models ready for inference
+- **Jobs/Pipelines** - Scheduled workflows
+
+## Example: Customer Support Analytics (aibi)
+
+One of the most popular demos includes:
+
+- **24,000+ simulated support tickets**
+- **AI vs Human agent performance metrics**
+- **SLA tracking and compliance scoring**
+- **CSAT prediction models**
+- **Interactive dashboards**
+
+This is exactly the kind of real-world scenario you practiced in our Field Operations missions!
+
+## When to Use dbdemos vs Databricks Sword
+
+| Use Case | Databricks Sword | dbdemos |
+|----------|------------------|---------|
+| **Learning fundamentals** | ✅ Structured curriculum | ❌ |
+| **Hands-on practice** | ✅ With validation | ❌ |
+| **Seeing production patterns** | ❌ | ✅ |
+| **Quick demos for stakeholders** | ❌ | ✅ |
+| **Gamified progression** | ✅ | ❌ |
+
+## Recommended Learning Path
+
+1. **Start with Databricks Sword missions** - Build foundational skills
+2. **Deploy Field Operations** - Practice with real Databricks resources
+3. **Explore dbdemos** - See how production systems are structured
+4. **Build your own** - Apply lessons to your own projects
+
+## Get Started with Field Operations
+
+Ready to put your skills to the test? Head to [Field Operations](/field-ops) and deploy your first mission to a real Databricks workspace!
+
+> 💡 **Pro tip**: Complete our Field Operations first to understand the patterns, then explore dbdemos to see how enterprise teams build them at scale.
+
+---
+
+*Happy learning! 🚀*

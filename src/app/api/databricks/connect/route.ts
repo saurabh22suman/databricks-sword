@@ -64,7 +64,13 @@ export async function POST(request: NextRequest): Promise<NextResponse> {
     // Validate the connection
     const validation = await validateConnection(workspaceUrl, pat);
     if (!validation.valid) {
-      return NextResponse.json({ error: validation.error || "Invalid credentials" }, { status: 401 });
+      // Return detailed error for better UX
+      const response = { error: validation.error || "Invalid credentials" };
+      // Include error type for UI guidance if available
+      if (validation.errorType) {
+        return NextResponse.json({ ...response, errorType: validation.errorType }, { status: 401 });
+      }
+      return NextResponse.json(response, { status: 401 });
     }
 
     // Encrypt the PAT

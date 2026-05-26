@@ -96,7 +96,9 @@ const xpExtractor = sql<number>`
 
 export async function GET(request: NextRequest): Promise<NextResponse> {
   try {
-    const { searchParams } = new URL(request.url)
+    // Handle case where request might be undefined (test scenarios)
+    const url = request?.url
+    const searchParams = url ? new URL(url).searchParams : new URLSearchParams()
 
     // Parse pagination parameters
     const cursor = searchParams.get("cursor")
