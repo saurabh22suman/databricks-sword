@@ -1,9 +1,11 @@
-import { authenticateApiRequest } from "@/lib/auth/api-auth";
-import { decryptPat, getBundleStatus, validateConnection } from "@/lib/databricks";
-import { NextRequest, NextResponse } from "next/server";
+import { authenticateApiRequest } from "@/lib/auth/api-auth"
+import { decryptPat, getBundleStatus, validateConnection } from "@/lib/databricks"
+import { getDb, databricksConnections } from "@/lib/db"
+import { eq } from "drizzle-orm"
+import { NextRequest, NextResponse } from "next/server"
 
 /** Only allow safe slug characters — prevents path traversal and command injection */
-const SAFE_SLUG = /^[a-z0-9][a-z0-9-]*[a-z0-9]$/;
+const SAFE_SLUG = /^[a-z0-9][a-z0-9-]*[a-z0-9]$/
 
 /**
  * GET /api/databricks/status
@@ -11,17 +13,22 @@ const SAFE_SLUG = /^[a-z0-9][a-z0-9-]*[a-z0-9]$/;
  * UserId is derived from the session — not from query params.
  */
 export async function GET(request: NextRequest): Promise<NextResponse> {
+  console.log("[databricks/status] Starting request");
+
   try {
     // Authenticate via session — prevents IDOR
     const authResult = await authenticateApiRequest();
     if (!authResult.authenticated) {
+      console.log("[databricks/status] Auth failed:", authResult.error);
       return NextResponse.json({ error: authResult.error }, { status: authResult.status });
     }
     const { userId } = authResult;
+    console.log("[databricks/status] Auth userId:", userId);
 
     const { searchParams } = new URL(request.url);
     const missionSlug = searchParams.get("missionSlug");
     const shouldValidate = searchParams.get("validate") === "true";
+    console.log("[databricks/status] validate:", shouldValidate);
 
     // Validate missionSlug format if provided
     if (missionSlug && !SAFE_SLUG.test(missionSlug)) {
@@ -34,9 +41,6 @@ export async function GET(request: NextRequest): Promise<NextResponse> {
     // Get user's connection from database
     let connection;
     try {
-      const { getDb, databricksConnections } = await import("@/lib/db");
-      const { eq } = await import("drizzle-orm");
-
       console.log("[databricks/status] Fetching connection for userId:", userId);
 
       const connections = await getDb()
@@ -92,9 +96,10 @@ export async function GET(request: NextRequest): Promise<NextResponse> {
 
     return NextResponse.json(response);
   } catch (error) {
-    console.error("[api/databricks/status]", error instanceof Error ? error.message : "Unknown error");
+    const msg = error instanceof Error ? error.message : String(error);
+    console.error("[databricks/status] ERROR:", msg, error);
     return NextResponse.json(
-      { error: "Internal server error" },
+      { error: "Internal server error", details: msg },
       { status: 500 }
     );
   }
