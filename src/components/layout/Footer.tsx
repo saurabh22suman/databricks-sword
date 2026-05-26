@@ -79,6 +79,16 @@ export function Footer(): React.ReactElement | null {
                   Support this Project
                 </a>
               </li>
+              <li>
+                <a
+                  href="https://datapathsala.com"
+                  target="_blank"
+                  rel="noopener noreferrer"
+                  className="hover:text-anime-cyan hover:pl-2 transition-all"
+                >
+                  Interested — Datapathsala
+                </a>
+              </li>
             </ul>
           </div>
         </div>

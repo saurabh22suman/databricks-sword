@@ -1,36 +1,48 @@
 /**
  * @file page.tsx
- * @description Quick Reference Cheat Sheet - Databricks 2025 Syntax
+ * @description Quick Reference Cheat Sheet - Databricks 2025+ Syntax
  */
 
 import { Metadata } from "next"
 
 export const metadata: Metadata = {
   title: "Quick Reference | Databricks Sword",
-  description: "Quick syntax reference for Databricks 2025 - DLT, Delta Lake, MLflow, Unity Catalog",
+  description: "Quick syntax reference for Databricks 2025 - Delta Lake, DLT, Unity Catalog, MLflow, Streaming",
 }
 
 const sections = [
   {
-    title: "DLT Table Types (2025)",
+    title: "DLT / Pipelines",
     items: [
       {
         name: "STREAMING TABLE",
-        syntax: "CREATE OR REFRESH STREAMING TABLE name AS SELECT ...",
+        syntax: "CREATE STREAMING TABLE name (...)\nAS SELECT * FROM STREAM read_files('path')",
         desc: "Continuously ingests from cloud files (Auto Loader)",
         useCase: "Raw data ingestion from S3/ADLS/GCS",
       },
       {
         name: "MATERIALIZED VIEW",
-        syntax: "CREATE OR REFRESH MATERIALIZED VIEW name AS SELECT ...",
-        desc: "Pre-computed, refreshed on schedule",
+        syntax: "CREATE MATERIALIZED VIEW name\nAS SELECT ... [REFRESH EVERY 1 HOUR]",
+        desc: "Pre-computed, refreshed on schedule via pipeline",
         useCase: "Complex aggregations, historical metrics",
       },
       {
-        name: "LIVE TABLE",
-        syntax: "CREATE OR REFRESH LIVE TABLE name AS SELECT ...",
-        desc: "Real-time updates as source changes",
-        useCase: "Latest data, recent activity",
+        name: "EXPECTATION",
+        syntax: "CONSTRAINT name EXPECT (col IS NOT NULL)\nON VIOLATION DROP ROW",
+        desc: "Data quality constraint, drops/fails on violation",
+        useCase: "Validate incoming data quality",
+      },
+      {
+        name: "AUTO LOADER",
+        syntax: "spark.readStream.format('cloudFiles')\n.option('path','s3://bucket/').load()",
+        desc: "Incremental load from cloud storage",
+        useCase: "CDR, IoT, file ingestion",
+      },
+      {
+        name: "CDC FLOW",
+        syntax: "FLOW { INSERT BY NAME query |\nAUTO CDC auto_cdc_flow_spec }",
+        desc: "Change data capture from source DB",
+        useCase: "Replicate changed records",
       },
     ],
   },
@@ -39,28 +51,48 @@ const sections = [
     items: [
       {
         name: "MERGE",
-        syntax: "MERGE INTO table USING source WHEN MATCHED THEN UPDATE ...",
-        desc: "Upsert/update/delete in one operation",
+        syntax: "MERGE INTO target USING src\nON t.id = s.id\nWHEN MATCHED THEN UPDATE SET *\nWHEN NOT MATCHED THEN INSERT *",
+        desc: "Upsert/update/delete in one atomic operation",
+      },
+      {
+        name: "MERGE (Delete)",
+        syntax: "MERGE INTO t USING s ON t.id = s.id\nWHEN MATCHED AND s.deleted = TRUE\nTHEN DELETE",
+        desc: "Delete matched rows via MERGE",
       },
       {
         name: "OPTIMIZE",
-        syntax: "OPTIMIZE table [WHERE partition = 'x'] [ZORDER BY col]",
-        desc: "Compact small files, optional Z-order for faster queries",
-      },
-      {
-        name: "VACUUM",
-        syntax: "VACUUM table [RETAIN <n> HOURS]",
-        desc: "Remove orphaned files, default retention 168 hours",
+        syntax: "OPTIMIZE table [WHERE x='y']\nZORDER BY (col1, col2)",
+        desc: "Compact small files, co-locate filtered columns",
       },
       {
         name: "LIQUID CLUSTERING",
-        syntax: "ALTER TABLE t CLUSTER BY (col1, col2)",
-        desc: "Replace partitioning for high-cardinality columns",
+        syntax: "CREATE TABLE t (...)\nCLUSTER BY (col1, col2)\n-- or ALTER TABLE t CLUSTER BY (col1)",
+        desc: "Adaptive clustering, replaces static partitioning",
+      },
+      {
+        name: "VACUUM",
+        syntax: "VACUUM table [RETAIN 24 HOURS]",
+        desc: "Remove orphaned files (default 168h retention)",
       },
       {
         name: "CHANGE DATA FEED",
-        syntax: "tblproperties delta.enableChangeDataFeed = true",
+        syntax: "ALTER TABLE t SET TBLPROPERTIES\ndelta.enableChangeDataFeed = true",
         desc: "Track row-level changes (inserts, updates, deletes)",
+      },
+      {
+        name: "COPY INTO",
+        syntax: "COPY INTO table FROM 'path'\nFILEFORMAT = PARQUET",
+        desc: "Load from cloud files idempotently",
+      },
+      {
+        name: "RESTORE",
+        syntax: "RESTORE TABLE t TO VERSION AS OF 5",
+        desc: "Restore table to previous version",
+      },
+      {
+        name: "HISTORY",
+        syntax: "DESCRIBE HISTORY t",
+        desc: "View table change history",
       },
     ],
   },
@@ -70,22 +102,32 @@ const sections = [
       {
         name: "Namespace",
         syntax: "catalog.schema.table",
-        desc: "Three-level hierarchy",
+        desc: "Three-level hierarchy (metastore→catalog→schema→table)",
+      },
+      {
+        name: "External Location",
+        syntax: "CREATE EXTERNAL LOCATION name\nURL 's3://bucket'\nWITH STORAGE CREDENTIAL cred",
+        desc: "Grant access to cloud storage paths",
       },
       {
         name: "Row Filter",
-        syntax: "CREATE POLICY name ON table ROW FILTER TO users EXCEPT group WHERE predicate",
-        desc: "Filter rows based on user/group",
+        syntax: "CREATE POLICY name ON tbl\nROW FILTER fn TO user GROUP eng\nFOR TABLES WHEN has_tag('pii')",
+        desc: "Filter rows by user/tag (ABAC)",
       },
       {
         name: "Column Mask",
-        syntax: "CREATE POLICY name ON table COLUMN MASK col TO users EXCEPT group AS expr",
-        desc: "Mask sensitive columns (SSN, salary)",
+        syntax: "CREATE POLICY mask_ssn ON tbl\nCOLUMN MASK fn ON COLUMN ssn\nTO user GROUP eng",
+        desc: "Redact sensitive columns (SSN, salary)",
       },
       {
         name: "Lineage",
-        syntax: "SELECT * FROM system.access.table_lineage WHERE ...",
-        desc: "Track upstream/downstream dependencies",
+        syntax: "SELECT * FROM system.access\n.table_lineage WHERE source = 'tbl'",
+        desc: "Track upstream/downstream deps",
+      },
+      {
+        name: "Tags",
+        syntax: "ALTER TABLE t SET TAG sensitivity='high'\nALTER TABLE t UNSET TAG temp",
+        desc: "Apply tag-based governance",
       },
     ],
   },
@@ -94,43 +136,78 @@ const sections = [
     items: [
       {
         name: "Autolog",
-        syntax: "mlflow.sklearn.autolog()",
+        syntax: "mlflow.sklearn.autolog()\n# or mlflow.<framework>.autolog()",
         desc: "Auto-log parameters, metrics, models",
       },
       {
         name: "Register Model",
-        syntax: "mlflow.register_model('models:/name@staging', 'catalog.schema.model')",
+        syntax: "mlflow.register_model(\n'models:/name@staging', 'cat.schema.model')",
         desc: "Register to Unity Catalog",
       },
       {
-        name: "Load Model",
-        syntax: "mlflow.spark.load_model('models:/path')",
-        desc: "Load model for inference",
+        name: "Load for Inference",
+        syntax: "model = mlflow.spark\n.load_model('models:/path')\npredictions = model.transform(input_df)",
+        desc: "Load model for batch scoring",
+      },
+      {
+        name: "Stage Transition",
+        syntax: "client.transition_model_version_stage(\nname='model', version=1, stage='Production')",
+        desc: "Move model through stages (None→Staging→Production→Archived)",
+      },
+      {
+        name: "Model Serving",
+        syntax: "mlflow.deployments.get_deployment(\n'transformer', inputs=inputs)",
+        desc: "Query served model via AI Gateway",
       },
     ],
   },
   {
-    title: "Structured Streaming",
+    title: "Streaming",
     items: [
       {
         name: "Watermark",
-        syntax: ".withWatermark('event_time', '10 minutes')",
-        desc: "Handle late data, minimize state",
+        syntax: ".withWatermark('event_time',\n'10 minutes')",
+        desc: "Handle late data, trigger-based aggregation",
       },
       {
         name: "Trigger",
-        syntax: ".trigger(availableNow=True)",
-        desc: "Process once and exit vs continuous",
+        syntax: ".trigger(availableNow=True)\n# or .trigger(continuous='30 seconds')",
+        desc: "Batch_once vs continuous processing",
       },
       {
         name: "ForeachBatch",
-        syntax: ".foreachBatch(df => df.write(...))",
-        desc: "Run arbitrary code on micro-batch",
+        syntax: ".foreachBatch(df => {\n  df.write(...)\n})",
+        desc: "Run arbitrary code per micro-batch",
       },
       {
-        name: "Auto Loader",
-        syntax: "spark.readStream.format('cloudFiles').option('path', 's3://...')",
-        desc: "Ingest from cloud storage incrementally",
+        name: "Append Mode",
+        syntax: ".outputMode('append')\n# or .outputMode('complete', 'update')",
+        desc: "How to emit results",
+      },
+      {
+        name: "State Migration",
+        syntax: "spark.conf.set('sql.statesInStreamingJoin','true')",
+        desc: "Enable streaming state migration",
+      },
+    ],
+  },
+  {
+    title: "Lakehouse Monitor",
+    items: [
+      {
+        name: "Create Monitor",
+        syntax: "CREATE MONITOR TABLE cat.schema.table\nAS SELECT * FROM source",
+        desc: "Create time-series monitor for data quality",
+      },
+      {
+        name: "Snapshot Mode",
+        syntax: "CREATE OR REFRESH MONITOR...\nMODE SNAPSHOT\nFOR FRESHNESS drift_threshold = 300",
+        desc: "Monitor data freshness (seconds)",
+      },
+      {
+        name: "Metrics Profile",
+        syntax: "... MODE METRICS\nINCLUDE FRESHNESS VIOLATIONS",
+        desc: "Statistical profiling + drift detection",
       },
     ],
   },
@@ -146,7 +223,7 @@ export default function CheatSheetPage(): React.ReactElement {
             Quick Reference
           </h1>
           <p className="text-anime-200 text-sm">
-            Databricks 2025 syntax • Last verified: May 2025
+            Databricks 2025+ syntax • Last verified: May 2026
           </p>
         </div>
 

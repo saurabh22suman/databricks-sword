@@ -12,8 +12,8 @@ export const metadata: Metadata = {
     "Articles, tutorials, and best practices for mastering the Databricks ecosystem.",
 }
 
-// Force dynamic rendering for DB queries
-export const dynamic = "force-dynamic"
+// ISR: cache blog list for 5 minutes
+export const revalidate = 300
 
 /** Category display colors */
 const CATEGORY_COLORS: Record<string, string> = {
