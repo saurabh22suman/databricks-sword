@@ -7,6 +7,7 @@ import { ToastContainer } from "@/components/gamification/ToastContainer"
 import { XpFlyToBar } from "@/components/gamification/XpFlyToBar"
 import { StreakFreezeNudge } from "@/components/gamification/StreakFreezeNudge"
 import { StreakDailyBonus } from "@/components/gamification/StreakDailyBonus"
+import { PromoBanner } from "@/components/ui/PromoBanner"
 import { auth } from "@/lib/auth"
 import { MOCK_SESSION, isMockAuth } from "@/lib/auth/mockSession"
 import type { Metadata } from "next"
@@ -88,6 +89,7 @@ export default async function RootLayout({
             <XpFlyToBar />
             <StreakFreezeNudge />
             <StreakDailyBonus />
+            <PromoBanner />
             <main className="flex-1">{children}</main>
             <Footer />
           </SandboxSyncProvider>

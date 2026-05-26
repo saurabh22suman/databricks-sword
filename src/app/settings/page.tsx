@@ -65,20 +65,24 @@ export default function SettingsPage(): React.ReactElement {
   }, [])
 
   // Fetch existing Databricks connection on mount
+  const [connectionError, setConnectionError] = useState<string | null>(null)
+
   useEffect(() => {
     if (!session?.user?.id) return
 
     const fetchConnection = async (): Promise<void> => {
       try {
         const response = await fetch(`/api/databricks/status`)
-        if (response.ok) {
-          const data = await response.json()
-          if (data.connected && data.workspaceUrl) {
-            setDatabricksUrl(data.workspaceUrl)
-          }
+        const data = await response.json()
+
+        if (response.ok && data.connected && data.workspaceUrl) {
+          setDatabricksUrl(data.workspaceUrl)
+          setConnectionError(null)
+        } else if (!response.ok) {
+          setConnectionError(data.error || "Failed to fetch connection")
         }
-      } catch {
-        // Ignore errors - user just won't see connected status
+      } catch (err) {
+        setConnectionError(err instanceof Error ? err.message : "Connection failed")
       }
     }
 
@@ -608,11 +612,32 @@ export default function SettingsPage(): React.ReactElement {
           />
           <div className="bg-anime-900 border-anime-700 cut-corner rounded-lg border p-6">
             {session?.user ? (
-              databricksUrl ? (
+              connectionError ? (
+                <div className="space-y-3">
+                  <div className="p-4 bg-anime-accent/10 border border-anime-accent rounded-lg">
+                    <p className="text-anime-accent text-sm font-medium">
+                      Error: {connectionError}
+                    </p>
+                  </div>
+                  <p className="text-anime-400 text-sm">
+                    Connect your Databricks workspace to run code against real clusters.
+                  </p>
+                  <ConnectionForm
+                    userId={session.user.id ?? ""}
+                    onConnect={(url) => {
+                      setDatabricksUrl(url)
+                      setConnectionError(null)
+                    }}
+                  />
+                </div>
+              ) : databricksUrl ? (
                 <ConnectionStatus
                   userId={session.user.id ?? ""}
                   validate
-                  onDisconnect={() => setDatabricksUrl(null)}
+                  onDisconnect={() => {
+                    setDatabricksUrl(null)
+                    setConnectionError(null)
+                  }}
                 />
               ) : (
                 <div className="space-y-3">

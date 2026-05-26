@@ -19,8 +19,8 @@ export const metadata: Metadata = {
     "Databricks interview questions with detailed answers, code examples, and explanations. Your decrypted knowledge base for lakehouse mastery.",
 }
 
-// Force dynamic rendering for DB queries and runtime alignment checks
-export const dynamic = "force-dynamic"
+// ISR: cache intel page for 5 minutes (challenges rarely change)
+export const revalidate = 300
 
 /**
  * Get FAQ items from database.

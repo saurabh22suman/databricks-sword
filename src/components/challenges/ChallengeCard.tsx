@@ -84,7 +84,7 @@ export function ChallengeCard({
 
       {/* Verified date (static for now - can be made dynamic later) */}
       <div className="flex items-center justify-end mb-2">
-        <span className="text-xs text-anime-600">Verified: May 2025</span>
+        <span className="text-xs text-anime-600">Verified: May 2026</span>
       </div>
 
       {/* Title */}

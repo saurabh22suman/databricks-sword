@@ -1013,6 +1013,20 @@ html {
   animation: scan-vertical 4s linear infinite;
 }
 
+/* CRT-style horizontal scan line sweep */
+@keyframes scan-horizontal {
+  0% {
+    left: -100%;
+  }
+  100% {
+    left: 100%;
+  }
+}
+
+.animate-scan-horizontal {
+  animation: scan-horizontal 3s linear infinite;
+}
+
 /* Subtle random horizontal jitter (soft glitch effect) */
 @keyframes glitch-soft {
   0%, 100% {

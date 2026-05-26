@@ -37,13 +37,17 @@ export async function GET(request: NextRequest): Promise<NextResponse> {
       const { getDb, databricksConnections } = await import("@/lib/db");
       const { eq } = await import("drizzle-orm");
 
+      console.log("[databricks/status] Fetching connection for userId:", userId);
+
       const connections = await getDb()
         .select()
         .from(databricksConnections)
-        .where(eq(databricksConnections.userId, userId));
+        .where(eq(databricksConnections.userId, userId))
 
       connection = connections[0];
-    } catch {
+      console.log("[databricks/status] Found connection:", !!connection);
+    } catch (error) {
+      console.error("[databricks/status] DB error:", error instanceof Error ? error.message : error);
       // Database not configured - return disconnected status
       return NextResponse.json({
         connected: false,

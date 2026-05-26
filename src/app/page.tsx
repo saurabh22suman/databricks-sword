@@ -13,8 +13,8 @@ import { StructuredData, getCourseStructuredData } from "@/lib/seo/structured-da
 import { eq } from "drizzle-orm"
 import type { Metadata } from "next"
 
-// Force dynamic rendering for DB queries (blog posts)
-export const dynamic = "force-dynamic"
+// Revalidate every 5 minutes - cached for fast loads, background refresh
+export const revalidate = 300
 
 export const metadata: Metadata = {
   title: "Databricks Sword — Master the Lakehouse Through Gamified Missions",
