@@ -25,22 +25,31 @@ export function Header(): React.ReactElement {
   const [mobileMenuOpen, setMobileMenuOpen] = useState(false)
   const [userXp, setUserXp] = useState(0)
 
-  // Load XP from sandbox on mount and listen for XP awards
+  // Load XP from sandbox on mount.
+// Listen for XP events (emitted when milestones sync to server and local progress updates).
+// This approach avoids race conditions between sync and local lookups.
+  const [hasHydrated, setHasHydrated] = useState(false)
+
   useEffect(() => {
+    // Wait for session to be ready before loading XP
+    if (status === "loading") return
+
     const sandbox = loadSandbox()
     if (sandbox) {
       setUserXp(sandbox.userStats.totalXp)
     }
+    setHasHydrated(true)
 
-    // Subscribe to XP events to keep header bar in sync
-    let lastXp = sandbox?.userStats.totalXp ?? 0
+    // Subscribe to XP events for live updates
     const unsubscribe = onXpEvent((event) => {
-      lastXp += event.amount
-      setUserXp(lastXp)
+      setUserXp((prevXp) => Math.max(0, prevXp + event.amount))
     })
 
     return unsubscribe
-  }, [])
+  }, [status])
+
+  // Don't render progress bar until we've hydrated to avoid flash of incorrect rank
+  const isLoading = status === "loading" || !hasHydrated
 
   const audioMuted = !settings.sfxEnabled && !settings.musicEnabled
 
@@ -135,8 +144,8 @@ export function Header(): React.ReactElement {
             </Link>
           </nav>
 
-          {/* XP Progress bar */}
-          {session?.user && (
+          {/* XP Progress bar - only show when authenticated and hydrated */}
+          {session?.user && !isLoading && (
             <div className="hidden lg:flex items-center gap-3 pl-6 border-l border-white/10">
               <RankProgressBar xp={userXp} className="w-48" />
             </div>

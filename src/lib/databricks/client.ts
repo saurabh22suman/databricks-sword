@@ -6,7 +6,19 @@
 import type { StatementResponse, Warehouse } from "./types";
 
 const POLL_INTERVAL_MS = Number(process.env.DATABRICKS_POLL_INTERVAL_MS ?? 1000);
-const MAX_POLL_ATTEMPTS = Number(process.env.DATABRICKS_MAX_POLL_ATTEMPTS ?? 30); // 30 seconds max wait by default
+const DEFAULT_MAX_POLL_ATTEMPTS = 30; // 30 attempts × 1s = 30 seconds default
+
+/** Extended options for query execution */
+export type ExecuteOptions = {
+  /** Timeout in seconds (5-300, default 30) */
+  timeoutSeconds?: number;
+  /** Maximum row limit (default 10000) */
+  rowLimit?: number;
+}
+
+/** Default timeout of 30 seconds - suitable for most queries */
+const DEFAULT_TIMEOUT_SECONDS = 30;
+const DEFAULT_ROW_LIMIT = 10000;
 
 /**
  * Makes an authenticated request to the Databricks API
@@ -83,7 +95,68 @@ function transformStatementResponse(raw: DatabricksStatementApiResponse): Statem
 export type ValidationResult = {
   valid: boolean;
   error?: string;
+  /** Specific error category for UI guidance */
+  errorType?: "invalid_token" | "no_warehouse" | "warehouse_stopped" | "permission_denied" | "network_error" | "unknown";
 };
+
+/**
+ * Categorizes validation errors for better user feedback
+ */
+function categorizeValidationError(error: Error, hasWarehouse: boolean): ValidationResult {
+  const message = error.message.toLowerCase();
+
+  // Authentication errors
+  if (message.includes("unauthorized") || message.includes("403") || message.includes("401")) {
+    return {
+      valid: false,
+      error: "Invalid or expired Personal Access Token",
+      errorType: "invalid_token",
+    };
+  }
+
+  // Permission errors
+  if (message.includes("permission") || message.includes("permission_denied")) {
+    return {
+      valid: false,
+      error: "PAT lacks required scopes (sql, jobs, workspace)",
+      errorType: "permission_denied",
+    };
+  }
+
+  // Network errors
+  if (message.includes("ECONNREFUSED") || message.includes("timeout") || message.includes("network")) {
+    return {
+      valid: false,
+      error: "Cannot reach Databricks workspace - check URL and network",
+      errorType: "network_error",
+    };
+  }
+
+  // Warehouse errors - no warehouses found at all
+  if (message.includes("no warehouses") || message.includes("empty") || !hasWarehouse) {
+    return {
+      valid: false,
+      error: "No SQL Warehouse found. Create a SQL Warehouse in your Databricks workspace first.",
+      errorType: "no_warehouse",
+    };
+  }
+
+  // Warehouse stopped
+  if (message.includes("not running") || message.includes("stopped")) {
+    return {
+      valid: false,
+      error: "SQL Warehouse is stopped. Start it in Databricks console to run queries.",
+      errorType: "warehouse_stopped",
+    };
+  }
+
+  // Unknown
+  return {
+    valid: false,
+    error: error.message,
+    errorType: "unknown",
+  };
+}
 
 /**
  * Validates a Databricks connection by executing a simple SELECT 1 query
@@ -94,30 +167,39 @@ export type ValidationResult = {
  */
 export async function validateConnection(workspaceUrl: string, pat: string): Promise<ValidationResult> {
   try {
-    // First check if we have any running warehouses
+    // First check if we have any warehouses
     const warehouses = await getWarehouses(workspaceUrl, pat);
+
+    if (warehouses.length === 0) {
+      return categorizeValidationError(new Error("No warehouses found"), false);
+    }
+
     const runningWarehouse = warehouses.find((w) => w.state === "RUNNING");
 
     if (!runningWarehouse) {
-      // No running warehouse means we can't execute queries, but auth is valid
-      // Try a simpler API call to validate auth
-      await apiRequest<DatabricksWarehouseListResponse>(
-        workspaceUrl,
-        pat,
-        "/api/2.0/sql/warehouses",
-        { method: "GET" }
-      );
-      return { valid: true };
+      // No running warehouse - return specific error
+      const stoppedWarehouses = warehouses.filter((w) => w.state === "STOPPED");
+      if (stoppedWarehouses.length > 0) {
+        return categorizeValidationError(new Error("Warehouse stopped"), true);
+      }
+      return categorizeValidationError(new Error("No running warehouse found"), false);
     }
 
     // Execute a simple query to validate full connectivity
     const result = await executeStatement(workspaceUrl, pat, "SELECT 1", runningWarehouse.id);
+
+    if (result.error) {
+      return {
+        valid: false,
+        error: result.error.message,
+        errorType: "unknown",
+      };
+    }
+
     return { valid: result.status === "SUCCEEDED" };
   } catch (error) {
-    return { 
-      valid: false, 
-      error: error instanceof Error ? error.message : "Unknown error" 
-    };
+    const err = error instanceof Error ? error : new Error(String(error));
+    return categorizeValidationError(err, false);
   }
 }
 
@@ -135,8 +217,16 @@ export async function executeStatement(
   workspaceUrl: string,
   pat: string,
   sql: string,
-  warehouseId?: string
+  warehouseId?: string,
+  options?: ExecuteOptions
 ): Promise<StatementResponse> {
+  // Apply options with sensible defaults
+  const timeout = options?.timeoutSeconds ?? DEFAULT_TIMEOUT_SECONDS;
+  const rowLimit = options?.rowLimit ?? DEFAULT_ROW_LIMIT;
+
+  // Clamp timeout to valid range (5-300 seconds per API limits)
+  const clampedTimeout = Math.max(5, Math.min(300, timeout));
+
   // Auto-discover warehouse if not provided
   const effectiveWarehouseId = warehouseId ?? (await discoverRunningWarehouse(workspaceUrl, pat));
 
@@ -144,9 +234,13 @@ export async function executeStatement(
   const requestBody = {
     warehouse_id: effectiveWarehouseId,
     statement: sql,
-    wait_timeout: "30s",
+    wait_timeout: `${clampedTimeout}s`,
     on_wait_timeout: "CONTINUE",
+    row_limit: rowLimit,
   };
+
+  // Calculate max poll attempts based on timeout
+  const maxPollAttempts = Math.ceil(clampedTimeout * 1000 / POLL_INTERVAL_MS);
 
   const initialResponse = await apiRequest<DatabricksStatementApiResponse>(
     workspaceUrl,
@@ -168,8 +262,8 @@ export async function executeStatement(
     return transformStatementResponse(initialResponse);
   }
 
-  // Poll for completion
-  return pollForResult(workspaceUrl, pat, initialResponse.statement_id);
+  // Poll for completion with configurable timeout
+  return pollForResult(workspaceUrl, pat, initialResponse.statement_id, maxPollAttempts);
 }
 
 /**
@@ -178,9 +272,10 @@ export async function executeStatement(
 async function pollForResult(
   workspaceUrl: string,
   pat: string,
-  statementId: string
+  statementId: string,
+  maxAttempts: number = DEFAULT_MAX_POLL_ATTEMPTS
 ): Promise<StatementResponse> {
-  for (let attempt = 0; attempt < MAX_POLL_ATTEMPTS; attempt++) {
+  for (let attempt = 0; attempt < maxAttempts; attempt++) {
     await sleep(POLL_INTERVAL_MS);
 
     const response = await apiRequest<DatabricksStatementApiResponse>(
@@ -200,7 +295,7 @@ async function pollForResult(
     }
   }
 
-  throw new Error(`Statement ${statementId} timed out after ${MAX_POLL_ATTEMPTS * POLL_INTERVAL_MS}ms`);
+  throw new Error(`Statement ${statementId} timed out after ${DEFAULT_MAX_POLL_ATTEMPTS * POLL_INTERVAL_MS}ms`);
 }
 
 /**

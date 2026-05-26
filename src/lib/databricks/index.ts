@@ -14,7 +14,7 @@ export {
 export { decryptPat, encryptPat } from "./encryption";
 
 // Client
-export { executeStatement, getWarehouses, validateConnection, type ValidationResult } from "./client";
+export { executeStatement, getWarehouses, validateConnection, type ValidationResult, type ExecuteOptions } from "./client";
 
 // Evaluation
 export { evaluateMission } from "./evaluate";

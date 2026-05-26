@@ -91,12 +91,15 @@ export function ActiveMission({
   const [showCleanupConfirm, setShowCleanupConfirm] = useState(false)
   const [cleanupSuccess, setCleanupSuccess] = useState(false)
   const [error, setError] = useState<string | null>(null)
+  const [isLive, setIsLive] = useState(true) // Auto-refresh enabled by default
 
+  // Auto-refresh control - faster when validating
   useEffect(() => {
     loadStatus()
-    const interval = setInterval(loadStatus, 10000)
+    const intervalMs = isLive ? 5000 : 15000 // 5s live, 15s otherwise
+    const interval = setInterval(loadStatus, intervalMs)
     return () => clearInterval(interval)
-  }, [deploymentId])
+  }, [deploymentId, isLive])
 
   const loadStatus = async () => {
     try {
@@ -389,6 +392,21 @@ export function ActiveMission({
                     </a>
                   </li>
                 )}
+
+                {/* dbdemos link for more practice */}
+                <li className="pt-3 border-t border-anime-700 mt-3">
+                  <a
+                    href="/blog/databricks-db-demos"
+                    className="text-anime-purple hover:text-anime-cyan flex items-center gap-2"
+                  >
+                    <span>🚀</span>
+                    <span>Want more real-world examples?</span>
+                  </a>
+                  <p className="text-anime-500 text-xs mt-1 ml-6">
+                    Explore dbdemos for production-grade demos
+                  </p>
+                </li>
+
                 {!links.workspace && (
                   <li className="text-anime-500 italic">
                     No connection info available
@@ -413,6 +431,30 @@ export function ActiveMission({
           </div>
 
           <div className="space-y-6">
+            {/* Live Mode Toggle */}
+            <div className="cut-corner bg-anime-900 border border-anime-700 p-4">
+              <div className="flex items-center justify-between">
+                <div>
+                  <p className="text-anime-100 font-medium">Auto-refresh</p>
+                  <p className="text-anime-500 text-sm">
+                    {isLive ? "Updates every 5 seconds" : "Updates every 15 seconds"}
+                  </p>
+                </div>
+                <button
+                  onClick={() => setIsLive(!isLive)}
+                  className={`
+                    px-4 py-2 rounded-lg font-medium transition-all
+                    ${isLive
+                      ? "bg-anime-cyan text-anime-950"
+                      : "bg-anime-800 text-anime-400 border border-anime-700"
+                    }
+                  `}
+                >
+                  {isLive ? "● Live" : "○ Paused"}
+                </button>
+              </div>
+            </div>
+
             <div className="cut-corner bg-anime-900 border border-anime-700 p-6">
               <h2 className="font-heading text-2xl text-anime-cyan mb-4">
                 ⚙️ Actions
@@ -447,7 +489,7 @@ export function ActiveMission({
             </div>
 
             {validations.length > 0 && (
-              <ValidationResults validations={validations} />
+              <ValidationResults validations={validations} isLive={isLive && isValidating} />
             )}
 
             {operations.length > 0 && (

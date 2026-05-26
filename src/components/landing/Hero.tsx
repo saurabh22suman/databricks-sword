@@ -12,7 +12,6 @@ import { useEffect, useState } from "react"
  */
 export function Hero(): React.ReactElement {
   const [scrollY, setScrollY] = useState(0)
-  const [unitsDeployed, setUnitsDeployed] = useState(0)
   const [userCount, setUserCount] = useState(0)
 
   useEffect(() => {
@@ -29,10 +28,7 @@ export function Hero(): React.ReactElement {
         }
         return res.json()
       })
-      .then((data: { unitsDeployed?: number; userCount?: number }) => {
-        if (typeof data.unitsDeployed === "number") {
-          setUnitsDeployed(data.unitsDeployed)
-        }
+      .then((data: { userCount?: number }) => {
         if (typeof data.userCount === "number") {
           setUserCount(data.userCount)
         }
@@ -102,21 +98,9 @@ export function Hero(): React.ReactElement {
               <span className="relative z-10 drop-shadow-md">Start Here (Beginner)</span>
               <ArrowRight className="w-5 h-5 group-hover:translate-x-1 transition-transform relative z-10" />
             </Link>
-            <Link
-              href="/cheat-sheet"
-              className="cut-corner group relative px-6 py-4 bg-anime-800 hover:bg-anime-700 transition-all duration-300 text-white font-bold uppercase tracking-wider flex items-center justify-center gap-2 border border-anime-600"
-            >
-              <Cpu className="w-4 h-4" />
-              <span className="relative z-10">Quick Reference</span>
-            </Link>
           </div>
 
           <div className="mt-16 flex items-center gap-8 opacity-60">
-            <div className="flex flex-col">
-              <span className="text-2xl font-black text-white">{unitsDeployed}</span>
-              <span className="text-[10px] uppercase tracking-widest text-gray-500">Units Deployed</span>
-            </div>
-            <div className="w-px h-8 bg-gray-700" />
             <div className="flex flex-col">
               <span className="text-2xl font-black text-white">{userCount}</span>
               <span className="text-[10px] uppercase tracking-widest text-gray-500">Registered Learners</span>

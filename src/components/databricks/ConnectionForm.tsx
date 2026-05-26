@@ -177,9 +177,13 @@ export function ConnectionForm({
           <p className="text-sm text-red-400">{validationErrors.pat}</p>
         )}
         <p className="text-xs text-anime-500">
-          <a 
-            href="https://docs.databricks.com/en/dev-tools/auth/pat.html" 
-            target="_blank" 
+          Requires scopes:{" "}
+          <code className="text-anime-300 bg-anime-800 px-1 rounded">sql</code>,{" "}
+          <code className="text-anime-300 bg-anime-800 px-1 rounded">jobs</code>,{" "}
+          <code className="text-anime-300 bg-anime-800 px-1 rounded">workspace</code>.{" "}
+          <a
+            href="https://docs.databricks.com/en/dev-tools/auth/pat.html"
+            target="_blank"
             rel="noopener noreferrer"
             className="text-anime-cyan hover:underline"
           >
@@ -194,8 +198,8 @@ export function ConnectionForm({
           htmlFor="warehouse-id"
           className="block text-sm font-medium text-anime-200"
         >
-          SQL Warehouse ID
-          <span className="ml-1 text-anime-500 font-normal">(for validation queries)</span>
+          SQL Warehouse ID{" "}
+          <span className="ml-1 text-anime-500 font-normal">(optional - auto-discovered if blank)</span>
         </label>
         <input
           id="warehouse-id"
