@@ -633,7 +633,6 @@ export default function SettingsPage(): React.ReactElement {
               ) : databricksUrl ? (
                 <ConnectionStatus
                   userId={session.user.id ?? ""}
-                  validate
                   onDisconnect={() => {
                     setDatabricksUrl(null)
                     setConnectionError(null)
