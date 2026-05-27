@@ -667,17 +667,22 @@ export default function SettingsPage(): React.ReactElement {
                     Auto-cleanup Deployments
                   </div>
                   <div className="text-anime-400 mt-1 text-xs">
-                    Automatically clean up Field Operations deployments 24 hours
-                    after completion
+                    Automatically clean up Field Operations deployments on next visit (24h+ old)
                   </div>
+                  {settings.lastAutoCleanupAt && (
+                    <div className="text-anime-500 text-xs mt-1">
+                      Last cleaned: {new Date(settings.lastAutoCleanupAt).toLocaleString()}
+                    </div>
+                  )}
                 </div>
                 <button
-                  onClick={() =>
+                  onClick={() => {
+                    // Will clean on next app load - just mark toggle
                     updateSetting(
                       "fieldOpsAutoCleanup",
                       !settings.fieldOpsAutoCleanup,
                     )
-                  }
+                  }}
                   className={cn(
                     "relative inline-flex h-6 w-11 items-center rounded-full transition-colors",
                     settings.fieldOpsAutoCleanup

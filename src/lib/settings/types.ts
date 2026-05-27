@@ -20,6 +20,8 @@ export type UserSettings = {
   showHints: boolean
   /** Whether to automatically clean up Field Ops deployments after completion */
   fieldOpsAutoCleanup: boolean
+  /** Timestamp when auto-cleanup was last run (ISO string) */
+  lastAutoCleanupAt: string | null
 }
 
 /** localStorage key for user settings */
@@ -34,4 +36,5 @@ export const DEFAULT_SETTINGS: UserSettings = {
   codeEditorFontSize: 14,
   showHints: true,
   fieldOpsAutoCleanup: true,
+  lastAutoCleanupAt: null,
 }

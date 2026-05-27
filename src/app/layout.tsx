@@ -8,6 +8,7 @@ import { XpFlyToBar } from "@/components/gamification/XpFlyToBar"
 import { StreakFreezeNudge } from "@/components/gamification/StreakFreezeNudge"
 import { StreakDailyBonus } from "@/components/gamification/StreakDailyBonus"
 import { PromoBanner } from "@/components/ui/PromoBanner"
+import { AutoCleanupRunner } from "@/components/field-ops/AutoCleanupRunner"
 import { auth } from "@/lib/auth"
 import { MOCK_SESSION, isMockAuth } from "@/lib/auth/mockSession"
 import type { Metadata } from "next"
@@ -90,6 +91,7 @@ export default async function RootLayout({
             <StreakFreezeNudge />
             <StreakDailyBonus />
             <PromoBanner />
+            <AutoCleanupRunner />
             <main className="flex-1">{children}</main>
             <Footer />
           </SandboxSyncProvider>
