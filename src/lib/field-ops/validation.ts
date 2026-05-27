@@ -5,6 +5,7 @@
 
 import { executeSQL } from "../databricks/cli"
 import { fieldOpsValidations, getDb } from "../db"
+import { toUserFriendlyError } from "../../lib/errors"
 import { getCheckKey, loadFieldOpsContent } from "./content"
 import type {
   DatabricksConnection,
@@ -69,11 +70,38 @@ export async function executeValidation(
 
     return { passed: true }
   } catch (error) {
+    // Use centralized error formatter
     return {
       passed: false,
-      errorMessage: error instanceof Error ? error.message : "Validation failed",
+      errorMessage: toUserFriendlyError(error),
     }
   }
+}
+
+/**
+ * Legacy function kept for compatibility - new code should use toUserFriendlyError
+ */
+function convertSqlErrorToFriendly(sqlError: string): string {
+  if (sqlError.includes("TABLE_OR_VIEW_NOT_FOUND") || sqlError.includes("42P01")) {
+    return "Table not found. Have you run the notebook to create this table?"
+  }
+  if (sqlError.includes("TABLE_OR_VIEW_ALREADY_EXISTS") || sqlError.includes("42P07")) {
+    return "Table already exists from previous run"
+  }
+  if (sqlError.includes("cannot be found")) {
+    return "Object not found in Databricks. Did you run the notebook to create it?"
+  }
+  if (sqlError.includes("Authentication")) {
+    return "Authentication failed. Please reconnect your Databricks workspace in Settings."
+  }
+  if (sqlError.includes("PERMISSION_DENIED") || sqlError.includes("42P00")) {
+    return "Permission denied. Check your PAT has required scopes."
+  }
+  if (sqlError.includes("network") || sqlError.includes("ECONNREFUSED")) {
+    return "Network error. Check your Databricks workspace is accessible."
+  }
+  // Return original if no match
+  return sqlError
 }
 
 /**
