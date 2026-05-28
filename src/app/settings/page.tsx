@@ -3,6 +3,7 @@
 import { useSyncNow } from "@/components/auth"
 import { SyncProgressDialog } from "@/components/auth/SyncProgressDialog"
 import { ConnectionForm, ConnectionStatus } from "@/components/databricks"
+import { DeploymentManager } from "@/components/deployments/DeploymentManager"
 import { RankBadge } from "@/components/gamification/RankBadge"
 import { getRankForXp } from "@/lib/gamification"
 import type { SandboxData } from "@/lib/sandbox"
@@ -735,6 +736,19 @@ export default function SettingsPage(): React.ReactElement {
             </div>
           )}
         </section>
+
+        {/* Deployment Manager */}
+        {databricksUrl && session?.user && (
+          <section className="mb-8">
+            <SectionHeader
+              label="Deployments"
+              icon={<Database className="h-4 w-4" />}
+            />
+            <div className="bg-anime-900 border-anime-700 cut-corner rounded-lg border p-6">
+              <DeploymentManager />
+            </div>
+          </section>
+        )}
 
         {/* Coupon Redemption */}
         <section className="mb-8">
