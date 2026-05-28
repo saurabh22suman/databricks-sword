@@ -1,6 +1,7 @@
 "use client"
 
 import { ProfileSidebar } from "@/components/auth/ProfileSidebar"
+import { NotificationDropdown } from "@/components/ui/NotificationDropdown"
 import { RankProgressBar } from "@/components/gamification/RankProgressBar"
 import { onXpEvent } from "@/lib/gamification/xpEventBus"
 import { useSettings } from "@/lib/settings"
@@ -161,6 +162,9 @@ export function Header(): React.ReactElement {
             >
               {audioMuted ? <VolumeX className="w-5 h-5" /> : <Volume2 className="w-5 h-5" />}
             </button>
+
+            {/* Notifications Dropdown */}
+            <NotificationDropdown />
 
             {/* Mobile Menu Toggle */}
             <button

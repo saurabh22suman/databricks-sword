@@ -202,6 +202,9 @@ export async function destroyBundle(
   const schemaPrefix = path.basename(bundlePath)
   const failures: CleanupFailure[] = []
 
+  console.log(`[Cleanup] Destroying bundle with schemaPrefix: ${schemaPrefix}`)
+  console.log(`[Cleanup] Catalog: ${config.catalog}, WorkspaceUrl: ${config.workspaceUrl}`)
+
   const schemas = ["bronze", "silver", "gold"]
   for (const schema of schemas) {
     const fullSchemaName = `${schemaPrefix}_${schema}`
@@ -210,10 +213,12 @@ export async function destroyBundle(
       await dropSchema(config, config.catalog, fullSchemaName)
       console.log(`[Cleanup] Dropped schema: ${fullSchemaName}`)
     } catch (error) {
+      const msg = error instanceof Error ? error.message : "Failed to drop schema"
+      console.log(`[Cleanup] Schema drop error for ${fullSchemaName}: ${msg}`)
       failures.push({
         resourceType: "schema",
         resourceName: `${config.catalog}.${fullSchemaName}`,
-        errorMessage: error instanceof Error ? error.message : "Failed to drop schema",
+        errorMessage: msg,
       })
     }
   }

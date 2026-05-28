@@ -620,9 +620,19 @@ export async function cleanupDeployment(
     throw new Error("Deployment not found")
   }
 
+  // Log cleanup details for debugging
+  console.log("[Cleanup] Deployment:", {
+    deploymentId,
+    schemaPrefix: deployment.schemaPrefix,
+    catalogName: deployment.catalogName,
+    bundlePath: deployment.bundlePath,
+    workspaceUrl: deployment.workspaceUrl,
+  })
+
   // Older rows may not have a persisted bundlePath. Derive it from schemaPrefix so
   // remote Databricks assets can still be cleaned up from Settings bulk cleanup.
   const bundlePath = deployment.bundlePath ?? `/tmp/dbsword-bundles/${deployment.schemaPrefix}`
+  console.log("[Cleanup] Using bundlePath:", bundlePath)
 
   const { operation, replayed } = await createOrReuseOperation({
     deploymentId,

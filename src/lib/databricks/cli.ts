@@ -135,6 +135,31 @@ export async function listSchemas(
 }
 
 /**
+ * List Field Ops schemas (with 'fo_' prefix) in a catalog.
+ * Returns array of schema names and their industry/ID info.
+ */
+export async function listFieldOpsSchemas(
+  config: DatabricksConnection,
+  catalog: string
+): Promise<{ schemaName: string; industry: string; userId: string; timestamp: string }[]> {
+  const allSchemas = await listSchemas(config, catalog)
+
+  // Filter schemas with 'fo_' prefix (Field Ops deployments)
+  const foSchemas = allSchemas.filter((s) => s.startsWith("fo_"))
+
+  // Parse schema name to extract info: fo_{industry}_{userId}_{timestamp}
+  return foSchemas.map((schemaName) => {
+    const parts = schemaName.split("_")
+    // parts: [fo, industry, userId, timestamp]
+    const industry = parts[1] || "unknown"
+    const userId = parts[2] || ""
+    const timestamp = parts.slice(3).join("_") || ""
+
+    return { schemaName, industry, userId, timestamp }
+  })
+}
+
+/**
  * Drop a schema using CLI.
  * Uses --force to delete even if schema contains objects (tables, volumes).
  */
