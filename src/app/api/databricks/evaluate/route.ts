@@ -1,6 +1,7 @@
 import { authenticateApiRequest } from "@/lib/auth/api-auth";
 import { decryptPat, evaluateMission, type EvaluationQuery } from "@/lib/databricks";
 import { NextRequest, NextResponse } from "next/server";
+import { randomUUID } from "crypto";
 import { z } from "zod";
 
 /** Only allow safe slug characters — prevents path traversal and command injection */
@@ -21,8 +22,13 @@ type StageConfigWithQueries = {
  * POST /api/databricks/evaluate
  * Evaluates a mission stage against the user's Databricks workspace.
  * UserId is derived from the authenticated session — not from request body.
+ *
+ * Includes request tracking ID for log correlation.
  */
 export async function POST(request: NextRequest): Promise<NextResponse> {
+  // Generate correlation ID for log tracking
+  const requestId = randomUUID()
+
   try {
     // Authenticate via session — prevents IDOR
     const authResult = await authenticateApiRequest();
@@ -89,8 +95,31 @@ export async function POST(request: NextRequest): Promise<NextResponse> {
       );
     }
 
-    // Decrypt the PAT
-    const pat = decryptPat(connection.encryptedPat);
+    // Decrypt the PAT with strict error handling
+    let pat: string
+    try {
+      pat = decryptPat(connection.encryptedPat)
+
+      // Validate the decrypted token meets structural requirements
+      if (!pat || pat.length < 20 || !pat.startsWith("dap")) {
+        // Log anonymously without exposing token structure
+        console.error("[api/databricks/evaluate] Token validation failed: invalid format")
+        return NextResponse.json(
+          { error: "Invalid Databricks configuration" },
+          { status: 500 }
+        )
+      }
+    } catch (decryptError) {
+      // Structured anonymous logging - never expose decryption details to client
+      console.error(
+        "[api/databricks/evaluate] Token decryption failed:",
+        decryptError instanceof Error ? "decryption_error" : "unknown_error"
+      )
+      return NextResponse.json(
+        { error: "Failed to access Databricks credentials" },
+        { status: 500 }
+      )
+    }
 
     // Evaluate the mission
     const results = await evaluateMission(
@@ -108,10 +137,14 @@ export async function POST(request: NextRequest): Promise<NextResponse> {
       evaluatedAt: new Date().toISOString(),
     });
   } catch (error) {
-    console.error("[api/databricks/evaluate]", error instanceof Error ? error.message : "Unknown error");
+    // Log with correlation ID for tracking
+    console.error(
+      `[api/databricks/evaluate] requestId=${requestId} error=`,
+      error instanceof Error ? error.message : "Unknown error"
+    )
     return NextResponse.json(
-      { error: "Internal server error" },
+      { error: "Internal server error", requestId },
       { status: 500 }
-    );
+    )
   }
 }

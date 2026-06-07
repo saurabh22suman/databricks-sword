@@ -153,6 +153,13 @@ export function MissionMap({
   const [isDragging, setIsDragging] = useState(false)
   const [dragStart, setDragStart] = useState({ x: 0, y: 0 })
   const [sandbox, setSandbox] = useState<SandboxData | null>(null)
+  // Track if component has mounted to avoid SSR mismatch with containerRef
+  const [hasMounted, setHasMounted] = useState(false)
+
+  // Set mounted state after hydration to ensure containerRef is available
+  useEffect(() => {
+    setHasMounted(true)
+  }, [])
 
   const refreshSandbox = useCallback(() => {
     setSandbox(loadSandbox() ?? initializeSandbox())
@@ -596,7 +603,7 @@ export function MissionMap({
                 />
               )
             })}
-            {containerRef.current && (
+            {hasMounted && containerRef.current && (
               <rect
                 className="minimap-viewport"
                 x={

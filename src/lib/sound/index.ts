@@ -16,7 +16,7 @@
  */
 
 export type { MusicState, SoundId } from "./types"
-import { cyberSoundEngine } from "./engine"
+import { cyberSoundEngine, cleanupSound as cleanupEngine } from "./engine"
 import { ambientMusic } from "./music"
 import type { MusicState, SoundId } from "./types"
 
@@ -100,4 +100,24 @@ export function setMusicVolume(level: number): void {
  */
 export function getMusicState(): MusicState {
   return ambientMusic.getState()
+}
+
+/**
+ * Cleans up all sound engine resources.
+ * Call this on app unmount to prevent AudioContext leaks
+ * during SPA navigation.
+ *
+ * @example
+ * ```ts
+ * import { cleanupSound } from "@/lib/sound"
+ *
+ * // In root layout useEffect cleanup
+ * useEffect(() => {
+ *   return () => cleanupSound()
+ * }, [])
+ * ```
+ */
+export function cleanupSound(): void {
+  ambientMusic.stop()
+  cleanupEngine()
 }

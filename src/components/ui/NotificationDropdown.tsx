@@ -100,6 +100,9 @@ export function NotificationDropdown(): React.ReactElement {
   const [isOpen, setIsOpen] = useState(false)
   const [notifications, setNotifications] = useState<Notification[]>([])
   const dropdownRef = useRef<HTMLDivElement>(null)
+  // Use ref to track latest notifications for callbacks
+  const notificationsRef = useRef(notifications)
+  notificationsRef.current = notifications
 
   // Load notifications on mount
   useEffect(() => {

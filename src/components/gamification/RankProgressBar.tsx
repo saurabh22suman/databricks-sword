@@ -37,7 +37,14 @@ export function RankProgressBar({ xp, className }: RankProgressBarProps): React.
   const xpRemaining = nextRank.minXp - xp
 
   return (
-    <div className={cn("flex flex-col gap-2", className)}>
+    <div
+      className={cn("flex flex-col gap-2", className)}
+      role="progressbar"
+      aria-valuenow={xp}
+      aria-valuemin={currentRank.minXp}
+      aria-valuemax={nextRank.minXp}
+      aria-label={`Rank progress: ${currentRank.title}, ${xpRemaining.toLocaleString()} XP remaining to ${nextRank.title}`}
+    >
       <div className="flex items-center justify-between">
         <div className="flex items-center gap-2">
           <span className="text-xs text-anime-300 font-medium">

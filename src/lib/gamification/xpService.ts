@@ -269,19 +269,6 @@ export function awardMissionXp(
   baseXp: number,
 ): XpEvent {
   const sandbox = loadSandbox() ?? initializeSandbox()
-  const existingMission = sandbox.missionProgress[missionId]
-  const alreadyCompleted = existingMission?.completed === true
-
-  if (alreadyCompleted) {
-    return {
-      type: "mission",
-      amount: 0,
-      multiplier: getStreakMultiplier(sandbox.streakData.currentStreak),
-      source: missionId,
-      timestamp: new Date().toISOString(),
-    }
-  }
-
   const multiplier = getStreakMultiplier(sandbox.streakData.currentStreak)
   const amount = Math.floor(baseXp * multiplier)
 
@@ -293,6 +280,8 @@ export function awardMissionXp(
     timestamp: new Date().toISOString(),
   }
 
+  // Atomic check-and-set: evaluate completion inside the updater closure
+  // This prevents race conditions from double-clicks or concurrent network payloads
   updateSandbox((data) => {
     const withStreak = updateStreakOnActivity(data)
     const missionProgress = { ...withStreak.missionProgress }
@@ -304,6 +293,7 @@ export function awardMissionXp(
       totalXpEarned: 0,
     }
 
+    // Atomic check: if already completed in this transaction, return unchanged
     if (existing.completed) {
       return withStreak
     }

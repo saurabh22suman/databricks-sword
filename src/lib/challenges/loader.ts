@@ -290,7 +290,13 @@ function validateFreeText(
 
   // Timeout wrapper to prevent catastrophic backtracking
   const REGEX_TIMEOUT_MS = 1000
+  const MAX_PATTERN_LENGTH = 500 // Reject excessively long patterns
   const isSafeRegex = (pattern: string): boolean => {
+    // Reject empty or overly long patterns
+    if (!pattern || pattern.length > MAX_PATTERN_LENGTH) {
+      return false
+    }
+
     // Reject any pattern with a quantified group repeated by another quantifier.
     // This is the canonical ReDoS structure: (X+)+, (X*)+, (X+)*, etc.
     // where X is any sub-pattern (even a single char like 'a').
@@ -310,6 +316,12 @@ function validateFreeText(
       /\[\^\]\+\.\*/,  // [^]+.*
     ]
     if (absoluteBlocklist.some((b) => b.test(pattern))) {
+      return false
+    }
+
+    // Additional check: reject patterns with excessive repetition counts like {N,M} where N > 10
+    const excessiveRepeat = /\{\d{2,}/
+    if (excessiveRepeat.test(pattern)) {
       return false
     }
 

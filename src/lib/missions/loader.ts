@@ -2,6 +2,8 @@ import fs from "fs"
 import path from "path"
 import type { BriefingConfig, DebriefConfig, FurtherReading, Industry, Mission, MissionRank } from "./types"
 import { MissionSchema } from "./types"
+import { MISSION_TRACK_MAP } from "./tracks"
+import type { Track } from "./tracks"
 
 /**
  * Mission Loader
@@ -29,6 +31,18 @@ type MissionCacheEntry = {
   missions: Mission[]
 }
 
+/** Lightweight mission preview for listing pages - avoids full payload */
+export type MissionPreview = {
+  slug: string
+  title: string
+  subtitle: string
+  industry: string
+  rank: MissionRank
+  xpRequired: number
+  xpReward: number
+  estimatedMinutes: number
+}
+
 const MISSION_CACHE_TTL_MS = 30_000
 let missionCache: MissionCacheEntry | null = null
 const isTestRuntime = process.env.NODE_ENV === "test"
@@ -52,6 +66,65 @@ export function getMissionSlugs(): string[] {
     // Directory doesn't exist yet
     return []
   }
+}
+
+/**
+ * Loads lightweight mission previews (metadata only) for listing pages.
+ * Avoids parsing full mission content for better build/load performance.
+ *
+ * @returns Array of MissionPreview objects with essential metadata
+ *
+ * @example
+ * ```ts
+ * const previews = await getMissionPreviews()
+ * // [{ slug: 'financial-pipeline', title: '...', industry: 'finance', rank: 'B', xpRequired: 0 }, ...]
+ * ```
+ */
+export async function getMissionPreviews(): Promise<MissionPreview[]> {
+  const slugs = getMissionSlugs()
+  const previews: MissionPreview[] = []
+
+  for (const slug of slugs) {
+    try {
+      const mission = await getMission(slug)
+      previews.push({
+        slug: mission.id,
+        title: mission.title,
+        subtitle: mission.subtitle,
+        industry: mission.industry,
+        rank: mission.rank,
+        xpRequired: mission.xpRequired,
+        xpReward: mission.xpReward,
+        estimatedMinutes: mission.estimatedMinutes,
+      })
+    } catch {
+      // Skip invalid missions
+    }
+  }
+
+  // Sort by XP required, then by industry, then by rank
+  previews.sort((a, b) => {
+    if (a.xpRequired !== b.xpRequired) {
+      return a.xpRequired - b.xpRequired
+    }
+    if (a.industry !== b.industry) {
+      return a.industry.localeCompare(b.industry)
+    }
+    return RANK_ORDER[a.rank] - RANK_ORDER[b.rank]
+  })
+
+  return previews
+}
+
+/**
+ * Gets the learning track for a mission (from MISSION_TRACK_MAP).
+ * Uses slug for lookup since MissionPreview has slug, not id.
+ *
+ * @param slug - Mission slug
+ * @returns Track identifier
+ */
+export function getMissionTrack(slug: string): Track {
+  return MISSION_TRACK_MAP[slug] ?? "de"
 }
 
 /**

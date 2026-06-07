@@ -160,8 +160,14 @@ export function useSandboxSync(): UseSandboxSyncResult {
       if (document.visibilityState === "hidden") {
         const sandbox = loadSandbox()
         if (sandbox && shouldSync(sandbox)) {
+          // Update lastSynced timestamp locally BEFORE sending beacon
+          // This prevents consecutive merge conflicts on next load
+          const now = new Date().toISOString()
+          const sandboxWithSync = { ...sandbox, lastSynced: now }
+          saveSandbox(sandboxWithSync)
+
           // Use sendBeacon for reliability on tab close
-          const blob = new Blob([JSON.stringify(sandbox)], {
+          const blob = new Blob([JSON.stringify(sandboxWithSync)], {
             type: "application/json",
           })
           navigator.sendBeacon("/api/user/sync", blob)

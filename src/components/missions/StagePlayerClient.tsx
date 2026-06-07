@@ -6,23 +6,15 @@
  * Supports dual mode: simulated (pattern matching) and Databricks (real execution).
  * Integrates ArchitectureDiagram for diagram stages and SideQuestModal for
  * OSS deep-dive side quests between stage transitions.
+ *
+ * Uses dynamic imports for code-splitting stage challenge components
+ * to reduce initial bundle size and improve TTI.
  */
 
 "use client";
 
 import { useSyncNow } from "@/components/auth";
-import {
-    ArchitectureDiagram,
-    CompareChallenge,
-    DatabricksStagePlayer,
-    DragDropChallenge,
-    FillBlankChallenge,
-    FreeTextChallenge,
-    MissionBriefing,
-    MissionDebrief,
-    MissionQuiz,
-    SideQuestModal,
-} from "@/components/missions";
+import { SideQuestModal } from "@/components/missions";
 import type { BundleStatus } from "@/lib/databricks/types";
 import { awardMissionXp, awardStageXp } from "@/lib/gamification/xpService";
 import type {
@@ -39,6 +31,57 @@ import { updateSandbox } from "@/lib/sandbox";
 import { playSound } from "@/lib/sound";
 import { useRouter } from "next/navigation";
 import React, { useCallback, useState } from "react";
+import dynamic from "next/dynamic";
+
+/**
+ * Dynamic imports for stage challenge components.
+ * Loaded on-demand to reduce initial bundle size.
+ * Each component is code-split and only loaded when its stage type is needed.
+ */
+const MissionBriefing = dynamic(
+  () => import("@/components/missions/MissionBriefing").then((mod) => mod.MissionBriefing),
+  { ssr: false, loading: () => <div className="p-8 text-anime-400">Loading briefing...</div> }
+)
+
+const MissionQuiz = dynamic(
+  () => import("@/components/missions/MissionQuiz").then((mod) => mod.MissionQuiz),
+  { ssr: false, loading: () => <div className="p-8 text-anime-400">Loading quiz...</div> }
+)
+
+const MissionDebrief = dynamic(
+  () => import("@/components/missions/MissionDebrief").then((mod) => mod.MissionDebrief),
+  { ssr: false, loading: () => <div className="p-8 text-anime-400">Loading debrief...</div> }
+)
+
+const DragDropChallenge = dynamic(
+  () => import("@/components/missions/DragDropChallenge").then((mod) => mod.DragDropChallenge),
+  { ssr: false, loading: () => <div className="p-8 text-anime-400">Loading challenge...</div> }
+)
+
+const FillBlankChallenge = dynamic(
+  () => import("@/components/missions/FillBlankChallenge").then((mod) => mod.FillBlankChallenge),
+  { ssr: false, loading: () => <div className="p-8 text-anime-400">Loading challenge...</div> }
+)
+
+const FreeTextChallenge = dynamic(
+  () => import("@/components/missions/FreeTextChallenge").then((mod) => mod.FreeTextChallenge),
+  { ssr: false, loading: () => <div className="p-8 text-anime-400">Loading challenge...</div> }
+)
+
+const ArchitectureDiagram = dynamic(
+  () => import("@/components/missions/ArchitectureDiagram").then((mod) => mod.ArchitectureDiagram),
+  { ssr: false, loading: () => <div className="p-8 text-anime-400">Loading diagram...</div> }
+)
+
+const CompareChallenge = dynamic(
+  () => import("@/components/missions/CompareChallenge").then((mod) => mod.CompareChallenge),
+  { ssr: false, loading: () => <div className="p-8 text-anime-400">Loading comparison...</div> }
+)
+
+const DatabricksStagePlayer = dynamic(
+  () => import("@/components/missions/DatabricksStagePlayer").then((mod) => mod.DatabricksStagePlayer),
+  { ssr: false, loading: () => <div className="p-8 text-anime-400">Loading Databricks stage...</div> }
+)
 
 /** Side quest with loaded content, ready for the modal */
 export type SideQuestWithContent = {
@@ -137,7 +180,7 @@ export function StagePlayerClient({
   }, [router, nextUrl]);
 
   /** Check for "after" side quests for the current stage, or navigate */
-  const handleComplete = useCallback((_result?: unknown): void => {
+  const handleComplete = useCallback(async (_result?: unknown): Promise<void> => {
     // Play stage completion sound
     playSound("stage-complete")
 
@@ -148,8 +191,10 @@ export function StagePlayerClient({
     if (isFinalStage && missionXpReward > 0) {
       awardMissionXp(missionId, missionXpReward);
     }
+
+    // Sync to server BEFORE navigating - must await to prevent data loss
     if (stageXpReward > 0 || (isFinalStage && missionXpReward > 0)) {
-      void syncNow();
+      await syncNow();
     }
 
     // Check for "after" side quest triggered by this stage
@@ -202,7 +247,7 @@ export function StagePlayerClient({
   }, [missionId, stageId, handleComplete]);
 
   /** Side quest completed — persist mission progress and continue */
-  const handleSideQuestComplete = useCallback((xpAwarded: number): void => {
+  const handleSideQuestComplete = useCallback(async (xpAwarded: number): Promise<void> => {
     playSound("stage-complete")
 
     const completedQuestId = activeSideQuest?.id
@@ -240,7 +285,8 @@ export function StagePlayerClient({
           },
         }
       })
-      void syncNow()
+      // Must await sync to prevent data loss on navigation
+      await syncNow()
     }
 
     setActiveSideQuest(null);

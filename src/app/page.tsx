@@ -8,7 +8,7 @@ import { blogPosts, getDb } from "@/lib/db"
 import { INDUSTRY_CONFIGS } from "@/lib/field-ops/industries"
 import { getContentFiles } from "@/lib/mdx/content"
 import { blogFrontmatterSchema } from "@/lib/mdx/schema"
-import { getAllMissions } from "@/lib/missions"
+import { getMissionPreviews } from "@/lib/missions"
 import { StructuredData, getCourseStructuredData } from "@/lib/seo/structured-data"
 import { eq } from "drizzle-orm"
 import type { Metadata } from "next"
@@ -33,7 +33,8 @@ export const metadata: Metadata = {
  * showcasing missions, data archive (FAQ), and system logs (blog).
  */
 export default async function HomePage(): Promise<React.ReactElement> {
-  const missions = await getAllMissions()
+  // Use lightweight previews instead of full mission payloads
+  const missions = await getMissionPreviews()
 
   // --- Fetch latest 3 blog posts for System Logs section ---
   let blogSectionPosts: BlogSectionPost[] = []

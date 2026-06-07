@@ -45,6 +45,7 @@ export interface DragDropChallengeProps {
  * DragDropChallenge component
  *
  * Allows users to drag and drop code blocks to arrange them in the correct order.
+ * Supports both mouse drag-and-drop and keyboard navigation.
  */
 export function DragDropChallenge({
   config,
@@ -60,6 +61,8 @@ export function DragDropChallenge({
   const [validated, setValidated] = useState(false);
   const [isCorrect, setIsCorrect] = useState(false);
   const [attempts, setAttempts] = useState(0);
+  // Keyboard navigation state
+  const [selectedIndex, setSelectedIndex] = useState<number | null>(null);
 
   /**
    * Handle drag start
@@ -101,6 +104,72 @@ export function DragDropChallenge({
   const handleDragEnd = () => {
     setDraggedIndex(null);
   };
+
+  /**
+   * Handle keyboard navigation for accessibility.
+   * Space/Enter: Select a block
+   * ArrowUp/ArrowDown: Move selected block up/down
+   * Enter: Drop/move the selected block
+   */
+  const handleKeyDown = (e: React.KeyboardEvent, index: number) => {
+    // If no block is selected, Space/Enter selects one
+    if (selectedIndex === null) {
+      if (e.key === " " || e.key === "Enter") {
+        e.preventDefault()
+        setSelectedIndex(index)
+        return
+      }
+    }
+
+    // If a block is selected, handle movement
+    if (selectedIndex !== null) {
+      if (e.key === "ArrowUp") {
+        e.preventDefault()
+        // Move block up
+        if (selectedIndex > 0) {
+          const newBlocks = [...blocks]
+          const [moved] = newBlocks.splice(selectedIndex, 1)
+          newBlocks.splice(selectedIndex - 1, 0, moved)
+          setBlocks(newBlocks)
+          setSelectedIndex(selectedIndex - 1)
+          setValidated(false)
+          if (onUpdate) {
+            onUpdate(newBlocks.map((block) => block.id))
+          }
+        }
+        return
+      }
+
+      if (e.key === "ArrowDown") {
+        e.preventDefault()
+        // Move block down
+        if (selectedIndex < blocks.length - 1) {
+          const newBlocks = [...blocks]
+          const [moved] = newBlocks.splice(selectedIndex, 1)
+          newBlocks.splice(selectedIndex + 1, 0, moved)
+          setBlocks(newBlocks)
+          setSelectedIndex(selectedIndex + 1)
+          setValidated(false)
+          if (onUpdate) {
+            onUpdate(newBlocks.map((block) => block.id))
+          }
+        }
+        return
+      }
+
+      if (e.key === "Escape") {
+        e.preventDefault()
+        setSelectedIndex(null)
+        return
+      }
+
+      if (e.key === "Enter" || e.key === " ") {
+        e.preventDefault()
+        // Commit the selection - keep selected for further moves
+        return
+      }
+    }
+  }
 
   /**
    * Track if user completed successfully (to show Continue button)
@@ -150,21 +219,27 @@ export function DragDropChallenge({
       )}
 
       {/* Code Blocks */}
-      <div className="space-y-3">
+      <div className="space-y-3" role="listbox" aria-label="Code blocks to reorder">
         {blocks.map((block, index) => (
           <div
             key={block.id}
+            role="option"
+            aria-selected={selectedIndex === index}
+            tabIndex={0}
             draggable
             onDragStart={() => handleDragStart(index)}
             onDragOver={handleDragOver}
             onDrop={() => handleDrop(index)}
             onDragEnd={handleDragEnd}
+            onKeyDown={(e) => handleKeyDown(e, index)}
             className={cn(
               "bg-anime-900 border border-anime-700 rounded p-4",
               "cursor-grab active:cursor-grabbing",
               "transition-all duration-200",
               "hover:border-anime-cyan hover:shadow-neon-cyan",
+              "focus:outline-none focus:ring-2 focus:ring-anime-cyan",
               draggedIndex === index && "opacity-50",
+              selectedIndex === index && "ring-2 ring-anime-cyan",
               validated && isCorrect && "border-anime-green",
               validated && !isCorrect && "border-anime-yellow"
             )}

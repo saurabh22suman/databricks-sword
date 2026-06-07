@@ -158,6 +158,7 @@ export function Header(): React.ReactElement {
               onClick={toggleAudioMute}
               className="p-2 rounded-md text-gray-400 hover:text-white hover:bg-anime-800/60 transition-colors"
               aria-label={audioMuted ? "Unmute all audio" : "Mute all audio"}
+              aria-pressed={!audioMuted}
               title={audioMuted ? "Unmute all audio" : "Mute all audio"}
             >
               {audioMuted ? <VolumeX className="w-5 h-5" /> : <Volume2 className="w-5 h-5" />}

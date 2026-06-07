@@ -2,12 +2,14 @@ import { authenticateApiRequest } from "@/lib/auth/api-auth"
 import { isMockAuth } from "@/lib/auth/mockSession"
 import { calculateStreak } from "@/lib/gamification/streaks"
 import { getDb } from "@/lib/db/client"
+import { withDbRetry } from "@/lib/db/retry"
 import {
   couponRedemptions,
   fieldOpsCompletions,
   sandboxSnapshots,
 } from "@/lib/db/schema"
 import { ACHIEVEMENTS } from "@/lib/gamification/achievements"
+import { encryptSandbox } from "@/lib/sandbox/encryption"
 import type { SandboxData } from "@/lib/sandbox/types"
 import { SandboxDataSchema } from "@/lib/sandbox/types"
 import { desc, eq, sql } from "drizzle-orm"
@@ -166,32 +168,37 @@ export async function POST(request: NextRequest): Promise<NextResponse> {
       fieldOpsXp,
     })
 
-    // Upsert sandbox snapshot
+    // Encrypt sandbox data before storing
+    const encryptedSnapshot = encryptSandbox(JSON.stringify(sanitizedSandboxData))
+
+    // Upsert sandbox snapshot with retry logic for transient failures
     try {
       const snapshotId = nanoid()
 
-      await getDb()
-        .insert(sandboxSnapshots)
-        .values({
-          id: snapshotId,
-          userId,
-          snapshotData: JSON.stringify(sanitizedSandboxData),
-          totalXp: sanitizedSandboxData.userStats.totalXp,
-          currentStreak: sanitizedSandboxData.streakData.currentStreak,
-          updatedAt: new Date(),
-        })
-        .onConflictDoUpdate({
-          target: sandboxSnapshots.userId,
-          set: {
-            snapshotData: JSON.stringify(sanitizedSandboxData),
+      // Wrap database operation with retry for transient failures
+      await withDbRetry(async () => {
+        await getDb()
+          .insert(sandboxSnapshots)
+          .values({
+            id: snapshotId,
+            userId,
+            snapshotData: encryptedSnapshot,
             totalXp: sanitizedSandboxData.userStats.totalXp,
             currentStreak: sanitizedSandboxData.streakData.currentStreak,
             updatedAt: new Date(),
-          },
-        })
-
+          })
+          .onConflictDoUpdate({
+            target: sandboxSnapshots.userId,
+            set: {
+              snapshotData: encryptedSnapshot,
+              totalXp: sanitizedSandboxData.userStats.totalXp,
+              currentStreak: sanitizedSandboxData.streakData.currentStreak,
+              updatedAt: new Date(),
+            },
+          })
+      })
     } catch (upsertError) {
-      console.error("[SYNC] Upsert error:", upsertError)
+      console.error("[SYNC] Upsert error after retries:", upsertError)
       throw upsertError
     }
 
