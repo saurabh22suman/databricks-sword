@@ -53,8 +53,8 @@ describe("Hero", () => {
   it("renders the Start Mission CTA link", () => {
     render(<Hero />)
     expect(
-      screen.getByRole("link", { name: /start mission/i }),
-    ).toHaveAttribute("href", "/missions")
+      screen.getByRole("link", { name: /start here/i }),
+    ).toHaveAttribute("href", "/missions/lakehouse-fundamentals")
   })
 
   it("renders the System Online badge", () => {

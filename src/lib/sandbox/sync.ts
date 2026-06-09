@@ -288,14 +288,10 @@ export function shouldSync(sandbox: SandboxData): boolean {
     return true
   }
 
-  // Only sync if totalXp actually changed since last sync
-  // We need to compare current XP against what was last synced
-  // The lastSynced timestamp alone doesn't indicate dirty state
-  // Instead, check if there's meaningful new XP earned since last sync
-  // This requires tracking lastSyncedXp, but we can infer from the sync itself:
-  // If lastSynced is recent AND we have XP, assume it's already synced
-  // The real "dirty" check happens when we award XP - we don't re-sync immediately
-  // So we rely on the 5-minute interval for now to prevent spam
-  // The beacon on visibility change handles immediate sync needs
+  // If there are unsynced significant changes (e.g. totalXp > 0), sync anyway
+  if (sandbox.userStats.totalXp > 0) {
+    return true
+  }
+
   return false
 }

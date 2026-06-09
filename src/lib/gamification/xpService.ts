@@ -270,7 +270,8 @@ export function awardMissionXp(
 ): XpEvent {
   const sandbox = loadSandbox() ?? initializeSandbox()
   const multiplier = getStreakMultiplier(sandbox.streakData.currentStreak)
-  const amount = Math.floor(baseXp * multiplier)
+  const alreadyCompleted = sandbox.missionProgress[missionId]?.completed ?? false
+  const amount = alreadyCompleted ? 0 : Math.floor(baseXp * multiplier)
 
   const event: XpEvent = {
     type: "mission",

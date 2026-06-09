@@ -9,38 +9,37 @@ vi.mock("next/navigation", () => ({
   }),
 }))
 
-// Mock mission components - intercept ArchitectureDiagram
-vi.mock("@/components/missions", async () => {
-  const actual = await vi.importActual("@/components/missions")
-  return {
-    ...actual,
-    ArchitectureDiagram: ({
-      config,
-      onComplete,
-    }: {
-      config: unknown
-      onComplete: () => void
-    }) => (
-      <div data-testid="architecture-diagram">
-        Architecture Diagram Component
-        <button onClick={onComplete}>Complete Diagram</button>
-      </div>
-    ),
-    DatabricksStagePlayer: ({
-      missionSlug,
-      stageId,
-      bundleStatus,
-    }: {
-      missionSlug: string
-      stageId: string
-      bundleStatus: string
-    }) => (
-      <div data-testid="databricks-stage-player">
-        Databricks Mode: {missionSlug} / {stageId} / {bundleStatus}
-      </div>
-    ),
-  }
-})
+// Mock mission components individually since they are dynamically imported
+vi.mock("@/components/missions/ArchitectureDiagram", () => ({
+  ArchitectureDiagram: ({
+    config,
+    onComplete,
+  }: {
+    config: unknown
+    onComplete: () => void
+  }) => (
+    <div data-testid="architecture-diagram">
+      Architecture Diagram Component
+      <button onClick={onComplete}>Complete Diagram</button>
+    </div>
+  ),
+}))
+
+vi.mock("@/components/missions/DatabricksStagePlayer", () => ({
+  DatabricksStagePlayer: ({
+    missionSlug,
+    stageId,
+    bundleStatus,
+  }: {
+    missionSlug: string
+    stageId: string
+    bundleStatus: string
+  }) => (
+    <div data-testid="databricks-stage-player">
+      Databricks Mode: {missionSlug} / {stageId} / {bundleStatus}
+    </div>
+  ),
+}))
 
 describe("StagePlayerClient — Diagram Stage", () => {
   const diagramConfig = {
@@ -58,7 +57,7 @@ describe("StagePlayerClient — Diagram Stage", () => {
     ],
   }
 
-  it("renders ArchitectureDiagram component for diagram stage type", () => {
+  it("renders ArchitectureDiagram component for diagram stage type", async () => {
     render(
       <StagePlayerClient
         stageType="diagram"
@@ -69,11 +68,11 @@ describe("StagePlayerClient — Diagram Stage", () => {
       />,
     )
 
-    expect(screen.getByTestId("architecture-diagram")).toBeInTheDocument()
+    expect(await screen.findByTestId("architecture-diagram")).toBeInTheDocument()
     expect(screen.getByText("Architecture Diagram Component")).toBeInTheDocument()
   })
 
-  it("does not render a stub placeholder for diagram stages", () => {
+  it("does not render a stub placeholder for diagram stages", async () => {
     render(
       <StagePlayerClient
         stageType="diagram"
@@ -84,6 +83,8 @@ describe("StagePlayerClient — Diagram Stage", () => {
       />,
     )
 
+    // Wait for ArchitectureDiagram to render to ensure it finished loading
+    expect(await screen.findByTestId("architecture-diagram")).toBeInTheDocument()
     expect(screen.queryByText("This stage type is not yet implemented")).not.toBeInTheDocument()
     expect(screen.queryByText("Skip to Next Stage")).not.toBeInTheDocument()
   })

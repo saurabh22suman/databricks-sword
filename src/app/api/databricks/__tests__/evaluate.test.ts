@@ -138,7 +138,7 @@ describe("POST /api/databricks/evaluate", () => {
     const mockedEvaluate = vi.mocked(evaluateMission);
     const mockedDecrypt = vi.mocked(decryptPat);
 
-    mockedDecrypt.mockReturnValue("decrypted_pat");
+    mockedDecrypt.mockReturnValue("dapi_decrypted_token_longer_than_20_chars");
     mockedEvaluate.mockResolvedValue([
       { queryIndex: 0, description: "Count events", passed: true, expected: "5", actual: "5" },
     ]);
@@ -156,7 +156,7 @@ describe("POST /api/databricks/evaluate", () => {
 
     expect(mockedEvaluate).toHaveBeenCalledWith(
       "https://dbc-abc.cloud.databricks.com",
-      "decrypted_pat",
+      "dapi_decrypted_token_longer_than_20_chars",
       [{ query: "SELECT COUNT(*) FROM events", expectedResult: "5", tolerance: 0 }],
       undefined
     );
@@ -168,7 +168,7 @@ describe("POST /api/databricks/evaluate", () => {
     const mockedEvaluate = vi.mocked(evaluateMission);
     const mockedDecrypt = vi.mocked(decryptPat);
 
-    mockedDecrypt.mockReturnValue("decrypted_pat");
+    mockedDecrypt.mockReturnValue("dapi_decrypted_token_longer_than_20_chars");
     mockedEvaluate.mockResolvedValue([
       { queryIndex: 0, description: "Count events", passed: true, expected: "5", actual: "5" },
     ]);
@@ -197,7 +197,7 @@ describe("POST /api/databricks/evaluate", () => {
     const mockedEvaluate = vi.mocked(evaluateMission);
     const mockedDecrypt = vi.mocked(decryptPat);
 
-    mockedDecrypt.mockReturnValue("decrypted_pat");
+    mockedDecrypt.mockReturnValue("dapi_decrypted_token_longer_than_20_chars");
     mockedEvaluate.mockResolvedValue([
       { queryIndex: 0, description: "Count events", passed: false, expected: "5", actual: "3" },
     ]);

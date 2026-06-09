@@ -1,9 +1,8 @@
 "use client"
 
 import type { MissionPreview } from "@/lib/missions"
-import { getMissionTrack } from "@/lib/missions"
 import type { Track, TrackInfo } from "@/lib/missions/tracks"
-import { TRACKS, getAllTracks } from "@/lib/missions/tracks"
+import { TRACKS, getAllTracks, getTrackForMission } from "@/lib/missions/tracks"
 import { cn } from "@/lib/utils"
 import { ArrowRight, ChevronRight } from "lucide-react"
 import { useState } from "react"
@@ -48,7 +47,7 @@ export function InteractiveSyllabus({
   const missionsByTrack = getAllTracks().reduce(
     (acc, track) => {
       const trackMissions = missions
-        .filter((m) => getMissionTrack(m.slug) === track)
+        .filter((m) => getTrackForMission(m.slug) === track)
         .sort((a, b) => {
           const order: Record<string, number> = { B: 1, A: 2, S: 3 }
           return order[a.rank] - order[b.rank]

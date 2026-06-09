@@ -61,5 +61,12 @@
       "explanation": "df.explain(True) shows the parsed, analyzed, optimized, and physical plans. For SQL, use EXPLAIN or EXPLAIN EXTENDED. Understanding these plans helps identify optimization opportunities and troubleshoot performance issues."
     }
   ],
-  "passingScore": 60
+  "passingScore": 60,
+  "learnings": [
+    "Predicate pushdown minimizes I/O by filtering at the storage layer",
+    "Constant folding evaluates compile-time expressions once during planning",
+    "Broadcast hash joins send the small table to every executor, avoiding shuffles",
+    "Adaptive Query Execution (AQE) re-optimizes at runtime using actual statistics",
+    "Photon accelerates Catalyst-optimized plans with vectorized C++ execution"
+  ]
 }

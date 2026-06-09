@@ -28,13 +28,13 @@
       "id": "q3",
       "question": "How does privilege cascading work in Unity Catalog?",
       "options": [
-        "Permissions on a catalog automatically apply to all schemas and tables within",
-        "Permissions must be granted at every level separately",
-        "Permissions only cascade downward from schemas",
-        "There is no cascading — each object is independent"
+        "USAGE and SELECT cascade down to child objects; CREATE and MODIFY do not cascade automatically",
+        "All privileges on a catalog automatically apply to every child schema and table",
+        "No privileges cascade — each object must be granted independently",
+        "Only schema-level privileges cascade; catalog-level grants are isolated"
       ],
-      "correctAnswer": "Permissions on a catalog automatically apply to all schemas and tables within",
-      "explanation": "Granting a privilege on a catalog cascades to all children (schemas, tables). This enables efficient permission management — grant broad access at catalog level, restrict at lower levels."
+      "correctAnswer": "USAGE and SELECT cascade down to child objects; CREATE and MODIFY do not cascade automatically",
+      "explanation": "Data-read privileges (USAGE, SELECT) cascade to child schemas, tables, and columns. Administrative privileges (CREATE, MODIFY, ALL PRIVILEGES) do not cascade automatically — they require explicit grants at each level to prevent accidental broad write access."
     },
     {
       "id": "q4",
@@ -88,7 +88,7 @@
   "passingScore": 70,
   "learnings": [
     "Unity Catalog provides unified governance across workspaces",
-    "Three-level namespace: catalog.schema.table",
+    "Four-level hierarchy: metastore → catalog.schema.table",
     "Fine-grained access control at any level",
     "Data lineage tracks data flow automatically",
     "Centralized audit logging for compliance"

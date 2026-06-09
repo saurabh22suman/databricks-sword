@@ -77,12 +77,13 @@ spark.conf.get("spark.databricks.clusterUsageTags.sparkVersion")
         id: 4,
         question: "What is Unity Catalog and why is it important?",
         answer:
-          "Unity Catalog is Databricks' unified governance solution for all data and AI assets in the lakehouse. It provides centralized access control, auditing, lineage tracking, and data discovery across workspaces and clouds. Unity Catalog enables fine-grained permissions at the table, column, and row level, making it essential for enterprise data governance and compliance.",
+          "Unity Catalog is Databricks' unified governance solution for all data and AI assets in the lakehouse. It provides centralized access control, auditing, lineage tracking, and data discovery across workspaces and clouds. Unity Catalog enables fine-grained permissions at the table, column, and row level, making it essential for enterprise data governance and compliance. Through Lakehouse Federation, Unity Catalog also lets you query external data systems — Snowflake, PostgreSQL, MySQL, and others — natively without copying or moving data.",
         keyPoints: [
           "Centralized metadata and access control",
           "Cross-workspace and cross-cloud governance",
           "Data lineage and auditing",
           "Fine-grained permissions (row/column level security)",
+          "Lakehouse Federation for querying external systems without data movement",
         ],
       },
       {
@@ -121,25 +122,15 @@ spark.conf.get("spark.databricks.clusterUsageTags.sparkVersion")
         id: 26,
         question: "What are Databricks Workflows and how do they differ from Jobs?",
         answer:
-          "Databricks Workflows is the orchestration engine for running multi-task data, analytics, and ML pipelines. A Workflow defines a DAG of tasks (notebooks, JARs, Python scripts, dbt, SQL, DLT pipelines) with dependencies, retries, and conditional logic. Jobs are the execution instances of workflows. Workflows support scheduling, event triggers (file arrival), parameters, and integration with CI/CD.",
-        codeExample: `# Create a multi-task workflow via REST API
+          "Databricks Workflows is the orchestration engine for running multi-task data, analytics, and ML pipelines. A Workflow defines a DAG of tasks (notebooks, JARs, Python scripts, dbt, SQL, DLT pipelines) with dependencies, retries, and conditional logic. Jobs are the execution instances of workflows. Workflows support scheduling, event triggers (file arrival), parameters, and integration with CI/CD. For new workflows, Serverless Jobs are the recommended default compute — they provide instant startup, zero-config provisioning, and automatic scale-to-zero, eliminating the need to size or tune classic job clusters for most workloads.",
+        codeExample: `// Serverless Jobs configuration (recommended default)
 {
   "name": "daily_etl_pipeline",
+  "compute": [{ "compute_key": "default", "spec": { "type": "serverless" } }],
   "tasks": [
-    {
-      "task_key": "ingest",
-      "notebook_task": { "notebook_path": "/pipelines/ingest" }
-    },
-    {
-      "task_key": "transform",
-      "depends_on": [{ "task_key": "ingest" }],
-      "notebook_task": { "notebook_path": "/pipelines/transform" }
-    },
-    {
-      "task_key": "validate",
-      "depends_on": [{ "task_key": "transform" }],
-      "notebook_task": { "notebook_path": "/pipelines/validate" }
-    }
+    { "task_key": "ingest", "notebook_task": { "notebook_path": "/pipelines/ingest" } },
+    { "task_key": "transform", "depends_on": [{ "task_key": "ingest" }], "notebook_task": { "notebook_path": "/pipelines/transform" } },
+    { "task_key": "validate", "depends_on": [{ "task_key": "transform" }], "notebook_task": { "notebook_path": "/pipelines/validate" } }
   ],
   "schedule": { "quartz_cron_expression": "0 0 6 * * ?", "timezone_id": "UTC" }
 }`,
@@ -148,15 +139,16 @@ spark.conf.get("spark.databricks.clusterUsageTags.sparkVersion")
           "Supports notebooks, JARs, Python, SQL, DLT",
           "Event-driven triggers (file arrival, API call)",
           "Built-in retry, timeout, and alerting policies",
+          "Serverless Jobs: instant startup, zero-config, scale-to-zero (default)",
         ],
       },
       {
         id: 27,
         question: "What is Databricks SQL and SQL Warehouses?",
         answer:
-          "Databricks SQL (DB SQL) is a serverless analytics service for running SQL queries on lakehouse data. SQL Warehouses are compute endpoints optimized for concurrent BI queries with auto-scaling, query caching, and Photon acceleration. They support T-ANSI SQL, JDBC/ODBC drivers, and native connectors for BI tools like Tableau, Power BI, and Looker. Serverless SQL Warehouses remove cluster management entirely.",
+          "Databricks SQL (DB SQL) is a serverless analytics service for running SQL queries on lakehouse data. SQL Warehouses are compute endpoints optimized for concurrent BI queries with auto-scaling, query caching, and Photon acceleration. They support T-ANSI SQL, JDBC/ODBC drivers, and native connectors for BI tools like Tableau, Power BI, and Looker. Serverless SQL Warehouses are the default recommended compute pattern for all SQL query workloads — they remove cluster management entirely. Classic and Pro warehouse tiers remain available as legacy options for specialized use cases.",
         keyPoints: [
-          "Serverless SQL compute for BI workloads",
+          "Serverless SQL Warehouses are the default for all BI workloads",
           "Photon engine provides near-warehouse performance",
           "Auto-scaling handles concurrency spikes",
           "Query result caching reduces repeat query costs",
@@ -280,10 +272,11 @@ df = spark.read.format("jdbc").option("url", jdbc_url).load()`,
         id: 33,
         question: "How does Databricks implement data lineage?",
         answer:
-          "Unity Catalog provides automatic data lineage tracking across tables, columns, notebooks, workflows, and ML models. It captures read/write relationships without any code changes. Lineage helps with impact analysis (which downstream tables are affected by a schema change), regulatory compliance (GDPR data tracing), debugging data quality issues, and understanding data flow through the organization.",
+          "Unity Catalog provides automatic data lineage tracking across tables, columns, notebooks, workflows, and ML models. It captures read/write relationships without any code changes. Lineage helps with impact analysis (which downstream tables are affected by a schema change), regulatory compliance (GDPR data tracing), debugging data quality issues, and understanding data flow through the organization. Column-level lineage tracks individual column transformations — how a specific output column was derived from source columns through SQL expressions, UDF applications, or aggregation functions, enabling fine-grained impact analysis for schema and semantic changes.",
         keyPoints: [
           "Automatic lineage capture via Unity Catalog",
           "Table-level and column-level lineage",
+          "Column-level lineage tracks SQL expressions, UDFs, and aggregations",
           "Tracks notebook, workflow, and model dependencies",
           "Essential for impact analysis and compliance",
         ],
@@ -510,25 +503,26 @@ spark.readStream.format("delta") \\
         id: 39,
         question: "How does OPTIMIZE work in Delta Lake?",
         answer:
-          "OPTIMIZE compacts small files into larger ones (target ~256MB, configurable via `targetFileSize`) for better read performance. It can also Z-order data by specified columns to co-locate related values for faster predicate pushdown. OPTIMIZE is idempotent and safe to run concurrently with reads. On Databricks, predictive optimization can schedule OPTIMIZE automatically based on table usage patterns.",
+          "OPTIMIZE compacts small files into larger ones (target ~256MB, configurable via `targetFileSize`) for better read performance. For data layout, prefer Liquid Clustering (CLUSTER BY) — it co-locates related data using space-filling curves and adapts as data and query patterns change. Z-ORDER is the legacy alternative and is less adaptive: changing Z-ORDER columns requires a full rewrite. OPTIMIZE is idempotent and safe to run concurrently with reads. On Databricks, predictive optimization can schedule OPTIMIZE and VACUUM automatically based on table usage patterns.",
         codeExample: `-- Basic compaction
 OPTIMIZE my_table;
 
--- Z-order by frequently filtered columns
-OPTIMIZE my_table ZORDER BY (date, region);
+-- Modern: change clustering columns (no rewrite required)
+ALTER TABLE my_table CLUSTER BY (date, region);
 
--- Optimize a specific partition
-OPTIMIZE my_table WHERE date = '2025-01-15';
+-- Legacy: Z-order (avoid for new tables)
+-- OPTIMIZE my_table ZORDER BY (date, region);
 
--- Enable predictive optimization (auto-OPTIMIZE)
+-- Enable predictive optimization (auto-OPTIMIZE + auto-VACUUM)
 ALTER TABLE my_table SET TBLPROPERTIES (
-  'delta.tuneFileSizesForRewrites' = 'true'
+  'delta.enablePredictiveOptimization' = 'true'
 );`,
         keyPoints: [
           "Compacts small files into optimal-size files",
-          "Z-ordering co-locates data for query predicates",
+          "Liquid Clustering (CLUSTER BY) is the modern layout strategy",
+          "Z-ORDER is the legacy alternative (avoid for new tables)",
           "Safe to run concurrently with readers",
-          "Predictive optimization automates scheduling",
+          "Predictive optimization automates OPTIMIZE and VACUUM",
         ],
       },
       {
@@ -595,12 +589,13 @@ OPTIMIZE events;`,
         id: 43,
         question: "What are Deletion Vectors in Delta Lake?",
         answer:
-          "Deletion Vectors are a performance optimization that marks rows as deleted within existing Parquet data files rather than rewriting entire files. When a DELETE or UPDATE touches a few rows, the engine writes a lightweight bitmap (deletion vector) instead of a full file rewrite. This dramatically speeds up DML operations on large tables. Reads apply the deletion vector to filter out marked rows.",
+          "Deletion Vectors are a performance optimization that marks rows as deleted within existing Parquet data files rather than rewriting entire files. When a DELETE or UPDATE touches a few rows, the engine writes a lightweight bitmap (deletion vector) instead of a full file rewrite. This dramatically speeds up DML operations on large tables. Reads apply the deletion vector to filter out marked rows. Deletion Vectors are enabled by default in Databricks Runtime 14.3+ and are fully transparent to users — no configuration is required.",
         keyPoints: [
           "Mark rows deleted without rewriting data files",
           "10-100x faster DELETE/UPDATE on large tables",
           "Bitmap stored alongside data files",
           "Transparent to readers — filtered automatically",
+          "Enabled by default in DBR 14.3+ — no configuration required",
         ],
       },
       {
@@ -619,7 +614,7 @@ OPTIMIZE events;`,
         id: 45,
         question: "What is UniForm in Delta Lake?",
         answer:
-          "UniForm (Universal Format) automatically generates Iceberg and Hudi metadata alongside Delta Lake commits, enabling engines like Snowflake, Trino, Presto, and BigQuery to read Delta tables through their native format readers. No data duplication — only metadata is generated. UniForm makes Delta Lake truly interoperable without requiring all consumers to support the Delta protocol.",
+          "UniForm (Universal Format) automatically generates Iceberg and Hudi metadata alongside Delta Lake commits, enabling engines like Snowflake, Trino, Presto, BigQuery, StarRocks, and Dremio to read Delta tables through their native format readers via Iceberg/Hudi metadata translation. No data duplication — only metadata is generated. UniForm makes Delta Lake truly interoperable without requiring all consumers to support the Delta protocol.",
         codeExample: `-- Enable UniForm for Iceberg compatibility
 ALTER TABLE my_table SET TBLPROPERTIES (
   'delta.universalFormat.enabledFormats' = 'iceberg'
@@ -633,8 +628,9 @@ TBLPROPERTIES (
         keyPoints: [
           "Auto-generates Iceberg/Hudi metadata from Delta",
           "No data duplication — metadata only",
-          "Enables Snowflake, Trino, BigQuery to read Delta",
+          "Enables Snowflake, Trino, BigQuery, StarRocks, Dremio to read Delta",
           "Live interoperability without export/convert",
+          "Iceberg/Hudi metadata translation for native engine reads",
         ],
       },
     ],

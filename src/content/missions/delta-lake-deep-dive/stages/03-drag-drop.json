@@ -13,9 +13,9 @@
       "label": "Compact Small Files"
     },
     {
-      "id": "zorder-table",
-      "code": "OPTIMIZE patients ZORDER BY (patient_id, admission_date)",
-      "label": "Z-ORDER by Query Columns"
+      "id": "liquid-cluster",
+      "code": "ALTER TABLE patients CLUSTER BY (patient_id, admission_date)",
+      "label": "Apply Liquid Clustering"
     },
     {
       "id": "analyze-table",
@@ -36,15 +36,15 @@
   "correctOrder": [
     "describe-history",
     "optimize-table",
-    "zorder-table",
+    "liquid-cluster",
     "analyze-table",
     "vacuum-table",
     "verify-performance"
   ],
   "hints": [
     "Check table history first to understand the current state",
-    "OPTIMIZE before Z-ORDER to compact files first",
-    "Z-ORDER co-locates data by specified columns for faster filtering",
+    "OPTIMIZE before Liquid Clustering to compact files first",
+    "Liquid Clustering co-locates data by specified columns for faster filtering",
     "ANALYZE computes column statistics for the query optimizer",
     "VACUUM after optimization to clean up old versions",
     "Test with a real query to verify performance improvement"
@@ -53,7 +53,7 @@
     "Time travel queries use VERSION AS OF or TIMESTAMP AS OF syntax",
     "OPTIMIZE compacts small files for better query performance",
     "VACUUM removes old files but respects the retention period",
-    "Z-ORDER colocates related data for efficient data skipping",
+    "Liquid Clustering co-locates related data with adaptive layout — no rewrite required to change clustering columns",
     "DESCRIBE HISTORY shows all operations on a Delta table"
   ]
 }

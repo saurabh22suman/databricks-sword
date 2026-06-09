@@ -10,7 +10,7 @@ StreamVerse Media now has a clean, three-layer medallion architecture. Analysts 
 - **Append-only ingestion** — never modify raw data, preserve the full history
 - **Schema enforcement** — reject malformed records at ingestion
 - **Auto Loader** — efficiently track and process new files incrementally
-- **Partitioning** — by ingestion date for efficient cleanup
+- **Partitioning / Liquid Clustering** — prefer `CLUSTER BY` for adaptive layout; `partitionBy` is legacy for new tables
 
 ### Silver Layer (Validated)
 - **Deduplication** — remove duplicate events using `dropDuplicates()` or `MERGE`
@@ -22,7 +22,12 @@ StreamVerse Media now has a clean, three-layer medallion architecture. Analysts 
 - **Pre-aggregated metrics** — daily/weekly/monthly rollups for fast dashboards
 - **Feature tables** — ML-ready features (user engagement scores, content popularity)
 - **Business entities** — one table per business concept (users, content, subscriptions)
-- **Optimized for consumers** — Z-ORDERed by common query patterns
+- **Optimized for consumers** — clustered via `CLUSTER BY` for query patterns, or rely on Predictive Optimization for automatic maintenance
+
+### Predictive Optimization
+- Enable Predictive Optimization on Gold tables to let the platform schedule OPTIMIZE and VACUUM automatically
+- The platform learns table usage patterns and runs maintenance without manual intervention
+- Significantly reduces operational overhead for high-cardinality, continuously growing tables
 
 ### CDC Through Medallion
 - **APPLY CHANGES INTO** — DLT's CDC operator for propagating updates

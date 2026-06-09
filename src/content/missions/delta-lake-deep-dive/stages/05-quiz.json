@@ -26,15 +26,15 @@
     },
     {
       "id": "q3",
-      "question": "What does Z-ORDER do?",
+      "question": "What does Liquid Clustering (CLUSTER BY) do?",
       "options": [
-        "Co-locates related data within files so queries can skip irrelevant files",
-        "Sorts data alphabetically",
-        "Compresses files using Z-algorithm",
-        "Creates a secondary index"
+        "Automatically organizes data using space-filling curves, adapting as data and query patterns change — without full table rewrites",
+        "Sorts data alphabetically by clustering columns",
+        "Compresses files using a Z-algorithm",
+        "Creates a secondary index on clustering columns"
       ],
-      "correctAnswer": "Co-locates related data within files so queries can skip irrelevant files",
-      "explanation": "Z-ORDER arranges data within files so that values of the specified columns are clustered together. This enables data skipping — queries that filter by Z-ordered columns can skip entire files."
+      "correctAnswer": "Automatically organizes data using space-filling curves, adapting as data and query patterns change — without full table rewrites",
+      "explanation": "Liquid Clustering replaces legacy Z-ORDER and partitioning. It uses space-filling curves to co-locate related data, adapts incrementally as data and query patterns change, and supports altering clustering columns without rewriting the entire table."
     },
     {
       "id": "q4",
@@ -90,7 +90,7 @@
     "Transaction log provides atomicity and versioning",
     "Time travel enables querying historical versions",
     "OPTIMIZE compacts small files for better performance",
-    "Z-ORDER colocates data for efficient data skipping",
+    "Liquid Clustering (CLUSTER BY) is the modern layout strategy",
     "VACUUM removes old files respecting retention"
   ]
 }

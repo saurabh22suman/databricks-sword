@@ -13,6 +13,7 @@ import { useEffect, useState } from "react"
 export function Hero(): React.ReactElement {
   const [scrollY, setScrollY] = useState(0)
   const [userCount, setUserCount] = useState(0)
+  const [unitsDeployed, setUnitsDeployed] = useState(0)
 
   useEffect(() => {
     const handleScroll = () => requestAnimationFrame(() => setScrollY(window.scrollY))
@@ -28,9 +29,12 @@ export function Hero(): React.ReactElement {
         }
         return res.json()
       })
-      .then((data: { userCount?: number }) => {
+      .then((data: { userCount?: number; unitsDeployed?: number }) => {
         if (typeof data.userCount === "number") {
           setUserCount(data.userCount)
+        }
+        if (typeof data.unitsDeployed === "number") {
+          setUnitsDeployed(data.unitsDeployed)
         }
       })
       .catch(() => {
@@ -104,6 +108,11 @@ export function Hero(): React.ReactElement {
             <div className="flex flex-col">
               <span className="text-2xl font-black text-white">{userCount}</span>
               <span className="text-[10px] uppercase tracking-widest text-gray-500">Registered Learners</span>
+            </div>
+            <div className="h-8 w-px bg-gray-700" />
+            <div className="flex flex-col">
+              <span className="text-2xl font-black text-white">{unitsDeployed}</span>
+              <span className="text-[10px] uppercase tracking-widest text-gray-500">Units Deployed</span>
             </div>
           </div>
         </div>
