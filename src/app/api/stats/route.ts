@@ -20,12 +20,9 @@ export async function GET(): Promise<NextResponse> {
 
     const userCount = result[0]?.count ?? 0
 
-    return NextResponse.json({
-      userCount,
-      unitsDeployed: userCount,
-    })
+    return NextResponse.json({ userCount })
   } catch (error) {
     console.error("Failed to fetch stats:", error)
-    return NextResponse.json({ userCount: 0, unitsDeployed: 0 })
+    return NextResponse.json({ userCount: 0 })
   }
 }

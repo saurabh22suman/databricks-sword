@@ -49,22 +49,22 @@
       "file": "stages/04-fill-blank.json"
     },
     {
-      "id": "07-fix-bug",
+      "id": "05-fix-bug",
       "type": "fix-bug",
       "title": "Fix a Faulty MERGE Statement",
-      "file": "stages/07-fix-bug.json"
+      "file": "stages/05-fix-bug.json"
     },
     {
-      "id": "05-quiz",
+      "id": "06-quiz",
       "type": "quiz",
       "title": "Knowledge Check",
-      "file": "stages/05-quiz.json"
+      "file": "stages/06-quiz.json"
     },
     {
-      "id": "06-debrief",
+      "id": "07-debrief",
       "type": "debrief",
       "title": "Mission Debrief",
-      "file": "stages/06-debrief.json"
+      "file": "stages/07-debrief.json"
     }
   ],
   "sideQuests": [

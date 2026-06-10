@@ -17,19 +17,19 @@
     "blocks": [
       {
         "id": "b1",
-        "content": "raw_stream = spark.readStream.format('kafka').option('subscribe', 'events').load()"
+        "code": "raw_stream = spark.readStream.format('kafka').option('subscribe', 'events').load()"
       },
       {
         "id": "b2",
-        "content": "parsed = raw_stream.select(from_json(col('value').cast('string'), schema).alias('data')).select('data.*')"
+        "code": "parsed = raw_stream.select(from_json(col('value').cast('string'), schema).alias('data')).select('data.*')"
       },
       {
         "id": "b3",
-        "content": "aggregated = parsed.groupBy(window(col('event_time'), '5 minutes')).count()"
+        "code": "aggregated = parsed.groupBy(window(col('event_time'), '5 minutes')).count()"
       },
       {
         "id": "b4",
-        "content": "query = aggregated.writeStream.format('delta').outputMode('complete').option('checkpointLocation', '/checkpoints/events').start('/delta/event_counts')"
+        "code": "query = aggregated.writeStream.format('delta').outputMode('complete').option('checkpointLocation', '/checkpoints/events').start('/delta/event_counts')"
       }
     ],
     "correctOrder": [

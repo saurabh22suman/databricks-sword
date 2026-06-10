@@ -302,15 +302,18 @@ function extractListItems(text: string): string[] {
 }
 
 /**
- * Cleans markdown formatting from text (bold, links, code).
+ * Cleans markdown formatting from text (links, code, blockquotes, hr).
+ *
+ * Bold (`**...**`) and italic (`*...*`) markers are intentionally preserved
+ * so the renderer can convert them to <strong>/<em> elements. Other
+ * syntax that would render as raw characters (links, inline code,
+ * blockquotes, horizontal rules) is stripped.
  *
  * @param text - Raw markdown text
- * @returns Plain text with markdown stripped
+ * @returns Cleaned text with bold/italic markers preserved
  */
 function cleanMarkdown(text: string): string {
   return text
-    .replace(/\*\*(.+?)\*\*/g, "$1") // bold
-    .replace(/\*(.+?)\*/g, "$1") // italic
     .replace(/`(.+?)`/g, "$1") // inline code
     .replace(/\[([^\]]+)\]\([^)]+\)/g, "$1") // links
     .replace(/^>\s*/gm, "") // blockquotes

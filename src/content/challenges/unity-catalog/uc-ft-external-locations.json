@@ -14,7 +14,8 @@
   "optimalSolution": "-- Azure: CREATE STORAGE CREDENTIAL ... WITH (AZURE_SERVICE_PRINCIPAL = (...));\n-- AWS:   CREATE STORAGE CREDENTIAL ... WITH (AWS_IAM_ROLE = { ... });\n-- GCP:   CREATE STORAGE CREDENTIAL ... WITH (GCP_SERVICE_ACCOUNT = { ... });\n-- URL examples:\n--   'abfss://container@storage.dfs.core.windows.net/sales/'\n--   's3://my-bucket/sales/'\n--   'gs://my-bucket/sales/'\n\n-- Create external table\nCREATE EXTERNAL TABLE main.sales.orders\nLOCATION '<your-url>/orders/'\nAS SELECT * FROM parquet.`/tmp/orders`;",
   "explanation": "External locations enable Unity Catalog to govern data stored outside Databricks-managed storage. Storage credentials securely store cloud provider authentication. This pattern is essential for organizations migrating existing data lakes to Unity Catalog governance.",
   "freeText": {
-    "validationRegex": "STORAGE CREDENTIAL|EXTERNAL LOCATION|(AZURE_SERVICE_PRINCIPAL|AWS_IAM_ROLE|GCP_SERVICE_ACCOUNT)|(abfss://|s3://|gs://)",
-    "sampleAnswer": "CREATE STORAGE CREDENTIAL my_cred WITH (AZURE_SERVICE_PRINCIPAL = (...));\nCREATE EXTERNAL LOCATION my_loc URL 'abfss://...' WITH (STORAGE CREDENTIAL my_cred);"
+    "starterCode": "",
+    "expectedPattern": "STORAGE CREDENTIAL|EXTERNAL LOCATION|(AZURE_SERVICE_PRINCIPAL|AWS_IAM_ROLE|GCP_SERVICE_ACCOUNT)|(abfss://|s3://|gs://)",
+    "simulatedOutput": "CREATE STORAGE CREDENTIAL my_cred WITH (AZURE_SERVICE_PRINCIPAL = (...));\nCREATE EXTERNAL LOCATION my_loc URL 'abfss://...' WITH (STORAGE CREDENTIAL my_cred);"
   }
 }

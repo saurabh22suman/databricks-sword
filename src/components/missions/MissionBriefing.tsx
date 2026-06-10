@@ -9,6 +9,7 @@ import { Badge } from "@/components/ui";
 import type { BriefingConfig } from "@/lib/missions";
 import { cn } from "@/lib/utils";
 import React from "react";
+import { renderRichText } from "./RichText";
 
 export interface MissionBriefingProps {
   /**
@@ -27,6 +28,10 @@ export interface MissionBriefingProps {
    * Callback when start button is clicked
    */
   onStart?: () => void;
+  /**
+   * Custom button label (overrides default "Continue")
+   */
+  buttonLabel?: string;
 }
 
 /**
@@ -58,15 +63,16 @@ export function MissionBriefing({
   estimatedMinutes,
   isLoading = false,
   onStart,
+  buttonLabel,
 }: MissionBriefingProps): React.ReactElement {
   return (
     <div className="space-y-8">
       {/* Narrative Section */}
       {config.narrative && (
         <section>
-          <p className="text-anime-300 text-lg leading-relaxed">
-            {config.narrative}
-          </p>
+          <div className="space-y-4 text-anime-300 text-lg leading-relaxed">
+            {renderRichText(config.narrative)}
+          </div>
         </section>
       )}
 
@@ -152,7 +158,7 @@ export function MissionBriefing({
             "disabled:opacity-50 disabled:cursor-not-allowed"
           )}
         >
-          {isLoading ? "Preparing..." : "Continue"}
+          {isLoading ? "Preparing..." : buttonLabel || "Continue"}
         </button>
       </div>
     </div>

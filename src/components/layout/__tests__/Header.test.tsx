@@ -110,6 +110,7 @@ describe("Header", () => {
     expect(screen.getByText("⚡ Field Ops")).toBeInTheDocument()
     expect(screen.getByText("Map")).toBeInTheDocument()
     expect(screen.getByText("Leaderboard")).toBeInTheDocument()
+    expect(screen.getByText("Cheat Sheet")).toBeInTheDocument()
     expect(screen.getByText("Logs")).toBeInTheDocument()
   })
 

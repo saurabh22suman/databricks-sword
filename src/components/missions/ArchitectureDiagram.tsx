@@ -218,6 +218,7 @@ export function ArchitectureDiagram({
                 key={zone.id}
                 onDrop={() => handleDropOnZone(zone.id)}
                 onDragOver={handleDragOver}
+                aria-label={`${zone.label} drop zone`}
                 className={cn(
                   "min-h-[100px] rounded-lg p-4",
                   "border-2 border-dashed",
@@ -254,6 +255,8 @@ export function ArchitectureDiagram({
       {/* Feedback */}
       {feedback && (
         <div
+          role="status"
+          aria-live="polite"
           className={cn(
             "mb-4 p-3 rounded-md text-center",
             feedback.type === "success" && "bg-anime-green/20 text-anime-green border border-anime-green",

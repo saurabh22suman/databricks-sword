@@ -49,6 +49,18 @@ export function Header(): React.ReactElement {
     return unsubscribe
   }, [status])
 
+  // Close mobile menu on Escape key
+  useEffect(() => {
+    const handleEscape = (e: KeyboardEvent) => {
+      if (e.key === "Escape" && mobileMenuOpen) {
+        setMobileMenuOpen(false)
+      }
+    }
+
+    document.addEventListener("keydown", handleEscape)
+    return () => document.removeEventListener("keydown", handleEscape)
+  }, [mobileMenuOpen])
+
   // Don't render progress bar until we've hydrated to avoid flash of incorrect rank
   const isLoading = status === "loading" || !hasHydrated
 
@@ -172,6 +184,7 @@ export function Header(): React.ReactElement {
               onClick={() => setMobileMenuOpen(!mobileMenuOpen)}
               className="md:hidden p-2 text-gray-400 hover:text-white transition-colors"
               aria-label={mobileMenuOpen ? "Close menu" : "Open menu"}
+              aria-expanded={mobileMenuOpen}
             >
               {mobileMenuOpen ? (
                 <X className="w-6 h-6" />
@@ -221,13 +234,13 @@ export function Header(): React.ReactElement {
 
       {/* Mobile Navigation Menu */}
       {mobileMenuOpen && (
-        <div className="fixed inset-0 z-40 md:hidden">
+        <div className="fixed inset-0 z-40 md:hidden" role="dialog" aria-modal="true" aria-label="Main navigation">
           {/* Backdrop */}
           <div
             className="absolute inset-0 bg-anime-950/90 backdrop-blur-sm"
             onClick={() => setMobileMenuOpen(false)}
           />
-          
+
           {/* Menu Content */}
           <nav className="absolute top-20 left-0 right-0 bg-anime-950 border-b border-anime-700 p-6 flex flex-col gap-4">
             <Link
@@ -256,7 +269,7 @@ export function Header(): React.ReactElement {
               onClick={() => setMobileMenuOpen(false)}
               className="text-sm font-bold uppercase tracking-widest text-gray-400 hover:text-white py-2 border-b border-anime-800 transition-colors"
             >
-              🗺️ Map
+              Map
             </Link>
             <Link
               href="/leaderboard"
@@ -264,6 +277,13 @@ export function Header(): React.ReactElement {
               className="text-sm font-bold uppercase tracking-widest text-gray-400 hover:text-white py-2 border-b border-anime-800 transition-colors"
             >
               Leaderboard
+            </Link>
+            <Link
+              href="/cheat-sheet"
+              onClick={() => setMobileMenuOpen(false)}
+              className="text-sm font-bold uppercase tracking-widest text-anime-cyan hover:text-white py-2 border-b border-anime-800 transition-colors"
+            >
+              Cheat Sheet
             </Link>
             <Link
               href="/blog"

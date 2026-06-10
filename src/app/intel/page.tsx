@@ -1,6 +1,8 @@
 import type { FAQCategory, FAQQuestion } from "@/content/intel/faqData"
 import { categorySlugMap, faqData } from "@/content/intel/faqData"
+import { IntelSearch } from "@/components/intel/IntelSearch"
 import { getAllChallenges } from "@/lib/challenges"
+import { CATEGORY_ICON_MAP } from "@/lib/challenges/categoryIcons"
 import { faqItems, getDb } from "@/lib/db"
 import {
   getChallengeCategoryForIntelTopic,
@@ -50,19 +52,12 @@ async function getDbFaqs(): Promise<FAQCategory[]> {
       categoryMap.set(item.category, questions)
     }
 
-    // Convert to category array with icons
-    const categoryIcons: Record<string, string> = {
-      "general": "🏢",
-      "delta-lake": "🔷",
-      "pyspark": "⚡",
-      "sql": "📊",
-      "mlflow": "🤖",
-      "architecture": "🏗️",
-    }
-
     return Array.from(categoryMap.entries()).map(([name, questions]) => ({
       name: name.split("-").map(w => w.charAt(0).toUpperCase() + w.slice(1)).join(" "),
-      icon: categoryIcons[name] || "📚",
+      // Preserve the legacy `icon` field for type compatibility — the page
+      // computes the real icon path server-side below before passing data to
+      // the IntelSearch client component.
+      icon: "",
       questions,
     }))
   } catch (error) {
@@ -72,40 +67,48 @@ async function getDbFaqs(): Promise<FAQCategory[]> {
 }
 
 /**
- * Expandable FAQ item component.
+ * Direct lowercase display-name → icon path map. Built once at module load.
+ *
+ * The intel page gets its category names from two sources that disagree:
+ *   1. Static `faqData` has full titles like "SQL & Analytics", "MLflow & MLOps".
+ *   2. DB rows store the bare slug and `getDbFaqs()` title-cases it, so
+ *      the runtime display name can be "Sql", "Mlflow", "Pyspark", etc.
+ *
+ * To handle both shapes we lowercase the display name and match against the
+ * FIRST WORD of each known display name. That way "Sql" matches the row
+ * whose full name starts with "SQL".
  */
-function FAQItem({ item }: { item: FAQQuestion }): React.ReactElement {
-  // Only show ID prefix for numeric IDs (static data), not UUIDs (database data)
-  const showIdPrefix = typeof item.id === "number"
+const INTEL_ICON_BY_FIRST_WORD: Record<string, string> = (() => {
+  const map: Record<string, string> = {}
+  for (const [displayName, slug] of Object.entries(categorySlugMap)) {
+    const iconPath = CATEGORY_ICON_MAP[slug as keyof typeof CATEGORY_ICON_MAP]
+    if (!iconPath) continue // "general" has no icon file
+    const firstWord = displayName.toLowerCase().split(/[\s&]+/)[0]
+    if (firstWord) map[firstWord] = iconPath
+  }
+  return map
+})()
 
-  return (
-    <details className="group cut-corner border border-anime-700 bg-anime-900 transition-colors hover:border-anime-cyan/50">
-      <summary className="flex cursor-pointer items-center justify-between p-5 text-gray-100 hover:bg-anime-800/50 focus-visible:outline-none focus-visible:ring-1 focus-visible:ring-anime-cyan/60">
-        <span className="pr-4 font-medium">{showIdPrefix ? `${item.id}. ` : ""}{item.question}</span>
-        <span className="text-anime-cyan transition-transform group-open:rotate-180">
-          ▼
-        </span>
-      </summary>
-      <div className="border-t border-anime-700 p-5">
-        <p className="text-gray-300 leading-relaxed">{item.answer}</p>
-        
-        {item.codeExample && (
-          <pre className="mt-4 overflow-x-auto rounded bg-anime-950 p-4 text-sm text-gray-300 border border-anime-700">
-            <code>{item.codeExample}</code>
-          </pre>
-        )}
-        
-        <div className="mt-4">
-          <h4 className="text-sm font-semibold text-anime-cyan mb-2">Key Points:</h4>
-          <ul className="list-disc list-inside space-y-1 text-sm text-gray-400">
-            {item.keyPoints.map((point, idx) => (
-              <li key={idx}>{point}</li>
-            ))}
-          </ul>
-        </div>
-      </div>
-    </details>
-  )
+/**
+ * Resolve a category display name (e.g. "Delta Lake", "PySpark", "Sql")
+ * to the public path of its dedicated icon in /public/icons/. Returns
+ * `null` when no dedicated icon exists (currently only "General Databricks")
+ * so the caller can fall back to a generic icon.
+ */
+function getIconPathForCategory(displayName: string): string | null {
+  const firstWord = displayName.toLowerCase().split(/[\s&]+/)[0]
+  return INTEL_ICON_BY_FIRST_WORD[firstWord] ?? null
+}
+
+/**
+ * Expandable FAQ item component.
+ * (Rendered through the IntelSearch client component so the page can search it.)
+ */
+function FAQItem({ item: _item }: { item: FAQQuestion }): React.ReactElement {
+  // The live page renders the intel list through <IntelSearch /> so users
+  // can filter it. Kept as a no-op shim for any external imports that
+  // expect this symbol to exist on the page module.
+  return <></>
 }
 
 /**
@@ -116,8 +119,16 @@ export default async function IntelPage(): Promise<React.ReactElement> {
   // DB-first: load from Turso, fall back to static data if DB is empty
   const dbFaqs = await getDbFaqs()
   const displayData = dbFaqs.length > 0 ? dbFaqs : faqData
-  
+
   const totalQuestions = displayData.reduce((sum, cat) => sum + cat.questions.length, 0)
+
+  // Enrich categories with the real icon path (from /public/icons/) before
+  // handing off to the client component for interactive search.
+  const searchData = displayData.map((cat) => ({
+    name: cat.name,
+    iconPath: getIconPathForCategory(cat.name),
+    questions: cat.questions,
+  }))
 
   const challenges = await getAllChallenges()
   const coverage = getIntelTopicCoverage(challenges)
@@ -168,6 +179,7 @@ export default async function IntelPage(): Promise<React.ReactElement> {
             const challengeHref = challengeCategory
               ? (`/challenges?category=${encodeURIComponent(challengeCategory)}` as const)
               : "/challenges"
+            const iconPath = getIconPathForCategory(cat.name)
 
             return (
               <div
@@ -178,10 +190,22 @@ export default async function IntelPage(): Promise<React.ReactElement> {
                   href={`#${cat.name.toLowerCase().replace(/\s+/g, "-")}`}
                   className="group block focus-visible:outline-none focus-visible:ring-1 focus-visible:ring-anime-cyan/60"
                 >
-                  <span className="text-2xl" aria-hidden="true">
-                    {cat.icon}
-                  </span>
-                  <h3 className="mt-2 font-semibold text-gray-100 transition-colors group-hover:text-anime-cyan">{cat.name}</h3>
+                  <div className="mb-4 flex h-20 w-20 items-center justify-center rounded border border-anime-800 bg-anime-950/60 transition-colors group-hover:border-anime-cyan/60 group-hover:bg-anime-900">
+                    {iconPath ? (
+                      // eslint-disable-next-line @next/next/no-img-element
+                      <img
+                        src={iconPath}
+                        alt=""
+                        aria-hidden="true"
+                        width={72}
+                        height={72}
+                        className="h-16 w-16 object-contain"
+                      />
+                    ) : (
+                      <Database className="h-12 w-12 text-anime-cyan" aria-hidden="true" />
+                    )}
+                  </div>
+                  <h3 className="font-semibold text-gray-100 transition-colors group-hover:text-anime-cyan">{cat.name}</h3>
                   <p className="mt-1 text-sm font-mono text-gray-400">{cat.questions.length} classified entries</p>
                 </a>
 
@@ -196,24 +220,9 @@ export default async function IntelPage(): Promise<React.ReactElement> {
           })}
         </div>
 
-        {/* FAQ content by category */}
-        <div className="mt-12 space-y-12">
-          {displayData.map((category) => (
-            <section
-              key={category.name}
-              id={category.name.toLowerCase().replace(/\s+/g, "-")}
-            >
-              <h2 className="text-2xl font-bold text-gray-100 flex items-center gap-3 mb-6 border-l-2 border-anime-cyan pl-4">
-                <span aria-hidden="true">{category.icon}</span>
-                {category.name}
-              </h2>
-              <div className="space-y-4">
-                {category.questions.map((item) => (
-                  <FAQItem key={item.id} item={item} />
-                ))}
-              </div>
-            </section>
-          ))}
+        {/* Search + FAQ content (client component for interactive filtering) */}
+        <div className="mt-12">
+          <IntelSearch data={searchData} />
         </div>
 
         <div className="mt-12 cut-corner border border-anime-accent/30 bg-anime-900 p-6 text-center">

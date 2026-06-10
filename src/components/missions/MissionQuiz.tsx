@@ -283,7 +283,7 @@ export function MissionQuiz({
       </div>
 
       {isSubmitted && (
-        <div className="mt-6 rounded-lg border border-anime-700 bg-anime-950 p-4">
+        <div role="status" aria-live="polite" className="mt-6 rounded-lg border border-anime-700 bg-anime-950 p-4">
           <p className="text-sm text-anime-300">{currentQuestion.explanation}</p>
         </div>
       )}

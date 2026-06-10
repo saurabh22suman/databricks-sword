@@ -1,4 +1,5 @@
 import { blogPosts, getDb } from "@/lib/db"
+import { toIsoDate } from "@/lib/utils"
 import { and, eq } from "drizzle-orm"
 import { NextResponse } from "next/server"
 
@@ -38,7 +39,8 @@ export async function GET(
         author: post.author,
         category: post.category,
         tags: JSON.parse(post.tags),
-        publishedAt: post.publishedAt?.toISOString().split("T")[0] ?? "",
+        // publishedAt may be a Date (newer Drizzle) or Unix seconds (older Drizzle/raw)
+        publishedAt: toIsoDate(post.publishedAt),
         featured: post.featured,
         sourceUrl: post.sourceUrl,
         citations: JSON.parse(post.citations ?? "[]"),

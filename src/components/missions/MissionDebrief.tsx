@@ -10,6 +10,7 @@ import type { DebriefConfig } from "@/lib/missions";
 import { playSound } from "@/lib/sound";
 import { cn } from "@/lib/utils";
 import React from "react";
+import { RichText } from "./RichText";
 
 export interface MissionDebriefProps {
   /**
@@ -109,7 +110,7 @@ export function MissionDebrief({
         <h3 className="font-heading text-xl font-bold text-anime-100 mb-4">
           Mission Summary
         </h3>
-        <div className="text-anime-300 leading-relaxed whitespace-pre-line">{config.summary}</div>
+        <RichText text={config.summary} />
       </div>
 
       {/* Industry Context */}
@@ -117,9 +118,7 @@ export function MissionDebrief({
         <h3 className="font-heading text-xl font-bold text-anime-100 mb-4">
           Industry Context
         </h3>
-        <div className="text-anime-300 leading-relaxed whitespace-pre-line">
-          {config.industryContext}
-        </div>
+        <RichText text={config.industryContext} />
       </div>
 
       {/* Alternative Approach */}
@@ -127,9 +126,7 @@ export function MissionDebrief({
         <h3 className="font-heading text-xl font-bold text-anime-100 mb-4">
           Alternative Approach
         </h3>
-        <div className="text-anime-300 leading-relaxed whitespace-pre-line">
-          {config.alternativeApproach}
-        </div>
+        <RichText text={config.alternativeApproach} />
       </div>
 
       {/* Further Reading */}

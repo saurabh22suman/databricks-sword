@@ -94,8 +94,9 @@ export const FAQ: React.FC = () => {
                 openIndex === idx ? 'border-anime-cyan bg-anime-950 shadow-neon-cyan' : 'border-white/10 bg-black/20 hover:border-white/30'
               }`}
             >
-              <button 
+              <button
                 onClick={() => handleToggle(idx)}
+                aria-expanded={openIndex === idx}
                 className="w-full text-left px-6 py-5 flex items-center justify-between gap-4 group"
               >
                 <div className="flex items-center gap-4">

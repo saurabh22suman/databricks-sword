@@ -17,23 +17,23 @@
     "blocks": [
       {
         "id": "b1",
-        "content": "MERGE INTO target_customers AS t"
+        "code": "MERGE INTO target_customers AS t"
       },
       {
         "id": "b2",
-        "content": "USING staging_customers AS s"
+        "code": "USING staging_customers AS s"
       },
       {
         "id": "b3",
-        "content": "ON t.customer_id = s.customer_id"
+        "code": "ON t.customer_id = s.customer_id"
       },
       {
         "id": "b4",
-        "content": "WHEN MATCHED THEN UPDATE SET t.name = s.name, t.email = s.email"
+        "code": "WHEN MATCHED THEN UPDATE SET t.name = s.name, t.email = s.email"
       },
       {
         "id": "b5",
-        "content": "WHEN NOT MATCHED THEN INSERT (customer_id, name, email) VALUES (s.customer_id, s.name, s.email)"
+        "code": "WHEN NOT MATCHED THEN INSERT (customer_id, name, email) VALUES (s.customer_id, s.name, s.email)"
       }
     ],
     "correctOrder": [

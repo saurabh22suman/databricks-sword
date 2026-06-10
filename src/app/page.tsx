@@ -10,6 +10,7 @@ import { getContentFiles } from "@/lib/mdx/content"
 import { blogFrontmatterSchema } from "@/lib/mdx/schema"
 import { getMissionPreviews } from "@/lib/missions"
 import { StructuredData, getCourseStructuredData } from "@/lib/seo/structured-data"
+import { toIsoDate } from "@/lib/utils"
 import { eq } from "drizzle-orm"
 import type { Metadata } from "next"
 
@@ -49,7 +50,8 @@ export default async function HomePage(): Promise<React.ReactElement> {
       slug: p.slug,
       category: p.category,
       title: p.title,
-      publishedAt: p.publishedAt?.toISOString().split("T")[0] ?? "",
+      // publishedAt may be a Date (newer Drizzle) or Unix seconds (older Drizzle/raw)
+      publishedAt: toIsoDate(p.publishedAt),
       readTimeMinutes: Math.ceil((p.content?.length ?? 0) / 1500) || 5,
     }))
 

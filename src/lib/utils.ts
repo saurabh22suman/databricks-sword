@@ -10,6 +10,20 @@ export function cn(...inputs: ClassValue[]): string {
 }
 
 /**
+ * Normalizes a Drizzle `publishedAt` value (which can be either a `Date`
+ * or a Unix-seconds `number` depending on the column mode and runtime path)
+ * into an ISO `YYYY-MM-DD` string suitable for `<time dateTime>` and
+ * JSON API responses.
+ *
+ * Returns `""` for null/undefined.
+ */
+export function toIsoDate(value: Date | number | null | undefined): string {
+  if (value == null) return ""
+  const ms = value instanceof Date ? value.getTime() : Number(value) * 1000
+  return new Date(ms).toISOString().split("T")[0]
+}
+
+/**
  * Formats a date string into a human-readable format.
  */
 export function formatDate(date: string | Date): string {

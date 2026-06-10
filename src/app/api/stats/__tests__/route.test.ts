@@ -11,7 +11,7 @@ describe("GET /api/stats", () => {
     vi.clearAllMocks()
   })
 
-  it("returns user count without inflated units", async () => {
+  it("returns the registered user count", async () => {
     const select = vi.fn().mockReturnValue({
       from: vi.fn(async () => [{ count: 7 }]),
     })
@@ -27,7 +27,7 @@ describe("GET /api/stats", () => {
     expect(response.status).toBe(200)
     const body = await response.json()
 
-    expect(body).toEqual({ userCount: 7, unitsDeployed: 7 })
+    expect(body).toEqual({ userCount: 7 })
   })
 
   it("returns zeroed fallback when db query fails", async () => {
@@ -48,6 +48,6 @@ describe("GET /api/stats", () => {
     expect(response.status).toBe(200)
     const body = await response.json()
 
-    expect(body).toEqual({ userCount: 0, unitsDeployed: 0 })
+    expect(body).toEqual({ userCount: 0 })
   })
 })

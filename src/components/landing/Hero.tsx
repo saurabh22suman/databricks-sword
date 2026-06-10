@@ -13,7 +13,6 @@ import { useEffect, useState } from "react"
 export function Hero(): React.ReactElement {
   const [scrollY, setScrollY] = useState(0)
   const [userCount, setUserCount] = useState(0)
-  const [unitsDeployed, setUnitsDeployed] = useState(0)
 
   useEffect(() => {
     const handleScroll = () => requestAnimationFrame(() => setScrollY(window.scrollY))
@@ -29,16 +28,13 @@ export function Hero(): React.ReactElement {
         }
         return res.json()
       })
-      .then((data: { userCount?: number; unitsDeployed?: number }) => {
+      .then((data: { userCount?: number }) => {
         if (typeof data.userCount === "number") {
           setUserCount(data.userCount)
         }
-        if (typeof data.unitsDeployed === "number") {
-          setUnitsDeployed(data.unitsDeployed)
-        }
       })
       .catch(() => {
-        // Keep defaults of 0 for both metrics
+        // Keep default of 0 for user count
       })
   }, [])
 
@@ -99,7 +95,7 @@ export function Hero(): React.ReactElement {
               className="cut-corner group relative px-8 py-4 bg-anime-accent hover:bg-red-600 transition-all duration-300 text-white font-bold uppercase tracking-wider flex items-center justify-center gap-3 overflow-hidden shadow-[0_0_20px_rgba(255,0,60,0.4)] hover:shadow-[0_0_40px_rgba(255,0,60,0.8),inset_0_0_20px_rgba(255,255,255,0.2)] hover:scale-105 active:scale-95 border-t border-white/20"
             >
               <div className="absolute inset-0 bg-gradient-to-r from-transparent via-white/40 to-transparent translate-x-[-150%] group-hover:animate-shimmer skew-x-[-20deg]" />
-              <span className="relative z-10 drop-shadow-md">Start Here (Beginner)</span>
+              <span className="relative z-10 drop-shadow-md">Start Here</span>
               <ArrowRight className="w-5 h-5 group-hover:translate-x-1 transition-transform relative z-10" />
             </Link>
           </div>
@@ -108,11 +104,6 @@ export function Hero(): React.ReactElement {
             <div className="flex flex-col">
               <span className="text-2xl font-black text-white">{userCount}</span>
               <span className="text-[10px] uppercase tracking-widest text-gray-500">Registered Learners</span>
-            </div>
-            <div className="h-8 w-px bg-gray-700" />
-            <div className="flex flex-col">
-              <span className="text-2xl font-black text-white">{unitsDeployed}</span>
-              <span className="text-[10px] uppercase tracking-widest text-gray-500">Units Deployed</span>
             </div>
           </div>
         </div>
@@ -130,6 +121,7 @@ export function Hero(): React.ReactElement {
               width={256}
               height={256}
               className="object-contain animate-float"
+              style={{ width: "auto", height: "auto" }}
               priority
             />
           </div>

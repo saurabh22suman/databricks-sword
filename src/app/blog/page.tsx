@@ -1,7 +1,7 @@
 import { blogPosts, getDb } from "@/lib/db"
 import { getContentFiles } from "@/lib/mdx/content"
 import { blogFrontmatterSchema } from "@/lib/mdx/schema"
-import { cn } from "@/lib/utils"
+import { cn, toIsoDate } from "@/lib/utils"
 import { eq } from "drizzle-orm"
 import type { Metadata } from "next"
 import Link from "next/link"
@@ -52,7 +52,8 @@ async function getDbPosts(): Promise<BlogPost[]> {
       description: post.description,
       category: post.category,
       tags: JSON.parse(post.tags),
-      publishedAt: post.publishedAt?.toISOString().split("T")[0] ?? "",
+      // publishedAt may be a Date (newer Drizzle) or Unix seconds (older Drizzle/raw)
+      publishedAt: toIsoDate(post.publishedAt),
       featured: post.featured,
       source: "db" as const,
     }))
