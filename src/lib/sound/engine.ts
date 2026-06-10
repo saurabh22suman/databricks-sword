@@ -810,6 +810,19 @@ class CyberSoundEngine {
       osc.stop(s + 0.36)
     })
   }
+
+  /**
+   * Disposes of audio resources.
+   * Call this on unmount to prevent memory leaks.
+   */
+  dispose(): void {
+    if (this.ctx && this.ctx.state !== "closed") {
+      void this.ctx.close()
+      this.ctx = null
+      this.masterGain = null
+      this.reverbNode = null
+    }
+  }
 }
 
 /**
@@ -817,3 +830,22 @@ class CyberSoundEngine {
  * Created lazily — the AudioContext is only initialized on first play().
  */
 export const cyberSoundEngine = new CyberSoundEngine()
+
+/**
+ * Cleans up the sound engine resources.
+ * Call this on unmount or when sound is no longer needed
+ * to prevent memory leaks and orphaned AudioContext handles.
+ *
+ * @example
+ * ```ts
+ * // In a cleanup useEffect
+ * useEffect(() => {
+ *   return () => cleanupSound()
+ * }, [])
+ * ```
+ */
+export function cleanupSound(): void {
+  if (cyberSoundEngine) {
+    cyberSoundEngine.dispose()
+  }
+}

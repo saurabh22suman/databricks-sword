@@ -9,8 +9,8 @@
     },
     {
       "id": "silver-dedup",
-      "code": "@dlt.table\ndef silver_events():\n    return dlt.read_stream('bronze_events').dropDuplicates(['event_id'])",
-      "label": "Silver: Deduplicate Events"
+      "code": "@dlt.table\n@dlt.expect_or_drop('valid_event', 'event_id IS NOT NULL')\ndef silver_events():\n    return (dlt.read_stream('bronze_events')\n        .withWatermark('event_timestamp', '10 minutes')\n        .dropDuplicates(['event_id']))",
+      "label": "Silver: Deduplicate + Validate Events"
     },
     {
       "id": "silver-enrich",

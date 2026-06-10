@@ -9,56 +9,67 @@ vi.mock("next/navigation", () => ({
   }),
 }));
 
-// Mock the challenge components
-vi.mock("@/components/missions", async () => {
-  const actual = await vi.importActual("@/components/missions");
-  return {
-    ...actual,
-    DragDropChallenge: ({ config, onComplete }: { config: unknown; onComplete: () => void }) => (
-      <div data-testid="drag-drop-simulated">
-        Simulated DragDrop
-        <button onClick={onComplete}>Complete</button>
-      </div>
-    ),
-    FillBlankChallenge: ({ config, onComplete }: { config: unknown; onComplete: () => void }) => (
-      <div data-testid="fill-blank-simulated">
-        Simulated FillBlank
-        <button onClick={onComplete}>Complete</button>
-      </div>
-    ),
-    FreeTextChallenge: ({ config, onComplete }: { config: unknown; onComplete: () => void }) => (
-      <div data-testid="free-text-simulated">
-        Simulated FreeText
-        <button onClick={onComplete}>Complete</button>
-      </div>
-    ),
-    MissionQuiz: ({ config, onComplete }: { config: unknown; onComplete: () => void }) => (
-      <div data-testid="quiz-simulated">
-        Quiz Component
-        <button onClick={onComplete}>Complete</button>
-      </div>
-    ),
-    MissionDebrief: ({ config, onComplete }: { config: unknown; onComplete: () => void }) => (
-      <div data-testid="debrief-simulated">
-        Debrief Component
-        <button onClick={onComplete}>Complete</button>
-      </div>
-    ),
-    DatabricksStagePlayer: ({
-      missionSlug,
-      stageId,
-      bundleStatus,
-    }: {
-      missionSlug: string;
-      stageId: string;
-      bundleStatus: string;
-    }) => (
-      <div data-testid="databricks-stage-player">
-        Databricks Mode: {missionSlug} / {stageId} / {bundleStatus}
-      </div>
-    ),
-  };
-});
+// Mock the challenge components individually since they are dynamically imported
+vi.mock("@/components/missions/DragDropChallenge", () => ({
+  DragDropChallenge: ({ config, onComplete }: { config: unknown; onComplete: () => void }) => (
+    <div data-testid="drag-drop-simulated">
+      Simulated DragDrop
+      <button onClick={onComplete}>Complete</button>
+    </div>
+  ),
+}));
+
+vi.mock("@/components/missions/FillBlankChallenge", () => ({
+  FillBlankChallenge: ({ config, onComplete }: { config: unknown; onComplete: () => void }) => (
+    <div data-testid="fill-blank-simulated">
+      Simulated FillBlank
+      <button onClick={onComplete}>Complete</button>
+    </div>
+  ),
+}));
+
+vi.mock("@/components/missions/FreeTextChallenge", () => ({
+  FreeTextChallenge: ({ config, onComplete }: { config: unknown; onComplete: () => void }) => (
+    <div data-testid="free-text-simulated">
+      Simulated FreeText
+      <button onClick={onComplete}>Complete</button>
+    </div>
+  ),
+}));
+
+vi.mock("@/components/missions/MissionQuiz", () => ({
+  MissionQuiz: ({ config, onComplete }: { config: unknown; onComplete: () => void }) => (
+    <div data-testid="quiz-simulated">
+      Quiz Component
+      <button onClick={onComplete}>Complete</button>
+    </div>
+  ),
+}));
+
+vi.mock("@/components/missions/MissionDebrief", () => ({
+  MissionDebrief: ({ config, onComplete }: { config: unknown; onComplete: () => void }) => (
+    <div data-testid="debrief-simulated">
+      Debrief Component
+      <button onClick={onComplete}>Complete</button>
+    </div>
+  ),
+}));
+
+vi.mock("@/components/missions/DatabricksStagePlayer", () => ({
+  DatabricksStagePlayer: ({
+    missionSlug,
+    stageId,
+    bundleStatus,
+  }: {
+    missionSlug: string;
+    stageId: string;
+    bundleStatus: string;
+  }) => (
+    <div data-testid="databricks-stage-player">
+      Databricks Mode: {missionSlug} / {stageId} / {bundleStatus}
+    </div>
+  ),
+}));
 
 describe("StagePlayerClient Mode Switching", () => {
   const dragDropConfig = {
@@ -115,7 +126,7 @@ describe("StagePlayerClient Mode Switching", () => {
   });
 
   describe("Simulated mode", () => {
-    it("renders simulated DragDropChallenge for drag-drop stage", () => {
+    it("renders simulated DragDropChallenge for drag-drop stage", async () => {
       render(
         <StagePlayerClient
           stageType="drag-drop"
@@ -127,10 +138,10 @@ describe("StagePlayerClient Mode Switching", () => {
         />
       );
 
-      expect(screen.getByTestId("drag-drop-simulated")).toBeInTheDocument();
+      expect(await screen.findByTestId("drag-drop-simulated")).toBeInTheDocument();
     });
 
-    it("renders simulated FillBlankChallenge for fill-blank stage", () => {
+    it("renders simulated FillBlankChallenge for fill-blank stage", async () => {
       render(
         <StagePlayerClient
           stageType="fill-blank"
@@ -142,10 +153,10 @@ describe("StagePlayerClient Mode Switching", () => {
         />
       );
 
-      expect(screen.getByTestId("fill-blank-simulated")).toBeInTheDocument();
+      expect(await screen.findByTestId("fill-blank-simulated")).toBeInTheDocument();
     });
 
-    it("renders simulated FreeTextChallenge for fix-bug stage", () => {
+    it("renders simulated FreeTextChallenge for fix-bug stage", async () => {
       render(
         <StagePlayerClient
           stageType="fix-bug"
@@ -157,10 +168,10 @@ describe("StagePlayerClient Mode Switching", () => {
         />
       );
 
-      expect(screen.getByTestId("free-text-simulated")).toBeInTheDocument();
+      expect(await screen.findByTestId("free-text-simulated")).toBeInTheDocument();
     });
 
-    it("renders quiz component in simulated mode", () => {
+    it("renders quiz component in simulated mode", async () => {
       render(
         <StagePlayerClient
           stageType="quiz"
@@ -172,12 +183,12 @@ describe("StagePlayerClient Mode Switching", () => {
         />
       );
 
-      expect(screen.getByTestId("quiz-simulated")).toBeInTheDocument();
+      expect(await screen.findByTestId("quiz-simulated")).toBeInTheDocument();
     });
   });
 
   describe("Databricks mode", () => {
-    it("renders DatabricksStagePlayer for drag-drop stage in databricks mode", () => {
+    it("renders DatabricksStagePlayer for drag-drop stage in databricks mode", async () => {
       render(
         <StagePlayerClient
           stageType="drag-drop"
@@ -190,12 +201,12 @@ describe("StagePlayerClient Mode Switching", () => {
         />
       );
 
-      expect(screen.getByTestId("databricks-stage-player")).toBeInTheDocument();
+      expect(await screen.findByTestId("databricks-stage-player")).toBeInTheDocument();
       expect(screen.getByText(/test-mission/)).toBeInTheDocument();
       expect(screen.getByText(/deployed/)).toBeInTheDocument();
     });
 
-    it("renders DatabricksStagePlayer for fill-blank stage in databricks mode", () => {
+    it("renders DatabricksStagePlayer for fill-blank stage in databricks mode", async () => {
       render(
         <StagePlayerClient
           stageType="fill-blank"
@@ -208,10 +219,10 @@ describe("StagePlayerClient Mode Switching", () => {
         />
       );
 
-      expect(screen.getByTestId("databricks-stage-player")).toBeInTheDocument();
+      expect(await screen.findByTestId("databricks-stage-player")).toBeInTheDocument();
     });
 
-    it("routes fix-bug stage to DatabricksStagePlayer in databricks mode", () => {
+    it("routes fix-bug stage to DatabricksStagePlayer in databricks mode", async () => {
       render(
         <StagePlayerClient
           stageType="fix-bug"
@@ -224,10 +235,10 @@ describe("StagePlayerClient Mode Switching", () => {
         />
       );
 
-      expect(screen.getByTestId("databricks-stage-player")).toBeInTheDocument();
+      expect(await screen.findByTestId("databricks-stage-player")).toBeInTheDocument();
     });
 
-    it("renders simulated quiz component even in databricks mode", () => {
+    it("renders simulated quiz component even in databricks mode", async () => {
       render(
         <StagePlayerClient
           stageType="quiz"
@@ -241,10 +252,10 @@ describe("StagePlayerClient Mode Switching", () => {
       );
 
       // Quiz always uses simulated mode
-      expect(screen.getByTestId("quiz-simulated")).toBeInTheDocument();
+      expect(await screen.findByTestId("quiz-simulated")).toBeInTheDocument();
     });
 
-    it("renders simulated debrief component even in databricks mode", () => {
+    it("renders simulated debrief component even in databricks mode", async () => {
       render(
         <StagePlayerClient
           stageType="debrief"
@@ -258,12 +269,12 @@ describe("StagePlayerClient Mode Switching", () => {
       );
 
       // Debrief always uses simulated mode
-      expect(screen.getByTestId("debrief-simulated")).toBeInTheDocument();
+      expect(await screen.findByTestId("debrief-simulated")).toBeInTheDocument();
     });
   });
 
   describe("Default mode", () => {
-    it("defaults to simulated mode when executionMode is not provided", () => {
+    it("defaults to simulated mode when executionMode is not provided", async () => {
       render(
         <StagePlayerClient
           stageType="drag-drop"
@@ -275,7 +286,7 @@ describe("StagePlayerClient Mode Switching", () => {
       );
 
       // Should render simulated component
-      expect(screen.getByTestId("drag-drop-simulated")).toBeInTheDocument();
+      expect(await screen.findByTestId("drag-drop-simulated")).toBeInTheDocument();
     });
   });
 });

@@ -75,13 +75,42 @@ function formatTime(minutes: number): string {
 }
 
 /**
+ * Canonical industry display names (handles special cases)
+ */
+const INDUSTRY_LABELS: Record<string, string> = {
+  "e-commerce": "E-Commerce",
+  "fintech": "FinTech",
+  "cross-industry": "Cross-Industry",
+  "public-sector": "Public Sector",
+  "market-research": "Market Research",
+  // Default mappings for common industries
+  retail: "Retail",
+  gaming: "Gaming",
+  healthcare: "Healthcare",
+  technology: "Technology",
+  logistics: "Logistics",
+  media: "Media",
+  enterprise: "Enterprise",
+  finance: "Finance",
+  manufacturing: "Manufacturing",
+  automotive: "Automotive",
+  telecom: "Telecom",
+  agritech: "AgriTech",
+}
+
+/**
  * Get industry display name
  */
 function getIndustryLabel(industry: Mission["industry"]): string {
+  // Check for canonical mapping first
+  if (industry in INDUSTRY_LABELS) {
+    return INDUSTRY_LABELS[industry]
+  }
+  // Fall back to Title Case for unknown industries
   return industry
     .split("-")
     .map((word) => word.charAt(0).toUpperCase() + word.slice(1))
-    .join(" ");
+    .join(" ")
 }
 
 /**

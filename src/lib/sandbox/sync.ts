@@ -228,7 +228,7 @@ export function mergeConflicts(
       local.streakData.freezesAvailable,
       remote.streakData.freezesAvailable,
     ),
-    freezesUsed: Math.min(
+    freezesUsed: Math.max(
       local.streakData.freezesUsed,
       remote.streakData.freezesUsed,
     ),
@@ -283,13 +283,12 @@ export function shouldSync(sandbox: SandboxData): boolean {
   const now = Date.now()
   const fiveMinutes = 5 * 60 * 1000
 
-  // More than 5 minutes since last sync
+  // More than 5 minutes since last sync - force sync
   if (now - lastSyncTime > fiveMinutes) {
     return true
   }
 
-  // Significant changes - has XP that wasn't there before
-  // (This is a simple heuristic - in practice you'd track dirtiness more carefully)
+  // If there are unsynced significant changes (e.g. totalXp > 0), sync anyway
   if (sandbox.userStats.totalXp > 0) {
     return true
   }

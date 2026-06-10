@@ -108,6 +108,21 @@ export function getFAQStructuredData() {
 }
 
 /**
+ * Safely serializes JSON-LD data for injection into script tags.
+ * Escapes unsafe HTML characters to prevent XSS attacks.
+ *
+ * @param data - The structured data object to serialize
+ * @returns Safe JSON string with < and > escaped
+ */
+function serializeJsonLd(data: ReturnType<typeof getCourseStructuredData | typeof getFAQStructuredData>): string {
+  // First stringify the data
+  const json = JSON.stringify(data)
+  // Escape HTML-sensitive characters to prevent script injection
+  // < becomes \u003c and > becomes \u003e
+  return json.replace(/</g, "\\u003c").replace(/>/g, "\\u003e")
+}
+
+/**
  * Component to inject JSON-LD structured data into page head.
  */
 export function StructuredData({
@@ -118,7 +133,7 @@ export function StructuredData({
   return (
     <script
       type="application/ld+json"
-      dangerouslySetInnerHTML={{ __html: JSON.stringify(data) }}
+      dangerouslySetInnerHTML={{ __html: serializeJsonLd(data) }}
     />
   )
 }

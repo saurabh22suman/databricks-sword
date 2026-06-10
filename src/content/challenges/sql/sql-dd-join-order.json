@@ -17,23 +17,23 @@
     "blocks": [
       {
         "id": "b1",
-        "content": "SELECT o.order_id, c.name, p.product_name, o.total"
+        "code": "SELECT o.order_id, c.name, p.product_name, o.total"
       },
       {
         "id": "b2",
-        "content": "FROM orders o"
+        "code": "FROM orders o"
       },
       {
         "id": "b3",
-        "content": "JOIN customers c ON o.customer_id = c.customer_id"
+        "code": "JOIN customers c ON o.customer_id = c.customer_id"
       },
       {
         "id": "b4",
-        "content": "JOIN products p ON o.product_id = p.product_id"
+        "code": "JOIN products p ON o.product_id = p.product_id"
       },
       {
         "id": "b5",
-        "content": "WHERE o.total > 1000"
+        "code": "WHERE o.total > 1000"
       }
     ],
     "correctOrder": [

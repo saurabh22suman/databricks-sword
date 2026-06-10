@@ -19,7 +19,7 @@ const PROMO_CONFIG = {
 
 /**
  * Cyberpunk-styled promotional banner
- * Positioned mid-right of screen with entrance animations
+ * Positioned at top of page (below header) with entrance animations
  * Only shows when user is logged in
  */
 export function PromoBanner(): React.ReactElement {
@@ -60,85 +60,73 @@ export function PromoBanner(): React.ReactElement {
 
   return (
     <div
+      role="region"
+      aria-label="Promotional banner"
       className={`
-        fixed right-8 top-1/2 -translate-y-1/2 z-50
-        transition-all duration-700 ease-out
-        ${isVisible ? "opacity-100 translate-x-0" : "opacity-0 translate-x-20 pointer-events-none"}
+        fixed top-20 left-0 right-0 z-40
+        transition-all duration-500 ease-out
+        ${isVisible ? "opacity-100 translate-y-0" : "opacity-0 -translate-y-full pointer-events-none"}
       `}
     >
-      <div className="relative group">
+      <div className="relative group mx-auto max-w-4xl px-4">
         {/* Glow effect behind */}
-        <div className="absolute -inset-2 bg-gradient-to-r from-anime-purple via-anime-accent to-anime-cyan rounded-lg blur-lg opacity-40 group-hover:opacity-70 transition-opacity duration-500 animate-pulse" />
+        <div className="absolute -inset-2 bg-gradient-to-r from-anime-purple via-anime-accent to-anime-cyan rounded-lg blur-lg opacity-30 group-hover:opacity-50 transition-opacity duration-500" />
 
-        {/* Main banner card */}
-        <div className="relative cut-corner bg-anime-900/95 border border-anime-purple/50 backdrop-blur-xl overflow-hidden shadow-[0_0_30px_rgba(168,85,247,0.3)]">
+        {/* Main banner card - horizontal layout */}
+        <div className="relative cut-corner bg-anime-900/95 border border-anime-purple/50 backdrop-blur-xl overflow-hidden shadow-[0_4px_20px_rgba(168,85,247,0.2)]">
           {/* Animated scan line */}
           <div className="absolute top-0 left-0 w-full h-[1px] bg-gradient-to-r from-transparent via-anime-accent to-transparent animate-scan-horizontal" />
 
-          {/* Corner accents */}
-          <div className="absolute top-0 left-0 w-3 h-3 border-t-2 border-l-2 border-anime-accent" />
-          <div className="absolute top-0 right-0 w-3 h-3 border-t-2 border-r-2 border-anime-cyan" />
-          <div className="absolute bottom-0 left-0 w-3 h-3 border-b-2 border-l-2 border-anime-cyan" />
-          <div className="absolute bottom-0 right-0 w-3 h-3 border-b-2 border-r-2 border-anime-accent" />
-
-          {/* Content */}
-          <div className="p-4 pr-10 min-w-[280px] max-w-md">
-            {/* Label */}
-            <div className="flex items-center gap-2 mb-2">
-              <div className="px-2 py-0.5 bg-anime-accent/20 border border-anime-accent/50 text-anime-accent text-[10px] font-bold uppercase tracking-widest animate-pulse">
-                ✦ Hot Recommendation
+          {/* Content - horizontal flex layout */}
+          <div className="flex items-center justify-between gap-4 px-4 py-3">
+            {/* Label + Text */}
+            <div className="flex items-center gap-3 flex-1 min-w-0">
+              <div className="shrink-0 px-2 py-0.5 bg-anime-accent/20 border border-anime-accent/50 text-anime-accent text-[10px] font-bold uppercase tracking-widest">
+                ✦ Hot
               </div>
+              <p className="text-sm text-anime-100 font-medium truncate">
+                {PROMO_CONFIG.text}
+                <span className="text-anime-cyan ml-1">🚀</span>
+              </p>
             </div>
 
-            {/* Main text */}
-            <p className="text-sm text-anime-100 font-medium leading-relaxed mb-3">
-              {PROMO_CONFIG.text}{" "}
-              <span className="text-anime-cyan">🚀</span>
-            </p>
-
-            {/* CTA Button */}
-            <Link
-              href={PROMO_CONFIG.href}
-              target="_blank"
-              rel="noopener noreferrer"
-              className="
-                inline-flex items-center gap-2 px-4 py-2
-                bg-anime-purple/30 hover:bg-anime-purple/50
-                border border-anime-purple/60 hover:border-anime-purple
-                text-anime-100 text-sm font-semibold
-                transition-all duration-300
-                group-hover:shadow-[0_0_20px_rgba(168,85,247,0.4)]
-                cut-corner
-              "
-            >
-              <span>{PROMO_CONFIG.cta}</span>
-              <span className="text-anime-cyan">→</span>
-            </Link>
+            {/* CTA + Dismiss */}
+            <div className="flex items-center gap-3 shrink-0">
+              <Link
+                href={PROMO_CONFIG.href}
+                target="_blank"
+                rel="noopener noreferrer"
+                className="
+                  inline-flex items-center gap-2 px-3 py-1.5
+                  bg-anime-purple/30 hover:bg-anime-purple/50
+                  border border-anime-purple/60 hover:border-anime-purple
+                  text-anime-100 text-sm font-semibold
+                  transition-all duration-300
+                  hover:shadow-[0_0_15px_rgba(168,85,247,0.3)]
+                  cut-corner
+                "
+              >
+                <span>{PROMO_CONFIG.cta}</span>
+                <span className="text-anime-cyan">→</span>
+              </Link>
+              <button
+                onClick={handleDismiss}
+                className="
+                  p-1.5
+                  text-anime-500 hover:text-anime-100
+                  hover:bg-anime-800/50
+                  transition-all duration-200
+                  rounded
+                "
+                aria-label="Dismiss banner"
+              >
+                <X className="w-4 h-4" />
+              </button>
+            </div>
           </div>
 
-          {/* Dismiss button */}
-          <button
-            onClick={handleDismiss}
-            className="
-              absolute top-2 right-2 p-1.5
-              text-anime-500 hover:text-anime-100
-              hover:bg-anime-800/50
-              transition-all duration-200
-              rounded
-            "
-            aria-label="Dismiss banner"
-          >
-            <X className="w-4 h-4" />
-          </button>
-
           {/* Decorative circuit lines */}
-          <div className="absolute bottom-2 left-4 right-4 h-[1px] bg-gradient-to-r from-anime-purple/30 via-anime-cyan/30 to-transparent" />
-        </div>
-
-        {/* Floating particles effect */}
-        <div className="absolute -top-4 -right-4 w-8 h-8 animate-pulse">
-          <div className="absolute inset-0 border-2 border-anime-accent/30 rounded-full animate-ping" />
-          <div className="absolute inset-2 border border-anime-cyan/50 rounded-full animate-pulse" />
+          <div className="absolute bottom-0 left-4 right-4 h-[1px] bg-gradient-to-r from-anime-purple/30 via-anime-cyan/30 to-transparent" />
         </div>
       </div>
     </div>

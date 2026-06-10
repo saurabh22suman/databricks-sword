@@ -91,9 +91,10 @@ export function StreakCalendar({
   }
 
   // Render day cell
-  const renderDay = (day: number | null, date: string | null): React.ReactElement => {
+  // Using deterministic index-based key for stable React reconciliation
+  const renderDay = (day: number | null, date: string | null, index: number): React.ReactElement => {
     if (day === null || date === null) {
-      return <div key={`empty-${Math.random()}`} className="p-2"></div>
+      return <div key={`empty-${index}`} className="p-2"></div>
     }
 
     const streakData = getStreakDataForDate(date)
@@ -168,7 +169,7 @@ export function StreakCalendar({
 
       {/* Calendar grid */}
       <div className="grid grid-cols-7 gap-1 mb-4">
-        {calendarDays.map((dayData, index) => renderDay(dayData.day, dayData.date))}
+        {calendarDays.map((dayData, index) => renderDay(dayData.day, dayData.date, index))}
       </div>
 
       {/* Statistics */}

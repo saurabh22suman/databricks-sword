@@ -19,6 +19,8 @@ export type MissionStartWrapperProps = {
   missionId: string;
   /** First stage ID for navigation */
   firstStageId: string;
+  /** First stage title for button label */
+  firstStageTitle?: string;
 };
 
 /**
@@ -30,6 +32,7 @@ export function MissionStartWrapper({
   estimatedMinutes,
   missionId,
   firstStageId,
+  firstStageTitle,
 }: MissionStartWrapperProps): React.ReactElement {
   const router = useRouter();
 
@@ -42,6 +45,7 @@ export function MissionStartWrapper({
       config={config}
       estimatedMinutes={estimatedMinutes}
       onStart={handleStart}
+      buttonLabel={firstStageTitle ? `Start Mission Briefing →` : undefined}
     />
   );
 }

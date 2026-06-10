@@ -280,14 +280,21 @@ OPTIMIZE sales
 OPTIMIZE sales WHERE sale_date >= '2024-01-01'
 ```
 
-### Z-ORDER
+### Liquid Clustering (Recommended)
 
-Colocates related data for faster queries on frequently filtered columns:
+Use `CLUSTER BY` for adaptive data layout. It replaces both partitioning and Z-ORDER for new tables:
 
 ```sql
--- Z-order by commonly filtered columns
-OPTIMIZE sales ZORDER BY (product_id, sale_date)
+CREATE TABLE sales ( ... ) CLUSTER BY (sale_date, product_id);
+
+-- Change clustering columns without rewriting data
+ALTER TABLE sales CLUSTER BY (product_id, sale_date);
+
+-- Apply clustering incrementally
+OPTIMIZE sales;
 ```
+
+> **Legacy note:** `ZORDER BY` is still available but requires a full rewrite to change columns. `partitionBy` is supported for backward compatibility but creates cardinality-related maintenance issues; prefer Liquid Clustering for new tables.
 
 ### VACUUM
 
@@ -307,26 +314,32 @@ VACUUM sales RETAIN 24 HOURS
 
 ## Best Practices
 
-### 1. Choose the Right Partitioning
-
-- Partition by columns used in most queries (often date)
-- Avoid over-partitioning (don't partition by high-cardinality columns)
-- Aim for 1GB+ per partition
-
-```python
-df.write.format("delta") \
-    .partitionBy("sale_date") \
-    .mode("overwrite") \
-    .save("/data/sales")
-```
-
-### 2. Use Liquid Clustering (Databricks)
+### 1. Use Liquid Clustering (Databricks)
 
 Replace partitioning + Z-ordering with adaptive clustering:
 
 ```sql
-CREATE TABLE sales (...) 
+CREATE TABLE sales (...)
 CLUSTER BY (sale_date, product_id)
+```
+
+### 2. Enable Change Data Feed
+
+Track row-level changes for CDC pipelines:
+
+```sql
+ALTER TABLE sales SET TBLPROPERTIES (delta.enableChangeDataFeed = true)
+```
+
+### 3. Set Appropriate Retention
+
+Balance time travel needs with storage costs:
+
+```sql
+ALTER TABLE sales SET TBLPROPERTIES (
+    delta.logRetentionDuration = 'interval 30 days',
+    delta.deletedFileRetentionDuration = 'interval 7 days'
+)
 ```
 
 ### 3. Enable Change Data Feed

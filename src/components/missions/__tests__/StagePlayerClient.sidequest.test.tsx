@@ -39,42 +39,97 @@ vi.mock("@/lib/gamification/xpService", () => ({
   awardMissionXp: mockAwardMissionXp,
 }))
 
+// Mock mission components individually since they are dynamically imported
+vi.mock("@/components/missions/MissionBriefing", () => ({
+  MissionBriefing: ({
+    onStart,
+  }: {
+    config: unknown
+    onStart: () => void
+    estimatedMinutes?: number
+  }) => (
+    <div data-testid="briefing">
+      <button onClick={onStart}>Start</button>
+    </div>
+  ),
+}))
+
+vi.mock("@/components/missions/DragDropChallenge", () => ({
+  DragDropChallenge: ({
+    onComplete,
+  }: {
+    config: unknown
+    onComplete: () => void
+  }) => (
+    <div data-testid="drag-drop">
+      <button onClick={onComplete}>Complete</button>
+    </div>
+  ),
+}))
+
+vi.mock("@/components/missions/ArchitectureDiagram", () => ({
+  ArchitectureDiagram: ({
+    onComplete,
+  }: {
+    config: unknown
+    onComplete: () => void
+  }) => (
+    <div data-testid="architecture-diagram">
+      <button onClick={onComplete}>Complete Diagram</button>
+    </div>
+  ),
+}))
+
+vi.mock("@/components/missions/MissionQuiz", () => ({
+  MissionQuiz: ({ onComplete }: { config: unknown; onComplete: (result: { passed: boolean; percentage: number }) => void }) => (
+    <div data-testid="quiz">
+      <button onClick={() => onComplete({ passed: true, percentage: 100 })}>Complete Quiz</button>
+      <button onClick={() => onComplete({ passed: false, percentage: 40 })}>Fail Quiz</button>
+    </div>
+  ),
+}))
+
+vi.mock("@/components/missions/MissionDebrief", () => ({
+  MissionDebrief: ({ onComplete }: { config: unknown; onComplete: () => void }) => (
+    <div data-testid="debrief">
+      <button onClick={onComplete}>Complete Debrief</button>
+    </div>
+  ),
+}))
+
+vi.mock("@/components/missions/CompareChallenge", () => ({
+  CompareChallenge: ({ onComplete }: { config: unknown; onComplete: () => void }) => (
+    <div data-testid="compare">
+      <button onClick={onComplete}>Complete Compare</button>
+    </div>
+  ),
+}))
+
+vi.mock("@/components/missions/FillBlankChallenge", () => ({
+  FillBlankChallenge: ({ onComplete }: { config: unknown; onComplete: () => void }) => (
+    <div data-testid="fill-blank">
+      <button onClick={onComplete}>Complete FillBlank</button>
+    </div>
+  ),
+}))
+
+vi.mock("@/components/missions/FreeTextChallenge", () => ({
+  FreeTextChallenge: ({ onComplete }: { config: unknown; onComplete: () => void }) => (
+    <div data-testid="free-text">
+      <button onClick={onComplete}>Complete FreeText</button>
+    </div>
+  ),
+}))
+
+vi.mock("@/components/missions/DatabricksStagePlayer", () => ({
+  DatabricksStagePlayer: () => <div data-testid="databricks-stage-player" />,
+}))
+
 // Mock mission components, capturing SideQuestModal
 vi.mock("@/components/missions", async () => {
   const actual = await vi.importActual("@/components/missions")
   return {
     ...actual,
-    MissionBriefing: ({
-      onStart,
-    }: {
-      config: unknown
-      onStart: () => void
-      estimatedMinutes?: number
-    }) => (
-      <div data-testid="briefing">
-        <button onClick={onStart}>Start</button>
-      </div>
-    ),
-    DragDropChallenge: ({
-      onComplete,
-    }: {
-      config: unknown
-      onComplete: () => void
-    }) => (
-      <div data-testid="drag-drop">
-        <button onClick={onComplete}>Complete</button>
-      </div>
-    ),
-    ArchitectureDiagram: ({
-      onComplete,
-    }: {
-      config: unknown
-      onComplete: () => void
-    }) => (
-      <div data-testid="architecture-diagram">
-        <button onClick={onComplete}>Complete Diagram</button>
-      </div>
-    ),
     SideQuestModal: ({
       sideQuest,
       isOpen,
@@ -95,33 +150,6 @@ vi.mock("@/components/missions", async () => {
           <button onClick={() => onComplete(50)}>Complete Quest</button>
         </div>
       ) : null,
-    DatabricksStagePlayer: () => <div data-testid="databricks-stage-player" />,
-    MissionQuiz: ({ onComplete }: { config: unknown; onComplete: (result: { passed: boolean; percentage: number }) => void }) => (
-      <div data-testid="quiz">
-        <button onClick={() => onComplete({ passed: true, percentage: 100 })}>Complete Quiz</button>
-        <button onClick={() => onComplete({ passed: false, percentage: 40 })}>Fail Quiz</button>
-      </div>
-    ),
-    MissionDebrief: ({ onComplete }: { config: unknown; onComplete: () => void }) => (
-      <div data-testid="debrief">
-        <button onClick={onComplete}>Complete Debrief</button>
-      </div>
-    ),
-    CompareChallenge: ({ onComplete }: { config: unknown; onComplete: () => void }) => (
-      <div data-testid="compare">
-        <button onClick={onComplete}>Complete Compare</button>
-      </div>
-    ),
-    FillBlankChallenge: ({ onComplete }: { config: unknown; onComplete: () => void }) => (
-      <div data-testid="fill-blank">
-        <button onClick={onComplete}>Complete FillBlank</button>
-      </div>
-    ),
-    FreeTextChallenge: ({ onComplete }: { config: unknown; onComplete: () => void }) => (
-      <div data-testid="free-text">
-        <button onClick={onComplete}>Complete FreeText</button>
-      </div>
-    ),
   }
 })
 
@@ -182,10 +210,10 @@ describe("StagePlayerClient — Side Quests", () => {
     )
 
     // Complete the stage
-    await user.click(screen.getByText("Start"))
+    await user.click(await screen.findByText("Start"))
 
     // Side quest modal should appear
-    expect(screen.getByTestId("side-quest-modal")).toBeInTheDocument()
+    expect(await screen.findByTestId("side-quest-modal")).toBeInTheDocument()
     expect(screen.getByText("Delta Lake: The Open Source Engine")).toBeInTheDocument()
   })
 
@@ -204,8 +232,8 @@ describe("StagePlayerClient — Side Quests", () => {
     )
 
     // Complete stage → side quest appears
-    await user.click(screen.getByText("Start"))
-    expect(screen.getByTestId("side-quest-modal")).toBeInTheDocument()
+    await user.click(await screen.findByText("Start"))
+    expect(await screen.findByTestId("side-quest-modal")).toBeInTheDocument()
 
     // Skip side quest → navigate to next stage
     await user.click(screen.getByText("Skip Quest"))
@@ -227,10 +255,10 @@ describe("StagePlayerClient — Side Quests", () => {
     )
 
     // Complete stage → side quest appears
-    await user.click(screen.getByText("Start"))
+    await user.click(await screen.findByText("Start"))
 
     // Complete side quest → navigate to next stage
-    await user.click(screen.getByText("Complete Quest"))
+    await user.click(await screen.findByText("Complete Quest"))
     expect(mockPush).toHaveBeenCalledWith("/missions/test/stage/02")
   })
 
@@ -266,8 +294,8 @@ describe("StagePlayerClient — Side Quests", () => {
       />,
     )
 
-    await user.click(screen.getByText("Start"))
-    await user.click(screen.getByText("Complete Quest"))
+    await user.click(await screen.findByText("Start"))
+    await user.click(await screen.findByText("Complete Quest"))
 
     expect(mockUpdateSandbox).toHaveBeenCalledTimes(1)
     const updater = mockUpdateSandbox.mock.calls[0][0] as (data: unknown) => { missionProgress: Record<string, { sideQuestsCompleted: string[]; totalXpEarned: number }>; userStats: { totalXp: number } }
@@ -314,7 +342,7 @@ describe("StagePlayerClient — Side Quests", () => {
     )
 
     // Complete stage
-    await user.click(screen.getByText("Start"))
+    await user.click(await screen.findByText("Start"))
 
     // No side quest modal should appear, should navigate directly
     expect(screen.queryByTestId("side-quest-modal")).not.toBeInTheDocument()
@@ -336,7 +364,7 @@ describe("StagePlayerClient — Side Quests", () => {
     )
 
     // Complete stage
-    await user.click(screen.getByText("Start"))
+    await user.click(await screen.findByText("Start"))
 
     // Should navigate directly
     expect(screen.queryByTestId("side-quest-modal")).not.toBeInTheDocument()
@@ -369,7 +397,7 @@ describe("StagePlayerClient — Side Quests", () => {
       />,
     )
 
-    await user.click(screen.getByText("Fail Quiz"))
+    await user.click(await screen.findByText("Fail Quiz"))
 
     expect(mockPush).not.toHaveBeenCalled()
     expect(mockAwardStageXp).not.toHaveBeenCalled()
@@ -403,7 +431,7 @@ describe("StagePlayerClient — Side Quests", () => {
       />,
     )
 
-    await user.click(screen.getByText("Complete Quiz"))
+    await user.click(await screen.findByText("Complete Quiz"))
 
     expect(mockPush).toHaveBeenCalledWith("/missions/test/stage/04")
     expect(mockAwardStageXp).toHaveBeenCalledWith("test-mission", "03-quiz", 120)

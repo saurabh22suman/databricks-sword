@@ -3,6 +3,7 @@
  * @description Mission detail page - displays mission briefing
  */
 
+import { Badge } from "@/components/ui"
 import { MissionStartWrapper } from "@/components/missions/MissionStartWrapper"
 import { PrerequisiteGate } from "@/components/missions/PrerequisiteGate"
 import type { BriefingConfig } from "@/lib/missions"
@@ -160,12 +161,67 @@ export default async function MissionPage({
           </p>
         </div>
 
+        {/* Prerequisites */}
+        {mission.prerequisites && mission.prerequisites.length > 0 && (
+          <div className="container relative z-10 mx-auto px-4 mb-6">
+            <div className="border-l-2 border-anime-700 pl-4">
+              <h3 className="text-sm uppercase tracking-wider text-anime-500 mb-2">
+                Prerequisites
+              </h3>
+              <div className="flex flex-wrap gap-2">
+                {mission.prerequisites.map((prereq) => (
+                  <Badge key={prereq} variant="default">
+                    {prereq}
+                  </Badge>
+                ))}
+              </div>
+            </div>
+          </div>
+        )}
+
+        {/* Primary Features */}
+        {mission.primaryFeatures && mission.primaryFeatures.length > 0 && (
+          <div className="container relative z-10 mx-auto px-4 mb-6">
+            <div className="border-l-2 border-anime-700 pl-4">
+              <h3 className="text-sm uppercase tracking-wider text-anime-500 mb-2">
+                Primary Features
+              </h3>
+              <div className="flex flex-wrap gap-2">
+                {mission.primaryFeatures.map((feature) => (
+                  <Badge key={feature} variant="intermediate">
+                    {feature}
+                  </Badge>
+                ))}
+              </div>
+            </div>
+          </div>
+        )}
+
+        {/* Achievements */}
+        {mission.achievements && mission.achievements.length > 0 && (
+          <div className="container relative z-10 mx-auto px-4 mb-6">
+            <div className="border-l-2 border-anime-700 pl-4">
+              <h3 className="text-sm uppercase tracking-wider text-anime-500 mb-2">
+                Achievements
+              </h3>
+              <div className="flex flex-wrap gap-2">
+                {mission.achievements.map((achievement) => (
+                  <Badge key={achievement} variant="advanced">
+                    {achievement}
+                  </Badge>
+                ))}
+              </div>
+            </div>
+          </div>
+        )}
+
         {/* Mission Briefing */}
         <MissionStartWrapper
           config={briefingConfig}
           estimatedMinutes={mission.estimatedMinutes}
           missionId={mission.id}
           firstStageId={firstStageId}
+          firstStageTitle={mission.stages[0].title}
         />
       </div>
     </div>

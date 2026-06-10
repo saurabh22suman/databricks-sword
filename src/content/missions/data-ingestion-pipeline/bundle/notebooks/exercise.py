@@ -38,9 +38,12 @@
 # COMMAND ----------
 
 # Set up paths
-source_path = "/tmp/dbsword/ingestion_source"
-checkpoint_path = "/tmp/dbsword/ingestion_checkpoint"
-target_path = "/tmp/dbsword/ingestion_bronze"
+# Recommended: Unity Catalog Volumes for managed, governed storage
+# /Volumes/<catalog>/<schema>/<volume>/<path>
+# For local/simulated execution, /tmp/ is acceptable but should be annotated
+source_path = "/Volumes/main/default/events_volume/source"
+checkpoint_path = "/Volumes/main/default/events_volume/_checkpoints"
+target_path = "main.default.events_bronze"
 
 # Create sample source files
 sample_data = """{"event_id": "E001", "user_id": "U100", "event_type": "page_view", "timestamp": "2024-01-15T10:30:00Z"}

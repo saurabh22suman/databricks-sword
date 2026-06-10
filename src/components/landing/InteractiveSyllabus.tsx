@@ -1,7 +1,7 @@
 "use client"
 
-import type { Mission } from "@/lib/missions"
-import type { Track } from "@/lib/missions/tracks"
+import type { MissionPreview } from "@/lib/missions"
+import type { Track, TrackInfo } from "@/lib/missions/tracks"
 import { TRACKS, getAllTracks, getTrackForMission } from "@/lib/missions/tracks"
 import { cn } from "@/lib/utils"
 import { ArrowRight, ChevronRight } from "lucide-react"
@@ -27,8 +27,8 @@ const RANK_COLORS = {
 }
 
 type InteractiveSyllabusProps = {
-  /** All available missions to group by track */
-  missions: Mission[]
+  /** Lightweight mission previews to group by track */
+  missions: MissionPreview[]
 }
 
 /**
@@ -47,15 +47,15 @@ export function InteractiveSyllabus({
   const missionsByTrack = getAllTracks().reduce(
     (acc, track) => {
       const trackMissions = missions
-        .filter((m) => getTrackForMission(m.id) === track)
+        .filter((m) => getTrackForMission(m.slug) === track)
         .sort((a, b) => {
-          const order = { B: 1, A: 2, S: 3 }
+          const order: Record<string, number> = { B: 1, A: 2, S: 3 }
           return order[a.rank] - order[b.rank]
         })
       acc[track] = trackMissions
       return acc
     },
-    {} as Record<Track, Mission[]>,
+    {} as Record<Track, MissionPreview[]>,
   )
 
   const allTrackMissions = missionsByTrack[activeTrack] ?? []
@@ -63,7 +63,7 @@ export function InteractiveSyllabus({
   /** Pick one representative mission per rank tier (B, A, S) for preview */
   const activeMissions = (["B", "A", "S"] as const)
     .map((rank) => allTrackMissions.find((m) => m.rank === rank))
-    .filter((m): m is Mission => m !== undefined)
+    .filter((m): m is MissionPreview => m !== undefined)
 
   const totalInTrack = allTrackMissions.length
   const hasMore = totalInTrack > activeMissions.length
@@ -133,7 +133,7 @@ export function InteractiveSyllabus({
               const rankColor = RANK_COLORS[mission.rank]
               const isLast = idx === activeMissions.length - 1
               return (
-                <div key={mission.id}>
+                <div key={mission.slug}>
                   {/* Mission Card */}
                   <div className="cut-corner group relative border-2 border-anime-700 bg-anime-900 p-5 transition-all hover:border-anime-cyan hover:shadow-neon-cyan">
                     <div className="flex items-start gap-4">

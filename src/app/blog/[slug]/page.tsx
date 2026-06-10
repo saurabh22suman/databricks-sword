@@ -1,4 +1,5 @@
 import { blogPosts, getDb } from "@/lib/db"
+import { toIsoDate } from "@/lib/utils"
 import { getContentBySlug, getContentSlugs } from "@/lib/mdx/content"
 import { blogFrontmatterSchema } from "@/lib/mdx/schema"
 import { eq } from "drizzle-orm"
@@ -48,7 +49,8 @@ async function getDbPost(slug: string): Promise<BlogData | null> {
       author: post.author,
       category: post.category,
       tags: JSON.parse(post.tags),
-      publishedAt: post.publishedAt?.toISOString().split("T")[0] ?? "",
+      // publishedAt may be a Date (newer Drizzle) or Unix seconds (older Drizzle/raw)
+      publishedAt: toIsoDate(post.publishedAt),
       featured: post.featured,
       content: post.content,
       sourceUrl: post.sourceUrl,

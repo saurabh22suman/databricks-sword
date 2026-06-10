@@ -14,9 +14,11 @@ vi.mock("lucide-react", () => ({
 }))
 
 /** Helper to create a minimal mission fixture */
-function createMission(overrides: Partial<Mission> = {}): Mission {
+function createMission(overrides: Partial<Mission & { slug: string }> = {}): any {
+  const id = overrides.id || "test-mission"
   return {
-    id: "test-mission",
+    id,
+    slug: id,
     title: "Test Mission",
     subtitle: "A test mission",
     description: "A mission for testing",
@@ -44,7 +46,7 @@ function createMission(overrides: Partial<Mission> = {}): Mission {
   }
 }
 
-const mockMissions: Mission[] = [
+const mockMissions: any[] = [
   // DE Track missions
   createMission({
     id: "lakehouse-fundamentals",

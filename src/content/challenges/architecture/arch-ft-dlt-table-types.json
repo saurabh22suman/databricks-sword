@@ -4,15 +4,15 @@
   "category": "architecture",
   "difficulty": "B",
   "format": "fill-blank",
-  "description": "Fill in the blanks to distinguish between STREAMING TABLE, MATERIALIZED VIEW, and LIVE TABLE in Delta Live Tables. Know when to use each type.",
+  "description": "Fill in the blanks to distinguish between STREAMING TABLE and MATERIALIZED VIEW in Delta Live Tables. Know when to use each type.",
   "hints": [
-    "STREAMING TABLE continuously ingests from external sources",
+    "STREAMING TABLE incrementally appends from external sources (Auto Loader)",
     "MATERIALIZED VIEW is pre-computed and refreshed on schedule",
-    "LIVE TABLE updates in real-time as source data changes"
+    "Choose STREAMING TABLE for low-latency incremental data; MATERIALIZED VIEW for complex batch recomputations"
   ],
   "xpReward": 100,
-  "optimalSolution": "CREATE OR REFRESH MATERIALIZED VIEW daily_metrics AS SELECT region, sum(amount) as revenue FROM sales GROUP BY region;\n\nCREATE OR REFRESH LIVE TABLE realtime_orders AS SELECT * FROM orders;\n\nCREATE OR REFRESH STREAMING TABLE raw_events AS SELECT * FROM STREAM(read_files('s3://data/', format => 'json'));",
-  "explanation": "DLT offers three table types: STREAMING TABLE continuously ingests from cloud files (Auto Loader). MATERIALIZED VIEW recomputes on refresh - ideal for complex aggregations. LIVE TABLE (formerly Streaming Table) updates in real-time. Choose based on latency needs and query complexity.",
+  "optimalSolution": "CREATE OR REFRESH MATERIALIZED VIEW daily_metrics AS SELECT region, sum(amount) as revenue FROM sales GROUP BY region;\n\nCREATE OR REFRESH STREAMING TABLE realtime_orders AS SELECT * FROM orders;\n\nCREATE OR REFRESH STREAMING TABLE raw_events AS SELECT * FROM STREAM(read_files('s3://data/', format => 'json'));",
+  "explanation": "DLT offers two primary table types in modern pipelines. STREAMING TABLE incrementally appends from cloud files (Auto Loader) — ideal for low-latency, append-only data flows. MATERIALIZED VIEW recomputes on a refresh schedule — ideal for complex aggregations. LIVE TABLE is a deprecated DLT construct that has been replaced by STREAMING TABLE; new pipelines should not use it.",
   "fillBlank": {
     "codeTemplate": "__BLANK_0__ TABLE daily_sales AS SELECT region, sum(amount) as revenue FROM sales GROUP BY region;\n\n__BLANK_1__ TABLE realtime_orders AS SELECT * FROM orders;\n\n__BLANK_2__ STREAMING TABLE raw_events AS SELECT * FROM STREAM(read_files('s3://data/', format => 'json'));",
     "blanks": [
@@ -21,19 +21,19 @@
         "correctAnswer": "MATERIALIZED VIEW",
         "options": [
           "MATERIALIZED VIEW",
-          "LIVE TABLE",
           "STREAMING TABLE",
+          "LIVE TABLE (legacy, do not use)",
           "DYNAMIC TABLE"
         ]
       },
       {
         "id": 1,
-        "correctAnswer": "LIVE TABLE",
+        "correctAnswer": "STREAMING TABLE",
         "options": [
-          "LIVE TABLE",
           "STREAMING TABLE",
-          "DYNAMIC TABLE",
-          "MATERIALIZED VIEW"
+          "MATERIALIZED VIEW",
+          "LIVE TABLE (legacy, do not use)",
+          "DYNAMIC TABLE"
         ]
       },
       {

@@ -12,7 +12,7 @@ Replace GlobalShip's fragile manual notebook execution with a production-grade o
 
 1. **Design multi-task jobs** — connect notebooks, Python scripts, and SQL tasks in dependency graphs
 2. **Configure task dependencies** — sequential, parallel, and conditional branches
-3. **Set up job clusters** — cost-efficient compute that spins up per job run
+3. **Configure Serverless Jobs** — instant startup, zero-config provisioning, automatic scale-to-zero
 4. **Implement retry and alerting** — handle transient failures gracefully
 5. **Monitor job health** — dashboards, alerts, and run history
 
@@ -20,7 +20,7 @@ Replace GlobalShip's fragile manual notebook execution with a production-grade o
 
 - Databricks Workflows (Jobs) orchestrate multi-task pipelines with a DAG structure
 - Tasks can be notebooks, JARs, Python scripts, SQL queries, or Delta Live Tables pipelines
-- Job clusters are created per run and auto-terminate, saving costs
+- Serverless Jobs are the recommended default for most workloads — instant startup, automatic scaling, no cluster configuration. Classic Job Clusters remain available as a legacy fallback for specialized use cases.
 - Conditional tasks use `if/else` branching based on prior task outcomes
 - Built-in retry policies handle transient failures automatically
 

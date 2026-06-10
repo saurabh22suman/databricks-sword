@@ -54,7 +54,7 @@ describe("Databricks client", () => {
       const result = await validateConnection(workspaceUrl, pat);
 
       expect(result.valid).toBe(false);
-      expect(result.error).toContain("Authentication failed");
+      expect(result.error).toContain("Personal Access Token");
     });
 
     it("returns false on forbidden error (403)", async () => {
@@ -67,7 +67,7 @@ describe("Databricks client", () => {
       const result = await validateConnection(workspaceUrl, pat);
 
       expect(result.valid).toBe(false);
-      expect(result.error).toContain("Authentication failed");
+      expect(result.error).toContain("Personal Access Token");
     });
 
     it("returns false on network error", async () => {
@@ -76,7 +76,7 @@ describe("Databricks client", () => {
       const result = await validateConnection(workspaceUrl, pat);
 
       expect(result.valid).toBe(false);
-      expect(result.error).toContain("Network error");
+      expect(result.error).toContain("Cannot reach Databricks workspace");
     });
 
     it("returns false on invalid workspace URL", async () => {

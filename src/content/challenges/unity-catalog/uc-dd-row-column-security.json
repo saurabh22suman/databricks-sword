@@ -12,7 +12,7 @@
   ],
   "xpReward": 125,
   "optimalSolution": "CREATE TABLE sales_data (region, revenue, ssn);\nALTER TABLE sales_data SET ROW FILTER region_filter ON (region);\nALTER TABLE sales_data ALTER COLUMN ssn SET MASK ssn_mask;\nGRANT SELECT ON TABLE sales_data TO analysts;",
-  "explanation": "Row-level security filters rows based on user context (e.g., region). Column-level masking hides sensitive data (e.g., SSN) while allowing access to other columns. These features enable fine-grained data access without creating multiple table copies.",
+  "explanation": "Row-level security filters rows based on user context (e.g., region) using the modern ALTER TABLE ... SET ROW FILTER syntax — applied directly to the table, not via dynamic view wrapping. Column-level masking hides sensitive data (e.g., SSN) with ALTER TABLE ... ALTER COLUMN ... SET MASK. These features enable fine-grained data access without creating multiple table copies or wrapper views.",
   "dragDrop": {
     "blocks": [
       {

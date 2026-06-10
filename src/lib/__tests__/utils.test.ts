@@ -1,5 +1,5 @@
 import { describe, it, expect } from "vitest"
-import { cn, formatDate, calculateReadingTime, slugify } from "../utils"
+import { cn, formatDate, calculateReadingTime, slugify, toIsoDate } from "../utils"
 
 describe("cn", () => {
   it("merges class names", () => {
@@ -30,6 +30,29 @@ describe("formatDate", () => {
     const result = formatDate(new Date("2026-06-01"))
     expect(result).toContain("June")
     expect(result).toContain("2026")
+  })
+})
+
+describe("toIsoDate", () => {
+  it("returns empty string for null and undefined", () => {
+    expect(toIsoDate(null)).toBe("")
+    expect(toIsoDate(undefined)).toBe("")
+  })
+
+  it("returns YYYY-MM-DD for a Date object (ms path)", () => {
+    expect(toIsoDate(new Date("2026-05-17T00:00:00.000Z"))).toBe("2026-05-17")
+  })
+
+  it("returns YYYY-MM-DD for a Unix-seconds number (seconds path)", () => {
+    // 1763164800 = 2025-11-15T00:00:00.000Z
+    expect(toIsoDate(1763164800)).toBe("2025-11-15")
+  })
+
+  it("returns 4-digit year — guards against the 5-digit-year bug", () => {
+    const result = toIsoDate(1763164800)
+    const yearPart = result.split("-")[0]
+    expect(yearPart.length).toBe(4)
+    expect(Number(yearPart)).toBe(2025)
   })
 })
 

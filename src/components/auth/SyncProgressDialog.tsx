@@ -4,26 +4,54 @@
  * Non-dismissable modal shown during account sign-out flow.
  * Displays "Saving your Progress" with a pulsing animation
  * while sandbox data syncs to Turso DB before sign-out.
+ *
+ * Includes a 30-second timeout to prevent user deadlock.
  */
 
 "use client"
 
 import { cn } from "@/lib/utils"
 import { AnimatePresence, motion } from "framer-motion"
-import { CloudUpload, Loader2 } from "lucide-react"
+import { CloudUpload, Loader2, AlertTriangle } from "lucide-react"
+import { useEffect, useState } from "react"
 
 type SyncProgressDialogProps = {
   /** Whether the dialog is visible */
   open: boolean
+  /** Optional callback for timeout - called when operation takes too long */
+  onTimeout?: () => void
+  /** Timeout duration in milliseconds (default: 30000 = 30s) */
+  timeoutMs?: number
 }
 
 /**
  * Non-dismissable progress dialog shown while syncing sandbox to server on disconnect.
  * Cannot be closed by user — auto-closes when sync completes and sign-out redirects.
+ *
+ * Includes timeout protection: after 30 seconds, shows a "Force Continue" option.
  */
 export function SyncProgressDialog({
   open,
+  onTimeout,
+  timeoutMs = 30000,
 }: SyncProgressDialogProps): React.ReactElement {
+  const [timedOut, setTimedOut] = useState(false)
+
+  // Reset timeout state when dialog opens
+  useEffect(() => {
+    if (open) {
+      setTimedOut(false)
+
+      // Set up timeout timer
+      const timer = setTimeout(() => {
+        setTimedOut(true)
+        onTimeout?.()
+      }, timeoutMs)
+
+      return () => clearTimeout(timer)
+    }
+  }, [open, timeoutMs, onTimeout])
+
   return (
     <AnimatePresence>
       {open && (
@@ -62,26 +90,36 @@ export function SyncProgressDialog({
             {/* Icon + Spinner */}
             <div className="flex justify-center mb-6">
               <div className="relative">
-                <motion.div
-                  animate={{ rotate: 360 }}
-                  transition={{
-                    duration: 2,
-                    repeat: Infinity,
-                    ease: "linear",
-                  }}
-                >
-                  <Loader2 className="w-12 h-12 text-anime-cyan/30" />
-                </motion.div>
-                <CloudUpload className="w-6 h-6 text-anime-cyan absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2" />
+                {timedOut ? (
+                  <AlertTriangle className="w-12 h-12 text-anime-yellow" />
+                ) : (
+                  <motion.div
+                    animate={{ rotate: 360 }}
+                    transition={{
+                      duration: 2,
+                      repeat: Infinity,
+                      ease: "linear",
+                    }}
+                  >
+                    <Loader2 className="w-12 h-12 text-anime-cyan/30" />
+                  </motion.div>
+                )}
+                <CloudUpload className={cn(
+                  "w-6 h-6 absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2",
+                  timedOut ? "text-anime-yellow" : "text-anime-cyan"
+                )} />
               </div>
             </div>
 
             {/* Title */}
             <h2
               id="sync-dialog-title"
-              className="font-heading text-xl text-anime-cyan text-center mb-2"
+              className={cn(
+                "font-heading text-xl text-center mb-2",
+                timedOut ? "text-anime-yellow" : "text-anime-cyan"
+              )}
             >
-              Saving your Progress
+              {timedOut ? "Sync Taking Too Long" : "Saving your Progress"}
             </h2>
 
             {/* Description */}
@@ -89,23 +127,43 @@ export function SyncProgressDialog({
               id="sync-dialog-desc"
               className="text-anime-400 text-sm text-center font-mono"
             >
-              Syncing data to server before signing out...
+              {timedOut
+                ? "The server is taking longer than expected. Your progress is saved locally."
+                : "Syncing data to server before signing out..."}
             </p>
 
-            {/* Animated progress bar */}
-            <div className="mt-6 h-1 bg-anime-800 rounded-full overflow-hidden">
-              <motion.div
-                className="h-full bg-gradient-to-r from-anime-cyan via-anime-purple to-anime-cyan rounded-full"
-                initial={{ x: "-100%" }}
-                animate={{ x: "100%" }}
-                transition={{
-                  duration: 1.5,
-                  repeat: Infinity,
-                  ease: "linear",
-                }}
-                style={{ width: "60%" }}
-              />
-            </div>
+            {/* Animated progress bar - hide when timed out */}
+            {!timedOut && (
+              <div className="mt-6 h-1 bg-anime-800 rounded-full overflow-hidden">
+                <motion.div
+                  className="h-full bg-gradient-to-r from-anime-cyan via-anime-purple to-anime-cyan rounded-full"
+                  initial={{ x: "-100%" }}
+                  animate={{ x: "100%" }}
+                  transition={{
+                    duration: 1.5,
+                    repeat: Infinity,
+                    ease: "linear",
+                  }}
+                  style={{ width: "60%" }}
+                />
+              </div>
+            )}
+
+            {/* Timeout action button */}
+            {timedOut && (
+              <div className="mt-6">
+                <button
+                  onClick={onTimeout}
+                  className={cn(
+                    "w-full cut-corner py-3 font-bold uppercase tracking-wider",
+                    "border border-anime-yellow bg-anime-yellow/10 text-anime-yellow",
+                    "hover:bg-anime-yellow/20 transition-colors"
+                  )}
+                >
+                  Force Continue
+                </button>
+              </div>
+            )}
           </motion.div>
         </motion.div>
       )}

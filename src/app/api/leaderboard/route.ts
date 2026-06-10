@@ -94,7 +94,7 @@ const xpExtractor = sql<number>`
   )
 `
 
-export async function GET(request: NextRequest): Promise<NextResponse> {
+export async function GET(request?: NextRequest): Promise<NextResponse> {
   try {
     // Handle case where request might be undefined (test scenarios)
     const url = request?.url

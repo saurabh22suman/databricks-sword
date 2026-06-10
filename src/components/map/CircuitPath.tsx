@@ -73,10 +73,17 @@ export function CircuitPath({
   const fromNode = nodes.get(edge.from)
   const toNode = nodes.get(edge.to)
 
+  // Compute path data BEFORE the early return to comply with Rules of Hooks
+  // useMemo must be called unconditionally at the top level
+  const pathData = useMemo(() => {
+    if (!fromNode || !toNode) return ""
+    return generateFlowPath(fromNode, toNode)
+  }, [fromNode, toNode])
+
+  // Early return after hooks are called
   if (!fromNode || !toNode) return null
 
   const trackColors = edge.track ? TRACK_COLORS[edge.track] : TRACK_COLORS.de
-  const pathData = useMemo(() => generateFlowPath(fromNode, toNode), [fromNode, toNode])
 
   const pathId = `flow-${edge.from}-${edge.to}`
   const markerId = `arrow-${edge.from}-${edge.to}`

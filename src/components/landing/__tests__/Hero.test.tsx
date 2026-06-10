@@ -31,7 +31,7 @@ beforeEach(() => {
   global.fetch = vi.fn(() =>
     Promise.resolve({
       ok: true,
-      json: () => Promise.resolve({ userCount: 5, unitsDeployed: 15 }),
+      json: () => Promise.resolve({ userCount: 5 }),
     })
   ) as unknown as typeof fetch
 })
@@ -53,8 +53,8 @@ describe("Hero", () => {
   it("renders the Start Mission CTA link", () => {
     render(<Hero />)
     expect(
-      screen.getByRole("link", { name: /start mission/i }),
-    ).toHaveAttribute("href", "/missions")
+      screen.getByRole("link", { name: /start here/i }),
+    ).toHaveAttribute("href", "/missions/lakehouse-fundamentals")
   })
 
   it("renders the System Online badge", () => {
@@ -62,16 +62,14 @@ describe("Hero", () => {
     expect(screen.getByText("System Online")).toBeInTheDocument()
   })
 
-  it("renders the stats section with fetched units deployed", async () => {
+  it("renders the stats section with fetched user count", async () => {
     render(<Hero />)
-    expect(screen.getByText("Units Deployed")).toBeInTheDocument()
-    expect(screen.queryByText("System Rating")).not.toBeInTheDocument()
+    expect(screen.queryByText("Units Deployed")).not.toBeInTheDocument()
+    expect(screen.getByText("Registered Learners")).toBeInTheDocument()
 
-    // Wait for fetch to complete and check dynamic values
+    // Wait for fetch to complete and check the dynamic value
     await waitFor(() => {
-      expect(screen.getByText("15")).toBeInTheDocument()
-      expect(screen.getByText("Registered Learners")).toBeInTheDocument()
-      expect(screen.getAllByText("5").length).toBeGreaterThan(0)
+      expect(screen.getByText("5")).toBeInTheDocument()
     })
   })
 
@@ -85,7 +83,7 @@ describe("Hero", () => {
     expect(screen.getByText("Protocol Sword")).toBeInTheDocument()
   })
 
-  it("falls back to default metrics when stats fetch fails", async () => {
+  it("falls back to default metric when stats fetch fails", async () => {
     global.fetch = vi.fn(() => Promise.reject(new Error("network"))) as unknown as typeof fetch
 
     render(<Hero />)
@@ -94,7 +92,7 @@ describe("Hero", () => {
       expect(global.fetch).toHaveBeenCalledWith("/api/stats")
     })
     const statValues = screen.getAllByText("0")
-    expect(statValues.length).toBeGreaterThanOrEqual(2)
+    expect(statValues.length).toBeGreaterThanOrEqual(1)
     expect(screen.getByText("Registered Learners")).toBeInTheDocument()
   })
 

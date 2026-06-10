@@ -10,19 +10,21 @@ export function SignInButton(): React.ReactElement {
       <button
         onClick={() => signIn("github", { callbackUrl: "/missions" })}
         className="group relative overflow-hidden bg-anime-900 border border-anime-700 hover:border-anime-cyan px-6 py-4 transition-all duration-300 cut-corner shadow-neon-cyan hover:shadow-neon-cyan-lg"
+        aria-label="Sign in with GitHub"
       >
         <div className="absolute inset-0 bg-anime-cyan opacity-0 group-hover:opacity-10 transition-opacity" />
         <div className="relative flex items-center justify-center gap-3">
           <Github className="w-5 h-5" />
           <span className="font-heading text-lg">Sign in with GitHub</span>
         </div>
-       
+
 </button>
 
       {/* Google Sign In */}
       <button
         onClick={() => signIn("google", { callbackUrl: "/missions" })}
         className="group relative overflow-hidden bg-anime-900 border border-anime-700 hover:border-anime-purple px-6 py-4 transition-all duration-300 cut-corner shadow-neon-purple hover:shadow-neon-purple-lg"
+        aria-label="Sign in with Google"
       >
         <div className="absolute inset-0 bg-anime-purple opacity-0 group-hover:opacity-10 transition-opacity" />
         <div className="relative flex items-center justify-center gap-3">

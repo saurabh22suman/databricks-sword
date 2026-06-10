@@ -17,23 +17,23 @@
     "blocks": [
       {
         "id": "b1",
-        "content": "WITH active_users AS ("
+        "code": "WITH active_users AS ("
       },
       {
         "id": "b2",
-        "content": "  SELECT user_id, username FROM users WHERE status = 'active'"
+        "code": "  SELECT user_id, username FROM users WHERE status = 'active'"
       },
       {
         "id": "b3",
-        "content": "), user_totals AS ("
+        "code": "), user_totals AS ("
       },
       {
         "id": "b4",
-        "content": "  SELECT au.user_id, au.username, SUM(p.amount) AS total_spent\n  FROM active_users au JOIN purchases p ON au.user_id = p.user_id\n  GROUP BY au.user_id, au.username"
+        "code": "  SELECT au.user_id, au.username, SUM(p.amount) AS total_spent\n  FROM active_users au JOIN purchases p ON au.user_id = p.user_id\n  GROUP BY au.user_id, au.username"
       },
       {
         "id": "b5",
-        "content": ") SELECT username, total_spent FROM user_totals WHERE total_spent > 500 ORDER BY total_spent DESC"
+        "code": ") SELECT username, total_spent FROM user_totals WHERE total_spent > 500 ORDER BY total_spent DESC"
       }
     ],
     "correctOrder": [

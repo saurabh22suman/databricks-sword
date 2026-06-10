@@ -16,7 +16,7 @@ They need **Delta Lake power features** to manage this data at scale.
 
 1. **Time travel:** Restore accidentally deleted records using versioning
 2. **OPTIMIZE:** Compact small files for better query performance
-3. **Z-ORDER:** Co-locate related data for faster scans
+3. **Liquid Clustering:** Use `CLUSTER BY` for adaptive data layout — co-locates related data without manual Z-ORDER rewrites
 4. **VACUUM:** Clean old file versions to reduce storage costs
 5. **Change Data Capture:** Stream incremental changes from source systems
 

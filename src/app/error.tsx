@@ -6,6 +6,7 @@ import { useEffect } from "react"
 /**
  * Global error boundary for Next.js App Router.
  * Features glitch effect with cyberpunk aesthetics.
+ * In production, hides technical details from users.
  */
 export default function Error({
   error,
@@ -14,10 +15,17 @@ export default function Error({
   error: Error & { digest?: string }
   reset: () => void
 }): React.ReactElement {
+  const isProduction = process.env.NODE_ENV === "production"
+
   useEffect(() => {
-    // Log the error to an error reporting service if needed
+    // Always log errors server-side for debugging
     console.error("Global error:", error)
   }, [error])
+
+  // Production-safe error message
+  const errorMessage = isProduction
+    ? "Something went wrong. Please try again."
+    : error.message || "An unexpected error occurred"
 
   return (
     <div className="fixed inset-0 z-50 flex items-center justify-center bg-anime-950">
@@ -52,19 +60,20 @@ export default function Error({
           </p>
         </div>
 
-        {/* Error message */}
+        {/* Error message - only show details in development */}
         <div className="w-full max-w-lg">
           <div className="cut-corner border border-anime-accent/30 bg-anime-900/50 p-6">
             <div className="mb-4 flex items-center gap-2 border-b border-anime-accent/20 pb-2">
               <div className="h-2 w-2 animate-pulse bg-anime-accent" />
               <span className="font-mono text-xs uppercase tracking-wider text-anime-accent">
-                Error Trace
+                {isProduction ? "Status" : "Error Trace"}
               </span>
             </div>
             <p className="font-mono text-sm text-gray-400">
-              {error.message || "An unexpected error occurred"}
+              {errorMessage}
             </p>
-            {error.digest && (
+            {/* Only show digest in development */}
+            {!isProduction && error.digest && (
               <p className="mt-2 font-mono text-xs text-gray-600">
                 Digest: {error.digest}
               </p>

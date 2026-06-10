@@ -58,7 +58,9 @@ describe("GET /api/leaderboard", () => {
       from: vi.fn(() => ({
         leftJoin: vi.fn(() => ({
           where: vi.fn(() => ({
-            orderBy: vi.fn(async () => rows),
+            orderBy: vi.fn(() => ({
+              limit: vi.fn(async () => rows),
+            })),
           })),
         })),
       })),
@@ -72,8 +74,8 @@ describe("GET /api/leaderboard", () => {
 
     const select = vi
       .fn()
-      .mockReturnValueOnce(firstQuery)
       .mockReturnValueOnce(secondQuery)
+      .mockReturnValueOnce(firstQuery)
 
     const getDbMock = vi.fn(() => ({ select }))
 
@@ -88,7 +90,7 @@ describe("GET /api/leaderboard", () => {
 
     const body = await response.json()
 
-    expect(body.totalPlayers).toBe(2) // Count reflects opted-in users only
+    expect(body.pagination.totalPlayers).toBe(2) // Count reflects opted-in users only
     expect(body.entries).toHaveLength(2)
 
     expect(body.entries[0]).toMatchObject({
@@ -122,7 +124,9 @@ describe("GET /api/leaderboard", () => {
       from: vi.fn(() => ({
         leftJoin: vi.fn(() => ({
           where: vi.fn(() => ({
-            orderBy: vi.fn(async () => rows),
+            orderBy: vi.fn(() => ({
+              limit: vi.fn(async () => rows),
+            })),
           })),
         })),
       })),
@@ -136,8 +140,8 @@ describe("GET /api/leaderboard", () => {
 
     const select = vi
       .fn()
-      .mockReturnValueOnce(firstQuery)
       .mockReturnValueOnce(secondQuery)
+      .mockReturnValueOnce(firstQuery)
 
     vi.doMock("@/lib/db/client", () => ({
       getDb: () => ({ select }),
@@ -150,7 +154,7 @@ describe("GET /api/leaderboard", () => {
     const body = await response.json()
 
     expect(body.entries).toHaveLength(1)
-    expect(body.totalPlayers).toBe(1)
+    expect(body.pagination.totalPlayers).toBe(1)
     expect(body.entries[0].userId).toBe("u-1")
   })
 
@@ -168,7 +172,9 @@ describe("GET /api/leaderboard", () => {
       from: vi.fn(() => ({
         leftJoin: vi.fn(() => ({
           where: vi.fn(() => ({
-            orderBy: vi.fn(async () => rows),
+            orderBy: vi.fn(() => ({
+              limit: vi.fn(async () => rows),
+            })),
           })),
         })),
       })),
@@ -182,8 +188,8 @@ describe("GET /api/leaderboard", () => {
 
     const select = vi
       .fn()
-      .mockReturnValueOnce(firstQuery)
       .mockReturnValueOnce(secondQuery)
+      .mockReturnValueOnce(firstQuery)
 
     vi.doMock("@/lib/db/client", () => ({
       getDb: () => ({ select }),

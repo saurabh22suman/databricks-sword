@@ -15,6 +15,12 @@ import { validateStreakData } from "../gamification/streaks"
 export const SANDBOX_KEY = "databricks-sword:sandbox"
 
 /**
+ * Cached lastSynced value to prevent unnecessary recalculations.
+ * Only recalculate if lastSynced actually changed.
+ */
+let cachedLastSynced: string | null = null
+
+/**
  * Initializes a default empty sandbox state.
  * 
  * @returns Default SandboxData with all fields initialized
@@ -100,7 +106,7 @@ export function loadSandbox(): SandboxData | null {
 
     // If streak was corrected, update the sandbox
     if (validatedStreakData !== validated.streakData) {
-      return {
+      const corrected = {
         ...validated,
         streakData: validatedStreakData,
         userStats: {
@@ -108,6 +114,27 @@ export function loadSandbox(): SandboxData | null {
           currentStreak: validatedStreakData.currentStreak,
           longestStreak: validatedStreakData.longestStreak,
         },
+      }
+      // Commit corrected streak data to disk immediately
+      saveSandbox(corrected)
+      return corrected
+    }
+
+    // Only recalculate stats if lastSynced actually changed
+    // This prevents O(n) iteration on every load
+    if (validated.lastSynced !== cachedLastSynced) {
+      cachedLastSynced = validated.lastSynced
+      const healed = recalculateStats(validated)
+      // Only save if we actually corrected something
+      if (
+        healed.userStats.totalXp !== validated.userStats.totalXp ||
+        healed.userStats.totalMissionsCompleted !==
+          validated.userStats.totalMissionsCompleted ||
+        healed.userStats.totalChallengesCompleted !==
+          validated.userStats.totalChallengesCompleted
+      ) {
+        saveSandbox(healed)
+        return healed
       }
     }
 

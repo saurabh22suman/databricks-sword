@@ -12,6 +12,8 @@ export type {
     FreeTextConfig, FurtherReading, Industry, Mission, MissionRank, Placement, QuizConfig, QuizQuestion, SideQuest, Stage, StageType
 } from "./types"
 
+export type { MissionPreview } from "./loader"
+
 // Zod Schemas
 export {
     BlankSchema, BriefingConfigSchema, CodeBlockSchema, CompareConfigSchema, DebriefConfigSchema, DiagramComponentSchema, DiagramConfigSchema, DragDropConfigSchema, DropZoneSchema, FillBlankConfigSchema,
@@ -21,8 +23,8 @@ export {
 
 // Loader functions
 export {
-    getAllMissions, getMission, getMissionSlugs, getMissionsByIndustry,
-    getMissionsByRank,
+    getAllMissions, getMission, getMissionSlugs, getMissionPreviews,
+    getMissionsByIndustry, getMissionsByRank, getMissionTrack,
     getStageConfig
 } from "./loader"
 

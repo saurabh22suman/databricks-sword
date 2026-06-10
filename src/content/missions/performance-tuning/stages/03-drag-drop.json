@@ -14,8 +14,8 @@
     },
     {
       "id": "optimize-table",
-      "code": "OPTIMIZE player_events ZORDER BY (game_id, player_id)",
-      "label": "Z-ORDER the Table"
+      "code": "ALTER TABLE player_events CLUSTER BY (game_id, player_id)",
+      "label": "Apply Liquid Clustering"
     },
     {
       "id": "enable-aqe",
@@ -44,7 +44,7 @@
   "hints": [
     "Always diagnose before optimizing \u2014 check Spark UI first",
     "EXPLAIN shows the query plan before execution",
-    "Z-ORDER improves data skipping for filtered queries",
+    "Liquid Clustering adapts to query patterns; change clustering columns without rewriting data",
     "AQE optimizes at runtime \u2014 enable before running queries",
     "Broadcast joins eliminate expensive shuffles",
     "Cache hot tables after other optimizations are in place"

@@ -79,11 +79,9 @@ describe("Middleware Route Protection", () => {
   })
 
   it("does not allow production mock-auth bypass", async () => {
-    const middleware = await loadMiddleware("true", "production")
-    const response = middleware(makeRequest("/missions"))
-
-    expect(response.status).toBe(307)
-    expect(response.headers.get("location")).toContain("/auth/signin")
+    await expect(loadMiddleware("true", "production")).rejects.toThrow(
+      "CRITICAL SECURITY ERROR: MOCK_AUTH is not allowed in production"
+    )
   })
 
   it("allows mock-auth bypass outside production", async () => {

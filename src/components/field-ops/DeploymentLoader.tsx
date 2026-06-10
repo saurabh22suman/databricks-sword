@@ -7,7 +7,7 @@
 
 import { cn } from "@/lib/utils"
 import { AnimatePresence, motion } from "framer-motion"
-import { useEffect, useRef, useState } from "react"
+import { useEffect, useMemo, useRef, useState } from "react"
 
 type DeploymentLoaderProps = {
   industry: string
@@ -144,6 +144,20 @@ export function DeploymentLoader({
 
   const currentTip = DATABRICKS_TIPS[currentTipIndex]
 
+  // Generate stable particle positions once on mount to avoid hydration mismatch
+  // Using deterministic seeds derived from index to avoid Math.random() in render
+  const particles = useMemo(() => {
+    return Array.from({ length: 20 }, (_, i) => {
+      // Deterministic pseudo-random values based on index
+      const seed = i * 7919 // prime multiplier for distribution
+      const x = ((seed * 16807) % 1000) / 1000 * (typeof window !== "undefined" ? window.innerWidth : 1000)
+      const y = ((seed * 21401) % 1000) / 1000 * (typeof window !== "undefined" ? window.innerHeight : 800)
+      const duration = 3 + (((seed * 31) % 200) / 100) // 3-5 seconds
+      const delay = ((seed * 47) % 200) / 100 // 0-2 seconds delay
+      return { x, y, duration, delay }
+    })
+  }, [])
+
   return (
     <motion.div
       initial={{ opacity: 0 }}
@@ -156,13 +170,13 @@ export function DeploymentLoader({
       
       {/* Floating particles */}
       <div className="absolute inset-0 overflow-hidden pointer-events-none">
-        {[...Array(20)].map((_, i) => (
+        {particles.map((p, i) => (
           <motion.div
             key={i}
             className="absolute w-1 h-1 bg-anime-cyan rounded-full"
             initial={{
-              x: Math.random() * (typeof window !== "undefined" ? window.innerWidth : 1000),
-              y: Math.random() * (typeof window !== "undefined" ? window.innerHeight : 800),
+              x: p.x,
+              y: p.y,
               opacity: 0.3,
             }}
             animate={{
@@ -170,9 +184,9 @@ export function DeploymentLoader({
               opacity: [0.3, 0.8, 0.3],
             }}
             transition={{
-              duration: 3 + Math.random() * 2,
+              duration: p.duration,
               repeat: Infinity,
-              delay: Math.random() * 2,
+              delay: p.delay,
               ease: "linear",
             }}
           />
