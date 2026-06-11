@@ -23,7 +23,8 @@ export type Industry =
 export type DeploymentStatus =
   | "pending"       // Created but not started
   | "deploying"     // Bundle deployment in progress
-  | "deployed"      // Successfully deployed
+  | "pipeline_running" // DLT pipeline started (manufacturing only); running in background
+  | "deployed"      // Successfully deployed; awaiting validation or user interaction
   | "validating"    // Running validation queries
   | "completed"     // All validations passed, XP awarded
   | "failed"        // Deployment or validation failed

@@ -60,7 +60,8 @@ export class DeploymentConflictError extends Error {
 
 const ALLOWED_STATUS_TRANSITIONS: Record<DeploymentStatus, DeploymentStatus[]> = {
   pending: ["deploying", "failed"],
-  deploying: ["deployed", "failed", "cleaning_up"],
+  deploying: ["pipeline_running", "deployed", "failed", "cleaning_up"],
+  pipeline_running: ["deployed", "failed", "cleaning_up"],
   deployed: ["validating", "completed", "cleaning_up", "failed"],
   validating: ["deployed", "failed", "cleaning_up"],
   completed: ["cleaning_up", "failed"],
