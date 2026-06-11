@@ -44,6 +44,15 @@ const serverEnvSchema = z.object({
     .transform((v) => v === "true"),
   GROQ_HINTS_MODEL: z.string().optional(),
   GROQ_HINTS_FALLBACK_MODELS: z.string().optional(),
+
+  // Field Ops deployment path
+  // Set to "true" to use Databricks Asset Bundles (recommended for new deployments)
+  // Default: false (legacy raw-CLI path)
+  FIELD_OPS_USE_DAB: z
+    .enum(["true", "false", ""])
+    .optional()
+    .default("false")
+    .transform((v) => v === "true"),
 })
 
 /**

@@ -164,7 +164,8 @@ export async function POST(request: NextRequest): Promise<NextResponse> {
       catalog: catalogName,
     }
 
-    const orchestration = await startDeployment(userId, industry, databricksConfig, context)
+    const useDab = process.env.FIELD_OPS_USE_DAB === "true"
+    const orchestration = await startDeployment(userId, industry, databricksConfig, context, { useDab })
 
     return apiOk({
       deployment: {

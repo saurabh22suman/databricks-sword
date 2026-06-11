@@ -13,6 +13,7 @@ import type {
   CleanupResult,
   DatabricksConnection,
   Deployment,
+  DeploymentResult,
   DeploymentStatus,
   Industry,
   ValidationResult,
@@ -350,6 +351,25 @@ async function finalizeOperationFailure(
     .where(eq(fieldOpsOperations.id, operationId))
 }
 
+type DeploymentOptions = {
+  useDab: boolean
+}
+
+/**
+ * Legacy deploy path (pre-DAB) - uses raw CLI commands.
+ * This is kept for rollback if needed.
+ */
+async function legacyDeployBundle(
+  bundlePath: string,
+  industry: Industry,
+  config: DatabricksConnection
+): Promise<DeploymentResult> {
+  // Stub: throw to indicate legacy path is not implemented
+  // The actual legacy logic was removed in Task 5.
+  // This stub exists for the flag to have a path to call.
+  throw new Error("Legacy deploy path is not implemented. Set FIELD_OPS_USE_DAB=true to use DAB.")
+}
+
 /**
  * Start a new Field Ops deployment.
  */
@@ -357,7 +377,8 @@ export async function startDeployment(
   userId: string,
   industry: Industry,
   config: DatabricksConnection,
-  context: OperationContext
+  context: OperationContext,
+  options: DeploymentOptions = { useDab: true }
 ): Promise<{
   deployment: Deployment
   operationId: string
@@ -479,7 +500,9 @@ export async function startDeployment(
 
   try {
     const { result, retries } = await withRetry(3, DEPLOY_RETRY_DELAYS_MS, async () => {
-      const deployResult = await deployBundle(bundlePath, industry, config)
+      const deployResult = options.useDab
+        ? await deployBundle(bundlePath, industry, config)
+        : await legacyDeployBundle(bundlePath, industry, config)
       if (!deployResult.success) {
         throw new Error(deployResult.errorMessage || "Deployment failed")
       }
