@@ -44,6 +44,10 @@ services:
       - AUTH_GITHUB_SECRET=${AUTH_GITHUB_SECRET}
       # ── Databricks PAT Encryption ──
       - AES_ENCRYPTION_KEY=${AES_ENCRYPTION_KEY}
+      # ── Field Ops: DAB rollout flag ──
+      # Set to "true" in Dokploy to use databricks bundle deploy/destroy
+      # Default off (false) — keep off until verified in staging
+      - FIELD_OPS_USE_DAB=${FIELD_OPS_USE_DAB:-false}
       # SMTP
       - SMTP_HOST=${SMTP_HOST}
       - SMTP_PORT=${SMTP_PORT}
