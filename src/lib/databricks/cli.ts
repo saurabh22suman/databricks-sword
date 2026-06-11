@@ -3,14 +3,53 @@
  * Uses the Databricks CLI for reliable Unity Catalog operations.
  */
 
-import { execFile } from "child_process"
+import { execFile as nodeExecFile } from "child_process"
 import fs from "fs/promises"
 import os from "os"
 import path from "path"
-import { promisify } from "util"
 import type { DatabricksConnection } from "../field-ops/types"
 
-const execFileAsync = promisify(execFile)
+export type RunCliResult = {
+  success: boolean
+  stdout: string
+  stderr: string
+  errorCategory?: "authFailed" | "resourceNotFound" | "commandFailed"
+}
+
+export type RunCliExecutor = (
+  command: string,
+  args: string[],
+  options: { cwd?: string; timeoutMs?: number; env: NodeJS.ProcessEnv }
+) => Promise<{ stdout: string; stderr: string }>
+
+const defaultExecutor: RunCliExecutor = (command, args, options) =>
+  new Promise((resolve, reject) => {
+    nodeExecFile(command, args, options, (error, stdout, stderr) => {
+      if (error) {
+        reject(new Error(`${error.message}\n${stderr}`))
+      } else {
+        resolve({ stdout, stderr })
+      }
+    })
+  })
+
+let executor: RunCliExecutor = defaultExecutor
+
+/** @internal — used for tests only */
+export function _setRunCliExecutor(e: RunCliExecutor): void {
+  executor = e
+}
+
+/** @internal — used for tests only */
+export function _resetRunCliExecutor(): void {
+  executor = defaultExecutor
+}
+
+function classifyError(message: string): RunCliResult["errorCategory"] {
+  if (/401|Unauthorized|PERMISSION_DENIED|invalid.?token/i.test(message)) return "authFailed"
+  if (/RESOURCE_DOES_NOT_EXIST|SCHEMA_DOES_NOT_EXIST|404/i.test(message)) return "resourceNotFound"
+  return "commandFailed"
+}
 
 /**
  * Execute a Databricks CLI command with the given connection config.
@@ -18,10 +57,11 @@ const execFileAsync = promisify(execFile)
  * Uses execFile (not exec) to pass args as an array directly,
  * avoiding shell interpretation and quoting issues.
  */
-async function runCli(
+export async function runCli(
   config: DatabricksConnection,
-  args: string[]
-): Promise<string> {
+  args: string[],
+  options: { cwd?: string; timeoutMs?: number } = {}
+): Promise<RunCliResult> {
   // Create a secure temporary config file for authentication
   const configContent = `[DEFAULT]
 host = ${config.workspaceUrl}
@@ -31,18 +71,19 @@ token = ${config.token}
   const tempConfigPath = path.join(tempDir, ".databrickscfg")
   await fs.writeFile(tempConfigPath, configContent, { mode: 0o600 })
 
+  const timeoutMs = options.timeoutMs ?? 60000
+  const env = { ...process.env, DATABRICKS_CONFIG_FILE: tempConfigPath }
+  const execOptions = { cwd: options.cwd, env, timeout: timeoutMs }
+
+  console.log(`[CLI] Running: databricks ${args.join(" ")}`)
   try {
-    console.log(`[CLI] Running: databricks ${args.join(" ")}`)
-    const { stdout, stderr } = await execFileAsync("databricks", args, {
-      timeout: 60000,
-      env: { ...process.env, DATABRICKS_CONFIG_FILE: tempConfigPath },
-    })
-    if (stderr) {
-      console.warn(`[CLI] stderr: ${stderr}`)
-    }
-    return stdout.trim()
+    const { stdout, stderr } = await executor("databricks", args, execOptions)
+    if (stderr) console.warn(`[CLI] stderr: ${stderr}`)
+    return { success: true, stdout: stdout.trim(), stderr }
+  } catch (e) {
+    const message = e instanceof Error ? e.message : "Unknown CLI error"
+    return { success: false, stdout: "", stderr: message, errorCategory: classifyError(message) }
   } finally {
-    // Clean up temp config directory and file
     await fs.rm(tempDir, { recursive: true, force: true }).catch(() => {})
   }
 }
@@ -53,15 +94,11 @@ token = ${config.token}
 export async function testConnection(
   config: DatabricksConnection
 ): Promise<{ success: boolean; errorMessage?: string }> {
-  try {
-    await runCli(config, ["catalogs", "list"])
+  const r = await runCli(config, ["catalogs", "list"])
+  if (r.success) {
     return { success: true }
-  } catch (error) {
-    return {
-      success: false,
-      errorMessage: error instanceof Error ? error.message : "Connection failed",
-    }
   }
+  return { success: false, errorMessage: r.stderr }
 }
 
 /**
@@ -115,7 +152,10 @@ export async function uploadFile(
   localFilePath: string,
   volumePath: string
 ): Promise<void> {
-  await runCli(config, ["fs", "cp", "--overwrite", localFilePath, `dbfs:${volumePath}`])
+  const r = await runCli(config, ["fs", "cp", "--overwrite", localFilePath, `dbfs:${volumePath}`])
+  if (!r.success) {
+    throw new Error(r.stderr)
+  }
 }
 
 /**
@@ -125,9 +165,12 @@ export async function listSchemas(
   config: DatabricksConnection,
   catalog: string
 ): Promise<string[]> {
+  const r = await runCli(config, ["schemas", "list", catalog, "-o", "json"])
+  if (!r.success) {
+    return []
+  }
   try {
-    const output = await runCli(config, ["schemas", "list", catalog, "-o", "json"])
-    const schemas = JSON.parse(output)
+    const schemas = JSON.parse(r.stdout)
     return schemas.map((s: { name: string }) => s.name)
   } catch {
     return []
@@ -168,16 +211,10 @@ export async function dropSchema(
   catalog: string,
   schema: string
 ): Promise<void> {
-  try {
-    await runCli(config, ["schemas", "delete", `${catalog}.${schema}`, "--force"])
-  } catch (error) {
-    // Ignore "not found" errors
-    if (
-      error instanceof Error &&
-      !error.message.includes("SCHEMA_DOES_NOT_EXIST")
-    ) {
-      throw error
-    }
+  const r = await runCli(config, ["schemas", "delete", `${catalog}.${schema}`, "--force"])
+  // Success if command succeeded OR if schema doesn't exist
+  if (!r.success && r.errorCategory !== "resourceNotFound" && !r.stderr.includes("SCHEMA_DOES_NOT_EXIST")) {
+    throw new Error(r.stderr)
   }
 }
 
@@ -190,23 +227,17 @@ export async function createSchema(
   catalog: string,
   schema: string
 ): Promise<void> {
-  try {
-    await runCli(config, [
-      "schemas",
-      "create",
-      schema,    // NAME comes first
-      catalog,   // CATALOG_NAME comes second
-      "--comment",
-      "Field Ops deployment schema",
-    ])
-  } catch (error) {
-    // Ignore "already exists" errors
-    if (
-      error instanceof Error &&
-      !error.message.includes("SCHEMA_ALREADY_EXISTS")
-    ) {
-      throw error
-    }
+  const r = await runCli(config, [
+    "schemas",
+    "create",
+    schema, // NAME comes first
+    catalog, // CATALOG_NAME comes second
+    "--comment",
+    "Field Ops deployment schema",
+  ])
+  // Success if command succeeded OR if already exists
+  if (!r.success && !r.stderr.includes("SCHEMA_ALREADY_EXISTS")) {
+    throw new Error(r.stderr)
   }
 }
 
@@ -231,25 +262,19 @@ export async function createVolume(
   schema: string,
   volumeName: string
 ): Promise<void> {
-  try {
-    await runCli(config, [
-      "volumes",
-      "create",
-      catalog,
-      schema,
-      volumeName,
-      "MANAGED",
-      "--comment",
-      "Field Ops data volume",
-    ])
-  } catch (error) {
-    // Ignore "already exists" errors
-    if (
-      error instanceof Error &&
-      !error.message.includes("ALREADY_EXISTS")
-    ) {
-      throw error
-    }
+  const r = await runCli(config, [
+    "volumes",
+    "create",
+    catalog,
+    schema,
+    volumeName,
+    "MANAGED",
+    "--comment",
+    "Field Ops data volume",
+  ])
+  // Success if command succeeded OR if already exists
+  if (!r.success && !r.stderr.includes("ALREADY_EXISTS")) {
+    throw new Error(r.stderr)
   }
 }
 
@@ -262,7 +287,7 @@ export async function uploadNotebook(
   workspacePath: string,
   language: "PYTHON" | "SQL" | "SCALA" | "R" = "PYTHON"
 ): Promise<void> {
-  await runCli(config, [
+  const r = await runCli(config, [
     "workspace",
     "import",
     "--file",
@@ -274,6 +299,9 @@ export async function uploadNotebook(
     "--overwrite",
     workspacePath,
   ])
+  if (!r.success) {
+    throw new Error(r.stderr)
+  }
 }
 
 /**
@@ -283,7 +311,10 @@ export async function createWorkspaceDirectory(
   config: DatabricksConnection,
   workspacePath: string
 ): Promise<void> {
-  await runCli(config, ["workspace", "mkdirs", workspacePath])
+  const r = await runCli(config, ["workspace", "mkdirs", workspacePath])
+  if (!r.success) {
+    throw new Error(r.stderr)
+  }
 }
 
 /**
@@ -293,15 +324,9 @@ export async function deleteWorkspaceDirectory(
   config: DatabricksConnection,
   workspacePath: string
 ): Promise<void> {
-  try {
-    await runCli(config, ["workspace", "delete", "--recursive", workspacePath])
-  } catch (error) {
-    // Ignore "not found" errors
-    if (
-      error instanceof Error &&
-      !error.message.includes("RESOURCE_DOES_NOT_EXIST")
-    ) {
-      throw error
-    }
+  const r = await runCli(config, ["workspace", "delete", "--recursive", workspacePath])
+  // Success if command succeeded OR if resource doesn't exist
+  if (!r.success && r.errorCategory !== "resourceNotFound" && !r.stderr.includes("RESOURCE_DOES_NOT_EXIST")) {
+    throw new Error(r.stderr)
   }
 }
