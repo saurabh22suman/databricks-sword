@@ -15,13 +15,9 @@ import type {
     Industry,
 } from "../field-ops/types"
 import {
-    createSchema,
-    createVolume,
-    createWorkspaceDirectory,
     deleteWorkspaceDirectory,
     dropSchema,
-    uploadFile,
-    uploadNotebook,
+    runCli,
 } from "./cli"
 
 async function assertRequiredAssets(
@@ -129,84 +125,43 @@ export async function generateBundle(
 }
 
 /**
- * Deploy a generated bundle to Databricks.
- * Creates schemas, volumes, uploads data files and notebooks.
+ * Deploy a generated bundle to Databricks using DAB CLI.
+ * Runs `databricks bundle deploy` and optionally starts DLT pipelines.
  */
 export async function deployBundle(
   bundlePath: string,
+  industry: Industry,
   config: DatabricksConnection
 ): Promise<DeploymentResult> {
-  try {
-    const schemaPrefix = path.basename(bundlePath)
-    console.log(`[Deploy] Starting deployment for ${schemaPrefix}`)
+  const schemaPrefix = path.basename(bundlePath)
 
-    const schemas = ["bronze", "silver", "gold"]
-    for (const schema of schemas) {
-      const fullSchemaName = `${schemaPrefix}_${schema}`
-      console.log(`[Deploy] Creating schema: ${fullSchemaName}`)
-      await createSchema(config, config.catalog, fullSchemaName)
-    }
-
-    const bronzeSchema = `${schemaPrefix}_bronze`
-    const volumeName = "raw_data"
-    console.log(`[Deploy] Creating volume: ${bronzeSchema}.${volumeName}`)
-    await createVolume(config, config.catalog, bronzeSchema, volumeName)
-
-    const localDataDir = path.join(bundlePath, "data")
-    const dataFiles = await fs.readdir(localDataDir)
-    for (const file of dataFiles) {
-      const localFilePath = path.join(localDataDir, file)
-      const volumePath = `/Volumes/${config.catalog}/${bronzeSchema}/${volumeName}/${file}`
-      console.log(`[Deploy] Uploading data file: ${file}`)
-      await uploadFile(config, localFilePath, volumePath)
-      console.log(`[Deploy] Successfully uploaded: ${file}`)
-    }
-
-    const workspaceDir = `/Workspace/Shared/field-ops/${schemaPrefix}`
-    console.log(`[Deploy] Creating workspace directory: ${workspaceDir}`)
-    await createWorkspaceDirectory(config, workspaceDir)
-
-    const localNotebooksDir = path.join(bundlePath, "notebooks")
-    const notebooks = await fs.readdir(localNotebooksDir)
-    for (const notebook of notebooks) {
-      const localNotebookPath = path.join(localNotebooksDir, notebook)
-      const notebookName = notebook.replace(/\.(py|sql|scala|r)$/i, "")
-      const language = getNotebookLanguage(notebook)
-      const workspacePath = `${workspaceDir}/${notebookName}`
-      console.log(`[Deploy] Uploading notebook: ${notebookName}`)
-      await uploadNotebook(config, localNotebookPath, workspacePath, language)
-      console.log(`[Deploy] Successfully uploaded notebook: ${notebookName}`)
-    }
-
-    console.log(`[Deploy] Deployment complete for ${schemaPrefix}`)
-    return {
-      success: true,
-      bundlePath,
-    }
-  } catch (error) {
-    console.error(`[Deploy] Deployment failed:`, error)
-    return {
-      success: false,
-      errorMessage: error instanceof Error ? error.message : "Deployment failed",
-    }
+  const deployResult = await runCli(
+    config,
+    [
+      "bundle", "deploy",
+      "--target", "dev",
+      "--var", `catalog=${config.catalog}`,
+      "--var", `schema_prefix=${schemaPrefix}`,
+    ],
+    { cwd: bundlePath, timeoutMs: 300_000 }
+  )
+  if (!deployResult.success) {
+    return { success: false, errorMessage: deployResult.stderr }
   }
-}
 
-/**
- * Get notebook language from file extension.
- */
-function getNotebookLanguage(filename: string): "PYTHON" | "SQL" | "SCALA" | "R" {
-  const ext = path.extname(filename).toLowerCase()
-  switch (ext) {
-    case ".sql":
-      return "SQL"
-    case ".scala":
-      return "SCALA"
-    case ".r":
-      return "R"
-    default:
-      return "PYTHON"
+  if (industry === "manufacturing") {
+    const startResult = await runCli(
+      config,
+      ["bundle", "run", "manufacturing_quality"],
+      { cwd: bundlePath, timeoutMs: 60_000 }
+    )
+    if (!startResult.success) {
+      return { success: false, errorMessage: startResult.stderr || "DLT pipeline start failed" }
+    }
+    // We do NOT wait for the pipeline to complete. It runs in the background.
   }
+
+  return { success: true, bundlePath }
 }
 
 /**

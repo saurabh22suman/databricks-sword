@@ -437,7 +437,7 @@ export async function startDeployment(
 
   try {
     const { result, retries } = await withRetry(3, DEPLOY_RETRY_DELAYS_MS, async () => {
-      const deployResult = await deployBundle(bundlePath, config)
+      const deployResult = await deployBundle(bundlePath, industry, config)
       if (!deployResult.success) {
         throw new Error(deployResult.errorMessage || "Deployment failed")
       }

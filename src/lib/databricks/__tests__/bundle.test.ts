@@ -10,11 +10,13 @@
 
 import fs from "fs/promises"
 import path from "path"
-import { afterEach, beforeEach, describe, expect, it } from "vitest"
+import { afterEach, beforeEach, describe, expect, it, vi } from "vitest"
 import yaml from "js-yaml"
 
 import { generateBundle } from "../bundle"
 import type { DatabricksConnection, Industry } from "../../field-ops/types"
+import { _resetRunCliExecutor, _setRunCliExecutor } from "../cli"
+import type { RunCliExecutor } from "../cli"
 
 const TEST_CATALOG = "test_catalog_xyz"
 const TEST_USER_ID = "test_user_abc12345"
@@ -203,5 +205,79 @@ describe("generateBundle - manufacturing yml overlay", () => {
     const raw = await fs.readFile(ymlPath, "utf-8")
     const parsed = yaml.load(raw) as { bundle: { name: string } }
     expect(parsed.bundle.name).toBe("field-ops-manufacturing")
+  })
+})
+
+describe("deployBundle - DAB CLI calls", () => {
+  let bundlePath: string
+  let mockExecutor: ReturnType<typeof vi.fn<RunCliExecutor>>
+
+  beforeEach(async () => {
+    bundlePath = await generateBundle(industry, TEST_USER_ID, config)
+    mockExecutor = vi.fn<RunCliExecutor>()
+    mockExecutor.mockResolvedValue({ stdout: "", stderr: "" })
+    _setRunCliExecutor(mockExecutor)
+  })
+
+  afterEach(async () => {
+    if (bundlePath) await fs.rm(bundlePath, { recursive: true, force: true })
+    _resetRunCliExecutor()
+    vi.restoreAllMocks()
+  })
+
+  it("calls databricks bundle deploy --target dev with the right --var flags", async () => {
+    const { deployBundle } = await import("../bundle")
+    const r = await deployBundle(bundlePath, industry, config)
+    expect(r.success).toBe(true)
+
+    const callArgs = mockExecutor.mock.calls[0]
+    expect(callArgs[0]).toBe("databricks")
+    expect(callArgs[1]).toContain("bundle")
+    expect(callArgs[1]).toContain("deploy")
+    expect(callArgs[1]).toContain("--target")
+    expect(callArgs[1]).toContain("dev")
+    // --var flags are passed as separate args: ["--var", "catalog=...", "--var", "schema_prefix=..."]
+    const varIdx = callArgs[1].indexOf("--var")
+    expect(varIdx).toBeGreaterThan(-1)
+    expect(callArgs[1][varIdx + 1]).toBe(`catalog=${TEST_CATALOG}`)
+    expect(callArgs[1][varIdx + 2]).toBe("--var")
+    expect(callArgs[1][varIdx + 3]).toMatch(/^schema_prefix=.+/)
+  })
+
+  it("passes bundlePath as cwd", async () => {
+    const { deployBundle } = await import("../bundle")
+    await deployBundle(bundlePath, industry, config)
+    const callOptions = mockExecutor.mock.calls[0][2] as { cwd?: string }
+    expect(callOptions.cwd).toBe(bundlePath)
+  })
+
+  it("uses a 5-minute timeout for bundle deploy", async () => {
+    const { deployBundle } = await import("../bundle")
+    await deployBundle(bundlePath, industry, config)
+    const callOptions = mockExecutor.mock.calls[0][2] as { timeout?: number }
+    expect(callOptions.timeout).toBe(300_000)
+  })
+
+  it("returns failure when bundle deploy fails", async () => {
+    mockExecutor.mockReset()
+    mockExecutor.mockRejectedValueOnce(new Error("bundle deploy failed"))
+    const { deployBundle } = await import("../bundle")
+    const r = await deployBundle(bundlePath, industry, config)
+    expect(r.success).toBe(false)
+    expect(r.errorMessage).toContain("bundle deploy failed")
+  })
+
+  it("for manufacturing, also calls databricks bundle run manufacturing_quality", async () => {
+    const { deployBundle } = await import("../bundle")
+    const mfgPath = await generateBundle("manufacturing" as Industry, TEST_USER_ID, config)
+    try {
+      const r = await deployBundle(mfgPath, "manufacturing" as Industry, config)
+      expect(r.success).toBe(true)
+      const allCalls = mockExecutor.mock.calls
+      const runCall = allCalls.find((c) => c[1].includes("run") && c[1].includes("manufacturing_quality"))
+      expect(runCall).toBeDefined()
+    } finally {
+      await fs.rm(mfgPath, { recursive: true, force: true })
+    }
   })
 })
