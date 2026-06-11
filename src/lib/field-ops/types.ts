@@ -132,7 +132,7 @@ export type IndustryConfig = {
  * Bundle deployment result.
  */
 export type CleanupFailure = {
-  resourceType: "schema" | "workspace_dir" | "local_bundle"
+  resourceType: "schema" | "workspace_dir" | "local_bundle" | "bundle"
   resourceName: string
   errorMessage: string
 }

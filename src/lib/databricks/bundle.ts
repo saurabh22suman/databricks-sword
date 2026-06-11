@@ -15,8 +15,6 @@ import type {
     Industry,
 } from "../field-ops/types"
 import {
-    deleteWorkspaceDirectory,
-    dropSchema,
     runCli,
 } from "./cli"
 
@@ -166,62 +164,83 @@ export async function deployBundle(
 
 /**
  * Destroy a deployed bundle and clean up all resources.
+ * Uses DAB CLI (databricks bundle destroy) for deployments with databricks.yml.
+ * Falls back to legacy CLI for pre-DAB deployments (no databricks.yml).
  */
 export async function destroyBundle(
   bundlePath: string,
   config: DatabricksConnection
 ): Promise<CleanupResult> {
+  // Detect legacy deployment: no databricks.yml at the bundle root.
+  const ymlPath = path.join(bundlePath, "databricks.yml")
+  const isLegacy = !(await fs.access(ymlPath).then(() => true).catch(() => false))
+  if (isLegacy) {
+    return legacyDestroyBundle(bundlePath, path.basename(bundlePath), config)
+  }
+
   const schemaPrefix = path.basename(bundlePath)
   const failures: CleanupFailure[] = []
 
-  console.log(`[Cleanup] Destroying bundle with schemaPrefix: ${schemaPrefix}`)
-  console.log(`[Cleanup] Catalog: ${config.catalog}, WorkspaceUrl: ${config.workspaceUrl}`)
+  console.log(`[Cleanup] Destroying bundle with DAB CLI: ${schemaPrefix}`)
 
+  const result = await runCli(
+    config,
+    [
+      "bundle", "destroy",
+      "--target", "dev",
+      "--auto-approve",
+      "--purge",
+    ],
+    { cwd: bundlePath, timeoutMs: 180_000 }
+  )
+  if (!result.success) {
+    failures.push({
+      resourceType: "bundle",
+      resourceName: bundlePath,
+      errorMessage: result.stderr,
+    })
+  }
+
+  await fs.rm(bundlePath, { recursive: true, force: true }).catch(() => {})
+
+  return { success: failures.length === 0, failures }
+}
+
+/**
+ * Legacy cleanup for pre-DAB deployments.
+ * Uses raw CLI to delete schemas and workspace directory.
+ * Used for deployments that don't have a databricks.yml file.
+ */
+export async function legacyDestroyBundle(
+  bundlePath: string,
+  schemaPrefix: string,
+  config: DatabricksConnection
+): Promise<CleanupResult> {
+  const failures: CleanupFailure[] = []
   const schemas = ["bronze", "silver", "gold"]
+
+  console.log(`[Cleanup] Legacy destroy for prefix: ${schemaPrefix}`)
+
   for (const schema of schemas) {
-    const fullSchemaName = `${schemaPrefix}_${schema}`
-    try {
-      console.log(`[Cleanup] Dropping schema: ${config.catalog}.${fullSchemaName}`)
-      await dropSchema(config, config.catalog, fullSchemaName)
-      console.log(`[Cleanup] Dropped schema: ${fullSchemaName}`)
-    } catch (error) {
-      const msg = error instanceof Error ? error.message : "Failed to drop schema"
-      console.log(`[Cleanup] Schema drop error for ${fullSchemaName}: ${msg}`)
-      failures.push({
-        resourceType: "schema",
-        resourceName: `${config.catalog}.${fullSchemaName}`,
-        errorMessage: msg,
-      })
+    const fullSchema = `${schemaPrefix}_${schema}`
+    const r = await runCli(
+      config,
+      ["schemas", "delete", `${config.catalog}.${fullSchema}`, "--force"]
+    )
+    if (!r.success && !r.stderr.includes("SCHEMA_DOES_NOT_EXIST") && r.errorCategory !== "resourceNotFound") {
+      failures.push({ resourceType: "schema", resourceName: `${config.catalog}.${fullSchema}`, errorMessage: r.stderr })
     }
   }
 
   const workspaceDir = `/Workspace/Shared/field-ops/${schemaPrefix}`
-  try {
-    console.log(`[Cleanup] Deleting workspace directory: ${workspaceDir}`)
-    await deleteWorkspaceDirectory(config, workspaceDir)
-    console.log(`[Cleanup] Deleted workspace directory: ${workspaceDir}`)
-  } catch (error) {
-    failures.push({
-      resourceType: "workspace_dir",
-      resourceName: workspaceDir,
-      errorMessage: error instanceof Error ? error.message : "Failed to delete workspace directory",
-    })
+  const wd = await runCli(config, ["workspace", "delete", "--recursive", workspaceDir])
+  if (!wd.success && !wd.stderr.includes("RESOURCE_DOES_NOT_EXIST") && wd.errorCategory !== "resourceNotFound") {
+    failures.push({ resourceType: "workspace_dir", resourceName: workspaceDir, errorMessage: wd.stderr })
   }
 
-  try {
-    await fs.rm(bundlePath, { recursive: true, force: true })
-  } catch (error) {
-    failures.push({
-      resourceType: "local_bundle",
-      resourceName: bundlePath,
-      errorMessage: error instanceof Error ? error.message : "Failed to remove local bundle directory",
-    })
-  }
+  await fs.rm(bundlePath, { recursive: true, force: true }).catch(() => {})
 
-  return {
-    success: failures.length === 0,
-    failures,
-  }
+  return { success: failures.length === 0, failures }
 }
 
 /**
