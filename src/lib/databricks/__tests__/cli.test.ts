@@ -1,5 +1,5 @@
 import { afterEach, beforeEach, describe, expect, it, vi } from "vitest"
-import { _resetRunCliExecutor, _setRunCliExecutor, runCli } from "../cli"
+import { _resetRunCliExecutor, _setRunCliExecutor, runCli, pipelineStart, pipelineState } from "../cli"
 import type { RunCliExecutor } from "../cli"
 
 describe("runCli structured result", () => {
@@ -68,5 +68,77 @@ describe("runCli structured result", () => {
       ["bundle", "deploy"],
       expect.objectContaining({ cwd: "/tmp/bundle-1", timeout: 5000 })
     )
+  })
+})
+
+describe("pipelineStart", () => {
+  let mockExecutor: ReturnType<typeof vi.fn<RunCliExecutor>>
+
+  beforeEach(() => {
+    mockExecutor = vi.fn<RunCliExecutor>()
+    _setRunCliExecutor(mockExecutor)
+  })
+
+  afterEach(() => {
+    _resetRunCliExecutor()
+    vi.restoreAllMocks()
+  })
+
+  it("calls databricks pipelines start --pipeline <name>", async () => {
+    mockExecutor.mockResolvedValue({ stdout: "", stderr: "" })
+    await pipelineStart(
+      { workspaceUrl: "https://x", token: "t", warehouseId: "w", catalog: "c" },
+      "manufacturing_quality"
+    )
+    expect(mockExecutor).toHaveBeenCalledWith(
+      "databricks",
+      ["pipelines", "start", "--pipeline", "manufacturing_quality"],
+      expect.any(Object)
+    )
+  })
+
+  it("throws on failure", async () => {
+    mockExecutor.mockRejectedValue(new Error("pipeline not found"))
+    await expect(
+      pipelineStart(
+        { workspaceUrl: "https://x", token: "t", warehouseId: "w", catalog: "c" },
+        "missing"
+      )
+    ).rejects.toThrow("pipeline not found")
+  })
+})
+
+describe("pipelineState", () => {
+  let mockExecutor: ReturnType<typeof vi.fn<RunCliExecutor>>
+
+  beforeEach(() => {
+    mockExecutor = vi.fn<RunCliExecutor>()
+    _setRunCliExecutor(mockExecutor)
+  })
+
+  afterEach(() => {
+    _resetRunCliExecutor()
+    vi.restoreAllMocks()
+  })
+
+  it("returns parsed state from JSON output", async () => {
+    mockExecutor.mockResolvedValue({
+      stdout: JSON.stringify({ state: "RUNNING" }),
+      stderr: "",
+    })
+    const state = await pipelineState(
+      { workspaceUrl: "https://x", token: "t", warehouseId: "w", catalog: "c" },
+      "manufacturing_quality"
+    )
+    expect(state).toBe("RUNNING")
+  })
+
+  it("returns null on failure", async () => {
+    mockExecutor.mockRejectedValue(new Error("not found"))
+    const state = await pipelineState(
+      { workspaceUrl: "https://x", token: "t", warehouseId: "w", catalog: "c" },
+      "missing"
+    )
+    expect(state).toBeNull()
   })
 })

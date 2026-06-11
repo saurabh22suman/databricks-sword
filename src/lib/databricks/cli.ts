@@ -330,3 +330,36 @@ export async function deleteWorkspaceDirectory(
     throw new Error(r.stderr)
   }
 }
+
+/**
+ * Start a DLT pipeline by name using CLI.
+ */
+export async function pipelineStart(
+  config: DatabricksConnection,
+  pipelineName: string
+): Promise<void> {
+  const r = await runCli(config, [
+    "pipelines", "start", "--pipeline", pipelineName,
+  ])
+  if (!r.success) throw new Error(r.stderr)
+}
+
+/**
+ * Get the current state of a DLT pipeline by name using CLI.
+ * Returns the pipeline state (e.g., "RUNNING", "STOPPED") or null if not found/error.
+ */
+export async function pipelineState(
+  config: DatabricksConnection,
+  pipelineName: string
+): Promise<string | null> {
+  const r = await runCli(config, [
+    "pipelines", "get", "--pipeline", pipelineName, "-o", "json",
+  ])
+  if (!r.success) return null
+  try {
+    const parsed = JSON.parse(r.stdout)
+    return parsed.state ?? null
+  } catch {
+    return null
+  }
+}
