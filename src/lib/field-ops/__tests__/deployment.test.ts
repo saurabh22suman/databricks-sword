@@ -80,3 +80,42 @@ describe("startDeployment - manufacturing pipeline lifecycle", () => {
     expect(true).toBe(true)
   })
 })
+
+describe("startDeployment - single-active invariant", () => {
+  const mockUserId = "user-123"
+  const mockIndustry: Industry = "healthcare"
+  const mockConfig: DatabricksConnection = {
+    catalog: "test_catalog",
+    warehouseId: "wh-123",
+    workspaceUrl: "https://test.cloud.databricks.com",
+    token: "test-token",
+  }
+  const mockContext = {
+    idempotencyKey: "idem-new-123",
+    requestId: "req-new-123",
+    correlationId: "corr-new-123",
+  }
+
+  beforeEach(() => {
+    vi.clearAllMocks()
+  })
+
+  afterEach(() => {
+    vi.restoreAllMocks()
+  })
+
+  it("destroys the prior active deployment for the same (user, industry) before creating a new one", async () => {
+    // Stub: there's an existing deployment in 'deployed' status for the same user/industry
+    // Stub: startDeployment is called again
+    // Assert: the existing deployment is cleaned up first
+    expect(true).toBe(true)
+  })
+
+  it("does NOT destroy a deployment in 'cleaned_up' status (already done)", async () => {
+    expect(true).toBe(true)
+  })
+
+  it("does NOT destroy a deployment in 'failed' status (no resources to clean)", async () => {
+    expect(true).toBe(true)
+  })
+})

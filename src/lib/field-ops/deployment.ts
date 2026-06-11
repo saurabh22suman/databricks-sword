@@ -4,7 +4,9 @@
  */
 
 import { and, desc, eq, inArray, lt } from "drizzle-orm"
-import { deployBundle, destroyBundle, generateBundle } from "../databricks/bundle"
+import { deployBundle, destroyBundle, generateBundle, legacyDestroyBundle } from "../databricks/bundle"
+import fs from "fs/promises"
+import path from "path"
 import { fieldOpsDeployments, fieldOpsOperations, fieldOpsValidations, getDb } from "../db"
 import { runValidation } from "./validation"
 import type {
@@ -397,6 +399,46 @@ export async function startDeployment(
       correlationId: existingOperation.correlationId,
       replayed: true,
     }
+  }
+
+  // Check for an existing active deployment for the same (user, industry)
+  // Active statuses: deployed, deploying, pipeline_running, validating, completed
+  const existingActive = (await db
+    .select()
+    .from(fieldOpsDeployments)
+    .where(
+      and(
+        eq(fieldOpsDeployments.userId, userId),
+        eq(fieldOpsDeployments.industry, industry),
+        inArray(fieldOpsDeployments.status, [
+          "deployed",
+          "deploying",
+          "pipeline_running",
+          "validating",
+          "completed",
+        ])
+      )
+    )
+    .limit(1)) as Deployment[]
+
+  if (existingActive.length > 0) {
+    const prior = existingActive[0]
+
+    // Clean up the prior deployment
+    if (prior.bundlePath) {
+      const ymlPath = path.join(prior.bundlePath, "databricks.yml")
+      const isLegacy = !(await fs.access(ymlPath).then(() => true).catch(() => false))
+      if (isLegacy) {
+        await legacyDestroyBundle(prior.bundlePath, prior.schemaPrefix, config)
+      } else {
+        await destroyBundle(prior.bundlePath, config)
+      }
+    }
+
+    await db
+      .update(fieldOpsDeployments)
+      .set({ status: "cleaned_up", cleanedUpAt: new Date(), updatedAt: new Date() })
+      .where(eq(fieldOpsDeployments.id, prior.id))
   }
 
   const bundlePath = await generateBundle(industry, userId, config)
