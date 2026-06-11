@@ -92,11 +92,27 @@ export async function generateBundle(
 
   const targetNotebooksDir = path.join(tempDir, "notebooks")
   await fs.mkdir(targetNotebooksDir, { recursive: true })
+
+  // Substitute deployment-specific placeholders so notebooks are usable
+  // as-is when uploaded to Databricks. Without this, cells like
+  // `catalog = "{catalog}"` would deploy literally and fail with
+  // NO_SUCH_CATALOG_EXCEPTION on first run.
+  const substitutions: Record<string, string> = {
+    "{catalog}": config.catalog,
+    "{schema_prefix}": schemaPrefix,
+  }
+
   for (const notebook of mission.notebooks) {
-    await fs.copyFile(
-      path.join(contentDir, "notebooks", notebook),
-      path.join(targetNotebooksDir, notebook)
-    )
+    const srcPath = path.join(contentDir, "notebooks", notebook)
+    const dstPath = path.join(targetNotebooksDir, notebook)
+    const raw = await fs.readFile(srcPath, "utf-8")
+    let rendered = raw
+    for (const [placeholder, value] of Object.entries(substitutions)) {
+      // split/join is used (not replaceAll) to avoid regex-escape pitfalls
+      // and to support Node versions predating replaceAll.
+      rendered = rendered.split(placeholder).join(value)
+    }
+    await fs.writeFile(dstPath, rendered, "utf-8")
   }
 
   const targetDataDir = path.join(tempDir, "data")
