@@ -5,6 +5,7 @@
 
 import fs from "fs/promises"
 import path from "path"
+import yaml from "js-yaml"
 import { loadFieldOpsContent } from "../field-ops/content"
 import type {
     CleanupFailure,
@@ -73,7 +74,7 @@ export async function generateBundle(
   const tempDir = path.join("/tmp", "dbsword-bundles", schemaPrefix)
   await fs.mkdir(tempDir, { recursive: true })
 
-  const databricksYml = generateDatabricksYml(industry, schemaPrefix, config)
+  const databricksYml = generateDatabricksYml(industry)
   await fs.writeFile(path.join(tempDir, "databricks.yml"), databricksYml)
 
   const contentDir = path.join(process.cwd(), "src", "content", "field-ops", industry)
@@ -269,43 +270,90 @@ export async function destroyBundle(
 }
 
 /**
+ * Build a Databricks Asset Bundle object with DAB variable references.
+ * Only bundle.name is hardcoded with the industry name.
+ */
+function buildDatabricksYmlObject(industry: Industry): Record<string, unknown> {
+  const isManufacturing = industry === "manufacturing"
+
+  const yml: Record<string, unknown> = {
+    bundle: {
+      name: `field-ops-${industry}`,
+      uuid: "${bundle.uuid}",
+    },
+    workspace: {
+      host: "${workspace.host}",
+    },
+    variables: {
+      catalog: {
+        description: "Unity Catalog name",
+      },
+      schema_prefix: {
+        description: "Per-deployment unique prefix",
+      },
+    },
+    resources: {
+      schemas: {
+        bronze: {
+          catalog_name: "${var.catalog}",
+          name: "${var.schema_prefix}_bronze",
+          comment: "Bronze layer — raw data ingestion",
+        },
+        silver: {
+          catalog_name: "${var.catalog}",
+          name: "${var.schema_prefix}_silver",
+          comment: "Silver layer — cleaned and transformed data",
+        },
+        gold: {
+          catalog_name: "${var.catalog}",
+          name: "${var.schema_prefix}_gold",
+          comment: "Gold layer — aggregated business-ready data",
+        },
+      },
+      volumes: {
+        raw_data: {
+          catalog_name: "${var.catalog}",
+          schema_name: "${var.schema_prefix}_bronze",
+          name: "raw_data",
+          volume_type: "MANAGED",
+          comment: "Field Ops data volume",
+        },
+      },
+    },
+    targets: {
+      dev: { mode: "development" },
+    },
+  }
+
+  if (isManufacturing) {
+    const resources = yml.resources as Record<string, Record<string, unknown>>
+    resources.pipelines = {
+      manufacturing_quality: {
+        name: "field-ops-manufacturing-${var.schema_prefix}-quality",
+        catalog: "${var.catalog}",
+        target: "${var.schema_prefix}_bronze",
+        libraries: [
+          { notebook: { path: "notebooks/01_dlt_bronze.py" } },
+          { notebook: { path: "notebooks/02_dlt_silver_spc.py" } },
+          { notebook: { path: "notebooks/03_dlt_gold_quality.py" } },
+        ],
+        configuration: {
+          "bundle.sourcePath": "notebooks",
+        },
+        development: true,
+        photon: false,
+        continuous: false,
+      },
+    }
+  }
+
+  return yml
+}
+
+/**
  * Generate databricks.yml content for a Field Ops mission.
  */
-function generateDatabricksYml(
-  industry: Industry,
-  schemaPrefix: string,
-  config: DatabricksConnection
-): string {
-  return `# Databricks Asset Bundle for Field Ops: ${industry}
-# Generated schema prefix: ${schemaPrefix}
-
-bundle:
-  name: field-ops-${industry}-\${schemaPrefix}
-
-workspace:
-  host: ${config.workspaceUrl}
-
-resources:
-  schemas:
-    bronze:
-      catalog_name: ${config.catalog}
-      name: ${schemaPrefix}_bronze
-      comment: "Bronze layer - raw data ingestion"
-
-    silver:
-      catalog_name: ${config.catalog}
-      name: ${schemaPrefix}_silver
-      comment: "Silver layer - cleaned and transformed data"
-
-    gold:
-      catalog_name: ${config.catalog}
-      name: ${schemaPrefix}_gold
-      comment: "Gold layer - aggregated business-ready data"
-
-targets:
-  dev:
-    mode: development
-    workspace:
-      host: ${config.workspaceUrl}
-`
+function generateDatabricksYml(industry: Industry): string {
+  const obj = buildDatabricksYmlObject(industry)
+  return yaml.dump(obj, { lineWidth: 120, noRefs: true })
 }

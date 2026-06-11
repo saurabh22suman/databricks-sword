@@ -11,6 +11,7 @@
 import fs from "fs/promises"
 import path from "path"
 import { afterEach, beforeEach, describe, expect, it } from "vitest"
+import yaml from "js-yaml"
 
 import { generateBundle } from "../bundle"
 import type { DatabricksConnection, Industry } from "../../field-ops/types"
@@ -122,5 +123,85 @@ describe("generateBundle - placeholder substitution", () => {
       // don't want to break it. Just verify it was copied successfully.
       expect(content.length).toBeGreaterThan(0)
     }
+  })
+})
+
+describe("generateBundle - databricks.yml structure", () => {
+  let bundlePath: string
+
+  beforeEach(async () => {
+    bundlePath = await generateBundle(industry, TEST_USER_ID, config)
+  })
+
+  afterEach(async () => {
+    if (bundlePath) await fs.rm(bundlePath, { recursive: true, force: true })
+  })
+
+  it("writes a databricks.yml that parses as valid YAML", async () => {
+    const ymlPath = path.join(bundlePath, "databricks.yml")
+    const raw = await fs.readFile(ymlPath, "utf-8")
+    const parsed = yaml.load(raw) as Record<string, unknown>
+    expect(parsed.bundle).toBeDefined()
+    expect(parsed.resources).toBeDefined()
+  })
+
+  it("uses DAB variable syntax ${var.catalog} and ${var.schema_prefix} (no JS interpolation)", async () => {
+    const ymlPath = path.join(bundlePath, "databricks.yml")
+    const raw = await fs.readFile(ymlPath, "utf-8")
+    // The actual catalog/schema_prefix values must NOT appear in the yml
+    expect(raw).not.toContain(TEST_CATALOG)
+    expect(raw).not.toContain("fo_gaming")
+    // The DAB variable references must appear
+    expect(raw).toContain("${var.catalog}")
+    expect(raw).toContain("${var.schema_prefix}")
+  })
+
+  it("hardcodes bundle.name with the industry name", async () => {
+    const ymlPath = path.join(bundlePath, "databricks.yml")
+    const raw = await fs.readFile(ymlPath, "utf-8")
+    const parsed = yaml.load(raw) as { bundle: { name: string } }
+    expect(parsed.bundle.name).toBe("field-ops-gaming")
+  })
+
+  it("declares schemas (bronze, silver, gold) using DAB variables", async () => {
+    const ymlPath = path.join(bundlePath, "databricks.yml")
+    const raw = await fs.readFile(ymlPath, "utf-8")
+    const parsed = yaml.load(raw) as { resources: { schemas: Record<string, { catalog_name: string; name: string }> } }
+    expect(parsed.resources.schemas.bronze.name).toBe("${var.schema_prefix}_bronze")
+    expect(parsed.resources.schemas.bronze.catalog_name).toBe("${var.catalog}")
+  })
+
+  it("does NOT include resources.pipelines for plain industries", async () => {
+    const ymlPath = path.join(bundlePath, "databricks.yml")
+    const raw = await fs.readFile(ymlPath, "utf-8")
+    const parsed = yaml.load(raw) as { resources: { pipelines?: unknown } }
+    expect(parsed.resources.pipelines).toBeUndefined()
+  })
+})
+
+describe("generateBundle - manufacturing yml overlay", () => {
+  let bundlePath: string
+
+  beforeEach(async () => {
+    bundlePath = await generateBundle("manufacturing" as Industry, TEST_USER_ID, config)
+  })
+
+  afterEach(async () => {
+    if (bundlePath) await fs.rm(bundlePath, { recursive: true, force: true })
+  })
+
+  it("includes resources.pipelines.manufacturing_quality", async () => {
+    const ymlPath = path.join(bundlePath, "databricks.yml")
+    const raw = await fs.readFile(ymlPath, "utf-8")
+    const parsed = yaml.load(raw) as { resources: { pipelines: Record<string, { name: string; libraries: unknown[] }> } }
+    expect(parsed.resources.pipelines.manufacturing_quality).toBeDefined()
+    expect(parsed.resources.pipelines.manufacturing_quality.libraries.length).toBe(3)
+  })
+
+  it("hardcodes bundle.name as field-ops-manufacturing", async () => {
+    const ymlPath = path.join(bundlePath, "databricks.yml")
+    const raw = await fs.readFile(ymlPath, "utf-8")
+    const parsed = yaml.load(raw) as { bundle: { name: string } }
+    expect(parsed.bundle.name).toBe("field-ops-manufacturing")
   })
 })
