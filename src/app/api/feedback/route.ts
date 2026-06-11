@@ -36,6 +36,15 @@ export async function POST(request: Request): Promise<NextResponse> {
     const smtpFrom = process.env.SMTP_FROM || smtpUser
     const feedbackTo = process.env.FEEDBACK_TO
 
+    const envStatus = {
+      SMTP_HOST: smtpHost ? `${smtpHost.length} chars` : "EMPTY",
+      SMTP_PORT: process.env.SMTP_PORT || "(default 587)",
+      SMTP_USER: smtpUser ? `${smtpUser.length} chars` : "EMPTY",
+      SMTP_PASS: smtpPass ? `${smtpPass.length} chars` : "EMPTY",
+      SMTP_FROM: smtpFrom ? `${smtpFrom.length} chars` : "(default = SMTP_USER)",
+      FEEDBACK_TO: feedbackTo ? `${feedbackTo.length} chars` : "EMPTY",
+    }
+
     const missing = [
       !smtpHost && "SMTP_HOST",
       !smtpUser && "SMTP_USER",
@@ -46,10 +55,10 @@ export async function POST(request: Request): Promise<NextResponse> {
     if (missing.length > 0) {
       console.error(
         `[feedback] SMTP not configured. Missing: ${missing.join(", ")}. ` +
-          `Set these as env vars in Dokploy (Service → Environment) and redeploy.`
+          `Env status: ${JSON.stringify(envStatus)}`
       )
       return NextResponse.json(
-        { error: "Email service not configured", missing },
+        { error: "Email service not configured", missing, envStatus },
         { status: 503 }
       )
     }
