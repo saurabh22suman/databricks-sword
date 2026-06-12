@@ -179,6 +179,16 @@ describe("generateBundle - databricks.yml structure", () => {
     const parsed = yaml.load(raw) as { resources: { pipelines?: unknown } }
     expect(parsed.resources.pipelines).toBeUndefined()
   })
+
+  it("hardcodes workspace.host with the actual workspace URL (DAB does not support ${workspace.host} interpolation)", async () => {
+    const ymlPath = path.join(bundlePath, "databricks.yml")
+    const raw = await fs.readFile(ymlPath, "utf-8")
+    // DAB rejects ${workspace.host} in workspace.host with: "Variable interpolation is not supported for fields that configure authentication at workspace.host"
+    expect(raw).not.toContain("${workspace.host}")
+    // The actual URL from config should be hardcoded
+    const parsed = yaml.load(raw) as { workspace: { host: string } }
+    expect(parsed.workspace.host).toBe(config.workspaceUrl)
+  })
 })
 
 describe("generateBundle - manufacturing yml overlay", () => {

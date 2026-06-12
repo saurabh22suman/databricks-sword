@@ -68,7 +68,7 @@ export async function generateBundle(
   const tempDir = path.join("/tmp", "dbsword-bundles", schemaPrefix)
   await fs.mkdir(tempDir, { recursive: true })
 
-  const databricksYml = generateDatabricksYml(industry)
+  const databricksYml = generateDatabricksYml(industry, config.workspaceUrl)
   await fs.writeFile(path.join(tempDir, "databricks.yml"), databricksYml)
 
   const contentDir = path.join(process.cwd(), "src", "content", "field-ops", industry)
@@ -247,7 +247,7 @@ export async function legacyDestroyBundle(
  * Build a Databricks Asset Bundle object with DAB variable references.
  * Only bundle.name is hardcoded with the industry name.
  */
-function buildDatabricksYmlObject(industry: Industry): Record<string, unknown> {
+function buildDatabricksYmlObject(industry: Industry, workspaceUrl: string): Record<string, unknown> {
   const isManufacturing = industry === "manufacturing"
 
   const yml: Record<string, unknown> = {
@@ -256,7 +256,11 @@ function buildDatabricksYmlObject(industry: Industry): Record<string, unknown> {
       uuid: "${bundle.uuid}",
     },
     workspace: {
-      host: "${workspace.host}",
+      // Hardcode the host at yml generation time. DAB does NOT support
+      // variable interpolation in workspace.host — see error:
+      // "Variable interpolation is not supported for fields that configure
+      //  authentication at workspace.host".
+      host: workspaceUrl,
     },
     variables: {
       catalog: {
@@ -327,7 +331,7 @@ function buildDatabricksYmlObject(industry: Industry): Record<string, unknown> {
 /**
  * Generate databricks.yml content for a Field Ops mission.
  */
-function generateDatabricksYml(industry: Industry): string {
-  const obj = buildDatabricksYmlObject(industry)
+function generateDatabricksYml(industry: Industry, workspaceUrl: string): string {
+  const obj = buildDatabricksYmlObject(industry, workspaceUrl)
   return yaml.dump(obj, { lineWidth: 120, noRefs: true })
 }
