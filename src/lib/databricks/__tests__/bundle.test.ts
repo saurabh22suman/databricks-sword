@@ -147,22 +147,22 @@ describe("generateBundle - databricks.yml structure", () => {
     expect(parsed.resources).toBeDefined()
   })
 
-  it("uses DAB variable syntax ${var.catalog} and ${var.schema_prefix} (no JS interpolation)", async () => {
+  it("uses DAB variable syntax ${var.catalog} and ${var.schema_prefix} in resources (no JS interpolation)", async () => {
     const ymlPath = path.join(bundlePath, "databricks.yml")
     const raw = await fs.readFile(ymlPath, "utf-8")
-    // The actual catalog/schema_prefix values must NOT appear in the yml
+    // The catalog value must NOT be hardcoded — only workspace.host, bundle.name,
+    // and workspace.root_path are hardcoded at yml generation time.
     expect(raw).not.toContain(TEST_CATALOG)
-    expect(raw).not.toContain("fo_gaming")
-    // The DAB variable references must appear
+    // The DAB variable references must appear in resources
     expect(raw).toContain("${var.catalog}")
     expect(raw).toContain("${var.schema_prefix}")
   })
 
-  it("hardcodes bundle.name with the industry name", async () => {
+  it("includes unique bundle.name with the schema prefix", async () => {
     const ymlPath = path.join(bundlePath, "databricks.yml")
     const raw = await fs.readFile(ymlPath, "utf-8")
     const parsed = yaml.load(raw) as { bundle: { name: string } }
-    expect(parsed.bundle.name).toBe("field-ops-gaming")
+    expect(parsed.bundle.name).toMatch(/^field-ops-gaming-fo_gaming_.+_.+$/)
   })
 
   it("declares schemas (bronze, silver, gold) using DAB variables", async () => {
@@ -200,6 +200,16 @@ describe("generateBundle - databricks.yml structure", () => {
     const parsed = yaml.load(raw) as { bundle: { uuid?: string } }
     expect(parsed.bundle.uuid).toBeUndefined()
   })
+
+  it("hardcodes workspace.root_path with /Shared/field-ops/<schemaPrefix>", async () => {
+    const ymlPath = path.join(bundlePath, "databricks.yml")
+    const raw = await fs.readFile(ymlPath, "utf-8")
+    const parsed = yaml.load(raw) as { workspace: { root_path: string } }
+    const schemaPrefix = path.basename(bundlePath)
+    expect(parsed.workspace.root_path).toBe(`/Shared/field-ops/${schemaPrefix}`)
+    // Confirm DAB variable substitution was NOT used (DAB rejects it here)
+    expect(raw).not.toContain("root_path: ${var.")
+  })
 })
 
 describe("generateBundle - manufacturing yml overlay", () => {
@@ -221,11 +231,11 @@ describe("generateBundle - manufacturing yml overlay", () => {
     expect(parsed.resources.pipelines.manufacturing_quality.libraries.length).toBe(3)
   })
 
-  it("hardcodes bundle.name as field-ops-manufacturing", async () => {
+  it("includes unique bundle.name with the schema prefix for manufacturing", async () => {
     const ymlPath = path.join(bundlePath, "databricks.yml")
     const raw = await fs.readFile(ymlPath, "utf-8")
     const parsed = yaml.load(raw) as { bundle: { name: string } }
-    expect(parsed.bundle.name).toBe("field-ops-manufacturing")
+    expect(parsed.bundle.name).toMatch(/^field-ops-manufacturing-fo_manufacturing_.+_.+$/)
   })
 })
 
