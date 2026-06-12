@@ -140,7 +140,8 @@ describe("Field Ops deploy route", () => {
         idempotencyKey: "dep-success",
         requestId: "req-1",
         correlationId: "corr-1",
-      }
+      },
+      { useDab: false }
     )
 
     const body = await response.json()
@@ -149,6 +150,164 @@ describe("Field Ops deploy route", () => {
       correlationId: "corr-1",
       operationId: "op-1",
       replayed: false,
+    })
+  })
+
+  describe("FIELD_OPS_USE_DAB feature flag", () => {
+    it("when flag is false, deploys via the legacy path", async () => {
+      const originalFlag = process.env.FIELD_OPS_USE_DAB
+      process.env.FIELD_OPS_USE_DAB = "false"
+
+      const { authenticateApiRequest } = await import("@/lib/auth/api-auth")
+      const { getUserSandbox } = await import("@/app/api/user/helpers")
+      const { getDb } = await import("@/lib/db")
+      const { decryptPat } = await import("@/lib/databricks")
+      const { startDeployment } = await import("@/lib/field-ops/deployment")
+
+      vi.mocked(authenticateApiRequest).mockResolvedValue({
+        authenticated: true,
+        userId: "user-1",
+      })
+
+      vi.mocked(getUserSandbox).mockResolvedValue({
+        userStats: { totalXp: 5000 },
+      } as never)
+
+      const limit = vi.fn().mockResolvedValue([
+        {
+          workspaceUrl: "https://example.databricks.com/",
+          encryptedPat: "encrypted-pat",
+          warehouseId: "wh-123",
+          catalogName: "analytics",
+        },
+      ])
+      const where = vi.fn().mockReturnValue({ limit })
+      const from = vi.fn().mockReturnValue({ where })
+      const select = vi.fn().mockReturnValue({ from })
+      vi.mocked(getDb).mockReturnValue({ select } as never)
+
+      vi.mocked(decryptPat).mockReturnValue("token")
+      vi.mocked(startDeployment).mockResolvedValue({
+        deployment: {
+          id: "dep-1",
+          industry: "retail",
+          status: "deployed",
+          schemaPrefix: "fo_retail_u1_x",
+        },
+        operationId: "op-1",
+        requestId: "req-1",
+        correlationId: "corr-1",
+        replayed: false,
+      } as never)
+
+      const response = await POST(
+        new Request("http://localhost:3000/api/field-ops/deploy", {
+          method: "POST",
+          headers: {
+            "Idempotency-Key": "dep-legacy",
+            "X-Request-Id": "req-1",
+            "X-Correlation-Id": "corr-1",
+          },
+          body: JSON.stringify({ industry: "retail" }),
+        }) as never
+      )
+
+      expect(response.status).toBe(200)
+      // startDeployment should be called with useDab: false
+      expect(startDeployment).toHaveBeenCalledWith(
+        "user-1",
+        "retail",
+        expect.objectContaining({
+          catalog: "analytics",
+          warehouseId: "wh-123",
+        }),
+        {
+          idempotencyKey: "dep-legacy",
+          requestId: "req-1",
+          correlationId: "corr-1",
+        },
+        { useDab: false }
+      )
+
+      process.env.FIELD_OPS_USE_DAB = originalFlag
+    })
+
+    it("when flag is true, deploys via the DAB path", async () => {
+      const originalFlag = process.env.FIELD_OPS_USE_DAB
+      process.env.FIELD_OPS_USE_DAB = "true"
+
+      const { authenticateApiRequest } = await import("@/lib/auth/api-auth")
+      const { getUserSandbox } = await import("@/app/api/user/helpers")
+      const { getDb } = await import("@/lib/db")
+      const { decryptPat } = await import("@/lib/databricks")
+      const { startDeployment } = await import("@/lib/field-ops/deployment")
+
+      vi.mocked(authenticateApiRequest).mockResolvedValue({
+        authenticated: true,
+        userId: "user-1",
+      })
+
+      vi.mocked(getUserSandbox).mockResolvedValue({
+        userStats: { totalXp: 5000 },
+      } as never)
+
+      const limit = vi.fn().mockResolvedValue([
+        {
+          workspaceUrl: "https://example.databricks.com/",
+          encryptedPat: "encrypted-pat",
+          warehouseId: "wh-123",
+          catalogName: "analytics",
+        },
+      ])
+      const where = vi.fn().mockReturnValue({ limit })
+      const from = vi.fn().mockReturnValue({ where })
+      const select = vi.fn().mockReturnValue({ from })
+      vi.mocked(getDb).mockReturnValue({ select } as never)
+
+      vi.mocked(decryptPat).mockReturnValue("token")
+      vi.mocked(startDeployment).mockResolvedValue({
+        deployment: {
+          id: "dep-1",
+          industry: "retail",
+          status: "deployed",
+          schemaPrefix: "fo_retail_u1_x",
+        },
+        operationId: "op-1",
+        requestId: "req-1",
+        correlationId: "corr-1",
+        replayed: false,
+      } as never)
+
+      const response = await POST(
+        new Request("http://localhost:3000/api/field-ops/deploy", {
+          method: "POST",
+          headers: {
+            "Idempotency-Key": "dep-dab",
+            "X-Request-Id": "req-1",
+            "X-Correlation-Id": "corr-1",
+          },
+          body: JSON.stringify({ industry: "retail" }),
+        }) as never
+      )
+
+      expect(response.status).toBe(200)
+      // startDeployment should be called with useDab: true
+      expect(startDeployment).toHaveBeenCalledWith(
+        "user-1",
+        "retail",
+        expect.objectContaining({
+          catalog: "analytics",
+          warehouseId: "wh-123",
+        }),
+        {
+          idempotencyKey: "dep-dab",
+          requestId: "req-1",
+          correlationId: "corr-1",
+        },
+        { useDab: true }
+      )
+
+      process.env.FIELD_OPS_USE_DAB = originalFlag
     })
   })
 })

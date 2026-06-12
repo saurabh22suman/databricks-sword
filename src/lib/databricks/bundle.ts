@@ -5,6 +5,7 @@
 
 import fs from "fs/promises"
 import path from "path"
+import yaml from "js-yaml"
 import { loadFieldOpsContent } from "../field-ops/content"
 import type {
     CleanupFailure,
@@ -14,13 +15,7 @@ import type {
     Industry,
 } from "../field-ops/types"
 import {
-    createSchema,
-    createVolume,
-    createWorkspaceDirectory,
-    deleteWorkspaceDirectory,
-    dropSchema,
-    uploadFile,
-    uploadNotebook,
+    runCli,
 } from "./cli"
 
 async function assertRequiredAssets(
@@ -73,7 +68,7 @@ export async function generateBundle(
   const tempDir = path.join("/tmp", "dbsword-bundles", schemaPrefix)
   await fs.mkdir(tempDir, { recursive: true })
 
-  const databricksYml = generateDatabricksYml(industry, schemaPrefix, config)
+  const databricksYml = generateDatabricksYml(industry)
   await fs.writeFile(path.join(tempDir, "databricks.yml"), databricksYml)
 
   const contentDir = path.join(process.cwd(), "src", "content", "field-ops", industry)
@@ -128,184 +123,211 @@ export async function generateBundle(
 }
 
 /**
- * Deploy a generated bundle to Databricks.
- * Creates schemas, volumes, uploads data files and notebooks.
+ * Deploy a generated bundle to Databricks using DAB CLI.
+ * Runs `databricks bundle deploy` and optionally starts DLT pipelines.
  */
 export async function deployBundle(
   bundlePath: string,
+  industry: Industry,
   config: DatabricksConnection
 ): Promise<DeploymentResult> {
-  try {
-    const schemaPrefix = path.basename(bundlePath)
-    console.log(`[Deploy] Starting deployment for ${schemaPrefix}`)
+  const schemaPrefix = path.basename(bundlePath)
 
-    const schemas = ["bronze", "silver", "gold"]
-    for (const schema of schemas) {
-      const fullSchemaName = `${schemaPrefix}_${schema}`
-      console.log(`[Deploy] Creating schema: ${fullSchemaName}`)
-      await createSchema(config, config.catalog, fullSchemaName)
-    }
-
-    const bronzeSchema = `${schemaPrefix}_bronze`
-    const volumeName = "raw_data"
-    console.log(`[Deploy] Creating volume: ${bronzeSchema}.${volumeName}`)
-    await createVolume(config, config.catalog, bronzeSchema, volumeName)
-
-    const localDataDir = path.join(bundlePath, "data")
-    const dataFiles = await fs.readdir(localDataDir)
-    for (const file of dataFiles) {
-      const localFilePath = path.join(localDataDir, file)
-      const volumePath = `/Volumes/${config.catalog}/${bronzeSchema}/${volumeName}/${file}`
-      console.log(`[Deploy] Uploading data file: ${file}`)
-      await uploadFile(config, localFilePath, volumePath)
-      console.log(`[Deploy] Successfully uploaded: ${file}`)
-    }
-
-    const workspaceDir = `/Workspace/Shared/field-ops/${schemaPrefix}`
-    console.log(`[Deploy] Creating workspace directory: ${workspaceDir}`)
-    await createWorkspaceDirectory(config, workspaceDir)
-
-    const localNotebooksDir = path.join(bundlePath, "notebooks")
-    const notebooks = await fs.readdir(localNotebooksDir)
-    for (const notebook of notebooks) {
-      const localNotebookPath = path.join(localNotebooksDir, notebook)
-      const notebookName = notebook.replace(/\.(py|sql|scala|r)$/i, "")
-      const language = getNotebookLanguage(notebook)
-      const workspacePath = `${workspaceDir}/${notebookName}`
-      console.log(`[Deploy] Uploading notebook: ${notebookName}`)
-      await uploadNotebook(config, localNotebookPath, workspacePath, language)
-      console.log(`[Deploy] Successfully uploaded notebook: ${notebookName}`)
-    }
-
-    console.log(`[Deploy] Deployment complete for ${schemaPrefix}`)
-    return {
-      success: true,
-      bundlePath,
-    }
-  } catch (error) {
-    console.error(`[Deploy] Deployment failed:`, error)
-    return {
-      success: false,
-      errorMessage: error instanceof Error ? error.message : "Deployment failed",
-    }
+  const deployResult = await runCli(
+    config,
+    [
+      "bundle", "deploy",
+      "--target", "dev",
+      "--var", `catalog=${config.catalog}`,
+      "--var", `schema_prefix=${schemaPrefix}`,
+    ],
+    { cwd: bundlePath, timeoutMs: 300_000 }
+  )
+  if (!deployResult.success) {
+    return { success: false, errorMessage: deployResult.stderr }
   }
-}
 
-/**
- * Get notebook language from file extension.
- */
-function getNotebookLanguage(filename: string): "PYTHON" | "SQL" | "SCALA" | "R" {
-  const ext = path.extname(filename).toLowerCase()
-  switch (ext) {
-    case ".sql":
-      return "SQL"
-    case ".scala":
-      return "SCALA"
-    case ".r":
-      return "R"
-    default:
-      return "PYTHON"
+  if (industry === "manufacturing") {
+    const startResult = await runCli(
+      config,
+      ["bundle", "run", "manufacturing_quality"],
+      { cwd: bundlePath, timeoutMs: 60_000 }
+    )
+    if (!startResult.success) {
+      return { success: false, errorMessage: startResult.stderr || "DLT pipeline start failed" }
+    }
+    // We do NOT wait for the pipeline to complete. It runs in the background.
   }
+
+  return { success: true, bundlePath }
 }
 
 /**
  * Destroy a deployed bundle and clean up all resources.
+ * Uses DAB CLI (databricks bundle destroy) for deployments with databricks.yml.
+ * Falls back to legacy CLI for pre-DAB deployments (no databricks.yml).
  */
 export async function destroyBundle(
   bundlePath: string,
   config: DatabricksConnection
 ): Promise<CleanupResult> {
+  // Detect legacy deployment: no databricks.yml at the bundle root.
+  const ymlPath = path.join(bundlePath, "databricks.yml")
+  const isLegacy = !(await fs.access(ymlPath).then(() => true).catch(() => false))
+  if (isLegacy) {
+    return legacyDestroyBundle(bundlePath, path.basename(bundlePath), config)
+  }
+
   const schemaPrefix = path.basename(bundlePath)
   const failures: CleanupFailure[] = []
 
-  console.log(`[Cleanup] Destroying bundle with schemaPrefix: ${schemaPrefix}`)
-  console.log(`[Cleanup] Catalog: ${config.catalog}, WorkspaceUrl: ${config.workspaceUrl}`)
+  console.log(`[Cleanup] Destroying bundle with DAB CLI: ${schemaPrefix}`)
 
+  const result = await runCli(
+    config,
+    [
+      "bundle", "destroy",
+      "--target", "dev",
+      "--auto-approve",
+      "--purge",
+    ],
+    { cwd: bundlePath, timeoutMs: 180_000 }
+  )
+  if (!result.success) {
+    failures.push({
+      resourceType: "bundle",
+      resourceName: bundlePath,
+      errorMessage: result.stderr,
+    })
+  }
+
+  await fs.rm(bundlePath, { recursive: true, force: true }).catch(() => {})
+
+  return { success: failures.length === 0, failures }
+}
+
+/**
+ * Legacy cleanup for pre-DAB deployments.
+ * Uses raw CLI to delete schemas and workspace directory.
+ * Used for deployments that don't have a databricks.yml file.
+ */
+export async function legacyDestroyBundle(
+  bundlePath: string,
+  schemaPrefix: string,
+  config: DatabricksConnection
+): Promise<CleanupResult> {
+  const failures: CleanupFailure[] = []
   const schemas = ["bronze", "silver", "gold"]
+
+  console.log(`[Cleanup] Legacy destroy for prefix: ${schemaPrefix}`)
+
   for (const schema of schemas) {
-    const fullSchemaName = `${schemaPrefix}_${schema}`
-    try {
-      console.log(`[Cleanup] Dropping schema: ${config.catalog}.${fullSchemaName}`)
-      await dropSchema(config, config.catalog, fullSchemaName)
-      console.log(`[Cleanup] Dropped schema: ${fullSchemaName}`)
-    } catch (error) {
-      const msg = error instanceof Error ? error.message : "Failed to drop schema"
-      console.log(`[Cleanup] Schema drop error for ${fullSchemaName}: ${msg}`)
-      failures.push({
-        resourceType: "schema",
-        resourceName: `${config.catalog}.${fullSchemaName}`,
-        errorMessage: msg,
-      })
+    const fullSchema = `${schemaPrefix}_${schema}`
+    const r = await runCli(
+      config,
+      ["schemas", "delete", `${config.catalog}.${fullSchema}`, "--force"]
+    )
+    if (!r.success && !r.stderr.includes("SCHEMA_DOES_NOT_EXIST") && r.errorCategory !== "resourceNotFound") {
+      failures.push({ resourceType: "schema", resourceName: `${config.catalog}.${fullSchema}`, errorMessage: r.stderr })
     }
   }
 
   const workspaceDir = `/Workspace/Shared/field-ops/${schemaPrefix}`
-  try {
-    console.log(`[Cleanup] Deleting workspace directory: ${workspaceDir}`)
-    await deleteWorkspaceDirectory(config, workspaceDir)
-    console.log(`[Cleanup] Deleted workspace directory: ${workspaceDir}`)
-  } catch (error) {
-    failures.push({
-      resourceType: "workspace_dir",
-      resourceName: workspaceDir,
-      errorMessage: error instanceof Error ? error.message : "Failed to delete workspace directory",
-    })
+  const wd = await runCli(config, ["workspace", "delete", "--recursive", workspaceDir])
+  if (!wd.success && !wd.stderr.includes("RESOURCE_DOES_NOT_EXIST") && wd.errorCategory !== "resourceNotFound") {
+    failures.push({ resourceType: "workspace_dir", resourceName: workspaceDir, errorMessage: wd.stderr })
   }
 
-  try {
-    await fs.rm(bundlePath, { recursive: true, force: true })
-  } catch (error) {
-    failures.push({
-      resourceType: "local_bundle",
-      resourceName: bundlePath,
-      errorMessage: error instanceof Error ? error.message : "Failed to remove local bundle directory",
-    })
+  await fs.rm(bundlePath, { recursive: true, force: true }).catch(() => {})
+
+  return { success: failures.length === 0, failures }
+}
+
+/**
+ * Build a Databricks Asset Bundle object with DAB variable references.
+ * Only bundle.name is hardcoded with the industry name.
+ */
+function buildDatabricksYmlObject(industry: Industry): Record<string, unknown> {
+  const isManufacturing = industry === "manufacturing"
+
+  const yml: Record<string, unknown> = {
+    bundle: {
+      name: `field-ops-${industry}`,
+      uuid: "${bundle.uuid}",
+    },
+    workspace: {
+      host: "${workspace.host}",
+    },
+    variables: {
+      catalog: {
+        description: "Unity Catalog name",
+      },
+      schema_prefix: {
+        description: "Per-deployment unique prefix",
+      },
+    },
+    resources: {
+      schemas: {
+        bronze: {
+          catalog_name: "${var.catalog}",
+          name: "${var.schema_prefix}_bronze",
+          comment: "Bronze layer — raw data ingestion",
+        },
+        silver: {
+          catalog_name: "${var.catalog}",
+          name: "${var.schema_prefix}_silver",
+          comment: "Silver layer — cleaned and transformed data",
+        },
+        gold: {
+          catalog_name: "${var.catalog}",
+          name: "${var.schema_prefix}_gold",
+          comment: "Gold layer — aggregated business-ready data",
+        },
+      },
+      volumes: {
+        raw_data: {
+          catalog_name: "${var.catalog}",
+          schema_name: "${var.schema_prefix}_bronze",
+          name: "raw_data",
+          volume_type: "MANAGED",
+          comment: "Field Ops data volume",
+        },
+      },
+    },
+    targets: {
+      dev: { mode: "development" },
+    },
   }
 
-  return {
-    success: failures.length === 0,
-    failures,
+  if (isManufacturing) {
+    const resources = yml.resources as Record<string, Record<string, unknown>>
+    resources.pipelines = {
+      manufacturing_quality: {
+        name: "field-ops-manufacturing-${var.schema_prefix}-quality",
+        catalog: "${var.catalog}",
+        target: "${var.schema_prefix}_bronze",
+        libraries: [
+          { notebook: { path: "notebooks/01_dlt_bronze.py" } },
+          { notebook: { path: "notebooks/02_dlt_silver_spc.py" } },
+          { notebook: { path: "notebooks/03_dlt_gold_quality.py" } },
+        ],
+        configuration: {
+          "bundle.sourcePath": "notebooks",
+        },
+        development: true,
+        photon: false,
+        continuous: false,
+      },
+    }
   }
+
+  return yml
 }
 
 /**
  * Generate databricks.yml content for a Field Ops mission.
  */
-function generateDatabricksYml(
-  industry: Industry,
-  schemaPrefix: string,
-  config: DatabricksConnection
-): string {
-  return `# Databricks Asset Bundle for Field Ops: ${industry}
-# Generated schema prefix: ${schemaPrefix}
-
-bundle:
-  name: field-ops-${industry}-\${schemaPrefix}
-
-workspace:
-  host: ${config.workspaceUrl}
-
-resources:
-  schemas:
-    bronze:
-      catalog_name: ${config.catalog}
-      name: ${schemaPrefix}_bronze
-      comment: "Bronze layer - raw data ingestion"
-
-    silver:
-      catalog_name: ${config.catalog}
-      name: ${schemaPrefix}_silver
-      comment: "Silver layer - cleaned and transformed data"
-
-    gold:
-      catalog_name: ${config.catalog}
-      name: ${schemaPrefix}_gold
-      comment: "Gold layer - aggregated business-ready data"
-
-targets:
-  dev:
-    mode: development
-    workspace:
-      host: ${config.workspaceUrl}
-`
+function generateDatabricksYml(industry: Industry): string {
+  const obj = buildDatabricksYmlObject(industry)
+  return yaml.dump(obj, { lineWidth: 120, noRefs: true })
 }
