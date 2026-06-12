@@ -189,6 +189,17 @@ describe("generateBundle - databricks.yml structure", () => {
     const parsed = yaml.load(raw) as { workspace: { host: string } }
     expect(parsed.workspace.host).toBe(config.workspaceUrl)
   })
+
+  it("does NOT set bundle.uuid to ${bundle.uuid} (causes cycle: DAB auto-generates uuid, do not redefine it)", async () => {
+    const ymlPath = path.join(bundlePath, "databricks.yml")
+    const raw = await fs.readFile(ymlPath, "utf-8")
+    // DAB errors with: "cycle detected in field resolution: bundle.uuid -> bundle.uuid"
+    // if we set uuid: "${bundle.uuid}" — uuid is auto-generated, never reference it in its own definition.
+    expect(raw).not.toContain('uuid: "${bundle.uuid}"')
+    // The parsed bundle block must not have a uuid key (DAB will auto-generate it)
+    const parsed = yaml.load(raw) as { bundle: { uuid?: string } }
+    expect(parsed.bundle.uuid).toBeUndefined()
+  })
 })
 
 describe("generateBundle - manufacturing yml overlay", () => {
