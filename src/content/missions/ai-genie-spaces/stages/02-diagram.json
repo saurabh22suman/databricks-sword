@@ -1,0 +1,35 @@
+{
+  "instructions": "Build the Genie Space architecture! Arrange components to show how data flows from raw tables through the semantic layer into a natural-language interface.",
+  "components": [
+    { "id": "raw-tables", "label": "Raw Delta Tables", "icon": "database" },
+    { "id": "metric-views", "label": "Metric Views", "icon": "calculator" },
+    { "id": "trusted-assets", "label": "Trusted Assets", "icon": "shield-check" },
+    { "id": "instructions", "label": "Genie Instructions", "icon": "file-text" },
+    { "id": "genie-space", "label": "Genie Space (NL Interface)", "icon": "message-circle" },
+    { "id": "user", "label": "Business User", "icon": "user" }
+  ],
+  "dropZones": [
+    { "id": "zone-1", "label": "Foundation", "position": { "x": 50, "y": 50 } },
+    { "id": "zone-2", "label": "Semantic Definitions", "position": { "x": 240, "y": 50 } },
+    { "id": "zone-3", "label": "Governance Filter", "position": { "x": 430, "y": 50 } },
+    { "id": "zone-4", "label": "Context", "position": { "x": 240, "y": 200 } },
+    { "id": "zone-5", "label": "NL Interface", "position": { "x": 430, "y": 200 } },
+    { "id": "zone-6", "label": "Consumer", "position": { "x": 240, "y": 350 } }
+  ],
+  "correctPlacements": [
+    { "componentId": "raw-tables", "zoneId": "zone-1" },
+    { "componentId": "metric-views", "zoneId": "zone-2" },
+    { "componentId": "trusted-assets", "zoneId": "zone-3" },
+    { "componentId": "instructions", "zoneId": "zone-4" },
+    { "componentId": "genie-space", "zoneId": "zone-5" },
+    { "componentId": "user", "zoneId": "zone-6" }
+  ],
+  "learnings": [
+    "Raw tables are the foundation; without them Genie has nothing to query",
+    "Metric Views define standard business metrics Genie prefers for metric questions",
+    "Trusted Assets whitelist what Genie is allowed to see — the governance layer",
+    "Genie Instructions disambiguate column names and business terms",
+    "The Genie Space is the NL interface where business users type questions",
+    "Users see only data their UC permissions allow, even through Genie"
+  ]
+}
