@@ -1,0 +1,39 @@
+{
+  "instructions": "Build the AI/BI Dashboard architecture! Arrange components to show how datasets feed widgets, and how AI features layer on top.",
+  "components": [
+    { "id": "gold-tables", "label": "Gold Tables / SQL Queries", "icon": "database" },
+    { "id": "datasets", "label": "Dashboard Datasets", "icon": "layers" },
+    { "id": "relationships", "label": "Dataset Relationships", "icon": "git-merge" },
+    { "id": "widgets", "label": "Widgets (Charts, Tables, KPIs)", "icon": "bar-chart" },
+    { "id": "parameters", "label": "Parameters / Filters", "icon": "filter" },
+    { "id": "genie-panel", "label": "Genie Panel (NL Q&A)", "icon": "message-circle" },
+    { "id": "ai-insights", "label": "AI Insights", "icon": "sparkles" }
+  ],
+  "dropZones": [
+    { "id": "zone-1", "label": "Data Source", "position": { "x": 50, "y": 50 } },
+    { "id": "zone-2", "label": "Dashboard Layer", "position": { "x": 240, "y": 50 } },
+    { "id": "zone-3", "label": "Cross-Dataset", "position": { "x": 430, "y": 50 } },
+    { "id": "zone-4", "label": "Visualization", "position": { "x": 240, "y": 200 } },
+    { "id": "zone-5", "label": "User-Controlled", "position": { "x": 50, "y": 200 } },
+    { "id": "zone-6", "label": "AI Q&A", "position": { "x": 430, "y": 200 } },
+    { "id": "zone-7", "label": "AI Summary", "position": { "x": 240, "y": 350 } }
+  ],
+  "correctPlacements": [
+    { "componentId": "gold-tables", "zoneId": "zone-1" },
+    { "componentId": "datasets", "zoneId": "zone-2" },
+    { "componentId": "relationships", "zoneId": "zone-3" },
+    { "componentId": "widgets", "zoneId": "zone-4" },
+    { "componentId": "parameters", "zoneId": "zone-5" },
+    { "componentId": "genie-panel", "zoneId": "zone-6" },
+    { "componentId": "ai-insights", "zoneId": "zone-7" }
+  ],
+  "learnings": [
+    "Gold tables (or SQL queries) are the data foundation for dashboard datasets",
+    "Datasets are the dashboard's typed view of underlying data — bound to widgets",
+    "Dataset Relationships declare semantic joins enabling cross-filtering between widgets",
+    "Widgets are the visualizations: charts, tables, KPIs, text",
+    "Parameters / filters let users slice the data interactively",
+    "The Genie Panel embeds natural-language Q&A directly in the dashboard",
+    "AI Insights auto-generate text summaries of chart patterns"
+  ]
+}
