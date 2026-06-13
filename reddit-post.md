@@ -30,7 +30,7 @@ Then you try to learn Databricks...
 
 **Title:** Why do gamers have all the fun? I created a gamified platform to learn Databricks & Lakehouse
 
-**Subtitle:** 20 missions, 50+ challenges, 8 Field Ops industries, infinite progression from Cadet to Grandmaster
+**Subtitle:** 22 missions, 52 challenges, 9 Field Ops industries, infinite progression from Cadet to Grandmaster
 
 ---
 
@@ -56,11 +56,11 @@ That's why I built this: databricks-sword.com
 
 Here's what you get:
 
-1. **20 Story-Driven Missions** - Learn Delta Lake, PySpark, MLflow through narrative-driven challenges
+1. **22 Story-Driven Missions** - Learn Delta Lake, PySpark, MLflow through narrative-driven challenges
 
 2. **52 Standalone Challenges** - Quickfire practice on specific topics (query optimization, transformations, streaming)
 
-3. **8 Field Ops Industries** - Retail, Healthcare, Fintech, Gaming, Automotive, Manufacturing, Telecom, Agritech
+3. **9 Field Ops Industries** - Retail, Healthcare, Fintech, Gaming, Automotive, Manufacturing, Telecom, Agritech, Medtech Research
    - Each deploys REAL bronze/silver/gold schemas to YOUR workspace
    - Intentionally broken notebooks = learn by debugging
    - Automated validation when you fix them

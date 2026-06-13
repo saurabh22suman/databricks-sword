@@ -3,7 +3,7 @@ import { z } from "zod"
 /**
  * Mission System Types
  * 
- * Types for story-driven missions across 10 industries.
+ * Types for story-driven missions across 9 industries.
  * Each mission follows the full pedagogical loop:
  * Briefing (WHY) → Diagram (WHERE/WHAT) → Code Challenges (HOW) 
  * → Quiz (RECALL) → Debrief (REFLECT)

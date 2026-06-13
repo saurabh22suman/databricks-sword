@@ -1,7 +1,7 @@
 /**
  * Mission Track Definitions
  *
- * Groups the 20 missions into 3 learning tracks:
+ * Groups the 22 missions into 3 learning tracks:
  * - Data Engineering (DE): Core lakehouse, Delta Lake, streaming, orchestration
  * - Machine Learning (ML): MLflow, Feature Store, model serving
  * - BI & Analytics (BI): SQL analytics, dashboards, semantic layer

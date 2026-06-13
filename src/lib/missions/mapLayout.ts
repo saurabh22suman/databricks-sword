@@ -1,7 +1,7 @@
 /**
  * Mission Map Layout Configuration
  *
- * Defines horizontal pipeline positions for all 20 missions and 8 Field Ops
+ * Defines horizontal pipeline positions for all 22 missions and 9 Field Ops
  * industries in a DLT-inspired data-flow diagram. Missions flow left-to-right
  * through 5 zones: Foundation → Core → Specialization → Mastery → Capstone.
  * Field Operations sit as a separate row below the main pipeline.

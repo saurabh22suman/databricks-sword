@@ -32,7 +32,7 @@ export function FieldOperationsPreview({
               FIELD <span className="text-gray-600">OPERATIONS</span>
             </h2>
             <p className="mt-4 text-gray-400 max-w-lg border-l-2 border-gray-700 pl-4 text-sm font-mono">
-              Deploy to real Databricks environments. Fix broken pipelines across 8 industries.
+              Deploy to real Databricks environments. Fix broken pipelines across 9 industries.
             </p>
           </div>
           <Link

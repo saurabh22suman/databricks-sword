@@ -10,7 +10,7 @@ export const metadata: Metadata = {
     template: "%s | Field Operations | Databricks Sword",
     default: "Field Operations | Databricks Sword",
   },
-  description: "Real-world Databricks deployments across 8 industries",
+  description: "Real-world Databricks deployments across 9 industries",
 }
 
 export default function FieldOpsLayout({

@@ -5,7 +5,7 @@
 ## Project Overview
 
 **Databricks Sword** is a gamified learning platform for mastering the Databricks ecosystem. It combines:
-- **Story-driven missions** — Deep learning through realistic industry scenarios (20 missions across 16 industries)
+- **Story-driven missions** — Deep learning through realistic industry scenarios (22 missions across 9 industries)
 - **Open challenge library** — Standalone drills for practice and interview prep (52 challenges)
 - **Spaced repetition** — SM-2 algorithm for long-term concept retention
 

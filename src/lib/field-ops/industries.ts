@@ -1,6 +1,6 @@
 /**
  * Field Operations Industries Configuration
- * Defines metadata and unlock requirements for all 8 industries.
+ * Defines metadata and unlock requirements for all 9 industries.
  */
 
 import type { Industry, IndustryConfig } from "./types"
