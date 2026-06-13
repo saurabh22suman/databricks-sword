@@ -68,3 +68,29 @@ describe("medtech-research content", () => {
     await expect(fs.access(dataPath)).resolves.toBeUndefined()
   })
 })
+
+describe("medtech-research notebooks", () => {
+  const notebooks = [
+    "01_ingest_abstracts.py",
+    "02_chunk_embed.py",
+    "03_vector_index.py",
+    "04_serve_rag_app.py",
+  ]
+  for (const nb of notebooks) {
+    it(`${nb} has broken-notebook markers`, async () => {
+      const fs = require("fs/promises")
+      const path = require("path")
+      const src = await fs.readFile(
+        path.join(
+          process.cwd(),
+          "src/content/field-ops/medtech-research/notebooks",
+          nb
+        ),
+        "utf-8"
+      )
+      expect(src).toMatch(/⚠️\s*BUG/i)
+      expect(src).toMatch(/TO FIX/i)
+      expect(src).toMatch(/MISSION COMPLETE/i)
+    })
+  }
+})
