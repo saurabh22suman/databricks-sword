@@ -201,14 +201,14 @@ describe("generateBundle - databricks.yml structure", () => {
     expect(parsed.bundle.uuid).toBeUndefined()
   })
 
-  it("hardcodes workspace.root_path with ~/<schemaPrefix> (satisfies 'mode: development' uniqueness constraint)", async () => {
+  it("hardcodes workspace.root_path with /Shared/field-ops/<schemaPrefix> (matches UI link target)", async () => {
     const ymlPath = path.join(bundlePath, "databricks.yml")
     const raw = await fs.readFile(ymlPath, "utf-8")
     const parsed = yaml.load(raw) as { workspace: { root_path: string } }
     const schemaPrefix = path.basename(bundlePath)
-    // '~/' satisfies the DAB constraint: root_path must start with '~/' or
-    // contain the current username when using 'mode: development'.
-    expect(parsed.workspace.root_path).toBe(`~/field-ops/${schemaPrefix}`)
+    // This must match src/lib/field-ops/links.ts:34 — the UI links to
+    // /Shared/field-ops/<schemaPrefix>, so the deploy must land there.
+    expect(parsed.workspace.root_path).toBe(`/Shared/field-ops/${schemaPrefix}`)
     // Confirm DAB variable substitution was NOT used (DAB rejects it here)
     expect(raw).not.toContain("root_path: ${var.")
   })

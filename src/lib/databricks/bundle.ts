@@ -272,10 +272,10 @@ function buildDatabricksYmlObject(
       host: workspaceUrl,
       // Hardcode root_path at yml generation time. DAB does NOT support
       // ${var.*} substitution in root_path — only built-ins like ${bundle.name}.
-      // Use ~/ so DAB expands it to /Workspace/Users/<current-user>/ at deploy
-      // time. This satisfies the 'mode: development' constraint that
-      // root_path must start with '~/' or contain the current username.
-      root_path: `~/field-ops/${schemaPrefix}`,
+      // This MUST match the path that src/lib/field-ops/links.ts generates for
+      // the "Open Deployed Notebooks" UI link, so the deployed files appear at
+      // the location users navigate to.
+      root_path: `/Shared/field-ops/${schemaPrefix}`,
     },
     variables: {
       catalog: {
