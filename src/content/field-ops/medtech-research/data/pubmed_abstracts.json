@@ -1,8 +1,1817 @@
 [
   {
-    "pmid": "0000000",
-    "title": "Placeholder",
-    "abstract": "Placeholder.",
-    "year": 2024
+    "pmid": "33000001",
+    "title": "Bispecific T-cell engager in acute lymphoblastic leukemia",
+    "authors": [
+      "Thomas U",
+      "Davis H",
+      "Johnson Z",
+      "Brown M",
+      "Lopez G"
+    ],
+    "abstract": "This retrospective analysis evaluated overall survival as a primary endpoint in oncology clinical trials. OS remains the gold standard though surrogate endpoints show correlation.",
+    "year": 2020,
+    "journal": "Clin Oncol",
+    "keywords": [
+      "bispecific antibody",
+      "CD3",
+      "T-cell engager",
+      "tebentafusp"
+    ]
+  },
+  {
+    "pmid": "33000002",
+    "title": "Brain metastasis management in melanoma",
+    "authors": [
+      "Garcia G",
+      "Moore M",
+      "Jones S"
+    ],
+    "abstract": "This study investigated mechanisms of primary resistance to checkpoint inhibition in melanoma. Loss of beta-2-microglobulin expression was associated with resistance.",
+    "year": 2020,
+    "journal": "Nature Med",
+    "keywords": [
+      "melanoma",
+      "BRAF",
+      "MEK inhibitor",
+      "immunotherapy"
+    ]
+  },
+  {
+    "pmid": "33000003",
+    "title": "BRAF and MEK inhibitor sequencing in melanoma",
+    "authors": [
+      "Smith A",
+      "Taylor U",
+      "Thomas Z"
+    ],
+    "abstract": "This study investigated mechanisms of primary resistance to checkpoint inhibition in melanoma. Loss of beta-2-microglobulin expression was associated with resistance.",
+    "year": 2020,
+    "journal": "Prostate",
+    "keywords": [
+      "melanoma",
+      "BRAF",
+      "MEK inhibitor",
+      "immunotherapy"
+    ]
+  },
+  {
+    "pmid": "33000004",
+    "title": "HRD testing in high-grade serous ovarian cancer",
+    "authors": [
+      "Smith A",
+      "Brown S"
+    ],
+    "abstract": "This retrospective analysis evaluated overall survival as a primary endpoint in oncology clinical trials. OS remains the gold standard though surrogate endpoints show correlation.",
+    "year": 2020,
+    "journal": "Lancet",
+    "keywords": [
+      "ovarian cancer",
+      "BRCA",
+      "PARP inhibitor",
+      "platinum"
+    ]
+  },
+  {
+    "pmid": "33000005",
+    "title": "Circulating tumor DNA for cancer detection",
+    "authors": [
+      "Moore W",
+      "Lopez D",
+      "Williams I"
+    ],
+    "abstract": "This randomized Phase II trial compared two dosing schedules of immunotherapy in advanced lung cancer. The every-2-week schedule showed similar efficacy to every-4-week.",
+    "year": 2020,
+    "journal": "Cancer Cell",
+    "keywords": [
+      "liquid biopsy",
+      "ctDNA",
+      "MRD",
+      "circulating tumor"
+    ]
+  },
+  {
+    "pmid": "33000006",
+    "title": "Microsatellite instability and immunotherapy in colorectal cancer",
+    "authors": [
+      "Anderson T",
+      "Garcia X"
+    ],
+    "abstract": "We conducted a pooled analysis of adjuvant FOLFOX in stage III colon cancer. The 5-year disease-free survival was 63% with oxaliplatin contributing significant benefit.",
+    "year": 2020,
+    "journal": "Radiology",
+    "keywords": [
+      "colorectal cancer",
+      "KRAS",
+      "cetuximab",
+      "FOLFOX"
+    ]
+  },
+  {
+    "pmid": "33000007",
+    "title": "Serial ctDNA monitoring in metastatic colorectal cancer",
+    "authors": [
+      "Martinez L",
+      "Garcia O"
+    ],
+    "abstract": "This retrospective analysis evaluated overall survival as a primary endpoint in oncology clinical trials. OS remains the gold standard though surrogate endpoints show correlation.",
+    "year": 2020,
+    "journal": "Lancet",
+    "keywords": [
+      "liquid biopsy",
+      "ctDNA",
+      "MRD",
+      "circulating tumor"
+    ]
+  },
+  {
+    "pmid": "33000008",
+    "title": "Lu-177-PSMA-617 radioligand therapy in mCRPC",
+    "authors": [
+      "Martinez M",
+      "Martinez G",
+      "Gonzalez Q",
+      "Miller M",
+      "Smith S"
+    ],
+    "abstract": "We conducted a dose-escalation study to determine the recommended Phase II dose of a novel agent in solid tumors. MTD was established with preliminary evidence of efficacy.",
+    "year": 2020,
+    "journal": "J Hepatol",
+    "keywords": [
+      "radioligand",
+      "Lu-177",
+      "PSMA",
+      "radioimmunotherapy"
+    ]
+  },
+  {
+    "pmid": "33000009",
+    "title": "Immunotherapy biomarkers in hepatocellular carcinoma",
+    "authors": [
+      "Garcia G",
+      "Taylor H",
+      "Jackson W",
+      "Garcia Y",
+      "Martinez B"
+    ],
+    "abstract": "This Phase III trial evaluated pembrolizumab plus lenvatinib versus lenvatinib monotherapy in patients with advanced hepatocellular carcinoma. The combination showed improved overall survival (21.2 vs 19.0 months) though results were not statistically significant.",
+    "year": 2020,
+    "journal": "Gastroenterology",
+    "keywords": [
+      "hepatocellular carcinoma",
+      "pembrolizumab",
+      "lenvatinib",
+      "TACE"
+    ]
+  },
+  {
+    "pmid": "33000010",
+    "title": "Abiraterone acetate in metastatic castration-resistant prostate cancer",
+    "authors": [
+      "Garcia H",
+      "Anderson N",
+      "Jones C",
+      "Garcia C"
+    ],
+    "abstract": "We conducted a dose-escalation study to determine the recommended Phase II dose of a novel agent in solid tumors. MTD was established with preliminary evidence of efficacy.",
+    "year": 2020,
+    "journal": "J Natl Cancer Inst",
+    "keywords": [
+      "prostate cancer",
+      "androgen deprivation",
+      "enzalutamide",
+      "abiraterone"
+    ]
+  },
+  {
+    "pmid": "33000011",
+    "title": "PARP inhibitor combination therapy in BRCA-mutant breast cancer",
+    "authors": [
+      "Garcia H",
+      "Brown E"
+    ],
+    "abstract": "We conducted a randomized Phase III trial comparing CDK4/6 inhibitor plus endocrine therapy versus endocrine therapy alone in hormone receptor-positive metastatic breast cancer. The combination significantly improved PFS (27.9 vs 14.0 months, HR 0.58, P<0.001).",
+    "year": 2020,
+    "journal": "Breast Cancer Res",
+    "keywords": [
+      "HER2",
+      "hormone receptor",
+      "trastuzumab",
+      "PARP inhibitor"
+    ]
+  },
+  {
+    "pmid": "33000012",
+    "title": "Adaptive trial design in immunotherapy",
+    "authors": [
+      "Garcia G",
+      "Jackson B",
+      "Taylor Y",
+      "Thomas D",
+      "Brown L"
+    ],
+    "abstract": "This randomized Phase II trial compared two dosing schedules of immunotherapy in advanced lung cancer. The every-2-week schedule showed similar efficacy to every-4-week.",
+    "year": 2020,
+    "journal": "J Natl Cancer Inst",
+    "keywords": [
+      "Phase I",
+      "Phase II",
+      "Phase III",
+      "randomized"
+    ]
+  },
+  {
+    "pmid": "33000013",
+    "title": "Liquid biopsy versus tissue biopsy comparison",
+    "authors": [
+      "Williams C",
+      "Hernandez F",
+      "Martin I"
+    ],
+    "abstract": "This retrospective analysis evaluated overall survival as a primary endpoint in oncology clinical trials. OS remains the gold standard though surrogate endpoints show correlation.",
+    "year": 2020,
+    "journal": "J Natl Cancer Inst",
+    "keywords": [
+      "liquid biopsy",
+      "ctDNA",
+      "MRD",
+      "circulating tumor"
+    ]
+  },
+  {
+    "pmid": "33000014",
+    "title": "Nivolumab plus cabozantinib in advanced renal cell carcinoma",
+    "authors": [
+      "Rodriguez L",
+      "Jones U"
+    ],
+    "abstract": "This retrospective analysis evaluated overall survival as a primary endpoint in oncology clinical trials. OS remains the gold standard though surrogate endpoints show correlation.",
+    "year": 2020,
+    "journal": "Mol Cancer Ther",
+    "keywords": [
+      "renal cell carcinoma",
+      "VEGF",
+      "PD-1",
+      "nivolumab"
+    ]
+  },
+  {
+    "pmid": "33000015",
+    "title": "Polatuzumab vedotin in previously untreated DLBCL",
+    "authors": [
+      "Martinez M",
+      "Garcia W",
+      "Martin G"
+    ],
+    "abstract": "This Phase III trial compared Pola-R-CHP versus R-CHOP in previously untreated DLBCL. The experimental arm showed improved progression-free survival (HR 0.73, P=0.02).",
+    "year": 2020,
+    "journal": "Radiology",
+    "keywords": [
+      "diffuse large B-cell lymphoma",
+      "R-CHOP",
+      "CAR-T",
+      "DLBCL"
+    ]
+  },
+  {
+    "pmid": "33000016",
+    "title": "Risk stratification in newly diagnosed myeloma",
+    "authors": [
+      "Gonzalez Q",
+      "Hernandez C",
+      "Moore X",
+      "Brown X",
+      "Lopez N"
+    ],
+    "abstract": "This Phase III trial evaluated daratumumab-based therapy in transplant-eligible multiple myeloma. The quadruplet regimen significantly improved depth of response and PFS.",
+    "year": 2020,
+    "journal": "JAMA Oncol",
+    "keywords": [
+      "multiple myeloma",
+      "daratumumab",
+      "proteasome",
+      "CAR-T"
+    ]
+  },
+  {
+    "pmid": "33000017",
+    "title": "Bispecific T-cell engager in acute lymphoblastic leukemia",
+    "authors": [
+      "Anderson S",
+      "Brown D",
+      "Miller U",
+      "Rodriguez H",
+      "Jackson G"
+    ],
+    "abstract": "We conducted a dose-escalation study to determine the recommended Phase II dose of a novel agent in solid tumors. MTD was established with preliminary evidence of efficacy.",
+    "year": 2021,
+    "journal": "Prostate",
+    "keywords": [
+      "bispecific antibody",
+      "CD3",
+      "T-cell engager",
+      "tebentafusp"
+    ]
+  },
+  {
+    "pmid": "33000018",
+    "title": "Minimal residual disease detection in solid tumors",
+    "authors": [
+      "Davis J",
+      "Johnson H",
+      "Brown Q",
+      "Lopez J"
+    ],
+    "abstract": "We conducted a dose-escalation study to determine the recommended Phase II dose of a novel agent in solid tumors. MTD was established with preliminary evidence of efficacy.",
+    "year": 2021,
+    "journal": "Mol Cancer Ther",
+    "keywords": [
+      "liquid biopsy",
+      "ctDNA",
+      "MRD",
+      "circulating tumor"
+    ]
+  },
+  {
+    "pmid": "33000019",
+    "title": "Borderline resectable pancreatic cancer: neoadjuvant therapy",
+    "authors": [
+      "Moore X",
+      "Jones Q",
+      "Martinez O"
+    ],
+    "abstract": "This retrospective analysis evaluated overall survival as a primary endpoint in oncology clinical trials. OS remains the gold standard though surrogate endpoints show correlation.",
+    "year": 2021,
+    "journal": "Lancet Oncol",
+    "keywords": [
+      "pancreatic cancer",
+      "gemcitabine",
+      "FOLFIRINOX",
+      "KRAS G12D"
+    ]
+  },
+  {
+    "pmid": "33000020",
+    "title": "Sarcomatoid features in renal cell carcinoma",
+    "authors": [
+      "Taylor V",
+      "Thomas X"
+    ],
+    "abstract": "This retrospective analysis evaluated overall survival as a primary endpoint in oncology clinical trials. OS remains the gold standard though surrogate endpoints show correlation.",
+    "year": 2021,
+    "journal": "Radiology",
+    "keywords": [
+      "renal cell carcinoma",
+      "VEGF",
+      "PD-1",
+      "nivolumab"
+    ]
+  },
+  {
+    "pmid": "33000021",
+    "title": "Transarterial chemoembolization combined with systemic therapy in HCC",
+    "authors": [
+      "Brown F",
+      "Moore G"
+    ],
+    "abstract": "This Phase III trial evaluated pembrolizumab plus lenvatinib versus lenvatinib monotherapy in patients with advanced hepatocellular carcinoma. The combination showed improved overall survival (21.2 vs 19.0 months) though results were not statistically significant.",
+    "year": 2021,
+    "journal": "Mol Cancer Ther",
+    "keywords": [
+      "hepatocellular carcinoma",
+      "pembrolizumab",
+      "lenvatinib",
+      "TACE"
+    ]
+  },
+  {
+    "pmid": "33000022",
+    "title": "Transarterial chemoembolization combined with systemic therapy in HCC",
+    "authors": [
+      "Lopez O",
+      "Williams K"
+    ],
+    "abstract": "This Phase III trial evaluated pembrolizumab plus lenvatinib versus lenvatinib monotherapy in patients with advanced hepatocellular carcinoma. The combination showed improved overall survival (21.2 vs 19.0 months) though results were not statistically significant.",
+    "year": 2021,
+    "journal": "Leukemia",
+    "keywords": [
+      "hepatocellular carcinoma",
+      "pembrolizumab",
+      "lenvatinib",
+      "TACE"
+    ]
+  },
+  {
+    "pmid": "33000023",
+    "title": "FLT3 inhibitors in FLT3-mutant acute myeloid leukemia",
+    "authors": [
+      "Garcia G",
+      "Williams V",
+      "Brown O",
+      "Davis R"
+    ],
+    "abstract": "This Phase III trial evaluated venetoclax plus azacitidine versus azacitidine alone in treatment-naive AML ineligible for intensive chemotherapy. The combination significantly improved overall survival (14.7 vs 9.6 months, P<0.001).",
+    "year": 2021,
+    "journal": "Ann Surg Oncol",
+    "keywords": [
+      "acute myeloid leukemia",
+      "FLT3",
+      "IDH1/2",
+      "venetoclax"
+    ]
+  },
+  {
+    "pmid": "33000024",
+    "title": "First-line immunotherapy in non-small cell lung cancer",
+    "authors": [
+      "Garcia H",
+      "Garcia Z"
+    ],
+    "abstract": "We conducted a randomized Phase III trial of first-line pembrolizumab plus chemotherapy versus chemotherapy alone in metastatic NSCLC. The combination significantly improved overall survival (22.0 vs 10.6 months, P<0.001).",
+    "year": 2021,
+    "journal": "J Clin Oncol",
+    "keywords": [
+      "NSCLC",
+      "EGFR",
+      " immunotherapy",
+      "PD-1"
+    ]
+  },
+  {
+    "pmid": "33000025",
+    "title": "Systemic therapy for sorafenib-refractory HCC",
+    "authors": [
+      "Martinez M",
+      "Gonzalez S",
+      "Miller B"
+    ],
+    "abstract": "We analyzed outcomes of TACE combined with systemic therapy in intermediate-stage HCC. Combination therapy showed improved time to progression compared to TACE alone.",
+    "year": 2021,
+    "journal": "Oncologist",
+    "keywords": [
+      "hepatocellular carcinoma",
+      "pembrolizumab",
+      "lenvatinib",
+      "TACE"
+    ]
+  },
+  {
+    "pmid": "33000026",
+    "title": "Systemic therapy for sorafenib-refractory HCC",
+    "authors": [
+      "Taylor U",
+      "Jackson Z",
+      "Garcia E"
+    ],
+    "abstract": "We analyzed outcomes of TACE combined with systemic therapy in intermediate-stage HCC. Combination therapy showed improved time to progression compared to TACE alone.",
+    "year": 2021,
+    "journal": "Cancer Cell",
+    "keywords": [
+      "hepatocellular carcinoma",
+      "pembrolizumab",
+      "lenvatinib",
+      "TACE"
+    ]
+  },
+  {
+    "pmid": "33000027",
+    "title": "CD20/CD3 bispecific antibodies in lymphoma",
+    "authors": [
+      "Anderson S",
+      "Jones W",
+      "Garcia U",
+      "Martin W",
+      "Wilson G"
+    ],
+    "abstract": "This randomized Phase II trial compared two dosing schedules of immunotherapy in advanced lung cancer. The every-2-week schedule showed similar efficacy to every-4-week.",
+    "year": 2021,
+    "journal": "Cancer Res",
+    "keywords": [
+      "bispecific antibody",
+      "CD3",
+      "T-cell engager",
+      "tebentafusp"
+    ]
+  },
+  {
+    "pmid": "33000028",
+    "title": "Immunotherapy biomarkers in hepatocellular carcinoma",
+    "authors": [
+      "Brown D",
+      "Rodriguez I",
+      "Moore J"
+    ],
+    "abstract": "We analyzed outcomes of TACE combined with systemic therapy in intermediate-stage HCC. Combination therapy showed improved time to progression compared to TACE alone.",
+    "year": 2021,
+    "journal": "J Clin Oncol",
+    "keywords": [
+      "hepatocellular carcinoma",
+      "pembrolizumab",
+      "lenvatinib",
+      "TACE"
+    ]
+  },
+  {
+    "pmid": "33000029",
+    "title": "RAS mutation testing in metastatic colorectal cancer",
+    "authors": [
+      "Jackson X",
+      "Taylor E",
+      "Thomas P",
+      "Brown U"
+    ],
+    "abstract": "This study assessed immunotherapy efficacy in MSI-H metastatic colorectal cancer. The overall response rate was 46% with durable responses in responding patients.",
+    "year": 2021,
+    "journal": "Cancer Cell",
+    "keywords": [
+      "colorectal cancer",
+      "KRAS",
+      "cetuximab",
+      "FOLFOX"
+    ]
+  },
+  {
+    "pmid": "33000030",
+    "title": "Radioligand therapy combination approaches",
+    "authors": [
+      "Hernandez O",
+      "Martin M",
+      "Gonzalez A",
+      "Williams K",
+      "Taylor X"
+    ],
+    "abstract": "We conducted a dose-escalation study to determine the recommended Phase II dose of a novel agent in solid tumors. MTD was established with preliminary evidence of efficacy.",
+    "year": 2021,
+    "journal": "Lung Cancer",
+    "keywords": [
+      "radioligand",
+      "Lu-177",
+      "PSMA",
+      "radioimmunotherapy"
+    ]
+  },
+  {
+    "pmid": "33000031",
+    "title": "PD-L1 inhibitor with chemotherapy in SCLC",
+    "authors": [
+      "Jones G",
+      "Wilson Q"
+    ],
+    "abstract": "This randomized Phase II trial compared two dosing schedules of immunotherapy in advanced lung cancer. The every-2-week schedule showed similar efficacy to every-4-week.",
+    "year": 2021,
+    "journal": "Radiology",
+    "keywords": [
+      "SCLC",
+      "chemotherapy",
+      "platinum",
+      "etoposide"
+    ]
+  },
+  {
+    "pmid": "33000032",
+    "title": "ctDNA for early detection of cancer recurrence",
+    "authors": [
+      "Garcia H",
+      "Martin W"
+    ],
+    "abstract": "We conducted a dose-escalation study to determine the recommended Phase II dose of a novel agent in solid tumors. MTD was established with preliminary evidence of efficacy.",
+    "year": 2021,
+    "journal": "Lancet Oncol",
+    "keywords": [
+      "liquid biopsy",
+      "ctDNA",
+      "MRD",
+      "circulating tumor"
+    ]
+  },
+  {
+    "pmid": "33000033",
+    "title": "Biomarker development in glioblastoma",
+    "authors": [
+      "Hernandez N",
+      "Moore C",
+      "Brown C",
+      "Lopez O",
+      "Smith X"
+    ],
+    "abstract": "This randomized Phase II trial compared two dosing schedules of immunotherapy in advanced lung cancer. The every-2-week schedule showed similar efficacy to every-4-week.",
+    "year": 2022,
+    "journal": "Leukemia",
+    "keywords": [
+      "glioblastoma",
+      "temozolomide",
+      "radiation",
+      "EGFRvIII"
+    ]
+  },
+  {
+    "pmid": "33000034",
+    "title": "CDK4/6 inhibitor efficacy in metastatic breast cancer",
+    "authors": [
+      "Brown E",
+      "Miller E",
+      "Rodriguez D"
+    ],
+    "abstract": "This retrospective analysis evaluated outcomes in patients with HER2-positive breast cancer receiving trastuzumab-based therapy. Among 245 patients, the overall response rate was 62% with a median progression-free survival of 14.2 months.",
+    "year": 2022,
+    "journal": "Gastroenterology",
+    "keywords": [
+      "HER2",
+      "hormone receptor",
+      "trastuzumab",
+      "PARP inhibitor"
+    ]
+  },
+  {
+    "pmid": "33000035",
+    "title": "Minimal residual disease detection in solid tumors",
+    "authors": [
+      "Johnson B",
+      "Brown Y",
+      "Lopez D"
+    ],
+    "abstract": "This randomized Phase II trial compared two dosing schedules of immunotherapy in advanced lung cancer. The every-2-week schedule showed similar efficacy to every-4-week.",
+    "year": 2022,
+    "journal": "J Clin Oncol",
+    "keywords": [
+      "liquid biopsy",
+      "ctDNA",
+      "MRD",
+      "circulating tumor"
+    ]
+  },
+  {
+    "pmid": "33000036",
+    "title": "HRD testing in high-grade serous ovarian cancer",
+    "authors": [
+      "Jones F",
+      "Martinez I"
+    ],
+    "abstract": "This retrospective analysis evaluated overall survival as a primary endpoint in oncology clinical trials. OS remains the gold standard though surrogate endpoints show correlation.",
+    "year": 2022,
+    "journal": "J Natl Cancer Inst",
+    "keywords": [
+      "ovarian cancer",
+      "BRCA",
+      "PARP inhibitor",
+      "platinum"
+    ]
+  },
+  {
+    "pmid": "33000037",
+    "title": "Liquid biopsy versus tissue biopsy comparison",
+    "authors": [
+      "Thomas U",
+      "Gonzalez G",
+      "Smith D"
+    ],
+    "abstract": "This randomized Phase II trial compared two dosing schedules of immunotherapy in advanced lung cancer. The every-2-week schedule showed similar efficacy to every-4-week.",
+    "year": 2022,
+    "journal": "Clin Cancer Res",
+    "keywords": [
+      "liquid biopsy",
+      "ctDNA",
+      "MRD",
+      "circulating tumor"
+    ]
+  },
+  {
+    "pmid": "33000038",
+    "title": "Polatuzumab vedotin in previously untreated DLBCL",
+    "authors": [
+      "Moore W",
+      "Moore G"
+    ],
+    "abstract": "This study evaluated risk factors for early relapse in DLBCL after R-CHOP. MYC rearrangement and IPI were significant predictors of early progression.",
+    "year": 2022,
+    "journal": "Clin Oncol",
+    "keywords": [
+      "diffuse large B-cell lymphoma",
+      "R-CHOP",
+      "CAR-T",
+      "DLBCL"
+    ]
+  },
+  {
+    "pmid": "33000039",
+    "title": "HER2-positive breast cancer: targeted therapy outcomes",
+    "authors": [
+      "Williams C",
+      "Johnson X",
+      "Taylor X"
+    ],
+    "abstract": "We investigated mechanisms of endocrine resistance in hormone receptor-positive breast cancer through genomic analysis of pre-treatment and resistant specimens. ESR1 mutations were detected in 36% of resistant tumors.",
+    "year": 2022,
+    "journal": "JAMA Oncol",
+    "keywords": [
+      "HER2",
+      "hormone receptor",
+      "trastuzumab",
+      "PARP inhibitor"
+    ]
+  },
+  {
+    "pmid": "33000040",
+    "title": "FLT3 inhibitors in FLT3-mutant acute myeloid leukemia",
+    "authors": [
+      "Williams D",
+      "Brown U",
+      "Davis H",
+      "Taylor G"
+    ],
+    "abstract": "We investigated FLT3 inhibitor therapy in FLT3-mutant acute myeloid leukemia. Combined FLT3 inhibitor with standard chemotherapy improved remission rates.",
+    "year": 2022,
+    "journal": "J Hepatol",
+    "keywords": [
+      "acute myeloid leukemia",
+      "FLT3",
+      "IDH1/2",
+      "venetoclax"
+    ]
+  },
+  {
+    "pmid": "33000041",
+    "title": "First-line chemotherapy for extensive-stage SCLC",
+    "authors": [
+      "Garcia H",
+      "Jackson Q",
+      "Gonzalez J",
+      "Wilson M"
+    ],
+    "abstract": "This randomized Phase II trial compared two dosing schedules of immunotherapy in advanced lung cancer. The every-2-week schedule showed similar efficacy to every-4-week.",
+    "year": 2022,
+    "journal": "Clin Oncol",
+    "keywords": [
+      "SCLC",
+      "chemotherapy",
+      "platinum",
+      "etoposide"
+    ]
+  },
+  {
+    "pmid": "33000042",
+    "title": "Maintenance rituximab after R-CHOP in DLBCL",
+    "authors": [
+      "Gonzalez Q",
+      "Miller O"
+    ],
+    "abstract": "This study evaluated risk factors for early relapse in DLBCL after R-CHOP. MYC rearrangement and IPI were significant predictors of early progression.",
+    "year": 2022,
+    "journal": "Gastroenterology",
+    "keywords": [
+      "diffuse large B-cell lymphoma",
+      "R-CHOP",
+      "CAR-T",
+      "DLBCL"
+    ]
+  },
+  {
+    "pmid": "33000043",
+    "title": "Primary resistance to checkpoint inhibition in melanoma",
+    "authors": [
+      "Jackson X",
+      "Garcia V",
+      "Martinez Y",
+      "Wilson A"
+    ],
+    "abstract": "We conducted a retrospective analysis of BRAF/MEK inhibitor sequencing in melanoma. Patients receiving first-line BRAF/MEK inhibition showed improved outcomes compared to immunotherapy first.",
+    "year": 2022,
+    "journal": "Leukemia",
+    "keywords": [
+      "melanoma",
+      "BRAF",
+      "MEK inhibitor",
+      "immunotherapy"
+    ]
+  },
+  {
+    "pmid": "33000044",
+    "title": "PARP inhibitor combination therapy in BRCA-mutant breast cancer",
+    "authors": [
+      "Jones G",
+      "Garcia E"
+    ],
+    "abstract": "This retrospective analysis evaluated outcomes in patients with HER2-positive breast cancer receiving trastuzumab-based therapy. Among 245 patients, the overall response rate was 62% with a median progression-free survival of 14.2 months.",
+    "year": 2022,
+    "journal": "Cancer Res",
+    "keywords": [
+      "HER2",
+      "hormone receptor",
+      "trastuzumab",
+      "PARP inhibitor"
+    ]
+  },
+  {
+    "pmid": "33000045",
+    "title": "Nivolumab plus cabozantinib in advanced renal cell carcinoma",
+    "authors": [
+      "Rodriguez K",
+      "Moore L"
+    ],
+    "abstract": "We conducted a dose-escalation study to determine the recommended Phase II dose of a novel agent in solid tumors. MTD was established with preliminary evidence of efficacy.",
+    "year": 2022,
+    "journal": "J Clin Oncol",
+    "keywords": [
+      "renal cell carcinoma",
+      "VEGF",
+      "PD-1",
+      "nivolumab"
+    ]
+  },
+  {
+    "pmid": "33000046",
+    "title": "Pembrolizumab and lenvatinib in advanced hepatocellular carcinoma",
+    "authors": [
+      "Taylor V",
+      "Thomas O",
+      "Brown R",
+      "Martinez D"
+    ],
+    "abstract": "We analyzed outcomes of TACE combined with systemic therapy in intermediate-stage HCC. Combination therapy showed improved time to progression compared to TACE alone.",
+    "year": 2022,
+    "journal": "Mol Cancer Ther",
+    "keywords": [
+      "hepatocellular carcinoma",
+      "pembrolizumab",
+      "lenvatinib",
+      "TACE"
+    ]
+  },
+  {
+    "pmid": "33000047",
+    "title": "Brain metastases in EGFR-mutant lung cancer",
+    "authors": [
+      "Martin Z",
+      "Gonzalez M",
+      "Williams G",
+      "Taylor N"
+    ],
+    "abstract": "We analyzed brain metastases in EGFR-mutant lung cancer patients treated with osimertinib. The incidence of new brain metastases was significantly reduced compared to first-generation TKIs.",
+    "year": 2022,
+    "journal": "Cancer Cell",
+    "keywords": [
+      "NSCLC",
+      "EGFR",
+      " immunotherapy",
+      "PD-1"
+    ]
+  },
+  {
+    "pmid": "33000048",
+    "title": "IDH1/2 inhibitors in IDH-mutant AML",
+    "authors": [
+      "Wilson S",
+      "Lopez B"
+    ],
+    "abstract": "We investigated FLT3 inhibitor therapy in FLT3-mutant acute myeloid leukemia. Combined FLT3 inhibitor with standard chemotherapy improved remission rates.",
+    "year": 2022,
+    "journal": "Blood Adv",
+    "keywords": [
+      "acute myeloid leukemia",
+      "FLT3",
+      "IDH1/2",
+      "venetoclax"
+    ]
+  },
+  {
+    "pmid": "33000049",
+    "title": "Early relapse in diffuse large B-cell lymphoma",
+    "authors": [
+      "Martin Z",
+      "Taylor E",
+      "Williams R"
+    ],
+    "abstract": "This study evaluated risk factors for early relapse in DLBCL after R-CHOP. MYC rearrangement and IPI were significant predictors of early progression.",
+    "year": 2023,
+    "journal": "Breast Cancer Res",
+    "keywords": [
+      "diffuse large B-cell lymphoma",
+      "R-CHOP",
+      "CAR-T",
+      "DLBCL"
+    ]
+  },
+  {
+    "pmid": "33000050",
+    "title": "KRAS G12D mutation in pancreatic adenocarcinoma",
+    "authors": [
+      "Moore W",
+      "Brown U"
+    ],
+    "abstract": "We conducted a dose-escalation study to determine the recommended Phase II dose of a novel agent in solid tumors. MTD was established with preliminary evidence of efficacy.",
+    "year": 2023,
+    "journal": "Blood Adv",
+    "keywords": [
+      "pancreatic cancer",
+      "gemcitabine",
+      "FOLFIRINOX",
+      "KRAS G12D"
+    ]
+  },
+  {
+    "pmid": "33000051",
+    "title": "Pembrolizumab and lenvatinib in advanced hepatocellular carcinoma",
+    "authors": [
+      "Miller I",
+      "Rodriguez J",
+      "Jackson M",
+      "Hernandez X"
+    ],
+    "abstract": "We analyzed outcomes of TACE combined with systemic therapy in intermediate-stage HCC. Combination therapy showed improved time to progression compared to TACE alone.",
+    "year": 2023,
+    "journal": "Clin Cancer Res",
+    "keywords": [
+      "hepatocellular carcinoma",
+      "pembrolizumab",
+      "lenvatinib",
+      "TACE"
+    ]
+  },
+  {
+    "pmid": "33000052",
+    "title": "Clear cell renal cell carcinoma: pathology and therapy",
+    "authors": [
+      "Brown E",
+      "Lopez P",
+      "Miller U",
+      "Thomas M",
+      "Jackson F"
+    ],
+    "abstract": "We conducted a dose-escalation study to determine the recommended Phase II dose of a novel agent in solid tumors. MTD was established with preliminary evidence of efficacy.",
+    "year": 2023,
+    "journal": "JAMA Oncol",
+    "keywords": [
+      "renal cell carcinoma",
+      "VEGF",
+      "PD-1",
+      "nivolumab"
+    ]
+  },
+  {
+    "pmid": "33000053",
+    "title": "Primary resistance to checkpoint inhibition in melanoma",
+    "authors": [
+      "Martinez M",
+      "Martinez A"
+    ],
+    "abstract": "This Phase III trial evaluated combination immunotherapy with nivolumab plus ipilimumab versus ipilimumab alone in advanced melanoma. The combination significantly improved overall survival (HR 0.55, P<0.001).",
+    "year": 2023,
+    "journal": "Cancer Cell",
+    "keywords": [
+      "melanoma",
+      "BRAF",
+      "MEK inhibitor",
+      "immunotherapy"
+    ]
+  },
+  {
+    "pmid": "33000054",
+    "title": "Microsatellite instability and immunotherapy in colorectal cancer",
+    "authors": [
+      "Gonzalez Q",
+      "Smith M"
+    ],
+    "abstract": "This study assessed immunotherapy efficacy in MSI-H metastatic colorectal cancer. The overall response rate was 46% with durable responses in responding patients.",
+    "year": 2023,
+    "journal": "Cancer Res",
+    "keywords": [
+      "colorectal cancer",
+      "KRAS",
+      "cetuximab",
+      "FOLFOX"
+    ]
+  },
+  {
+    "pmid": "33000055",
+    "title": "Hematologic toxicity management in radioligand therapy",
+    "authors": [
+      "Moore W",
+      "Brown Y",
+      "Jackson B",
+      "Rodriguez Z"
+    ],
+    "abstract": "This randomized Phase II trial compared two dosing schedules of immunotherapy in advanced lung cancer. The every-2-week schedule showed similar efficacy to every-4-week.",
+    "year": 2023,
+    "journal": "Blood",
+    "keywords": [
+      "radioligand",
+      "Lu-177",
+      "PSMA",
+      "radioimmunotherapy"
+    ]
+  },
+  {
+    "pmid": "33000056",
+    "title": "First-line immunotherapy in non-small cell lung cancer",
+    "authors": [
+      "Johnson C",
+      "Taylor C"
+    ],
+    "abstract": "This study evaluated the efficacy of EGFR tyrosine kinase inhibitors in treatment-naive patients with EGFR-mutant NSCLC. The overall response rate was 77% with a median duration of response of 17.5 months.",
+    "year": 2023,
+    "journal": "Lancet",
+    "keywords": [
+      "NSCLC",
+      "EGFR",
+      " immunotherapy",
+      "PD-1"
+    ]
+  },
+  {
+    "pmid": "33000057",
+    "title": "Early relapse in diffuse large B-cell lymphoma",
+    "authors": [
+      "Brown E",
+      "Davis D",
+      "Taylor U",
+      "Hernandez M"
+    ],
+    "abstract": "This Phase III trial compared Pola-R-CHP versus R-CHOP in previously untreated DLBCL. The experimental arm showed improved progression-free survival (HR 0.73, P=0.02).",
+    "year": 2023,
+    "journal": "Blood",
+    "keywords": [
+      "diffuse large B-cell lymphoma",
+      "R-CHOP",
+      "CAR-T",
+      "DLBCL"
+    ]
+  },
+  {
+    "pmid": "33000058",
+    "title": "Long-term outcomes after CAR T-cell therapy",
+    "authors": [
+      "Jackson Y",
+      "Gonzalez D",
+      "Wilson L",
+      "Jones G"
+    ],
+    "abstract": "We conducted a dose-escalation study to determine the recommended Phase II dose of a novel agent in solid tumors. MTD was established with preliminary evidence of efficacy.",
+    "year": 2023,
+    "journal": "Ann Surg Oncol",
+    "keywords": [
+      "CAR-T",
+      "CD19",
+      "BCMA",
+      "cell therapy"
+    ]
+  },
+  {
+    "pmid": "33000059",
+    "title": "Long-term outcomes after CAR T-cell therapy",
+    "authors": [
+      "Miller I",
+      "Smith Z",
+      "Jones R"
+    ],
+    "abstract": "We conducted a dose-escalation study to determine the recommended Phase II dose of a novel agent in solid tumors. MTD was established with preliminary evidence of efficacy.",
+    "year": 2023,
+    "journal": "J Natl Cancer Inst",
+    "keywords": [
+      "CAR-T",
+      "CD19",
+      "BCMA",
+      "cell therapy"
+    ]
+  },
+  {
+    "pmid": "33000060",
+    "title": "R-CHOP versus Pola-R-CHP in diffuse large B-cell lymphoma",
+    "authors": [
+      "Garcia G",
+      "Martinez D",
+      "Wilson L",
+      "Jones M",
+      "Smith L"
+    ],
+    "abstract": "This Phase III trial compared Pola-R-CHP versus R-CHOP in previously untreated DLBCL. The experimental arm showed improved progression-free survival (HR 0.73, P=0.02).",
+    "year": 2023,
+    "journal": "JAMA",
+    "keywords": [
+      "diffuse large B-cell lymphoma",
+      "R-CHOP",
+      "CAR-T",
+      "DLBCL"
+    ]
+  },
+  {
+    "pmid": "33000061",
+    "title": "Hematologic toxicity management in radioligand therapy",
+    "authors": [
+      "Garcia G",
+      "Martin P",
+      "Wilson R"
+    ],
+    "abstract": "This retrospective analysis evaluated overall survival as a primary endpoint in oncology clinical trials. OS remains the gold standard though surrogate endpoints show correlation.",
+    "year": 2023,
+    "journal": "Blood",
+    "keywords": [
+      "radioligand",
+      "Lu-177",
+      "PSMA",
+      "radioimmunotherapy"
+    ]
+  },
+  {
+    "pmid": "33000062",
+    "title": "Neoadjuvant trastuzumab emtansine in early HER2+ breast cancer",
+    "authors": [
+      "Moore X",
+      "Williams X",
+      "Moore N",
+      "Thomas P"
+    ],
+    "abstract": "This retrospective analysis evaluated outcomes in patients with HER2-positive breast cancer receiving trastuzumab-based therapy. Among 245 patients, the overall response rate was 62% with a median progression-free survival of 14.2 months.",
+    "year": 2023,
+    "journal": "Nature",
+    "keywords": [
+      "HER2",
+      "hormone receptor",
+      "trastuzumab",
+      "PARP inhibitor"
+    ]
+  },
+  {
+    "pmid": "33000063",
+    "title": "Dosimetry in radioligand therapy",
+    "authors": [
+      "Thomas U",
+      "Brown H"
+    ],
+    "abstract": "This randomized Phase II trial compared two dosing schedules of immunotherapy in advanced lung cancer. The every-2-week schedule showed similar efficacy to every-4-week.",
+    "year": 2023,
+    "journal": "Nature",
+    "keywords": [
+      "radioligand",
+      "Lu-177",
+      "PSMA",
+      "radioimmunotherapy"
+    ]
+  },
+  {
+    "pmid": "33000064",
+    "title": "Resistance mechanisms to ADCs",
+    "authors": [
+      "Gonzalez Q",
+      "Williams J"
+    ],
+    "abstract": "This retrospective analysis evaluated overall survival as a primary endpoint in oncology clinical trials. OS remains the gold standard though surrogate endpoints show correlation.",
+    "year": 2023,
+    "journal": "NEJM",
+    "keywords": [
+      "ADC",
+      "antibody-drug conjugate",
+      "HER2",
+      "MMAE"
+    ]
+  },
+  {
+    "pmid": "33000065",
+    "title": "PSMA-targeted radioligand therapy in mCRPC",
+    "authors": [
+      "Lopez O",
+      "Martin G"
+    ],
+    "abstract": "This retrospective analysis evaluated overall survival as a primary endpoint in oncology clinical trials. OS remains the gold standard though surrogate endpoints show correlation.",
+    "year": 2024,
+    "journal": "Radiology",
+    "keywords": [
+      "prostate cancer",
+      "androgen deprivation",
+      "enzalutamide",
+      "abiraterone"
+    ]
+  },
+  {
+    "pmid": "33000066",
+    "title": "Atezolizumab plus bevacizumab in HCC: IMbrave150 analysis",
+    "authors": [
+      "Taylor V",
+      "Williams Y"
+    ],
+    "abstract": "We analyzed outcomes of TACE combined with systemic therapy in intermediate-stage HCC. Combination therapy showed improved time to progression compared to TACE alone.",
+    "year": 2024,
+    "journal": "J Natl Cancer Inst",
+    "keywords": [
+      "hepatocellular carcinoma",
+      "pembrolizumab",
+      "lenvatinib",
+      "TACE"
+    ]
+  },
+  {
+    "pmid": "33000067",
+    "title": "Hyperthermic intraperitoneal chemotherapy in ovarian cancer",
+    "authors": [
+      "Brown E",
+      "Lopez Z",
+      "Smith U",
+      "Brown X",
+      "Hernandez A"
+    ],
+    "abstract": "This retrospective analysis evaluated overall survival as a primary endpoint in oncology clinical trials. OS remains the gold standard though surrogate endpoints show correlation.",
+    "year": 2024,
+    "journal": "J Clin Oncol",
+    "keywords": [
+      "ovarian cancer",
+      "BRCA",
+      "PARP inhibitor",
+      "platinum"
+    ]
+  },
+  {
+    "pmid": "33000068",
+    "title": "Long-term outcomes after CAR T-cell therapy",
+    "authors": [
+      "Rodriguez L",
+      "Jackson V",
+      "Hernandez W",
+      "Garcia T",
+      "Moore C"
+    ],
+    "abstract": "We conducted a dose-escalation study to determine the recommended Phase II dose of a novel agent in solid tumors. MTD was established with preliminary evidence of efficacy.",
+    "year": 2024,
+    "journal": "Neuro Oncol",
+    "keywords": [
+      "CAR-T",
+      "CD19",
+      "BCMA",
+      "cell therapy"
+    ]
+  },
+  {
+    "pmid": "33000069",
+    "title": "Trastuzumab deruxtecan in HER2-positive cancers",
+    "authors": [
+      "Lopez O",
+      "Miller R"
+    ],
+    "abstract": "This retrospective analysis evaluated overall survival as a primary endpoint in oncology clinical trials. OS remains the gold standard though surrogate endpoints show correlation.",
+    "year": 2024,
+    "journal": "Lancet Oncol",
+    "keywords": [
+      "ADC",
+      "antibody-drug conjugate",
+      "HER2",
+      "MMAE"
+    ]
+  },
+  {
+    "pmid": "33000070",
+    "title": "RAS mutation testing in metastatic colorectal cancer",
+    "authors": [
+      "Martinez M",
+      "Davis G",
+      "Martinez N"
+    ],
+    "abstract": "This study assessed immunotherapy efficacy in MSI-H metastatic colorectal cancer. The overall response rate was 46% with durable responses in responding patients.",
+    "year": 2024,
+    "journal": "Nature",
+    "keywords": [
+      "colorectal cancer",
+      "KRAS",
+      "cetuximab",
+      "FOLFOX"
+    ]
+  },
+  {
+    "pmid": "33000071",
+    "title": "Adaptive trial design in immunotherapy",
+    "authors": [
+      "Smith B",
+      "Garcia R",
+      "Wilson G"
+    ],
+    "abstract": "We conducted a dose-escalation study to determine the recommended Phase II dose of a novel agent in solid tumors. MTD was established with preliminary evidence of efficacy.",
+    "year": 2024,
+    "journal": "Clin Cancer Res",
+    "keywords": [
+      "Phase I",
+      "Phase II",
+      "Phase III",
+      "randomized"
+    ]
+  },
+  {
+    "pmid": "33000072",
+    "title": "FOLFOX adjuvant therapy in stage III colon cancer",
+    "authors": [
+      "Brown E",
+      "Jackson R",
+      "Rodriguez F",
+      "Miller E",
+      "Martinez A"
+    ],
+    "abstract": "We conducted a pooled analysis of adjuvant FOLFOX in stage III colon cancer. The 5-year disease-free survival was 63% with oxaliplatin contributing significant benefit.",
+    "year": 2024,
+    "journal": "Oncologist",
+    "keywords": [
+      "colorectal cancer",
+      "KRAS",
+      "cetuximab",
+      "FOLFOX"
+    ]
+  },
+  {
+    "pmid": "33000073",
+    "title": "Transarterial chemoembolization combined with systemic therapy in HCC",
+    "authors": [
+      "Taylor U",
+      "Martin W"
+    ],
+    "abstract": "This Phase III trial evaluated pembrolizumab plus lenvatinib versus lenvatinib monotherapy in patients with advanced hepatocellular carcinoma. The combination showed improved overall survival (21.2 vs 19.0 months) though results were not statistically significant.",
+    "year": 2024,
+    "journal": "Blood",
+    "keywords": [
+      "hepatocellular carcinoma",
+      "pembrolizumab",
+      "lenvatinib",
+      "TACE"
+    ]
+  },
+  {
+    "pmid": "33000074",
+    "title": "PD-1 inhibitor combination therapy in advanced NSCLC",
+    "authors": [
+      "Davis J",
+      "Taylor M"
+    ],
+    "abstract": "We analyzed brain metastases in EGFR-mutant lung cancer patients treated with osimertinib. The incidence of new brain metastases was significantly reduced compared to first-generation TKIs.",
+    "year": 2024,
+    "journal": "Ann Oncol",
+    "keywords": [
+      "NSCLC",
+      "EGFR",
+      " immunotherapy",
+      "PD-1"
+    ]
+  },
+  {
+    "pmid": "33000075",
+    "title": "Atezolizumab plus bevacizumab in HCC: IMbrave150 analysis",
+    "authors": [
+      "Gonzalez P",
+      "Wilson U",
+      "Jones M",
+      "Martinez F"
+    ],
+    "abstract": "We analyzed outcomes of TACE combined with systemic therapy in intermediate-stage HCC. Combination therapy showed improved time to progression compared to TACE alone.",
+    "year": 2024,
+    "journal": "Nature",
+    "keywords": [
+      "hepatocellular carcinoma",
+      "pembrolizumab",
+      "lenvatinib",
+      "TACE"
+    ]
+  },
+  {
+    "pmid": "33000076",
+    "title": "Adjuvant anti-PD-1 therapy in resected melanoma",
+    "authors": [
+      "Smith A",
+      "Jones K"
+    ],
+    "abstract": "We conducted a retrospective analysis of BRAF/MEK inhibitor sequencing in melanoma. Patients receiving first-line BRAF/MEK inhibition showed improved outcomes compared to immunotherapy first.",
+    "year": 2024,
+    "journal": "J Clin Oncol",
+    "keywords": [
+      "melanoma",
+      "BRAF",
+      "MEK inhibitor",
+      "immunotherapy"
+    ]
+  },
+  {
+    "pmid": "33000077",
+    "title": "Randomized Phase II trial in lung cancer",
+    "authors": [
+      "Martinez M",
+      "Wilson S"
+    ],
+    "abstract": "We conducted a dose-escalation study to determine the recommended Phase II dose of a novel agent in solid tumors. MTD was established with preliminary evidence of efficacy.",
+    "year": 2024,
+    "journal": "BMJ",
+    "keywords": [
+      "Phase I",
+      "Phase II",
+      "Phase III",
+      "randomized"
+    ]
+  },
+  {
+    "pmid": "33000078",
+    "title": "Prophylactic cranial irradiation in SCLC",
+    "authors": [
+      "Martin Y",
+      "Wilson B",
+      "Smith Z",
+      "Martinez T"
+    ],
+    "abstract": "This randomized Phase II trial compared two dosing schedules of immunotherapy in advanced lung cancer. The every-2-week schedule showed similar efficacy to every-4-week.",
+    "year": 2024,
+    "journal": "Ann Oncol",
+    "keywords": [
+      "SCLC",
+      "chemotherapy",
+      "platinum",
+      "etoposide"
+    ]
+  },
+  {
+    "pmid": "33000079",
+    "title": "FLT3 inhibitors in FLT3-mutant acute myeloid leukemia",
+    "authors": [
+      "Williams C",
+      "Moore O"
+    ],
+    "abstract": "We investigated FLT3 inhibitor therapy in FLT3-mutant acute myeloid leukemia. Combined FLT3 inhibitor with standard chemotherapy improved remission rates.",
+    "year": 2024,
+    "journal": "J Clin Oncol",
+    "keywords": [
+      "acute myeloid leukemia",
+      "FLT3",
+      "IDH1/2",
+      "venetoclax"
+    ]
+  },
+  {
+    "pmid": "33000080",
+    "title": "Combination immunotherapy in advanced melanoma",
+    "authors": [
+      "Brown D",
+      "Martinez U",
+      "Moore M",
+      "Lopez Z"
+    ],
+    "abstract": "This Phase III trial evaluated combination immunotherapy with nivolumab plus ipilimumab versus ipilimumab alone in advanced melanoma. The combination significantly improved overall survival (HR 0.55, P<0.001).",
+    "year": 2024,
+    "journal": "Lung Cancer",
+    "keywords": [
+      "melanoma",
+      "BRAF",
+      "MEK inhibitor",
+      "immunotherapy"
+    ]
+  },
+  {
+    "pmid": "33000081",
+    "title": "CDK4/6 inhibitor efficacy in metastatic breast cancer",
+    "authors": [
+      "Williams D",
+      "Taylor L",
+      "Brown G"
+    ],
+    "abstract": "We investigated mechanisms of endocrine resistance in hormone receptor-positive breast cancer through genomic analysis of pre-treatment and resistant specimens. ESR1 mutations were detected in 36% of resistant tumors.",
+    "year": 2010,
+    "journal": "Cancer Res",
+    "keywords": [
+      "HER2",
+      "hormone receptor",
+      "trastuzumab",
+      "PARP inhibitor"
+    ]
+  },
+  {
+    "pmid": "33000082",
+    "title": "Stroma-targeted therapy in pancreatic ductal adenocarcinoma",
+    "authors": [
+      "Martin Z",
+      "Davis R",
+      "Hernandez A",
+      "Davis Q",
+      "Johnson L"
+    ],
+    "abstract": "We conducted a dose-escalation study to determine the recommended Phase II dose of a novel agent in solid tumors. MTD was established with preliminary evidence of efficacy.",
+    "year": 2010,
+    "journal": "Lancet Oncol",
+    "keywords": [
+      "pancreatic cancer",
+      "gemcitabine",
+      "FOLFIRINOX",
+      "KRAS G12D"
+    ]
+  },
+  {
+    "pmid": "33000083",
+    "title": "Second-line therapy for relapsed SCLC",
+    "authors": [
+      "Williams D",
+      "Anderson L"
+    ],
+    "abstract": "This retrospective analysis evaluated overall survival as a primary endpoint in oncology clinical trials. OS remains the gold standard though surrogate endpoints show correlation.",
+    "year": 2011,
+    "journal": "Cancer Res",
+    "keywords": [
+      "SCLC",
+      "chemotherapy",
+      "platinum",
+      "etoposide"
+    ]
+  },
+  {
+    "pmid": "33000084",
+    "title": "Tumor treating fields with temozolomide in glioblastoma",
+    "authors": [
+      "Lopez P",
+      "Smith R",
+      "Brown X"
+    ],
+    "abstract": "We conducted a dose-escalation study to determine the recommended Phase II dose of a novel agent in solid tumors. MTD was established with preliminary evidence of efficacy.",
+    "year": 2011,
+    "journal": "Prostate",
+    "keywords": [
+      "glioblastoma",
+      "temozolomide",
+      "radiation",
+      "EGFRvIII"
+    ]
+  },
+  {
+    "pmid": "33000085",
+    "title": "Resistance mechanisms to ADCs",
+    "authors": [
+      "Jackson X",
+      "Hernandez N",
+      "Garcia P",
+      "Moore O",
+      "Williams T"
+    ],
+    "abstract": "This retrospective analysis evaluated overall survival as a primary endpoint in oncology clinical trials. OS remains the gold standard though surrogate endpoints show correlation.",
+    "year": 2012,
+    "journal": "JAMA",
+    "keywords": [
+      "ADC",
+      "antibody-drug conjugate",
+      "HER2",
+      "MMAE"
+    ]
+  },
+  {
+    "pmid": "33000086",
+    "title": "Borderline resectable pancreatic cancer: neoadjuvant therapy",
+    "authors": [
+      "Miller H",
+      "Thomas G"
+    ],
+    "abstract": "This randomized Phase II trial compared two dosing schedules of immunotherapy in advanced lung cancer. The every-2-week schedule showed similar efficacy to every-4-week.",
+    "year": 2012,
+    "journal": "Ann Surg Oncol",
+    "keywords": [
+      "pancreatic cancer",
+      "gemcitabine",
+      "FOLFIRINOX",
+      "KRAS G12D"
+    ]
+  },
+  {
+    "pmid": "33000087",
+    "title": "Minimal residual disease detection in solid tumors",
+    "authors": [
+      "Davis J",
+      "Martinez M"
+    ],
+    "abstract": "This retrospective analysis evaluated overall survival as a primary endpoint in oncology clinical trials. OS remains the gold standard though surrogate endpoints show correlation.",
+    "year": 2013,
+    "journal": "Prostate",
+    "keywords": [
+      "liquid biopsy",
+      "ctDNA",
+      "MRD",
+      "circulating tumor"
+    ]
+  },
+  {
+    "pmid": "33000088",
+    "title": "Immunotherapy biomarkers in hepatocellular carcinoma",
+    "authors": [
+      "Garcia G",
+      "Wilson F",
+      "Moore R"
+    ],
+    "abstract": "This study investigated biomarkers of response to immunotherapy in hepatocellular carcinoma. High TMB and specific gene expression signatures were associated with improved outcomes.",
+    "year": 2013,
+    "journal": "Cancer Cell",
+    "keywords": [
+      "hepatocellular carcinoma",
+      "pembrolizumab",
+      "lenvatinib",
+      "TACE"
+    ]
+  },
+  {
+    "pmid": "33000089",
+    "title": "Radiotherapy with ADT in localized prostate cancer",
+    "authors": [
+      "Jackson Y",
+      "Rodriguez A",
+      "Miller N"
+    ],
+    "abstract": "We conducted a dose-escalation study to determine the recommended Phase II dose of a novel agent in solid tumors. MTD was established with preliminary evidence of efficacy.",
+    "year": 2014,
+    "journal": "Neuro Oncol",
+    "keywords": [
+      "prostate cancer",
+      "androgen deprivation",
+      "enzalutamide",
+      "abiraterone"
+    ]
+  },
+  {
+    "pmid": "33000090",
+    "title": "Adjuvant chemotherapy after pancreatic resection",
+    "authors": [
+      "Martin Z",
+      "Wilson U"
+    ],
+    "abstract": "This randomized Phase II trial compared two dosing schedules of immunotherapy in advanced lung cancer. The every-2-week schedule showed similar efficacy to every-4-week.",
+    "year": 2014,
+    "journal": "Lancet Oncol",
+    "keywords": [
+      "pancreatic cancer",
+      "gemcitabine",
+      "FOLFIRINOX",
+      "KRAS G12D"
+    ]
+  },
+  {
+    "pmid": "33000091",
+    "title": "PSMA PET imaging for prostate cancer",
+    "authors": [
+      "Taylor V",
+      "Hernandez W"
+    ],
+    "abstract": "This randomized Phase II trial compared two dosing schedules of immunotherapy in advanced lung cancer. The every-2-week schedule showed similar efficacy to every-4-week.",
+    "year": 2015,
+    "journal": "Clin Cancer Res",
+    "keywords": [
+      "radioligand",
+      "Lu-177",
+      "PSMA",
+      "radioimmunotherapy"
+    ]
+  },
+  {
+    "pmid": "33000092",
+    "title": "ctDNA for early detection of cancer recurrence",
+    "authors": [
+      "Wilson R",
+      "Jones D",
+      "Martinez F"
+    ],
+    "abstract": "We conducted a dose-escalation study to determine the recommended Phase II dose of a novel agent in solid tumors. MTD was established with preliminary evidence of efficacy.",
+    "year": 2015,
+    "journal": "Lung Cancer",
+    "keywords": [
+      "liquid biopsy",
+      "ctDNA",
+      "MRD",
+      "circulating tumor"
+    ]
+  },
+  {
+    "pmid": "33000093",
+    "title": "Hormone receptor-positive breast cancer: endocrine resistance mechanisms",
+    "authors": [
+      "Jones G",
+      "Martinez N"
+    ],
+    "abstract": "We conducted a randomized Phase III trial comparing CDK4/6 inhibitor plus endocrine therapy versus endocrine therapy alone in hormone receptor-positive metastatic breast cancer. The combination significantly improved PFS (27.9 vs 14.0 months, HR 0.58, P<0.001).",
+    "year": 2016,
+    "journal": "BMJ",
+    "keywords": [
+      "HER2",
+      "hormone receptor",
+      "trastuzumab",
+      "PARP inhibitor"
+    ]
+  },
+  {
+    "pmid": "33000094",
+    "title": "Antibody-drug conjugates in triple-negative breast cancer",
+    "authors": [
+      "Wilson R",
+      "Jones G"
+    ],
+    "abstract": "We conducted a dose-escalation study to determine the recommended Phase II dose of a novel agent in solid tumors. MTD was established with preliminary evidence of efficacy.",
+    "year": 2016,
+    "journal": "JAMA",
+    "keywords": [
+      "ADC",
+      "antibody-drug conjugate",
+      "HER2",
+      "MMAE"
+    ]
+  },
+  {
+    "pmid": "33000095",
+    "title": "BCMA CAR T-cell therapy in multiple myeloma",
+    "authors": [
+      "Wilson R",
+      "Smith F",
+      "Martinez E",
+      "Garcia A",
+      "Jones F"
+    ],
+    "abstract": "We conducted a dose-escalation study to determine the recommended Phase II dose of a novel agent in solid tumors. MTD was established with preliminary evidence of efficacy.",
+    "year": 2017,
+    "journal": "JAMA Oncol",
+    "keywords": [
+      "CAR-T",
+      "CD19",
+      "BCMA",
+      "cell therapy"
+    ]
+  },
+  {
+    "pmid": "33000096",
+    "title": "KRAS wild-type colorectal cancer: anti-EGFR therapy outcomes",
+    "authors": [
+      "Moore W",
+      "Thomas G",
+      "Jackson U"
+    ],
+    "abstract": "We conducted a pooled analysis of adjuvant FOLFOX in stage III colon cancer. The 5-year disease-free survival was 63% with oxaliplatin contributing significant benefit.",
+    "year": 2017,
+    "journal": "Mol Cancer Ther",
+    "keywords": [
+      "colorectal cancer",
+      "KRAS",
+      "cetuximab",
+      "FOLFOX"
+    ]
+  },
+  {
+    "pmid": "33000097",
+    "title": "PARP inhibitor maintenance in BRCA-mutant ovarian cancer",
+    "authors": [
+      "Martinez M",
+      "Moore X",
+      "Lopez V",
+      "Brown Y",
+      "Lopez J"
+    ],
+    "abstract": "This retrospective analysis evaluated overall survival as a primary endpoint in oncology clinical trials. OS remains the gold standard though surrogate endpoints show correlation.",
+    "year": 2018,
+    "journal": "Lung Cancer",
+    "keywords": [
+      "ovarian cancer",
+      "BRCA",
+      "PARP inhibitor",
+      "platinum"
+    ]
+  },
+  {
+    "pmid": "33000098",
+    "title": "Second-line therapy for relapsed SCLC",
+    "authors": [
+      "Taylor U",
+      "Brown M"
+    ],
+    "abstract": "We conducted a dose-escalation study to determine the recommended Phase II dose of a novel agent in solid tumors. MTD was established with preliminary evidence of efficacy.",
+    "year": 2018,
+    "journal": "NEJM",
+    "keywords": [
+      "SCLC",
+      "chemotherapy",
+      "platinum",
+      "etoposide"
+    ]
+  },
+  {
+    "pmid": "33000099",
+    "title": "Temozolomide with radiation in newly diagnosed glioblastoma",
+    "authors": [
+      "Davis K",
+      "Hernandez X",
+      "Davis T",
+      "Johnson R"
+    ],
+    "abstract": "This retrospective analysis evaluated overall survival as a primary endpoint in oncology clinical trials. OS remains the gold standard though surrogate endpoints show correlation.",
+    "year": 2019,
+    "journal": "NEJM",
+    "keywords": [
+      "glioblastoma",
+      "temozolomide",
+      "radiation",
+      "EGFRvIII"
+    ]
+  },
+  {
+    "pmid": "33000100",
+    "title": "EGFR tyrosine kinase inhibitors in treatment-naive NSCLC",
+    "authors": [
+      "Anderson S",
+      "Jones I",
+      "Wilson H"
+    ],
+    "abstract": "We conducted a randomized Phase III trial of first-line pembrolizumab plus chemotherapy versus chemotherapy alone in metastatic NSCLC. The combination significantly improved overall survival (22.0 vs 10.6 months, P<0.001).",
+    "year": 2019,
+    "journal": "Blood Adv",
+    "keywords": [
+      "NSCLC",
+      "EGFR",
+      " immunotherapy",
+      "PD-1"
+    ]
   }
 ]
