@@ -306,6 +306,7 @@ const PREREQUISITE_EDGES: Array<[string, string]> = [
   ["sql-analytics-intro", "bi-dashboards"],
   ["advanced-transformations", "advanced-sql-analytics"],
   ["bi-dashboards", "advanced-sql-analytics"],
+  ["bi-dashboards", "ai-bi-dashboards"],
 
   // Ring 2/3 → Ring 3
   ["advanced-transformations", "performance-tuning"],

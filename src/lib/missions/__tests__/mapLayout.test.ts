@@ -54,39 +54,8 @@ describe("ai-bi-dashboards map node", () => {
     expect(node?.zone).toBe("specialization")
   })
 
-  it("has a prerequisite edge from bi-dashboards (via mission JSON)", () => {
-    const missionLookup = new Map<string, Mission>([
-      [
-        "ai-bi-dashboards",
-        {
-          id: "ai-bi-dashboards",
-          title: "AI BI Dashboards",
-          subtitle: "",
-          description: "",
-          industry: "finance",
-          rank: "S",
-          xpRequired: 0,
-          xpReward: 0,
-          estimatedMinutes: 1,
-          primaryFeatures: [],
-          prerequisites: ["bi-dashboards"],
-          databricksEnabled: false,
-          stages: [
-            {
-              id: "s1",
-              title: "Stage 1",
-              type: "briefing",
-              configFile: "stages/01-briefing.json",
-              xpReward: 0,
-              estimatedMinutes: 1,
-            },
-          ],
-          sideQuests: [],
-          achievements: [],
-        },
-      ],
-    ])
-    const edges = getMapEdges(missionLookup)
+  it("has a prerequisite edge from bi-dashboards (fallback path)", () => {
+    const edges = getMapEdges()
     expect(edges.some((e) => e.from === "bi-dashboards" && e.to === "ai-bi-dashboards")).toBe(true)
   })
 })
@@ -259,9 +228,9 @@ describe("mapLayout — pipeline layout", () => {
   })
 
   describe("edges", () => {
-    it("should return 37 prerequisite edges", () => {
+    it("should return 38 prerequisite edges", () => {
       const edges = getMapEdges()
-      expect(edges).toHaveLength(37)
+      expect(edges).toHaveLength(38)
     })
 
     it("all edges should reference valid node IDs", () => {
