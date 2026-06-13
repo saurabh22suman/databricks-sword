@@ -1,0 +1,56 @@
+{
+  "description": "Complete the AI Insights configuration for a revenue dashboard.",
+  "expectedOutput": "When completed correctly, this configuration will:\n1. Select a foundation model approved for Free Edition\n2. Set a refresh cadence matching business hours\n3. Provide context the AI uses to interpret the chart\n4. Constrain the insight to avoid leaking sensitive columns\n5. Surface anomalies only above a meaningful threshold",
+  "codeTemplate": "-- AI Insights configuration for a revenue dashboard widget\n-- AI Insights auto-generate a text summary of the chart's notable patterns\n\nai_insights_config = {\n    # Foundation model used to generate the summary\n    # Free Edition approved: databricks-llama-3.1-8b-instruct\n    'model': '__BLANK_0__',\n\n    # Refresh cadence: regenerate the insight every N hours\n    'refresh_cadence_hours': __BLANK_1__,\n\n    # Plain-English context the AI uses to interpret the chart\n    'context': (\n        'This chart shows net revenue by month. ' +\n        '__BLANK_2__ metrics: gross_revenue minus discount_amount minus returns. ' +\n        'A drop > 10% month-over-month is significant.'\n    ),\n\n    # Column allowlist: only use these columns in the insight\n    'allowed_columns': ['order_date', 'net_revenue', 'region'],\n\n    # Anomaly threshold: only flag if deviation exceeds this %\n    'anomaly_threshold_pct': __BLANK_3__,\n\n    # Output format: 'paragraph' (default) or 'bullets'\n    'format': '__BLANK_4__'\n}",
+  "blanks": [
+    {
+      "id": 0,
+      "options": [
+        "databricks-llama-3.1-8b-instruct",
+        "gpt-4",
+        "claude-opus-4.6",
+        "custom-bert"
+      ],
+      "correctAnswer": "databricks-llama-3.1-8b-instruct"
+    },
+    {
+      "id": 1,
+      "options": ["1", "6", "12", "24"],
+      "correctAnswer": "6"
+    },
+    {
+      "id": 2,
+      "options": [
+        "Net revenue equals",
+        "Total revenue equals",
+        "Sales equals",
+        "Money equals"
+      ],
+      "correctAnswer": "Net revenue equals"
+    },
+    {
+      "id": 3,
+      "options": ["5", "10", "20", "50"],
+      "correctAnswer": "10"
+    },
+    {
+      "id": 4,
+      "options": ["bullets", "paragraph", "json", "markdown"],
+      "correctAnswer": "bullets"
+    }
+  ],
+  "hints": [
+    "Free Edition allows only specific foundation models on Model Serving — pick one of the databricks-llama-* family",
+    "Refreshing insights every 6 hours balances freshness with compute cost",
+    "Net revenue is gross minus discounts minus returns — be explicit so the AI uses the right column",
+    "A 10% threshold catches real anomalies without flagging normal variance",
+    "Bullets are more scannable than paragraphs for chart summaries"
+  ],
+  "learnings": [
+    "AI Insights use Foundation Model Serving under the hood",
+    "Context strings directly influence insight quality",
+    "Column allowlists prevent leaking sensitive data in summaries",
+    "Anomaly thresholds filter out noise",
+    "Format choice affects how readable the summary is"
+  ]
+}
