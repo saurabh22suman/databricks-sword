@@ -46,6 +46,51 @@ describe("ai-genie-spaces map node", () => {
   })
 })
 
+describe("ai-bi-dashboards map node", () => {
+  it("appears in getMissionNodes with the expected position", () => {
+    const nodes = getMissionNodes()
+    const node = nodes.find((n) => n.id === "ai-bi-dashboards")
+    expect(node).toBeDefined()
+    expect(node?.zone).toBe("specialization")
+  })
+
+  it("has a prerequisite edge from bi-dashboards (via mission JSON)", () => {
+    const missionLookup = new Map<string, Mission>([
+      [
+        "ai-bi-dashboards",
+        {
+          id: "ai-bi-dashboards",
+          title: "AI BI Dashboards",
+          subtitle: "",
+          description: "",
+          industry: "finance",
+          rank: "S",
+          xpRequired: 0,
+          xpReward: 0,
+          estimatedMinutes: 1,
+          primaryFeatures: [],
+          prerequisites: ["bi-dashboards"],
+          databricksEnabled: false,
+          stages: [
+            {
+              id: "s1",
+              title: "Stage 1",
+              type: "briefing",
+              configFile: "stages/01-briefing.json",
+              xpReward: 0,
+              estimatedMinutes: 1,
+            },
+          ],
+          sideQuests: [],
+          achievements: [],
+        },
+      ],
+    ])
+    const edges = getMapEdges(missionLookup)
+    expect(edges.some((e) => e.from === "bi-dashboards" && e.to === "ai-bi-dashboards")).toBe(true)
+  })
+})
+
 describe("mapLayout — pipeline layout", () => {
   describe("constants", () => {
     it("should have correct map dimensions", () => {
@@ -106,9 +151,9 @@ describe("mapLayout — pipeline layout", () => {
   })
 
   describe("mission nodes", () => {
-    it("should return exactly 21 mission nodes", () => {
+    it("should return exactly 22 mission nodes", () => {
       const nodes = getMissionNodes()
-      expect(nodes).toHaveLength(21)
+      expect(nodes).toHaveLength(22)
     })
 
     it("all mission nodes should have type 'mission'", () => {
@@ -160,9 +205,9 @@ describe("mapLayout — pipeline layout", () => {
       expect(nodes).toHaveLength(2)
     })
 
-    it("specialization zone should have exactly 11 missions", () => {
+    it("specialization zone should have exactly 12 missions", () => {
       const nodes = getMissionNodes().filter((n) => n.zone === "specialization")
-      expect(nodes).toHaveLength(11)
+      expect(nodes).toHaveLength(12)
     })
 
     it("mastery zone should have exactly 3 missions", () => {
@@ -207,9 +252,9 @@ describe("mapLayout — pipeline layout", () => {
   })
 
   describe("all map nodes", () => {
-    it("should return 29 total nodes (21 missions + 8 field ops)", () => {
+    it("should return 30 total nodes (22 missions + 8 field ops)", () => {
       const nodes = getAllMapNodes()
-      expect(nodes).toHaveLength(29)
+      expect(nodes).toHaveLength(30)
     })
   })
 

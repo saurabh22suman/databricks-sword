@@ -86,11 +86,12 @@ export const MISSION_TRACK_MAP: Record<string, Track> = {
   "mlflow-experiment-tracking": "ml",
   "ml-pipelines-production": "ml",
 
-  // BI Track (3 missions: 2A, 1S)
+  // BI Track (4 missions: 2A, 2S)
   "bi-dashboards": "bi",
   "advanced-sql-analytics": "bi",
   "semantic-layer-governance": "bi",
   "ai-genie-spaces": "bi",
+  "ai-bi-dashboards": "bi",
 }
 
 /**

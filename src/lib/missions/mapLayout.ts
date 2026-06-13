@@ -202,6 +202,8 @@ const MISSION_POSITIONS: Array<{
   // Specialization — BI track (lower row)
   { id: "bi-dashboards", ring: 2, x: 880, y: 700, zone: "specialization" },
   { id: "advanced-sql-analytics", ring: 2, x: 1130, y: 700, zone: "specialization" },
+  // Specialization — BI track (extend)
+  { id: "ai-bi-dashboards", ring: 2, x: 1380, y: 700, zone: "specialization" },
 
   // Mastery — advanced DE missions
   { id: "performance-tuning", ring: 3, x: 1730, y: 220, zone: "mastery" },
