@@ -1,0 +1,35 @@
+{
+  "description": "Arrange the steps to build a working Genie Space in the correct order.",
+  "instructions": "A Genie Space is configured by selecting trusted assets, providing instructions, and tuning with feedback. Pattern: catalog → metric layer → trust → context → instructions → validate.",
+  "blocks": [
+    { "id": "pick-tables", "code": "Pick the Gold tables and views that contain answers to business questions (orders, customers, products)", "label": "Select Source Tables" },
+    { "id": "metric-views", "code": "Create metric views for standard business metrics (net_revenue, customer_ltv, churn_rate)", "label": "Build Metric Views" },
+    { "id": "trust-assets", "code": "In the Genie Space settings, mark the chosen tables/views/functions as Trusted Assets", "label": "Configure Trusted Assets" },
+    { "id": "add-functions", "code": "Add custom SQL/Python functions Genie can call to compute on the fly (e.g., cohort_retention)", "label": "Add Trusted Functions" },
+    { "id": "write-instructions", "code": "Write plain-English Genie Instructions: 'When users say revenue, use net_revenue. Active user means logged-in within 30 days.'", "label": "Write Genie Instructions" },
+    { "id": "test-questions", "code": "Run sample questions, check the generated SQL, upvote good answers, edit and save fixes for bad ones", "label": "Test & Tune with Feedback" }
+  ],
+  "correctOrder": [
+    "pick-tables",
+    "metric-views",
+    "trust-assets",
+    "add-functions",
+    "write-instructions",
+    "test-questions"
+  ],
+  "hints": [
+    "Start with the source: Genie needs actual data to query",
+    "Metric views are how you teach Genie what 'revenue' or 'churn' means in your business",
+    "Trusted Assets is the governance layer — without it Genie can't see the table even if it exists",
+    "Functions let Genie compute things that aren't pre-aggregated (cohorts, forecasts)",
+    "Instructions disambiguate terms like 'revenue', 'active', 'churn' that mean different things in different companies",
+    "Feedback is the tuning loop — every edited SQL improves future answers"
+  ],
+  "learnings": [
+    "Trusted Assets are the security boundary for Genie",
+    "Metric Views are the semantic layer Genie reads first",
+    "Instructions handle ambiguity that schema metadata can't",
+    "Functions extend Genie's computation capabilities",
+    "Feedback creates a virtuous improvement cycle"
+  ]
+}
