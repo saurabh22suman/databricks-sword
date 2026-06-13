@@ -2,14 +2,16 @@
 
 > Project memory and AI guidance for Claude Code and similar AI assistants.
 
-## Project Status (May 2026)
+## Project Status (June 2026)
 
-**Production Readiness: 85/100 ✅**
+**Phase 2 in progress** — DAB adoption for Field Ops landed, brand migration to "Databricks Sword" complete.
 
 Key files for reference:
-- `docs/readiness.md` - Latest production audit and fixes
-- `docs/phase-2.md` - UX improvements in progress
-- `docs/learner-feedback-audit.md` - Learner feedback analysis
+- `docs/master-context.md` - High-level project overview
+- `docs/01-architecture-and-apis.md` - Architecture, API contracts, data flow
+- `docs/02-agent-playbook-and-rca.md` - React standards + RCA playbook
+- `docs/03-feature-and-content-mapping.md` - Gamification mechanics, content map
+- `docs/superpowers/specs/` and `docs/superpowers/plans/` - Recent design + implementation specs
 
 ## Quick Commands
 

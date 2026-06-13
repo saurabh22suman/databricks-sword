@@ -25,7 +25,7 @@ describe("Coupon redeem API route", () => {
 
     const request = new NextRequest("http://localhost:3000/api/user/coupon/redeem", {
       method: "POST",
-      body: JSON.stringify({ code: "INFOBEANS1000" }),
+      body: JSON.stringify({ code: "DBSWORD1000" }),
     })
 
     const response = await POST(request)
@@ -47,7 +47,7 @@ describe("Coupon redeem API route", () => {
 
     const request = new NextRequest("http://localhost:3000/api/user/coupon/redeem", {
       method: "POST",
-      body: JSON.stringify({ code: "  infobeans1000 " }),
+      body: JSON.stringify({ code: "  dbsword1000 " }),
     })
 
     const response = await POST(request)
@@ -58,7 +58,7 @@ describe("Coupon redeem API route", () => {
     expect(values).toHaveBeenCalledTimes(1)
     expect(values.mock.calls[0][0]).toMatchObject({
       userId: "user-123",
-      code: "INFOBEANS1000",
+      code: "DBSWORD1000",
       xpAwarded: 1000,
     })
   })
@@ -76,7 +76,7 @@ describe("Coupon redeem API route", () => {
 
     const request = new NextRequest("http://localhost:3000/api/user/coupon/redeem", {
       method: "POST",
-      body: JSON.stringify({ code: "INFOBEANS1000" }),
+      body: JSON.stringify({ code: "DBSWORD1000" }),
     })
 
     const response = await POST(request)
@@ -86,7 +86,7 @@ describe("Coupon redeem API route", () => {
     expect(data).toEqual({ applied: false, reason: "already_redeemed" })
   })
 
-  it("applies PREPRABBIT15000 for 15000 XP", async () => {
+  it("applies DBSWORD15000 for 15000 XP", async () => {
     vi.mocked(auth).mockResolvedValue({
       user: { id: "user-123", email: "test@example.com" },
       expires: "2026-01-01",
@@ -99,7 +99,7 @@ describe("Coupon redeem API route", () => {
 
     const request = new NextRequest("http://localhost:3000/api/user/coupon/redeem", {
       method: "POST",
-      body: JSON.stringify({ code: "preprabbit15000" }),
+      body: JSON.stringify({ code: "dbsword15000" }),
     })
 
     const response = await POST(request)
@@ -109,7 +109,7 @@ describe("Coupon redeem API route", () => {
     expect(data).toEqual({ applied: true, xpAwarded: 15000 })
     expect(values.mock.calls[0][0]).toMatchObject({
       userId: "user-123",
-      code: "PREPRABBIT15000",
+      code: "DBSWORD15000",
       xpAwarded: 15000,
     })
   })

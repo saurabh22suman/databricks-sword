@@ -2,7 +2,7 @@
   "questions": [
     {
       "id": "q1",
-      "question": "Why should DLT pipelines be parameterized?",
+      "question": "Why should SDP pipelines be parameterized?",
       "options": [
         "To promote the same pipeline code across dev/staging/prod with different configurations",
         "To make pipelines run faster",
@@ -62,7 +62,7 @@
     },
     {
       "id": "q6",
-      "question": "[Recall: Data Quality] What DLT expectation level should you use for critical production checks?",
+      "question": "[Recall: Data Quality] What SDP expectation level should you use for critical production checks?",
       "options": [
         "expect_or_fail — halt the pipeline to prevent bad data from reaching Gold tables",
         "expect — just log warnings",
@@ -87,7 +87,7 @@
   ],
   "passingScore": 70,
   "learnings": [
-    "DLT simplifies ETL pipeline development",
+    "SDP (Spark Declarative Pipelines, formerly DLT) simplifies ETL pipeline development",
     "CDC captures and applies data changes",
     "SCD Type 2 maintains historical versions",
     "Quality metrics track pipeline health",

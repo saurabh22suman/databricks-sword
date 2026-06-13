@@ -10,7 +10,7 @@
         "ML feature tables"
       ],
       "correctAnswer": "Append-only raw data ingestion preserving original data exactly",
-      "explanation": "Bronze stores raw data as-is, with ingestion metadata (_ingested_at). It's append-only — you never modify Bronze data. This preserves the full history for reprocessing."
+      "explanation": "Bronze stores raw data as-is, with ingestion metadata (_ingested_at). It's append-only \u2014 you never modify Bronze data. This preserves the full history for reprocessing."
     },
     {
       "id": "q2",
@@ -26,19 +26,19 @@
     },
     {
       "id": "q3",
-      "question": "What does dlt.apply_changes() do?",
+      "question": "What does dp.apply_changes() do?",
       "options": [
         "Applies CDC (Change Data Capture) to propagate row-level updates through the pipeline",
         "Applies schema changes to tables",
         "Modifies pipeline configuration",
-        "Updates DLT expectations"
+        "Updates pipeline expectations"
       ],
       "correctAnswer": "Applies CDC (Change Data Capture) to propagate row-level updates through the pipeline",
-      "explanation": "dlt.apply_changes() is DLT's CDC operator. It processes inserts, updates, and deletes from a source, applying them to a target table while maintaining order via sequence_by."
+      "explanation": "dp.apply_changes() is Spark Declarative Pipelines' CDC operator (formerly dlt.apply_changes). It processes inserts, updates, and deletes from a source, applying them to a target table while maintaining order via sequence_by."
     },
     {
       "id": "q4",
-      "question": "Why use dlt.read() instead of dlt.read_stream() for Gold tables?",
+      "question": "Why use dp.read() instead of dp.read_stream() for Gold tables?",
       "options": [
         "Gold aggregations need the complete dataset, not incremental micro-batches",
         "read() is faster than read_stream()",
@@ -46,7 +46,7 @@
         "There is no difference"
       ],
       "correctAnswer": "Gold aggregations need the complete dataset, not incremental micro-batches",
-      "explanation": "Gold tables often contain aggregations (groupBy, count, avg) that need the full Silver dataset. Batch read with dlt.read() ensures correct totals, while read_stream() would only process new data."
+      "explanation": "Gold tables often contain aggregations (groupBy, count, avg) that need the full Silver dataset. Batch read with dp.read() ensures correct totals, while read_stream() would only process new data."
     },
     {
       "id": "q5",
@@ -76,13 +76,13 @@
       "id": "q7",
       "question": "[Recall: Workflows] How do you schedule a medallion pipeline to run daily?",
       "options": [
-        "Create a Databricks Workflow with a cron schedule triggering the DLT pipeline",
+        "Create a Databricks Workflow with a cron schedule triggering the pipeline",
         "Set a timer in the notebook",
         "Use a sleep() loop",
         "Manually run it each day"
       ],
-      "correctAnswer": "Create a Databricks Workflow with a cron schedule triggering the DLT pipeline",
-      "explanation": "Recall from Workflows & Orchestration: Databricks Jobs can schedule DLT pipeline runs with cron expressions. The job creates compute, runs the pipeline, and auto-terminates."
+      "correctAnswer": "Create a Databricks Workflow with a cron schedule triggering the pipeline",
+      "explanation": "Recall from Workflows & Orchestration: Databricks Jobs can schedule Spark Declarative Pipelines runs with cron expressions. The job creates compute, runs the pipeline, and auto-terminates."
     }
   ],
   "passingScore": 70,
@@ -91,6 +91,7 @@
     "Silver cleanses and validates data quality",
     "Gold provides business-level aggregations and metrics",
     "Each layer adds value through progressive refinement",
-    "Delta format enables consistency across all layers"
+    "Delta format enables consistency across all layers",
+    "Import as: from pyspark import pipelines as dp"
   ]
 }

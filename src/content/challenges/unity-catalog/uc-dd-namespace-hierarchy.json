@@ -12,7 +12,7 @@
   ],
   "xpReward": 75,
   "optimalSolution": "Metastore \u2192 Catalog \u2192 Schema \u2192 Table \u2192 Column",
-  "explanation": "Unity Catalog uses a four-level hierarchy: metastore → catalog → schema → table. The metastore is the root governance container; the three-part object reference namespace is catalog.schema.table. This hierarchy enables fine-grained access control at every level.",
+  "explanation": "Unity Catalog has a four-level container hierarchy: metastore → catalog → schema → table, with columns as attributes of tables. The metastore is the top-level account governance container (one per workspace-region); the 3-level object reference namespace is catalog.schema.table (or view). This hierarchy enables fine-grained access control at every level.",
   "dragDrop": {
     "blocks": [
       {

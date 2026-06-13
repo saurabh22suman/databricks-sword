@@ -6,15 +6,15 @@ PharmaCore Labs now has an automated data quality framework. Every clinical tria
 
 ## What You Learned
 
-### DLT Expectation Levels
-- **EXPECT** — log a warning but keep the record (for monitoring)
-- **EXPECT OR DROP** — silently remove invalid records (for non-critical fields)
-- **EXPECT OR FAIL** — halt the pipeline on violation (for critical fields)
+### SDP Expectation Levels
+- **`dp.expect`** — log a warning but keep the record (for monitoring)
+- **`dp.expect_or_drop`** — silently remove invalid records (for non-critical fields)
+- **`dp.expect_or_fail`** — halt the pipeline on violation (for critical fields)
 
 ### Quality Rule Patterns
-- **Null checks** — `EXPECT ("patient_id IS NOT NULL")`
-- **Range validation** — `EXPECT ("age BETWEEN 18 AND 120")`
-- **Format validation** — `EXPECT ("email RLIKE '^[^@]+@[^@]+$'")`
+- **Null checks** — `dp.expect("patient_id_not_null", col("patient_id").isNotNull())`
+- **Range validation** — `dp.expect("valid_age", (col("age") >= 18) & (col("age") <= 120))`
+- **Format validation** — `dp.expect("valid_email", col("email").rlike("^[^@]+@[^@]+$"))`
 - **Referential integrity** — cross-table lookups for valid foreign keys
 
 ### Quarantine Architecture
@@ -23,22 +23,22 @@ PharmaCore Labs now has an automated data quality framework. Every clinical tria
 - Analysts review and fix quarantined records, then replay them
 
 ### Quality Monitoring
-- DLT event log captures expectation violation counts per batch
+- The SDP event log captures expectation violation counts per batch
 - Build dashboards showing quality trends over time
 - Alert when violation rates exceed thresholds
 
 ### Schema Enforcement
 - Delta Lake schema enforcement rejects writes that don't match the table schema
 - Schema evolution (`mergeSchema`) allows controlled schema changes
-- DLT automatically validates schema between pipeline stages
+- SDP automatically validates schema between pipeline stages
 
 ## Key Takeaways
 
-1. Use EXPECT OR FAIL for fields where invalid data could cause regulatory issues
-2. Use EXPECT OR DROP for non-critical fields that can be filtered
+1. Use `dp.expect_or_fail` for fields where invalid data could cause regulatory issues
+2. Use `dp.expect_or_drop` for non-critical fields that can be filtered
 3. Always quarantine dropped records — never silently discard data
 4. Monitor violation rates as leading indicators of upstream data issues
-5. Combine DLT expectations with Delta Lake constraints for defense in depth
+5. Combine SDP expectations with Delta Lake constraints for defense in depth
 
 ## Next Steps
 

@@ -1,19 +1,19 @@
 {
   "industry": "manufacturing",
   "title": "Smart Factory Quality Platform",
-  "description": "Deploy a Delta Live Tables pipeline for real-time quality monitoring in a semiconductor fab. Features include sensor fusion, SPC analysis, and Feature Store integration for ML-driven defect prediction.",
+  "description": "Deploy a Spark Declarative Pipelines (formerly Delta Live Tables) pipeline for real-time quality monitoring in a semiconductor fab. Features include sensor fusion, SPC analysis, and Feature Store integration for ML-driven defect prediction.",
   "difficulty": "advanced",
   "estimatedMinutes": 90,
   "xpReward": 2000,
   "objectives": [
-    "Implement DLT bronze/silver/gold medallion architecture for manufacturing sensors",
-    "Fix broken expectations in DLT pipeline quality checks",
+    "Implement SDP bronze/silver/gold medallion architecture for manufacturing sensors",
+    "Fix broken expectations in SDP pipeline quality checks",
     "Calculate Statistical Process Control (SPC) metrics with correct control limits",
     "Register production feature table in Databricks Feature Store",
     "Build defect prediction features with proper time-travel lookups"
   ],
   "technologies": [
-    "Delta Live Tables",
+    "Spark Declarative Pipelines (SDP, formerly DLT)",
     "Feature Store",
     "Delta Lake Time Travel",
     "Streaming",
@@ -22,15 +22,15 @@
   "scenario": {
     "industry": "Semiconductor Manufacturing",
     "challenge": "A chip fabrication plant has deployed thousands of IoT sensors across production lines but lacks real-time quality monitoring. Historical defect rates are 3.2% - above industry standards. Manual SPC charting is too slow to catch process drift. ML models are trained on outdated snapshots instead of live feature tables.",
-    "deployment": "4 DLT notebooks + 3 feature tables (sensor metrics, batch quality, equipment health)"
+    "deployment": "4 SDP notebooks + 3 feature tables (sensor metrics, batch quality, equipment health)"
   },
   "validations": [
     {
-      "id": "dlt_pipeline_running",
-      "name": "DLT Pipeline Health",
+      "id": "sdp_pipeline_running",
+      "name": "SDP Pipeline Health",
       "query": "SELECT COUNT(*) as pipeline_count FROM system.livelinessMonitor WHERE pipeline_name = 'manufacturing_quality' AND state = 'RUNNING'",
       "expected": 1,
-      "hint": "Check DLT pipeline definition - expectations might be causing failures"
+      "hint": "Check SDP pipeline definition - expectations might be causing failures"
     },
     {
       "id": "bronze_sensor_data",

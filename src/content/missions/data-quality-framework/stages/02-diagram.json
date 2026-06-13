@@ -1,5 +1,5 @@
 {
-  "instructions": "Build the Data Quality Pipeline! Arrange components to show how Delta Live Tables expectations validate data at different severity levels.",
+  "instructions": "Build the Data Quality Pipeline! Arrange components to show how Spark Declarative Pipelines (formerly Delta Live Tables) expectations validate data at different severity levels.",
   "components": [
     {
       "id": "raw-data",

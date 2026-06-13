@@ -90,7 +90,7 @@ src/
 
 | Layer | Technology |
 |-------|------------|
-| Framework | Next.js 15 (App Router, React Server Components) |
+| Framework | Next.js 16 (App Router, React Server Components) |
 | Language | TypeScript (strict mode) |
 | Styling | Tailwind CSS 4 (dark-only cyberpunk theme) |
 | Database | SQLite via Turso + Drizzle ORM |
@@ -101,7 +101,7 @@ src/
 
 ## Gamification
 
-8 military/mecha ranks from **Cadet** (0 XP) to **Grandmaster** (25,000 XP), 21 achievements, daily streak tracking with freeze mechanics, and XP multipliers.
+8 military/mecha ranks from **Cadet** (0 XP) to **Grandmaster** (25,000 XP), 29 achievements, daily streak tracking with freeze mechanics, and XP multipliers.
 
 ## Docker
 

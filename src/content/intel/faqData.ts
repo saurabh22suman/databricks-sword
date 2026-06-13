@@ -122,7 +122,7 @@ spark.conf.get("spark.databricks.clusterUsageTags.sparkVersion")
         id: 26,
         question: "What are Databricks Workflows and how do they differ from Jobs?",
         answer:
-          "Databricks Workflows is the orchestration engine for running multi-task data, analytics, and ML pipelines. A Workflow defines a DAG of tasks (notebooks, JARs, Python scripts, dbt, SQL, DLT pipelines) with dependencies, retries, and conditional logic. Jobs are the execution instances of workflows. Workflows support scheduling, event triggers (file arrival), parameters, and integration with CI/CD. For new workflows, Serverless Jobs are the recommended default compute — they provide instant startup, zero-config provisioning, and automatic scale-to-zero, eliminating the need to size or tune classic job clusters for most workloads.",
+          "Databricks Workflows is the orchestration engine for running multi-task data, analytics, and ML pipelines. A Workflow defines a DAG of tasks (notebooks, JARs, Python scripts, dbt, SQL, SDP pipelines) with dependencies, retries, and conditional logic. Jobs are the execution instances of workflows. Workflows support scheduling, event triggers (file arrival), parameters, and integration with CI/CD. For new workflows, Serverless Jobs are the recommended default compute — they provide instant startup, zero-config provisioning, and automatic scale-to-zero, eliminating the need to size or tune classic job clusters for most workloads.",
         codeExample: `// Serverless Jobs configuration (recommended default)
 {
   "name": "daily_etl_pipeline",
@@ -136,7 +136,7 @@ spark.conf.get("spark.databricks.clusterUsageTags.sparkVersion")
 }`,
         keyPoints: [
           "DAG-based multi-task orchestration",
-          "Supports notebooks, JARs, Python, SQL, DLT",
+          "Supports notebooks, JARs, Python, SQL, SDP",
           "Event-driven triggers (file arrival, API call)",
           "Built-in retry, timeout, and alerting policies",
           "Serverless Jobs: instant startup, zero-config, scale-to-zero (default)",
@@ -954,7 +954,7 @@ df.coalesce(1).write.format("csv").save("/output/single_file/")`,
         id: 53,
         question: "How do you implement data quality checks in PySpark?",
         answer:
-          "Data quality checks in PySpark include: null/duplicate validation with filter/groupBy, schema validation with StructType, range checks with where(), referential integrity with anti-joins, and statistical checks (mean, stddev). On Databricks, DLT Expectations provide declarative quality rules. For production pipelines, implement quality gates that quarantine bad records rather than failing entirely.",
+          "Data quality checks in PySpark include: null/duplicate validation with filter/groupBy, schema validation with StructType, range checks with where(), referential integrity with anti-joins, and statistical checks (mean, stddev). On Databricks, Spark Declarative Pipelines (SDP, formerly DLT) provides declarative expectations for quality rules (`dp.expect`, `dp.expect_or_drop`, `dp.expect_or_fail`). For production pipelines, implement quality gates that quarantine bad records rather than failing entirely.",
         codeExample: `# Check for nulls
 null_counts = df.select([
   sum(col(c).isNull().cast("int")).alias(c)
@@ -964,16 +964,17 @@ null_counts = df.select([
 # Check for duplicates
 dupes = df.groupBy("id").count().filter(col("count") > 1)
 
-# DLT Expectations (declarative quality rules)
-# @dlt.expect_or_drop("valid_amount", "amount > 0")
-# @dlt.expect_or_fail("not_null_id", "id IS NOT NULL")
+# Spark Declarative Pipelines expectations (declarative quality rules)
+# from pyspark import pipelines as dp
+# dp.expect_or_drop("valid_amount", col("amount") > 0)
+# dp.expect_or_fail("not_null_id", col("id").isNotNull())
 
 # Quarantine pattern — good and bad rows
 good = df.filter((col("amount") > 0) & col("id").isNotNull())
 quarantine = df.filter((col("amount") <= 0) | col("id").isNull())`,
         keyPoints: [
           "Validate nulls, duplicates, ranges, and types",
-          "DLT Expectations for declarative quality rules",
+          "SDP expectations for declarative quality rules",
           "Quarantine bad records instead of failing pipelines",
           "Statistical checks for anomaly detection",
         ],
@@ -1206,8 +1207,8 @@ df.groupBy("region").pivot("month").sum("revenue")`,
         id: 58,
         question: "What are Materialized Views in Databricks?",
         answer:
-          "Materialized Views (MVs) pre-compute and store query results, refreshing automatically when underlying data changes. Unlike regular views (computed on each query), MVs provide faster BI query performance. In Databricks, MVs are managed by Lakeflow Declarative Pipelines (DLT) and support incremental refresh. They're ideal for expensive aggregations serving dashboards.",
-        codeExample: `-- Create a materialized view in DLT
+          "Materialized Views (MVs) pre-compute and store query results, refreshing automatically when underlying data changes. Unlike regular views (computed on each query), MVs provide faster BI query performance. In Databricks, MVs are managed by Spark Declarative Pipelines (SDP, formerly Delta Live Tables / Lakeflow Declarative Pipelines) and support incremental refresh. They're ideal for expensive aggregations serving dashboards.",
+        codeExample: `-- Create a materialized view in SDP (Spark Declarative Pipelines)
 CREATE OR REFRESH MATERIALIZED VIEW gold_sales_summary AS
 SELECT
   region,
@@ -1224,7 +1225,7 @@ SELECT region, SUM(amount) FROM orders GROUP BY region;`,
         keyPoints: [
           "Pre-computed results for faster queries",
           "Automatic incremental refresh on data change",
-          "Managed by Lakeflow Declarative Pipelines (DLT)",
+          "Managed by Spark Declarative Pipelines (SDP, formerly Lakeflow Declarative Pipelines / DLT)",
           "Ideal for dashboards with expensive aggregations",
         ],
       },
@@ -1868,7 +1869,7 @@ client.set_registered_model_alias(
         id: 23,
         question: "How would you design a real-time streaming pipeline in Databricks?",
         answer:
-          "Use Structured Streaming with Delta Lake as source/sink. Ingest from Kafka/Event Hubs/Kinesis, process with DataFrame transformations, and write to Delta tables with exactly-once guarantees. For complex pipelines, use Lakeflow (DLT) which handles checkpointing, retries, and automatic schema evolution. Monitor with Spark UI and Databricks observability tools.",
+          "Use Structured Streaming with Delta Lake as source/sink. Ingest from Kafka/Event Hubs/Kinesis, process with DataFrame transformations, and write to Delta tables with exactly-once guarantees. For complex pipelines, use Spark Declarative Pipelines (SDP, formerly Lakeflow / DLT) which handles checkpointing, retries, and automatic schema evolution. Monitor with Spark UI and Databricks observability tools.",
         codeExample: `# Structured Streaming with Delta
 stream_df = spark.readStream \\
     .format("kafka") \\
@@ -1942,7 +1943,7 @@ df.writeStream \\
         id: 76,
         question: "What is the Medallion (multi-hop) architecture and how do you implement it?",
         answer:
-          "The Medallion architecture organizes data into Bronze (raw ingestion), Silver (cleansed, validated), and Gold (business-aggregated) layers. Bronze preserves raw data as-is for auditability. Silver applies schema enforcement, deduplication, and quality rules. Gold provides business-ready aggregations and dimensional models. Implement with DLT pipelines or structured streaming between Delta tables.",
+          "The Medallion architecture organizes data into Bronze (raw ingestion), Silver (cleansed, validated), and Gold (business-aggregated) layers. Bronze preserves raw data as-is for auditability. Silver applies schema enforcement, deduplication, and quality rules. Gold provides business-ready aggregations and dimensional models. Implement with Spark Declarative Pipelines (SDP, formerly DLT) or structured streaming between Delta tables.",
         codeExample: `-- Bronze: raw ingestion (append-only)
 CREATE OR REFRESH STREAMING TABLE bronze_orders
 AS SELECT *, current_timestamp() AS ingested_at,
@@ -1968,20 +1969,20 @@ FROM LIVE.silver_orders GROUP BY ALL;`,
           "Bronze: raw, append-only, preserves source fidelity",
           "Silver: cleansed, deduplicated, schema-enforced",
           "Gold: business aggregations and dimensional models",
-          "DLT automates the pipeline between layers",
+          "Spark Declarative Pipelines (SDP) automates the pipeline between layers",
         ],
       },
       {
         id: 77,
-        question: "How do you design DLT (Lakeflow Declarative Pipelines) for production?",
+        question: "How do you design Spark Declarative Pipelines (formerly DLT) for production?",
         answer:
-          "Design DLT pipelines by declaring tables as SQL/Python definitions with expectations (data quality rules). DLT handles orchestration, checkpointing, error handling, and infrastructure. Key design decisions: use STREAMING TABLE for incremental sources, MATERIALIZED VIEW for aggregations, set expectations with ON VIOLATION actions (DROP ROW, FAIL UPDATE), and organize with a clear Bronze→Silver→Gold flow.",
-        codeExample: `import dlt
+          "Design SDP pipelines by declaring tables as SQL/Python definitions with expectations (data quality rules). SDP handles orchestration, checkpointing, error handling, and infrastructure. Key design decisions: use STREAMING TABLE for incremental sources, MATERIALIZED VIEW for aggregations, set expectations with ON VIOLATION actions (DROP ROW, FAIL UPDATE), and organize with a clear Bronze→Silver→Gold flow.",
+        codeExample: `from pyspark import pipelines as dp
 from pyspark.sql.functions import *
 
-@dlt.table(comment="Raw clickstream from Kafka")
-@dlt.expect_or_drop("valid_timestamp", "event_time IS NOT NULL")
+@dp.table(comment="Raw clickstream from Kafka")
 def bronze_clicks():
+    dp.expect_or_drop("valid_timestamp", col("event_time").isNotNull())
     return (spark.readStream
         .format("kafka")
         .option("subscribe", "clickstream")
@@ -1989,19 +1990,17 @@ def bronze_clicks():
         .select(from_json(col("value").cast("string"), schema).alias("data"))
         .select("data.*"))
 
-@dlt.table(comment="Sessionized click data")
-@dlt.expect_all_or_drop({
-    "valid_user": "user_id IS NOT NULL",
-    "valid_page": "page_url IS NOT NULL"
-})
+@dp.table(comment="Sessionized click data")
 def silver_sessions():
-    return (dlt.read_stream("bronze_clicks")
+    dp.expect_or_drop("valid_user", col("user_id").isNotNull())
+    dp.expect_or_drop("valid_page", col("page_url").isNotNull())
+    return (dp.read_stream("bronze_clicks")
         .withWatermark("event_time", "1 hour")
         .groupBy(session_window("event_time", "30 minutes"), "user_id")
         .agg(collect_list("page_url").alias("pages"),
              count("*").alias("clicks")))`,
         keyPoints: [
-          "Declarative — define WHAT, DLT handles HOW",
+          "Declarative — define WHAT, SDP handles HOW",
           "Expectations enforce data quality with configurable actions",
           "STREAMING TABLE for incremental, MATERIALIZED VIEW for batch",
           "Automatic checkpointing, retry, and error recovery",

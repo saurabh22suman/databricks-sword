@@ -1,8 +1,8 @@
 {
   "id": "production-pipelines",
   "title": "Production Pipelines",
-  "subtitle": "DLT, CDC & Monitoring",
-  "description": "Build production-grade data pipelines with Delta Live Tables, Change Data Capture, error handling, monitoring, and SLA management.",
+  "subtitle": "SDP, CDC & Monitoring",
+  "description": "Build production-grade data pipelines with Spark Declarative Pipelines (formerly Delta Live Tables), Change Data Capture, error handling, monitoring, and SLA management.",
   "industry": "e-commerce",
   "rank": "S",
   "xpRequired": 1500,
@@ -14,7 +14,7 @@
     "medallion-architecture"
   ],
   "primaryFeatures": [
-    "DLT Production Patterns",
+    "SDP Production Patterns",
     "CDC Pipelines",
     "Error Handling",
     "Pipeline Monitoring",

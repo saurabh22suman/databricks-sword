@@ -7,12 +7,12 @@ import { Metadata } from "next"
 
 export const metadata: Metadata = {
   title: "Quick Reference | Databricks Sword",
-  description: "Quick syntax reference for Databricks 2025 - Delta Lake, DLT, Unity Catalog, MLflow, Streaming",
+  description: "Quick syntax reference for Databricks 2025 - Delta Lake, Spark Declarative Pipelines, Unity Catalog, MLflow, Streaming",
 }
 
 const sections = [
   {
-    title: "DLT / Pipelines",
+    title: "SDP / Pipelines (formerly DLT)",
     items: [
       {
         name: "STREAMING TABLE",
@@ -102,7 +102,7 @@ const sections = [
       {
         name: "Namespace",
         syntax: "catalog.schema.table",
-        desc: "Three-level hierarchy (metastore→catalog→schema→table)",
+        desc: "Three-level object reference namespace (metastore is the top-level container above catalogs)",
       },
       {
         name: "External Location",

@@ -332,7 +332,7 @@ export async function deleteWorkspaceDirectory(
 }
 
 /**
- * Start a DLT pipeline by name using CLI.
+ * Start a Spark Declarative Pipelines pipeline by name using CLI.
  */
 export async function pipelineStart(
   config: DatabricksConnection,
@@ -345,7 +345,7 @@ export async function pipelineStart(
 }
 
 /**
- * Get the current state of a DLT pipeline by name using CLI.
+ * Get the current state of a Spark Declarative Pipelines pipeline by name using CLI.
  * Returns the pipeline state (e.g., "RUNNING", "STOPPED") or null if not found/error.
  */
 export async function pipelineState(

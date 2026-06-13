@@ -1,9 +1,9 @@
 {
-  "instructions": "Design the Production Pipeline! Arrange components to show how Delta Live Tables handles CDC, error handling, and observability.",
+  "instructions": "Design the Production Pipeline! Arrange components to show how Spark Declarative Pipelines (formerly Delta Live Tables) handles CDC, error handling, and observability.",
   "components": [
     {
       "id": "dlt-pipeline",
-      "label": "DLT Pipeline (Parameterized)",
+      "label": "SDP Pipeline (Parameterized)",
       "icon": "layers"
     },
     {
@@ -18,7 +18,7 @@
     },
     {
       "id": "event-log",
-      "label": "DLT Event Log",
+      "label": "SDP Event Log",
       "icon": "file-text"
     },
     {
@@ -92,7 +92,7 @@
     }
   ],
   "learnings": [
-    "DLT Pipeline: Declarative ETL with automatic dependency management",
+    "SDP Pipeline: Declarative ETL with automatic dependency management",
     "APPLY CHANGES: Built-in CDC support for merge, update, and delete operations",
     "Dead Letter Queue: Captures rows that fail quality checks for review",
     "Event Log: Full audit trail of pipeline runs, data quality, and lineage",

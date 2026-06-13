@@ -6,11 +6,11 @@
 
 ## Your Mission
 
-Build a data quality framework using Delta Live Tables (DLT) expectations that validates clinical trial data at every stage of the pipeline. Invalid records must be quarantined — never silently dropped or passed through.
+Build a data quality framework using Spark Declarative Pipelines (formerly Delta Live Tables) expectations that validates clinical trial data at every stage of the pipeline. Invalid records must be quarantined — never silently dropped or passed through.
 
 ## Objectives
 
-1. **Understand DLT expectations** — EXPECT, EXPECT OR DROP, EXPECT OR FAIL
+1. **Understand SDP expectations** — `dp.expect`, `dp.expect_or_drop`, `dp.expect_or_fail`
 2. **Design quality rules** — null checks, range validation, referential integrity
 3. **Implement quarantine patterns** — route invalid records for review
 4. **Monitor quality metrics** — track violation rates over time
@@ -18,10 +18,10 @@ Build a data quality framework using Delta Live Tables (DLT) expectations that v
 
 ## Key Intelligence
 
-- Delta Live Tables (DLT) provides declarative pipeline definitions with built-in quality enforcement
-- Three expectation levels: warn (EXPECT), drop invalid (EXPECT OR DROP), fail pipeline (EXPECT OR FAIL)
-- Expectations are defined as SQL boolean expressions
-- Quality metrics are automatically tracked in the DLT event log
+- Spark Declarative Pipelines (SDP, formerly DLT) provides declarative pipeline definitions with built-in quality enforcement
+- Three expectation levels: warn (`dp.expect`), drop invalid (`dp.expect_or_drop`), fail pipeline (`dp.expect_or_fail`)
+- Expectations are defined as Python column expressions (e.g. `col("age") > 0`) — pass a boolean to `dp.expect*`
+- Quality metrics are automatically tracked in the SDP event log
 - Quarantine tables capture invalid records with failure reason metadata
 
 ## Stakes

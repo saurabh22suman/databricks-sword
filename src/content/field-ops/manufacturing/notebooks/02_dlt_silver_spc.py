@@ -7,14 +7,14 @@
 # ════════════════════════════════════════════════════════════════════════════
 #
 # OBJECTIVE:
-#   Build a Silver DLT layer that calculates Statistical Process Control
+#   Build a Silver SDP layer that calculates Statistical Process Control
 #   (SPC) metrics for each sensor type per batch. Control limits tell
 #   engineers when a process is drifting out of specification.
 #
 # WHAT YOU'LL LEARN:
 #   ✅ SPC fundamentals: X-bar, UCL, LCL, sigma, process capability
-#   ✅ DLT Silver layer: reading from Bronze DLT tables
-#   ✅ Window aggregations in DLT
+#   ✅ SDP Silver layer: reading from Bronze SDP tables
+#   ✅ Window aggregations in SDP
 #   ✅ 3-sigma rule for control limits (99.73% coverage)
 #   ✅ Pivot patterns for sensor type comparison
 #
@@ -36,13 +36,13 @@
 #   6-sigma: 99.99966% — Six Sigma quality (3.4 DPMO)
 #
 # DOCUMENTATION:
-#   - DLT Python: https://docs.databricks.com/en/delta-live-tables/python-ref.html
+#   - SDP Python: https://docs.databricks.com/en/dlt/python-ref.html
 #   - stddev:     https://docs.databricks.com/en/sql/language-manual/functions/stddev.html
 # ════════════════════════════════════════════════════════════════════════════
 
 # COMMAND ----------
 
-import dlt
+from pyspark import pipelines as dp
 from pyspark.sql.functions import (
     col, avg, stddev, min as spark_min, max as spark_max,
     count, round as spark_round, when, current_timestamp, lit
@@ -53,21 +53,21 @@ from pyspark.sql.functions import (
 # ────────────────────────────────────────────────────────────────────────────
 # SILVER TABLE 1: Validated Sensor Readings
 # ────────────────────────────────────────────────────────────────────────────
-# Read from Bronze DLT table, apply schema enforcement, and filter
+# Read from Bronze SDP table, apply schema enforcement, and filter
 # only readings with valid parsed timestamps.
 
-@dlt.table(
+@dp.table(
     name="validated_sensor_readings",
     comment="Validated sensor readings with proper types and null filtering",
     table_properties={"quality": "silver"},
 )
-@dlt.expect_or_drop("has_timestamp", "timestamp_parsed IS NOT NULL")
-@dlt.expect_or_drop("has_sensor_id", "sensor_id IS NOT NULL")
-@dlt.expect_or_drop("positive_value", "value > 0")
 def validated_sensor_readings():
     """Clean sensor readings — drop nulls and negative values."""
+    dp.expect_or_drop("has_timestamp", col("timestamp_parsed").isNotNull())
+    dp.expect_or_drop("has_sensor_id", col("sensor_id").isNotNull())
+    dp.expect_or_drop("positive_value", col("value") > 0)
     return (
-        dlt.read("raw_sensor_readings")
+        dp.read("raw_sensor_readings")
         .select(
             "reading_id",
             "sensor_id",
@@ -90,7 +90,7 @@ def validated_sensor_readings():
 # ⚠️ BUG: Uses 2×σ for control limits instead of 3×σ!
 # This creates a 4.55% false alarm rate vs the standard 0.27%.
 
-@dlt.table(
+@dp.table(
     name="spc_metrics",
     comment="Statistical Process Control metrics with UCL/LCL per sensor per batch",
     table_properties={"quality": "silver"},
@@ -105,7 +105,7 @@ def spc_metrics():
         LCL = X̄ - 3σ (lower control limit — 3 sigma rule)
     """
     return (
-        dlt.read("validated_sensor_readings")
+        dp.read("validated_sensor_readings")
         .groupBy("batch_id", "sensor_type", "unit")
         .agg(
             count("*").alias("reading_count"),
@@ -137,15 +137,15 @@ def spc_metrics():
 # Flag individual readings that fall outside the UCL/LCL boundaries.
 # This is the core SPC "out of control" detection.
 
-@dlt.table(
+@dp.table(
     name="sensor_anomalies",
     comment="Individual sensor readings that violate SPC control limits",
     table_properties={"quality": "silver"},
 )
 def sensor_anomalies():
     """Identify readings outside control limits by joining with SPC metrics."""
-    df_readings = dlt.read("validated_sensor_readings")
-    df_spc = dlt.read("spc_metrics")
+    df_readings = dp.read("validated_sensor_readings")
+    df_spc = dp.read("spc_metrics")
 
     return (
         df_readings
@@ -172,7 +172,7 @@ def sensor_anomalies():
 # COMMAND ----------
 
 # ────────────────────────────────────────────────────────────────────────────
-# SQL Equivalent — SPC Metrics (Non-DLT)
+# SQL Equivalent — SPC Metrics (Non-SDP)
 # ────────────────────────────────────────────────────────────────────────────
 # For interactive analysis, here's the equivalent SQL query:
 
@@ -201,9 +201,9 @@ def sensor_anomalies():
 #   3-sigma: 99.73% coverage (0.27% false alarm rate)  ← Industry standard
 #
 # CONCEPTS LEARNED:
-#   1. DLT Silver layer: reading from Bronze with dlt.read()
+#   1. SDP Silver layer: reading from Bronze with dp.read()
 #   2. SPC X-bar chart: mean, UCL, LCL concepts
 #   3. 3-sigma rule for control limits
-#   4. DLT table chaining: Bronze → Silver → anomalies
+#   4. SDP table chaining: Bronze → Silver → anomalies
 #   5. groupBy aggregations with stddev()
 # ────────────────────────────────────────────────────────────────────────────

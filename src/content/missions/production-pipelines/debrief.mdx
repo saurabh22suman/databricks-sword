@@ -6,14 +6,14 @@ MegaMart's pipelines are now production-grade: parameterized for multiple enviro
 
 ## What You Learned
 
-### DLT Production Patterns
+### SDP Production Patterns
 - **Parameterized pipelines** — use `spark.conf.get("pipeline.env")` for dev/staging/prod
 - **Pipeline configuration** — separate storage paths, catalog names, and compute per environment
 - **Idempotent operations** — pipelines produce the same output regardless of how many times they run
 - **Development mode** — use "Development" mode for faster iteration, "Production" for reliability
 
 ### CDC with APPLY CHANGES
-- `dlt.apply_changes()` tracks insert/update/delete operations
+- `dp.apply_changes()` tracks insert/update/delete operations
 - `sequence_by` column ensures events are applied in correct order
 - SCD Type 1 (overwrite) and Type 2 (historical) patterns
 - CDC enables tracking order status changes: pending → processing → shipped → delivered
@@ -25,14 +25,14 @@ MegaMart's pipelines are now production-grade: parameterized for multiple enviro
 - **Graceful degradation** — use cached/stale data when upstream is unavailable
 
 ### Monitoring & Alerting
-- **DLT event log** — built-in audit trail of pipeline executions and quality metrics
+- **SDP event log** — built-in audit trail of pipeline executions and quality metrics
 - **Custom metrics** — `spark.sparkContext.setJobDescription()` for tracking within tasks
 - **Freshness monitoring** — track `MAX(updated_at)` in Gold tables against SLA thresholds
 - **Alerting** — webhook/email alerts when SLAs are at risk or violated
 
 ### SLA Management
 - Define SLAs per table: "Gold order summary refreshed within 15 minutes of Silver update"
-- Monitor with scheduled SQL queries against DLT event log
+- Monitor with scheduled SQL queries against the SDP event log
 - Escalation: warning at 80% of SLA → alert at 95% → page at 100%
 
 ## Key Takeaways
@@ -40,7 +40,7 @@ MegaMart's pipelines are now production-grade: parameterized for multiple enviro
 1. Always parameterize pipelines for environment promotion (dev → staging → prod)
 2. Never block a pipeline for non-critical errors — use dead letter queues
 3. Monitor data freshness as the primary SLA metric
-4. DLT event logs are your built-in observability layer
+4. The SDP event log is your built-in observability layer
 5. Test failure scenarios in staging before they happen in production
 
 ## Next Steps

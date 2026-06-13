@@ -58,7 +58,7 @@ Here's what you get:
 
 1. **20 Story-Driven Missions** - Learn Delta Lake, PySpark, MLflow through narrative-driven challenges
 
-2. **50+ Standalone Challenges** - Quickfire practice on specific topics (query优化, transformations, streaming)
+2. **52 Standalone Challenges** - Quickfire practice on specific topics (query optimization, transformations, streaming)
 
 3. **8 Field Ops Industries** - Retail, Healthcare, Fintech, Gaming, Automotive, Manufacturing, Telecom, Agritech
    - Each deploys REAL bronze/silver/gold schemas to YOUR workspace
