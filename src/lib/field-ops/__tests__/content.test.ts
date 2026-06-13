@@ -43,3 +43,28 @@ describe("field-ops content normalization", () => {
     expect(keys).toContain("silver_spc_metrics")
   })
 })
+
+describe("medtech-research content", () => {
+  it("has 4 validations", async () => {
+    const mission = await loadFieldOpsContent("medtech-research")
+    expect(mission.validations).toHaveLength(4)
+  })
+
+  it("declares 4 notebooks", async () => {
+    const mission = await loadFieldOpsContent("medtech-research")
+    expect(mission.notebooks).toHaveLength(4)
+  })
+
+  it("declares 1 data file that exists on disk", async () => {
+    const mission = await loadFieldOpsContent("medtech-research")
+    expect(mission.dataFiles).toEqual(["pubmed_abstracts.json"])
+    const path = require("path")
+    const fs = require("fs/promises")
+    const dataPath = path.join(
+      process.cwd(),
+      "src/content/field-ops/medtech-research/data",
+      "pubmed_abstracts.json"
+    )
+    await expect(fs.access(dataPath)).resolves.toBeUndefined()
+  })
+})
