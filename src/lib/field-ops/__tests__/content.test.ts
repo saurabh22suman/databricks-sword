@@ -38,7 +38,7 @@ describe("field-ops content normalization", () => {
     const manufacturing = await loadFieldOpsContent("manufacturing")
 
     const keys = manufacturing.validations.map((validation) => validation.checkKey)
-    expect(keys).toContain("dlt_pipeline_running")
+    expect(keys).toContain("sdp_pipeline_running")
     expect(keys).toContain("bronze_sensor_data")
     expect(keys).toContain("silver_spc_metrics")
   })

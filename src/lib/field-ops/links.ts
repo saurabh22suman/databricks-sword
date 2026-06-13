@@ -31,7 +31,9 @@ export function buildFieldOpsLinks(params: DeploymentLinkParams): {
     }
   }
 
-  const notebooks = `${workspace}/#workspace/Shared/field-ops/${params.schemaPrefix}`
+  // DAB deploys to ~/field-ops/<schemaPrefix> (per-user, see bundle.ts:273-276).
+  // The workspace web UI renders this as the current user's home directory.
+  const notebooks = `${workspace}/#workspace/~/field-ops/${params.schemaPrefix}`
 
   const explorerBronze =
     catalogName && params.schemaPrefix

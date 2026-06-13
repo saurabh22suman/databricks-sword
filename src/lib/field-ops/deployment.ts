@@ -510,7 +510,7 @@ export async function startDeployment(
     })
 
     // Manufacturing pipeline lifecycle: transition to pipeline_running before deployed.
-    // The DLT pipeline is started in deployBundle (Task 5), but we track the state here.
+    // The Spark Declarative Pipelines pipeline is started in deployBundle (Task 5), but we track the state here.
     if (industry === "manufacturing") {
       await db
         .update(fieldOpsDeployments)

@@ -229,6 +229,7 @@ const FIELD_OPS_POSITIONS: Array<{ industry: Industry; x: number; y: number }> =
   { industry: "manufacturing", x: 1620, y: 970 },
   { industry: "telecom", x: 1840, y: 970 },
   { industry: "agritech", x: 2060, y: 970 },
+  { industry: "medtech-research", x: 2200, y: 970 },
 ]
 
 /**

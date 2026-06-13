@@ -1,5 +1,5 @@
 import { describe, expect, it } from "vitest"
-import { getIndustryConfig, isIndustryUnlocked } from "../industries"
+import { getAllIndustries, getIndustryConfig, isIndustryUnlocked } from "../industries"
 
 describe("field-ops industry unlock thresholds", () => {
   it("uses the recalibrated XP ladder", () => {
@@ -22,5 +22,27 @@ describe("field-ops industry unlock thresholds", () => {
 
     expect(isIndustryUnlocked("agritech", 13799)).toBe(false)
     expect(isIndustryUnlocked("agritech", 13800)).toBe(true)
+  })
+})
+
+describe("medtech-research industry", () => {
+  it("is registered in INDUSTRY_CONFIGS", () => {
+    const config = getIndustryConfig("medtech-research")
+    expect(config.industry).toBe("medtech-research")
+    expect(config.title).toBeTruthy()
+    expect(config.schemas).toEqual(["bronze", "silver", "gold"])
+  })
+
+  it("is included in getAllIndustries()", () => {
+    const all = getAllIndustries().map((c) => c.industry)
+    expect(all).toContain("medtech-research")
+  })
+
+  it("is unlockable at the highest XP threshold (after agritech)", () => {
+    // Pick an XP that unlocks all existing industries + medtech
+    // Existing max is agritech at 13800. Set medtech at 16000 to fit the ladder pattern.
+    const all = getAllIndustries()
+    const maxRequired = Math.max(...all.map((c) => c.xpRequired))
+    expect(isIndustryUnlocked("medtech-research", maxRequired + 1000)).toBe(true)
   })
 })

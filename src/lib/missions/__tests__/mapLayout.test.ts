@@ -191,9 +191,9 @@ describe("mapLayout — pipeline layout", () => {
   })
 
   describe("field ops nodes", () => {
-    it("should return exactly 8 field ops nodes", () => {
+    it("should return exactly 9 field ops nodes", () => {
       const nodes = getFieldOpsNodes()
-      expect(nodes).toHaveLength(8)
+      expect(nodes).toHaveLength(9)
     })
 
     it("all field ops nodes should have type 'field-ops'", () => {
@@ -221,9 +221,9 @@ describe("mapLayout — pipeline layout", () => {
   })
 
   describe("all map nodes", () => {
-    it("should return 30 total nodes (22 missions + 8 field ops)", () => {
+    it("should return 31 total nodes (22 missions + 9 field ops)", () => {
       const nodes = getAllMapNodes()
-      expect(nodes).toHaveLength(30)
+      expect(nodes).toHaveLength(31)
     })
   })
 
