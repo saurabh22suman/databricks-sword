@@ -1,0 +1,32 @@
+{
+  "id": "ai-genie-spaces",
+  "title": "AI/BI Genie Spaces",
+  "subtitle": "Configure natural-language analytics with trusted assets and Genie instructions",
+  "description": "Learn to build AI/BI Genie Spaces: define trusted assets (tables, metric views, functions), write Genie Instructions that disambiguate columns, and tune NL→SQL accuracy with curated context.",
+  "industry": "enterprise",
+  "rank": "A",
+  "xpRequired": 5000,
+  "xpReward": 600,
+  "estimatedMinutes": 45,
+  "primaryFeatures": [
+    "AI/BI Genie",
+    "Trusted Assets",
+    "Genie Instructions",
+    "Metric Views",
+    "NL→SQL Patterns"
+  ],
+  "prerequisites": [
+    "unity-catalog-governance",
+    "semantic-layer-governance"
+  ],
+  "databricksEnabled": false,
+  "stages": [
+    { "id": "briefing", "title": "Mission Briefing", "type": "briefing", "configFile": "stages/01-briefing.json", "xpReward": 0, "estimatedMinutes": 5 },
+    { "id": "diagram", "title": "Genie Space Architecture", "type": "diagram", "configFile": "stages/02-diagram.json", "xpReward": 75, "estimatedMinutes": 8 },
+    { "id": "drag-drop-pipeline", "title": "Build a Genie Space", "type": "drag-drop", "configFile": "stages/03-drag-drop.json", "xpReward": 100, "estimatedMinutes": 12 },
+    { "id": "fill-blank-genie", "title": "Write Genie Instructions", "type": "fill-blank", "configFile": "stages/04-fill-blank.json", "xpReward": 100, "estimatedMinutes": 10 },
+    { "id": "quiz", "title": "Knowledge Check", "type": "quiz", "configFile": "stages/05-quiz.json", "xpReward": 75, "estimatedMinutes": 8 },
+    { "id": "debrief", "title": "Mission Debrief", "type": "debrief", "configFile": "stages/06-debrief.json", "xpReward": 0, "estimatedMinutes": 2 }
+  ],
+  "sideQuests": []
+}
