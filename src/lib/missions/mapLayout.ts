@@ -149,7 +149,7 @@ export const ZONES: Zone[] = [
     x: 1920,
     y: 60,
     width: 320,
-    height: 720,
+    height: 920,
     color: "rgba(255, 51, 102, 0.06)",
     glowColor: "#ff3366",
     borderColor: "rgba(255, 51, 102, 0.25)",
@@ -212,6 +212,7 @@ const MISSION_POSITIONS: Array<{
   { id: "lakehouse-platform-design", ring: 4, x: 2080, y: 220, zone: "capstone" },
   { id: "ml-pipelines-production", ring: 4, x: 2080, y: 470, zone: "capstone" },
   { id: "semantic-layer-governance", ring: 4, x: 2080, y: 680, zone: "capstone" },
+  { id: "ai-genie-spaces", ring: 4, x: 2080, y: 900, zone: "capstone" },
 ]
 
 /**
@@ -322,6 +323,8 @@ const PREREQUISITE_EDGES: Array<[string, string]> = [
   ["unity-catalog-governance", "ml-pipelines-production"],
   ["unity-catalog-governance", "semantic-layer-governance"],
   ["advanced-sql-analytics", "semantic-layer-governance"],
+  ["unity-catalog-governance", "ai-genie-spaces"],
+  ["semantic-layer-governance", "ai-genie-spaces"],
 ]
 
 /**

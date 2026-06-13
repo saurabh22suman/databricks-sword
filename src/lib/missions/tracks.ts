@@ -90,6 +90,7 @@ export const MISSION_TRACK_MAP: Record<string, Track> = {
   "bi-dashboards": "bi",
   "advanced-sql-analytics": "bi",
   "semantic-layer-governance": "bi",
+  "ai-genie-spaces": "bi",
 }
 
 /**
