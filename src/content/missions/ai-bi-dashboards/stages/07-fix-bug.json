@@ -1,0 +1,11 @@
+{
+  "description": "A dashboard is showing wrong totals — the dataset relationship is misconfigured. Find and fix the bug.",
+  "starterCode": "-- Dashboard dataset relationship definition\n-- BUG: join column names are swapped\nRELATIONSHIPS = [\n    {\n        'left_dataset': 'orders',\n        'right_dataset': 'customers',\n        'left_column': 'order_id',\n        'right_column': 'customer_id',\n        'join_type': 'inner'\n    },\n    {\n        'left_dataset': 'orders',\n        'right_dataset': 'products',\n        'left_column': 'product_id',\n        'right_column': 'order_id',\n        'join_type': 'left'\n    }\n]\n\n-- Symptom: Customer filter shows 0 orders even for known active customers",
+  "expectedPattern": "left_column.*customer_id.*right_column.*customer_id.*join_type.*inner.*left_column.*product_id.*right_column.*product_id",
+  "simulatedOutput": "Customer filter shows 0 orders even for known active customers",
+  "hints": [
+    "Trace each join from left to right: what column in left_dataset actually matches what column in right_dataset?",
+    "The first relationship had left_column: 'order_id' but should be 'customer_id'",
+    "The second relationship joined orders.product_id to products.order_id, which is also wrong"
+  ]
+}
