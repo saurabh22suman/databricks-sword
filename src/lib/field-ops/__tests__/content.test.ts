@@ -1,3 +1,5 @@
+import fs from "fs/promises"
+import path from "path"
 import { describe, expect, it } from "vitest"
 import { loadFieldOpsContent } from "../content"
 import type { Industry } from "../types"
@@ -58,8 +60,6 @@ describe("medtech-research content", () => {
   it("declares 1 data file that exists on disk", async () => {
     const mission = await loadFieldOpsContent("medtech-research")
     expect(mission.dataFiles).toEqual(["pubmed_abstracts.json"])
-    const path = require("path")
-    const fs = require("fs/promises")
     const dataPath = path.join(
       process.cwd(),
       "src/content/field-ops/medtech-research/data",
@@ -78,8 +78,6 @@ describe("medtech-research notebooks", () => {
   ]
   for (const nb of notebooks) {
     it(`${nb} has broken-notebook markers`, async () => {
-      const fs = require("fs/promises")
-      const path = require("path")
       const src = await fs.readFile(
         path.join(
           process.cwd(),
