@@ -201,12 +201,14 @@ describe("generateBundle - databricks.yml structure", () => {
     expect(parsed.bundle.uuid).toBeUndefined()
   })
 
-  it("hardcodes workspace.root_path with /Shared/field-ops/<schemaPrefix>", async () => {
+  it("hardcodes workspace.root_path with ~/<schemaPrefix> (satisfies 'mode: development' uniqueness constraint)", async () => {
     const ymlPath = path.join(bundlePath, "databricks.yml")
     const raw = await fs.readFile(ymlPath, "utf-8")
     const parsed = yaml.load(raw) as { workspace: { root_path: string } }
     const schemaPrefix = path.basename(bundlePath)
-    expect(parsed.workspace.root_path).toBe(`/Shared/field-ops/${schemaPrefix}`)
+    // '~/' satisfies the DAB constraint: root_path must start with '~/' or
+    // contain the current username when using 'mode: development'.
+    expect(parsed.workspace.root_path).toBe(`~/field-ops/${schemaPrefix}`)
     // Confirm DAB variable substitution was NOT used (DAB rejects it here)
     expect(raw).not.toContain("root_path: ${var.")
   })
@@ -236,6 +238,38 @@ describe("generateBundle - manufacturing yml overlay", () => {
     const raw = await fs.readFile(ymlPath, "utf-8")
     const parsed = yaml.load(raw) as { bundle: { name: string } }
     expect(parsed.bundle.name).toMatch(/^field-ops-manufacturing-fo_manufacturing_.+_.+$/)
+  })
+})
+
+describe("generateBundle - medtech-research resources", () => {
+  let bundlePath: string
+
+  beforeEach(async () => {
+    bundlePath = await generateBundle("medtech-research" as Industry, TEST_USER_ID, config)
+  })
+
+  afterEach(async () => {
+    if (bundlePath) await fs.rm(bundlePath, { recursive: true, force: true })
+  })
+
+  it("declares vector_search_endpoints resource", async () => {
+    const ymlPath = path.join(bundlePath, "databricks.yml")
+    const raw = await fs.readFile(ymlPath, "utf-8")
+    const parsed = yaml.load(raw) as { resources: { vector_search_endpoints: unknown } }
+    expect(parsed.resources.vector_search_endpoints).toBeDefined()
+  })
+
+  it("uses a Free Edition approved foundation model in model_serving", async () => {
+    const ymlPath = path.join(bundlePath, "databricks.yml")
+    const raw = await fs.readFile(ymlPath, "utf-8")
+    expect(raw).toMatch(/databricks-(llama|meta-llama|dbrx)-/)
+  })
+
+  it("declares apps resource with ./app source path", async () => {
+    const ymlPath = path.join(bundlePath, "databricks.yml")
+    const raw = await fs.readFile(ymlPath, "utf-8")
+    const parsed = yaml.load(raw) as { resources: { apps: { medtech_rag_app: { source_code_path: string } } } }
+    expect(parsed.resources.apps.medtech_rag_app.source_code_path).toBe("./app")
   })
 })
 

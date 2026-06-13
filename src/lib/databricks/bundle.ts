@@ -124,7 +124,7 @@ export async function generateBundle(
 
 /**
  * Deploy a generated bundle to Databricks using DAB CLI.
- * Runs `databricks bundle deploy` and optionally starts DLT pipelines.
+ * Runs `databricks bundle deploy` and optionally starts Spark Declarative Pipelines.
  */
 export async function deployBundle(
   bundlePath: string,
@@ -154,7 +154,7 @@ export async function deployBundle(
       { cwd: bundlePath, timeoutMs: 60_000 }
     )
     if (!startResult.success) {
-      return { success: false, errorMessage: startResult.stderr || "DLT pipeline start failed" }
+      return { success: false, errorMessage: startResult.stderr || "Spark Declarative Pipelines pipeline start failed" }
     }
     // We do NOT wait for the pipeline to complete. It runs in the background.
   }
@@ -272,8 +272,10 @@ function buildDatabricksYmlObject(
       host: workspaceUrl,
       // Hardcode root_path at yml generation time. DAB does NOT support
       // ${var.*} substitution in root_path — only built-ins like ${bundle.name}.
-      // This matches the legacy /Shared/field-ops/ path that the UI links to.
-      root_path: `/Shared/field-ops/${schemaPrefix}`,
+      // Use ~/ so DAB expands it to /Workspace/Users/<current-user>/ at deploy
+      // time. This satisfies the 'mode: development' constraint that
+      // root_path must start with '~/' or contain the current username.
+      root_path: `~/field-ops/${schemaPrefix}`,
     },
     variables: {
       catalog: {
@@ -334,6 +336,42 @@ function buildDatabricksYmlObject(
         development: true,
         photon: false,
         continuous: false,
+      },
+    }
+  }
+
+  // Medtech-research adds Vector Search, Model Serving, and Apps resources
+  if (industry === "medtech-research") {
+    const resources = yml.resources as Record<string, Record<string, unknown>>
+    resources.vector_search_endpoints = {
+      medsearch_endpoint: {
+        name: "medsearch-${var.schema_prefix}",
+        endpoint_type: "STANDARD",
+      },
+    }
+    resources.model_serving = {
+      rag_foundation_endpoint: {
+        name: "medtech-rag-${var.schema_prefix}",
+        config: {
+          served_entities: [
+            {
+              name: "llama-3-1-8b",
+              external_model: "databricks-llama-3.1-8b-instruct",
+            },
+          ],
+          traffic_config: {
+            routes: [
+              { served_model_name: "llama-3-1-8b", traffic_percentage: 100 },
+            ],
+          },
+        },
+      },
+    }
+    resources.apps = {
+      medtech_rag_app: {
+        name: "medtech-rag-${var.schema_prefix}",
+        source_code_path: "./app",
+        description: "RAG app for medical research discovery (Streamlit)",
       },
     }
   }
