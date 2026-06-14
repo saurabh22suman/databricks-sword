@@ -16,14 +16,14 @@ const STARTERS: { slug: string; title: string; minutes: number; blurb: string }[
     blurb: "Delta Lake, Unity Catalog, and the medallion architecture.",
   },
   {
-    slug: "sql-essentials",
-    title: "SQL Essentials",
+    slug: "sql-analytics-intro",
+    title: "SQL Analytics Intro",
     minutes: 20,
     blurb: "SELECTs, JOINs, and window functions for analytics engineers.",
   },
   {
-    slug: "pyspark-intro",
-    title: "PySpark Intro",
+    slug: "pyspark-essentials",
+    title: "PySpark Essentials",
     minutes: 30,
     blurb: "DataFrames, transformations, and lazy evaluation.",
   },
