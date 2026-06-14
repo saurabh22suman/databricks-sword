@@ -42,9 +42,9 @@ export function ChallengePlayerWrapper({
     }
   }, [challenge.id])
 
-  const handleComplete = (_result: ValidationResult): void => {
+  const handleComplete = async (_result: ValidationResult): Promise<void> => {
     playSound("challenge-complete")
-    const event = awardChallengeXp(challenge.id, challenge.xpReward)
+    const event = await awardChallengeXp(challenge.id, challenge.xpReward)
     if (event.amount === 0) {
       setXpMaxed(true)
     }

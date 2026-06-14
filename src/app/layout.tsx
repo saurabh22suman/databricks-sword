@@ -1,4 +1,5 @@
 import { SandboxSyncProvider, SessionProvider } from "@/components/auth"
+import { SkipToContent } from "@/components/a11y/SkipToContent"
 import { BackgroundMusic } from "@/components/layout/BackgroundMusic"
 import { Footer } from "@/components/layout/Footer"
 import { Header } from "@/components/layout/Header"
@@ -83,6 +84,7 @@ export default async function RootLayout({
       >
         <SessionProvider session={session}>
           <SandboxSyncProvider>
+            <SkipToContent />
             <Header />
             <RouteChangeSound />
             <BackgroundMusic />
@@ -92,7 +94,9 @@ export default async function RootLayout({
             <StreakDailyBonus />
             <PromoBanner />
             <AutoCleanupRunner />
-            <main className="flex-1">{children}</main>
+            <main id="main-content" tabIndex={-1} className="flex-1">
+              {children}
+            </main>
             <Footer />
           </SandboxSyncProvider>
         </SessionProvider>

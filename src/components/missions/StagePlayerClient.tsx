@@ -186,10 +186,10 @@ export function StagePlayerClient({
 
     // Award XP for stage completion and mission completion (final stage only)
     if (stageXpReward > 0) {
-      awardStageXp(missionId, stageId, stageXpReward);
+      await awardStageXp(missionId, stageId, stageXpReward);
     }
     if (isFinalStage && missionXpReward > 0) {
-      awardMissionXp(missionId, missionXpReward);
+      await awardMissionXp(missionId, missionXpReward);
     }
 
     // Sync to server BEFORE navigating - must await to prevent data loss

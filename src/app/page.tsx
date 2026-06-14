@@ -4,6 +4,7 @@ import { FAQ } from "@/components/landing/FAQ"
 import { FieldOperationsPreview } from "@/components/landing/FieldOperationsPreview"
 import { Hero } from "@/components/landing/Hero"
 import { InteractiveSyllabus } from "@/components/landing/InteractiveSyllabus"
+import { MissionStatusCard } from "@/components/dashboard/MissionStatusCard"
 import { blogPosts, getDb } from "@/lib/db"
 import { INDUSTRY_CONFIGS } from "@/lib/field-ops/industries"
 import { getContentFiles } from "@/lib/mdx/content"
@@ -88,13 +89,16 @@ export default async function HomePage(): Promise<React.ReactElement> {
       <div className="fixed inset-0 bg-cyber-grid bg-[size:40px_40px] opacity-20 pointer-events-none animate-pulse-fast" />
       <div className="fixed top-0 left-0 w-full h-32 bg-gradient-to-b from-anime-accent/10 to-transparent pointer-events-none z-0" />
       
-      <main className="relative z-10">
+      <div className="relative z-10">
         <Hero />
+        <section className="container mx-auto px-4 py-8">
+          <MissionStatusCard />
+        </section>
         <FieldOperationsPreview industries={featuredIndustries} />
         <InteractiveSyllabus missions={missions} />
         <FAQ />
         <BlogSection posts={blogSectionPosts} />
-      </main>
+      </div>
     </div>
   )
 }

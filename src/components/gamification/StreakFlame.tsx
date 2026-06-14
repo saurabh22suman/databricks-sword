@@ -35,9 +35,16 @@ export function StreakFlame({ streakDays, className }: StreakFlameProps): React.
   const streakText = `${streakDays} day${streakDays === 1 ? '' : 's'} streak`
 
   return (
-    <div 
+    <div
       className={cn("flex flex-col items-center gap-2", className)}
       data-testid="streak-flame"
+      aria-label={
+        streakDays > 0
+          ? `Current streak: ${streakText} with a ${xpMultiplier}x XP multiplier${
+              milestoneMessage ? `. ${milestoneMessage}` : ""
+            }`
+          : "No active streak. Start a mission to begin a new streak."
+      }
     >
       {/* Lottie Flame Animation */}
       {streakDays > 0 && (
@@ -52,20 +59,26 @@ export function StreakFlame({ streakDays, className }: StreakFlameProps): React.
       )}
 
       {/* Streak Count */}
-      <div className="text-sm font-mono text-anime-cyan">
+      <div className="text-sm font-mono text-anime-cyan" aria-hidden="true">
         {streakText}
       </div>
 
       {/* XP Multiplier */}
       {streakDays > 0 && (
-        <div className="text-xs font-bold text-anime-yellow bg-anime-900 px-2 py-1 rounded">
+        <div
+          className="text-xs font-bold text-anime-yellow bg-anime-900 px-2 py-1 rounded"
+          aria-hidden="true"
+        >
           {xpMultiplier}x XP
         </div>
       )}
 
       {/* Milestone Message */}
       {milestoneMessage && (
-        <div className="text-sm font-bold text-anime-accent animate-pulse">
+        <div
+          className="text-sm font-bold text-anime-accent animate-pulse"
+          aria-hidden="true"
+        >
           {milestoneMessage}
         </div>
       )}

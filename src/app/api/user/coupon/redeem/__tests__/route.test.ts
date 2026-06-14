@@ -3,6 +3,17 @@ import { NextRequest } from "next/server"
 import { beforeEach, describe, expect, it, vi } from "vitest"
 import { POST } from "../route"
 
+// Set COUPONS_JSON BEFORE the coupons module is imported so the
+// module-level COUPONS snapshot (read at import time) has the codes
+// the tests exercise. There are no hardcoded defaults in source.
+vi.hoisted(() => {
+  process.env.COUPONS_JSON = JSON.stringify({
+    DBSWORD1000: { xp: 1000, active: true },
+    DBSWORD10000: { xp: 10000, active: true },
+    DBSWORD15000: { xp: 15000, active: true },
+  })
+})
+
 vi.mock("@/lib/auth", () => ({
   auth: vi.fn(),
 }))

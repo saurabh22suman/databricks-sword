@@ -67,9 +67,7 @@ export function OnboardingFlow(): React.ReactElement {
   const total = STEPS.length
 
   return (
-    <main
-      id="main-content"
-      tabIndex={-1}
+    <div
       className="bg-anime-950 min-h-screen flex items-center justify-center px-4 py-12"
     >
       <section
@@ -128,6 +126,6 @@ export function OnboardingFlow(): React.ReactElement {
           Step {currentIdx + 1} of {total}
         </div>
       </section>
-    </main>
+    </div>
   )
 }
