@@ -31,6 +31,10 @@ export function buildFieldOpsLinks(params: DeploymentLinkParams): {
     }
   }
 
+  // DAB deploys to /Shared/field-ops/<schemaPrefix> (shared, see bundle.ts:278).
+  // This MUST match the path that bundle.ts writes to databricks.yml's
+  // workspace.root_path, so the deployed files appear at the location users
+  // navigate to from the "Open Deployed Notebooks" UI link.
   const notebooks = `${workspace}/#workspace/Shared/field-ops/${params.schemaPrefix}`
 
   const explorerBronze =

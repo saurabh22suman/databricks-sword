@@ -365,9 +365,7 @@ describe("Mission Types", () => {
   })
 
   describe("EvaluationQuerySchema", () => {
-    // NOTE: Direct EvaluationQuerySchema.parse() tests skipped due to Zod v4 export issue
-    // The schema works correctly when used inline in config schemas (see tests below)
-    it.skip("validates correct evaluation query", () => {
+    it("validates correct evaluation query", () => {
       const query: EvaluationQuery = {
         sql: "SELECT COUNT(*) as count FROM table",
         expectedResult: { count: 10 },
@@ -377,7 +375,7 @@ describe("Mission Types", () => {
       expect(() => EvaluationQuerySchema.parse(query)).not.toThrow()
     })
 
-    it.skip("validates evaluation query with tolerance", () => {
+    it("validates evaluation query with tolerance", () => {
       const query: EvaluationQuery = {
         sql: "SELECT AVG(price) as avg_price FROM products",
         expectedResult: { avg_price: 99.99 },
@@ -397,7 +395,7 @@ describe("Mission Types", () => {
       expect(() => EvaluationQuerySchema.parse(invalid)).toThrow()
     })
 
-    it.skip("rejects missing expectedResult", () => {
+    it("rejects missing expectedResult", () => {
       const invalid = {
         sql: "SELECT * FROM table",
         description: "Test",

@@ -1,6 +1,6 @@
 /**
  * Field Operations List Page
- * Displays all 8 industries with unlock status.
+ * Displays all 9 industries with unlock status.
  */
 
 import { getUserSandbox } from "@/app/api/user/helpers"
@@ -16,7 +16,7 @@ import { redirect } from "next/navigation"
 
 export const metadata: Metadata = {
   title: "Field Operations | Databricks Sword",
-  description: "Real-world Databricks deployments across 8 industries",
+  description: "Real-world Databricks deployments across 9 industries",
 }
 
 export default async function FieldOpsPage(): Promise<React.ReactElement> {
@@ -61,7 +61,7 @@ export default async function FieldOpsPage(): Promise<React.ReactElement> {
             ⚡ Field Operations
           </h1>
           <p className="text-anime-300 text-lg">
-            Real-world Databricks deployments across 8 industries
+            Real-world Databricks deployments across 9 industries
           </p>
         </div>
 

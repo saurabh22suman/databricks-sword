@@ -1,6 +1,6 @@
 {
   "description": "CDC updates are applied out of order due to the wrong sequence column. Fix apply_changes so sequence_by uses updated_at.",
-  "starterCode": "dlt.apply_changes(target=\"silver_orders\", source=\"bronze_order_events\", keys=[\"order_id\"], sequence_by=\"created_at\")",
+  "starterCode": "dp.apply_changes(target=\"silver_orders\", source=\"bronze_order_events\", keys=[\"order_id\"], sequence_by=\"created_at\")",
   "expectedPattern": "sequence_by\\s*=\\s*\\\"updated_at\\\"",
   "simulatedOutput": "Issue: Late-arriving status updates overwrite newer order states.",
   "hints": [

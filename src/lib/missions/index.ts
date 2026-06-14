@@ -1,7 +1,7 @@
 /**
  * Mission System
  * 
- * Story-driven missions across 10 industries following the full pedagogical loop:
+ * Story-driven missions across 9 industries following the full pedagogical loop:
  * Briefing (WHY) → Diagram (WHERE/WHAT) → Code Challenges (HOW) 
  * → Quiz (RECALL) → Debrief (REFLECT)
  */

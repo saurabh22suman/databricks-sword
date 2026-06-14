@@ -1,7 +1,7 @@
 /**
  * Mission Track Definitions
  *
- * Groups the 20 missions into 3 learning tracks:
+ * Groups the 22 missions into 3 learning tracks:
  * - Data Engineering (DE): Core lakehouse, Delta Lake, streaming, orchestration
  * - Machine Learning (ML): MLflow, Feature Store, model serving
  * - BI & Analytics (BI): SQL analytics, dashboards, semantic layer
@@ -86,10 +86,12 @@ export const MISSION_TRACK_MAP: Record<string, Track> = {
   "mlflow-experiment-tracking": "ml",
   "ml-pipelines-production": "ml",
 
-  // BI Track (3 missions: 2A, 1S)
+  // BI Track (4 missions: 2A, 2S)
   "bi-dashboards": "bi",
   "advanced-sql-analytics": "bi",
   "semantic-layer-governance": "bi",
+  "ai-genie-spaces": "bi",
+  "ai-bi-dashboards": "bi",
 }
 
 /**

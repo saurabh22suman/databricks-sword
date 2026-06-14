@@ -44,7 +44,7 @@ export default async function MissionsPage(): Promise<React.ReactElement> {
           </h1>
           <p className="text-anime-400 text-lg max-w-2xl mx-auto">
             Choose your mission. Master real-world Databricks scenarios across
-            10 industries.
+            9 industries.
           </p>
         </div>
 

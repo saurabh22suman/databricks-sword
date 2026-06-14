@@ -1,0 +1,46 @@
+{
+  "description": "Complete the Genie Instructions that disambiguate common business terms.",
+  "expectedOutput": "When completed correctly, this configuration will:\n1. Disambiguate 'revenue' to use the net_revenue metric view (not gross)\n2. Define 'active user' as 30-day logged-in (not all-time)\n3. Specify the date grain for 'last quarter' (calendar quarter, not 90 days)\n4. Reference the cohort function for retention questions\n5. Direct Genie to the trusted assets whitelist",
+  "codeTemplate": "-- Genie Instructions for an e-commerce Genie Space\n-- These run as plain-English context for NL→SQL translation\n\nINSTRUCTIONS = [\n    -- Disambiguate 'revenue' to use the governed metric view\n    \"When users ask about __BLANK_0__, use the metric view analytics.metrics.net_revenue, \"\n    \"not gold.orders.gross_revenue. Net revenue = gross - discounts - returns.\",\n\n    -- Define 'active user' precisely\n    \"'Active user' means __BLANK_1__ in the last 30 days. \"\n    \"Use the trusted function analytics.fn.is_active_user(user_id, days_back).\",\n\n    -- Specify date grain for vague terms\n    \"'Last quarter' means the most recent completed __BLANK_2__, not the last 90 days. \"\n    \"Always filter on DATE_TRUNC('quarter', order_date).\",\n\n    -- Reference cohort function\n    \"For retention questions, call the trusted function __BLANK_3__(start_date, cohort_days).\",\n\n    -- Direct to trusted assets only\n    \"Only query tables in the __BLANK_4__ list. Reject questions about other tables.\"\n]\n\nTRUSTED_ASSETS = [\n    'analytics.metrics.net_revenue',\n    'analytics.metrics.customer_ltv',\n    'analytics.metrics.churn_rate',\n    'analytics.fn.is_active_user',\n    'analytics.fn.cohort_retention'\n]",
+  "blanks": [
+    {
+      "id": 0,
+      "options": ["revenue", "money", "sales", "income"],
+      "correctAnswer": "revenue"
+    },
+    {
+      "id": 1,
+      "options": ["any user", "logged-in", "purchased", "registered"],
+      "correctAnswer": "logged-in"
+    },
+    {
+      "id": 2,
+      "options": ["calendar quarter", "fiscal month", "ISO week", "rolling window"],
+      "correctAnswer": "calendar quarter"
+    },
+    {
+      "id": 3,
+      "options": ["analytics.fn.cohort_retention", "gold.users.cohorts", "ml.cohort_model", "spark.cohort"],
+      "correctAnswer": "analytics.fn.cohort_retention"
+    },
+    {
+      "id": 4,
+      "options": ["Trusted Assets", "Gold schemas", "Unity Catalog", "Bronze tables"],
+      "correctAnswer": "Trusted Assets"
+    }
+  ],
+  "hints": [
+    "Revenue is the most commonly-ambiguous term in analytics — always specify the metric view",
+    "Active user definitions vary by company (DAU, MAU, WAU, logged-in, purchased)",
+    "'Last quarter' can mean calendar quarter, fiscal quarter, or rolling 90 days — be explicit",
+    "Trusted functions are the way to expose custom Python/SQL computations to Genie",
+    "Trusted Assets is the whitelist — Genie cannot see anything not in this list"
+  ],
+  "learnings": [
+    "Genie Instructions are plain-English, not SQL",
+    "Each instruction should answer one ambiguity",
+    "Reference metric views and trusted functions by their full UC path",
+    "Date-grain ambiguity is one of the top NL→SQL failure modes",
+    "The Trusted Assets list is the security boundary — review it carefully"
+  ]
+}

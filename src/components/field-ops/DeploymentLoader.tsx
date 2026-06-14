@@ -65,7 +65,7 @@ const DATABRICKS_TIPS = [
   },
   {
     title: "Data Quality",
-    tip: "Use Delta Live Tables expectations to enforce data quality rules at ingestion time.",
+    tip: "Use Spark Declarative Pipelines expectations (dp.expect, dp.expect_or_drop, dp.expect_or_fail) to enforce data quality rules at ingestion time.",
   },
   {
     title: "Feature Store",

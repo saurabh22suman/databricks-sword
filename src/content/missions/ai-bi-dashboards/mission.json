@@ -1,0 +1,32 @@
+{
+  "id": "ai-bi-dashboards",
+  "title": "AI/BI Dashboards",
+  "subtitle": "Build AI-powered dashboards with Lakeview, dataset relationships, and Genie integration",
+  "description": "Extend classic Lakeview dashboards with the AI/BI features: Genie panel for natural-language Q&A, AI-generated visualizations, dataset relationships (semantic graph), and AI insights on charts.",
+  "industry": "enterprise",
+  "rank": "S",
+  "xpRequired": 8000,
+  "xpReward": 750,
+  "estimatedMinutes": 50,
+  "primaryFeatures": [
+    "AI/BI Dashboards (Lakeview AI)",
+    "Genie Panel",
+    "Dataset Relationships",
+    "AI-Generated Visualizations",
+    "AI Insights"
+  ],
+  "prerequisites": [
+    "bi-dashboards"
+  ],
+  "databricksEnabled": false,
+  "stages": [
+    { "id": "briefing", "title": "Mission Briefing", "type": "briefing", "configFile": "stages/01-briefing.json", "xpReward": 0, "estimatedMinutes": 5 },
+    { "id": "diagram", "title": "Dashboard + AI Architecture", "type": "diagram", "configFile": "stages/02-diagram.json", "xpReward": 75, "estimatedMinutes": 10 },
+    { "id": "drag-drop-pipeline", "title": "Build Dashboard with AI Panel", "type": "drag-drop", "configFile": "stages/03-drag-drop.json", "xpReward": 100, "estimatedMinutes": 12 },
+    { "id": "fill-blank-dashboard", "title": "Configure AI Insights", "type": "fill-blank", "configFile": "stages/04-fill-blank.json", "xpReward": 100, "estimatedMinutes": 12 },
+    { "id": "fix-bug", "title": "Fix a Dataset Relationship", "type": "fix-bug", "configFile": "stages/07-fix-bug.json", "xpReward": 100, "estimatedMinutes": 8 },
+    { "id": "quiz", "title": "Knowledge Check", "type": "quiz", "configFile": "stages/05-quiz.json", "xpReward": 75, "estimatedMinutes": 8 },
+    { "id": "debrief", "title": "Mission Debrief", "type": "debrief", "configFile": "stages/06-debrief.json", "xpReward": 0, "estimatedMinutes": 3 }
+  ],
+  "sideQuests": []
+}

@@ -1,8 +1,8 @@
 {
   "id": "data-quality-framework",
   "title": "Data Quality Framework",
-  "subtitle": "Expectations, Quarantine & DLT",
-  "description": "Build data quality pipelines with Delta Live Tables expectations, quarantine patterns, and automated validation rules.",
+  "subtitle": "Expectations, Quarantine & SDP",
+  "description": "Build data quality pipelines with Spark Declarative Pipelines (formerly Delta Live Tables) expectations, quarantine patterns, and automated validation rules.",
   "industry": "healthcare",
   "rank": "A",
   "xpRequired": 500,
@@ -14,7 +14,7 @@
     "unity-catalog-governance"
   ],
   "primaryFeatures": [
-    "DLT Expectations",
+    "SDP Expectations",
     "Quarantine Patterns",
     "Data Validation",
     "Quality Metrics",
@@ -48,7 +48,7 @@
     {
       "id": "fill-blank",
       "type": "fill-blank",
-      "title": "Write DLT Expectations",
+      "title": "Write SDP Expectations",
       "configFile": "stages/04-fill-blank.json",
       "xpReward": 75,
       "estimatedMinutes": 12

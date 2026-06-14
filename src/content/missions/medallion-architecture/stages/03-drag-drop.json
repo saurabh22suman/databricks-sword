@@ -4,32 +4,32 @@
   "blocks": [
     {
       "id": "ingest-auto-loader",
-      "code": "@dlt.table\ndef bronze_events():\n    return spark.readStream.format('cloudFiles').load('/raw/events')",
+      "code": "@dp.table\ndef bronze_events():\n    return spark.readStream.format('cloudFiles').load('/raw/events')",
       "label": "Bronze: Auto Loader Ingestion"
     },
     {
       "id": "silver-dedup",
-      "code": "@dlt.table\n@dlt.expect_or_drop('valid_event', 'event_id IS NOT NULL')\ndef silver_events():\n    return (dlt.read_stream('bronze_events')\n        .withWatermark('event_timestamp', '10 minutes')\n        .dropDuplicates(['event_id']))",
+      "code": "@dp.table\ndef silver_events():\n    dp.expect_or_drop('valid_event', col('event_id').isNotNull())\n    return (dp.read_stream('bronze_events')\n        .withWatermark('event_timestamp', '10 minutes')\n        .dropDuplicates(['event_id']))",
       "label": "Silver: Deduplicate + Validate Events"
     },
     {
       "id": "silver-enrich",
-      "code": "return deduped.join(dlt.read('dim_users'), 'user_id')",
+      "code": "return deduped.join(dp.read('dim_users'), 'user_id')",
       "label": "Silver: Enrich with User Data"
     },
     {
       "id": "gold-daily",
-      "code": "@dlt.table\ndef gold_daily_metrics():\n    return dlt.read('silver_events').groupBy('date').agg(count('*'))",
+      "code": "@dp.table\ndef gold_daily_metrics():\n    return dp.read('silver_events').groupBy('date').agg(count('*'))",
       "label": "Gold: Daily Aggregation"
     },
     {
       "id": "gold-features",
-      "code": "@dlt.table\ndef gold_user_features():\n    return dlt.read('silver_events').groupBy('user_id').agg(features...)",
+      "code": "@dp.table\ndef gold_user_features():\n    return dp.read('silver_events').groupBy('user_id').agg(features...)",
       "label": "Gold: ML Feature Table"
     },
     {
       "id": "cdc-apply",
-      "code": "dlt.apply_changes(target='silver_users', source='cdc_raw', keys=['user_id'])",
+      "code": "dp.apply_changes(target='silver_users', source='cdc_raw', keys=['user_id'])",
       "label": "CDC: Apply User Updates"
     }
   ],
@@ -54,6 +54,7 @@
     "Silver layer cleanses, validates, and enriches the data",
     "Gold layer creates business-level aggregations and KPIs",
     "Each layer builds on the previous with increasing quality",
-    "This pattern enables data replay and debugging"
+    "This pattern enables data replay and debugging",
+    "Import as: from pyspark import pipelines as dp"
   ]
 }

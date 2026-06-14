@@ -6,22 +6,22 @@
 
 ## Your Mission
 
-Transform MegaMart's prototype pipelines into production-grade systems using Delta Live Tables. Implement CDC for order updates, comprehensive error handling, automated monitoring, and SLA guarantees.
+Transform MegaMart's prototype pipelines into production-grade systems using Spark Declarative Pipelines (formerly Delta Live Tables). Implement CDC for order updates, comprehensive error handling, automated monitoring, and SLA guarantees.
 
 ## Objectives
 
-1. **Production DLT patterns** — parameterized pipelines, environment promotion
+1. **Production SDP patterns** — parameterized pipelines, environment promotion
 2. **CDC implementation** — APPLY CHANGES for order status tracking
 3. **Error handling** — dead letter queues, retry logic, graceful degradation
-4. **Pipeline monitoring** — DLT event logs, custom metrics, alerting
+4. **Pipeline monitoring** — SDP event log, custom metrics, alerting
 5. **SLA management** — latency tracking, freshness monitoring, incident response
 
 ## Key Intelligence
 
-- DLT pipelines should be parameterized for dev/staging/prod environments
-- APPLY CHANGES INTO handles CDC with automatic ordering by sequence column
+- SDP pipelines should be parameterized for dev/staging/prod environments
+- `dp.apply_changes()` handles CDC with automatic ordering by sequence column
 - Dead letter queues capture records that fail processing without blocking the pipeline
-- DLT event logs provide built-in monitoring (pipeline start/stop, quality metrics, errors)
+- The SDP event log provides built-in monitoring (pipeline start/stop, quality metrics, errors)
 - SLA monitoring tracks data freshness — how old is the latest data in Gold tables
 
 ## Stakes

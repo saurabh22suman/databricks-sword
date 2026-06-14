@@ -38,7 +38,7 @@ export const metadata: Metadata = {
     template: "%s | Databricks Sword",
   },
   description:
-    "Master the Databricks ecosystem through gamified missions, interactive challenges, and spaced repetition. 20 story-driven missions, 50+ challenges, dark cyberpunk theme. All simulated—no cloud costs.",
+    "Master the Databricks ecosystem through gamified missions, interactive challenges, and spaced repetition. 22 story-driven missions, 52 challenges, dark cyberpunk theme. All simulated—no cloud costs.",
   keywords: [
     "Databricks",
     "Data Engineering",

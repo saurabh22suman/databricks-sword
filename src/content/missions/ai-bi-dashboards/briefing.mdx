@@ -1,0 +1,41 @@
+---
+title: "AI/BI Dashboards"
+subtitle: "AI-powered dashboards with the Genie panel, dataset relationships, and AI insights"
+---
+
+## What are AI/BI Dashboards?
+
+**AI/BI Dashboards** are the next generation of Databricks' native dashboarding product (Lakeview), augmented with AI features. Beyond classic Lakeview (canvas, widgets, parameters, alerts), AI/BI Dashboards add:
+
+- **Genie Panel** — embed a Genie Space directly in the dashboard for natural-language Q&A
+- **Dataset Relationships** — declare semantic joins between datasets in the dashboard; the dashboard respects them across widgets
+- **AI-Generated Visualizations** — ask "show me X by Y" and the canvas generates a chart
+- **AI Insights** — per-widget, ask "what's interesting in this chart?" and get an LLM-generated summary
+
+## Why this matters
+
+Classic dashboards answer questions you anticipated when you built them. AI/BI Dashboards answer **follow-up questions** in real time:
+
+- "What was revenue last quarter?" → classic dashboard chart
+- "Why did revenue drop in March?" → Genie panel pulls the answer from your data
+- "Show me revenue by region as a bar chart" → AI-generated visualization
+- "What's the most striking trend in this chart?" → AI insight
+
+## Your Mission
+
+1. **Understand the architecture** — dataset model, Genie panel placement, AI insights flow
+2. **Build a dashboard with AI features** — assemble components in the right order
+3. **Configure AI insights** — pick model, set refresh, write context
+4. **Debug a dataset relationship** — fix a wrong join that's causing wrong aggregations
+5. **Pass the knowledge check** — 5 questions on AI/BI Dashboard features
+
+## Key concepts you'll use
+
+- **Dataset** — a UC table or SQL query result bound to the dashboard
+- **Dataset Relationship** — a semantic join declared between datasets, enabling cross-filtering
+- **Genie Panel** — a widget that hosts a Genie Space inside the dashboard
+- **AI Insight** — an LLM-generated text summary of a chart's most notable patterns
+- **Parameter** — a dashboard variable that drives filters across widgets
+- **Cross-filter** — clicking a bar in one chart filters all related charts
+
+Ready? Let's build an AI-native dashboard.

@@ -1,0 +1,72 @@
+{
+  "questions": [
+    {
+      "id": "q1",
+      "question": "What is a Dataset Relationship in AI/BI Dashboards?",
+      "options": [
+        "A declared semantic join between two dashboard datasets that enables cross-filtering between widgets",
+        "A foreign-key constraint enforced by the warehouse",
+        "A lineage view in Catalog Explorer",
+        "A scheduled pipeline linking two tables"
+      ],
+      "correctAnswer": "A declared semantic join between two dashboard datasets that enables cross-filtering between widgets",
+      "explanation": "Dataset Relationships are dashboard-scoped joins declared at design time. They tell the canvas 'when the user clicks a bar in chart A, filter chart B to the same dimension value.' Without declared relationships, cross-filtering doesn't work."
+    },
+    {
+      "id": "q2",
+      "question": "What does the Genie Panel widget do?",
+      "options": [
+        "Embeds a Genie Space inside the dashboard for natural-language Q&A on the dashboard's datasets",
+        "Generates charts from a prompt",
+        "Replaces the dashboard canvas",
+        "Creates new datasets"
+      ],
+      "correctAnswer": "Embeds a Genie Space inside the dashboard for natural-language Q&A on the dashboard's datasets",
+      "explanation": "The Genie Panel is a widget that hosts a configured Genie Space. Users get a chat box inside the dashboard where they can ask follow-up questions in natural language. The Genie Space must be configured separately (Trusted Assets, Instructions)."
+    },
+    {
+      "id": "q3",
+      "question": "How are AI Insights generated?",
+      "options": [
+        "By sending the chart's data + context string to a Foundation Model endpoint, which returns a text summary",
+        "By running a built-in statistical analysis",
+        "By querying a pre-computed ML model",
+        "By reading documentation comments"
+      ],
+      "correctAnswer": "By sending the chart's data + context string to a Foundation Model endpoint, which returns a text summary",
+      "explanation": "AI Insights call a Foundation Model endpoint (e.g., databricks-llama-3.1-8b-instruct on Free Edition) with the chart's data, schema, and a context string. The model returns a text summary that appears under the chart."
+    },
+    {
+      "id": "q4",
+      "question": "[Recall: BI Dashboards] What's the difference between a Parameter and a Dataset Relationship?",
+      "options": [
+        "A Parameter is user-controlled filtering on a single dataset; a Dataset Relationship is a declared join between datasets for cross-filtering",
+        "They are the same thing",
+        "Parameters are deprecated",
+        "Dataset Relationships are UI-only and don't affect queries"
+      ],
+      "correctAnswer": "A Parameter is user-controlled filtering on a single dataset; a Dataset Relationship is a declared join between datasets for cross-filtering",
+      "explanation": "Parameters (date range, region) are explicit user-controlled filters. Dataset Relationships are declared joins that make cross-filtering automatic — click a value in one chart, related charts filter. They serve different purposes and complement each other."
+    },
+    {
+      "id": "q5",
+      "question": "What happens if your Genie Space's Trusted Assets don't include a dataset the dashboard references?",
+      "options": [
+        "The Genie Panel will refuse to answer questions about that dataset, but the dashboard widgets still work",
+        "The dashboard crashes",
+        "The Genie Panel silently answers wrong",
+        "All widgets in the dashboard break"
+      ],
+      "correctAnswer": "The Genie Panel will refuse to answer questions about that dataset, but the dashboard widgets still work",
+      "explanation": "Trusted Assets is a per-Space whitelist. The Genie Panel will not query assets outside that list. The dashboard's own widgets use the dashboard's own datasets, not the Genie Space's Trusted Assets, so they continue to work independently."
+    }
+  ],
+  "passingScore": 70,
+  "learnings": [
+    "Dataset Relationships enable cross-filtering across widgets",
+    "Genie Panel embeds a Genie Space inside the dashboard",
+    "AI Insights call a Foundation Model endpoint",
+    "Parameters (user filters) and Relationships (cross-filter) serve different purposes",
+    "Trusted Assets are per-Space; dashboard widgets are not affected"
+  ]
+}

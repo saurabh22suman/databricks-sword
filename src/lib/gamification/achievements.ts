@@ -55,7 +55,7 @@ export const ACHIEVEMENTS: readonly Achievement[] = [
   {
     id: "mission-master",
     title: "Mission Master",
-    description: "Complete all 20 missions",
+    description: "Complete all 22 missions",
     icon: "crown",
     xpBonus: 750,
     condition: { type: "mission-complete", count: 20 },
@@ -83,7 +83,7 @@ export const ACHIEVEMENTS: readonly Achievement[] = [
   {
     id: "challenge-legend",
     title: "Challenge Legend",
-    description: "Complete 50 challenges",
+    description: "Complete 52 challenges",
     icon: "diamond",
     xpBonus: 800,
     condition: { type: "challenge-complete", count: 50 },

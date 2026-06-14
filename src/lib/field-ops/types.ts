@@ -16,6 +16,7 @@ export type Industry =
   | "manufacturing"
   | "telecom"
   | "agritech"
+  | "medtech-research"
 
 /**
  * Deployment lifecycle status.
@@ -23,7 +24,7 @@ export type Industry =
 export type DeploymentStatus =
   | "pending"       // Created but not started
   | "deploying"     // Bundle deployment in progress
-  | "pipeline_running" // DLT pipeline started (manufacturing only); running in background
+  | "pipeline_running" // SDP pipeline started (manufacturing only); running in background
   | "deployed"      // Successfully deployed; awaiting validation or user interaction
   | "validating"    // Running validation queries
   | "completed"     // All validations passed, XP awarded
@@ -132,7 +133,14 @@ export type IndustryConfig = {
  * Bundle deployment result.
  */
 export type CleanupFailure = {
-  resourceType: "schema" | "workspace_dir" | "local_bundle" | "bundle"
+  resourceType:
+    | "schema"
+    | "workspace_dir"
+    | "local_bundle"
+    | "bundle"
+    | "vector_search_endpoint"
+    | "model_serving_endpoint"
+    | "app"
   resourceName: string
   errorMessage: string
 }

@@ -45,7 +45,7 @@ const UPDATES: UpdateEntry[] = [
     type: "minor",
     title: "Mission System Launch",
     changes: [
-      { category: "feature", description: "Launched 20 story-driven missions across 10 industries" },
+      { category: "feature", description: "Launched 22 story-driven missions across 9 industries" },
       { category: "feature", description: "Added medallion architecture progression: Bronze → Silver → Gold" },
       { category: "feature", description: "Implemented stage types: briefing, diagram, drag-drop, fill-blank, quiz, debrief" },
       { category: "content", description: "Created comprehensive mission content for all Databricks features" },

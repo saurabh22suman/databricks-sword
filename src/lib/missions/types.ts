@@ -3,7 +3,7 @@ import { z } from "zod"
 /**
  * Mission System Types
  * 
- * Types for story-driven missions across 10 industries.
+ * Types for story-driven missions across 9 industries.
  * Each mission follows the full pedagogical loop:
  * Briefing (WHY) → Diagram (WHERE/WHAT) → Code Challenges (HOW) 
  * → Quiz (RECALL) → Debrief (REFLECT)
@@ -235,7 +235,12 @@ export type EvaluationQuery = {
 
 export const EvaluationQuerySchema = z.object({
   sql: z.string(),
-  expectedResult: z.any(),
+  // z.record(z.unknown()) throws in Zod v4 (see issue with _zod internals),
+  // and z.any() silently accepts undefined. Use z.unknown() with a refine
+  // to enforce the Record<string, unknown> contract from the type.
+  expectedResult: z
+    .unknown()
+    .refine((v) => v !== undefined, { message: "expectedResult is required" }),
   description: z.string(),
   tolerance: z.number().optional(),
 })

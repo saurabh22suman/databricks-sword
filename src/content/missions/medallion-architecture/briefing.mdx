@@ -6,7 +6,7 @@
 
 ## Your Mission
 
-Design and implement a full medallion architecture (Bronze → Silver → Gold) using Delta Live Tables. Transform StreamVerse's chaotic data lake into a structured, reliable, and performant lakehouse.
+Design and implement a full medallion architecture (Bronze → Silver → Gold) using Spark Declarative Pipelines (formerly Delta Live Tables). Transform StreamVerse's chaotic data lake into a structured, reliable, and performant lakehouse.
 
 ## Objectives
 
@@ -21,7 +21,7 @@ Design and implement a full medallion architecture (Bronze → Silver → Gold) 
 - **Bronze (Raw)**: Append-only streaming ingestion via Auto Loader (`cloudFiles`) with schema inference and schema evolution tracking via `cloudFiles.schemaLocation`. Preserves raw data exactly as received, with ingestion metadata.
 - **Silver (Validated)**: Cleaned, deduplicated, conformed schema, business keys resolved
 - **Gold (Business)**: Aggregated, feature-engineered, optimized for specific use cases
-- DLT automates dependency resolution between layers
+- Spark Declarative Pipelines (SDP, formerly DLT) automates dependency resolution between layers
 - CDC (Change Data Capture) propagates updates through the medallion layers
 
 ## Stakes

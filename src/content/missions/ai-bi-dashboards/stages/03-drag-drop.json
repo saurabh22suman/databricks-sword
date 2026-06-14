@@ -1,0 +1,38 @@
+{
+  "description": "Arrange the steps to build an AI/BI Dashboard in the correct order.",
+  "instructions": "An AI/BI Dashboard starts with datasets, adds relationships, then widgets, then AI features. Pattern: source data -> dataset -> relationships -> widgets -> parameters -> Genie panel -> AI insights.",
+  "blocks": [
+    { "id": "create-dataset", "code": "Create a Dashboard Dataset by binding a Gold table (or saved SQL query) to the dashboard", "label": "Create Dataset" },
+    { "id": "add-relationships", "code": "Declare Dataset Relationships — e.g., orders.customer_id = customers.id — for cross-filtering", "label": "Add Dataset Relationships" },
+    { "id": "add-widgets", "code": "Add widgets: KPI cards, bar charts, line charts, tables, all bound to datasets", "label": "Add Widgets" },
+    { "id": "add-parameters", "code": "Add Parameters: date range, region dropdown, product category — and bind them to widget filters", "label": "Add Parameters / Filters" },
+    { "id": "add-genie-panel", "code": "Add a Genie Panel widget, bind it to a configured Genie Space for in-dashboard NL Q&A", "label": "Add Genie Panel" },
+    { "id": "configure-ai-insights", "code": "Enable AI Insights on key charts, pick a foundation model, write context for the AI summary", "label": "Enable AI Insights" },
+    { "id": "schedule-refresh", "code": "Configure scheduled refresh for the underlying datasets (every 1 hour during business hours)", "label": "Schedule Refresh" }
+  ],
+  "correctOrder": [
+    "create-dataset",
+    "add-relationships",
+    "add-widgets",
+    "add-parameters",
+    "add-genie-panel",
+    "configure-ai-insights",
+    "schedule-refresh"
+  ],
+  "hints": [
+    "Datasets are the typed view of data — widgets can't exist without them",
+    "Relationships are declared up-front so cross-filtering works across widgets from day one",
+    "Widgets are the visualizations — you can add as many as you want after datasets exist",
+    "Parameters turn a static dashboard into an interactive one",
+    "The Genie Panel is just another widget, but it hosts a Genie Space",
+    "AI Insights are configured per-widget, picking a model and context",
+    "Scheduled refresh keeps the data fresh — required for any production dashboard"
+  ],
+  "learnings": [
+    "Datasets are the foundation; widgets can't exist without them",
+    "Dataset Relationships enable cross-filtering across widgets",
+    "Genie Panel is a widget, but it hosts a Genie Space",
+    "AI Insights are per-widget LLM-generated summaries",
+    "Scheduled refresh is required for any production dashboard"
+  ]
+}

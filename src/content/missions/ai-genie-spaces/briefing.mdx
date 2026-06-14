@@ -1,0 +1,31 @@
+---
+title: "AI/BI Genie Spaces"
+subtitle: "Natural-language analytics powered by your semantic layer"
+---
+
+## What is AI/BI Genie?
+
+**AI/BI Genie** is Databricks' natural-language interface for analytics. Business users ask questions in plain English; Genie translates them to SQL using your table metadata, column comments, and curated instructions — then runs the query against the warehouse.
+
+## Why this matters
+
+Before Genie, the only way to "ask the data a question" was to write SQL or wait for a data team ticket. Genie flips that:
+
+- **Self-service analytics** for non-technical users
+- **Governed by Unity Catalog** — users only see data they're authorized to see
+- **Learns from feedback** — you can upvote good answers, edit bad ones, and Genie adapts
+- **Tuned by your semantic layer** — metric views and column comments directly improve NL→SQL accuracy
+
+## Your Mission
+
+You'll build and tune a Genie Space end-to-end.
+
+## Key concepts you'll use
+
+- **Trusted Asset** — a table, view, or function Genie is *allowed* to query. Without it, Genie can't see the asset.
+- **Genie Instruction** — plain-English context that guides NL→SQL. "When users say 'revenue', use `net_revenue` from the metric view, not `gross_revenue`."
+- **Metric View** — a UC-native metric definition (the semantic layer building block) that Genie prefers when answering metric questions.
+- **Trusted Functions** — Python/SQL functions Genie can call to enrich answers (e.g., a `forecast_qty()` function).
+- **Feedback Loop** — when a user edits a generated SQL, that edit becomes training signal for the next answer.
+
+Ready? Let's go.

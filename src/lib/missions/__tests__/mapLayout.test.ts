@@ -27,6 +27,39 @@ import {
     ZONES,
 } from "../mapLayout"
 
+describe("ai-genie-spaces map node", () => {
+  it("appears in getMissionNodes with the expected position", () => {
+    const nodes = getMissionNodes()
+    const node = nodes.find((n) => n.id === "ai-genie-spaces")
+    expect(node).toBeDefined()
+    expect(node?.zone).toBe("capstone")
+  })
+
+  it("has a prerequisite edge from unity-catalog-governance (fallback path)", () => {
+    const edges = getMapEdges()
+    expect(edges.some((e) => e.from === "unity-catalog-governance" && e.to === "ai-genie-spaces")).toBe(true)
+  })
+
+  it("has a prerequisite edge from semantic-layer-governance (fallback path)", () => {
+    const edges = getMapEdges()
+    expect(edges.some((e) => e.from === "semantic-layer-governance" && e.to === "ai-genie-spaces")).toBe(true)
+  })
+})
+
+describe("ai-bi-dashboards map node", () => {
+  it("appears in getMissionNodes with the expected position", () => {
+    const nodes = getMissionNodes()
+    const node = nodes.find((n) => n.id === "ai-bi-dashboards")
+    expect(node).toBeDefined()
+    expect(node?.zone).toBe("specialization")
+  })
+
+  it("has a prerequisite edge from bi-dashboards (fallback path)", () => {
+    const edges = getMapEdges()
+    expect(edges.some((e) => e.from === "bi-dashboards" && e.to === "ai-bi-dashboards")).toBe(true)
+  })
+})
+
 describe("mapLayout — pipeline layout", () => {
   describe("constants", () => {
     it("should have correct map dimensions", () => {
@@ -87,9 +120,9 @@ describe("mapLayout — pipeline layout", () => {
   })
 
   describe("mission nodes", () => {
-    it("should return exactly 20 mission nodes", () => {
+    it("should return exactly 22 mission nodes", () => {
       const nodes = getMissionNodes()
-      expect(nodes).toHaveLength(20)
+      expect(nodes).toHaveLength(22)
     })
 
     it("all mission nodes should have type 'mission'", () => {
@@ -141,9 +174,9 @@ describe("mapLayout — pipeline layout", () => {
       expect(nodes).toHaveLength(2)
     })
 
-    it("specialization zone should have exactly 11 missions", () => {
+    it("specialization zone should have exactly 12 missions", () => {
       const nodes = getMissionNodes().filter((n) => n.zone === "specialization")
-      expect(nodes).toHaveLength(11)
+      expect(nodes).toHaveLength(12)
     })
 
     it("mastery zone should have exactly 3 missions", () => {
@@ -151,16 +184,16 @@ describe("mapLayout — pipeline layout", () => {
       expect(nodes).toHaveLength(3)
     })
 
-    it("capstone zone should have exactly 3 missions", () => {
+    it("capstone zone should have exactly 4 missions", () => {
       const nodes = getMissionNodes().filter((n) => n.zone === "capstone")
-      expect(nodes).toHaveLength(3)
+      expect(nodes).toHaveLength(4)
     })
   })
 
   describe("field ops nodes", () => {
-    it("should return exactly 8 field ops nodes", () => {
+    it("should return exactly 9 field ops nodes", () => {
       const nodes = getFieldOpsNodes()
-      expect(nodes).toHaveLength(8)
+      expect(nodes).toHaveLength(9)
     })
 
     it("all field ops nodes should have type 'field-ops'", () => {
@@ -188,16 +221,16 @@ describe("mapLayout — pipeline layout", () => {
   })
 
   describe("all map nodes", () => {
-    it("should return 28 total nodes (20 missions + 8 field ops)", () => {
+    it("should return 31 total nodes (22 missions + 9 field ops)", () => {
       const nodes = getAllMapNodes()
-      expect(nodes).toHaveLength(28)
+      expect(nodes).toHaveLength(31)
     })
   })
 
   describe("edges", () => {
-    it("should return 35 prerequisite edges", () => {
+    it("should return 38 prerequisite edges", () => {
       const edges = getMapEdges()
-      expect(edges).toHaveLength(35)
+      expect(edges).toHaveLength(38)
     })
 
     it("all edges should reference valid node IDs", () => {

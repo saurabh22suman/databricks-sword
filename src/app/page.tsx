@@ -20,7 +20,7 @@ export const revalidate = 300
 export const metadata: Metadata = {
   title: "Databricks Sword — Master the Lakehouse Through Gamified Missions",
   description:
-    "Level up your Databricks skills with 20 story-driven missions, 50+ challenges, and spaced repetition. Dark cyberpunk theme. All simulated—no cloud costs.",
+    "Level up your Databricks skills with 22 story-driven missions, 52 challenges, and spaced repetition. Dark cyberpunk theme. All simulated—no cloud costs.",
   openGraph: {
     title: "Databricks Sword — Gamified Databricks Mastery",
     description: "Master Delta Lake, PySpark, MLflow, and Unity Catalog through interactive missions and challenges.",

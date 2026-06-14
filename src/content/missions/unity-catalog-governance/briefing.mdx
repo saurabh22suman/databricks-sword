@@ -10,7 +10,7 @@ Federal DataVault is migrating from legacy Hive metastores to Unity Catalog. You
 
 ## Objectives
 
-1. **Understand the four-level hierarchy** — metastore → catalog → schema → table
+1. **Understand the three-level namespace** — catalog → schema → table
 2. **Configure fine-grained access** — GRANT/REVOKE permissions at every level
 3. **Implement row and column-level security** — protect sensitive fields
 4. **Track data lineage** — automated lineage from Unity Catalog
@@ -19,7 +19,7 @@ Federal DataVault is migrating from legacy Hive metastores to Unity Catalog. You
 ## Key Intelligence
 
 - Unity Catalog provides centralized governance across all Databricks workspaces
-- The four-level hierarchy: `metastore → catalog.schema.table` replaces the flat Hive model. The metastore is the root governance container that holds all catalogs.
+- The three-level namespace: `catalog.schema.table` (or view) replaces the flat Hive model. The **metastore** sits above catalogs as the account-level governance container, but is not part of the namespace itself.
 - Data-read privileges (USAGE, SELECT) cascade down to child objects; administrative privileges (CREATE, MODIFY) require explicit grants at each level
 - Dynamic views enable row-level and column-level security
 - Data lineage is automatically captured for tables, notebooks, and pipelines

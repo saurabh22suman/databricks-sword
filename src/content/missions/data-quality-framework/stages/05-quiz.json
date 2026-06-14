@@ -2,7 +2,7 @@
   "questions": [
     {
       "id": "q1",
-      "question": "What does @dlt.expect_or_drop do when a record violates the constraint?",
+      "question": "What does dp.expect_or_drop() do when a record violates the constraint?",
       "options": [
         "Silently removes the invalid record and continues processing",
         "Logs a warning and keeps the record",
@@ -10,11 +10,11 @@
         "Sends an alert email"
       ],
       "correctAnswer": "Silently removes the invalid record and continues processing",
-      "explanation": "@dlt.expect_or_drop filters out records that violate the expectation. They are dropped from the output table but the pipeline continues. Use this for non-critical fields you want to filter."
+      "explanation": "dp.expect_or_drop() filters out records that violate the expectation. They are dropped from the output table but the pipeline continues. Use this for non-critical fields you want to filter."
     },
     {
       "id": "q2",
-      "question": "When should you use @dlt.expect_or_fail?",
+      "question": "When should you use dp.expect_or_fail()?",
       "options": [
         "When invalid data would corrupt downstream results and the pipeline must stop",
         "For all quality checks",
@@ -22,7 +22,7 @@
         "When you want to keep invalid records"
       ],
       "correctAnswer": "When invalid data would corrupt downstream results and the pipeline must stop",
-      "explanation": "expect_or_fail is the strictest level. It stops the pipeline on any violation. Use it for critical data integrity rules where proceeding with bad data is worse than stopping."
+      "explanation": "dp.expect_or_fail() is the strictest level. It stops the pipeline on any violation. Use it for critical data integrity rules where proceeding with bad data is worse than stopping."
     },
     {
       "id": "q3",
@@ -38,19 +38,19 @@
     },
     {
       "id": "q4",
-      "question": "Where are DLT expectation metrics stored?",
+      "question": "Where are Spark Declarative Pipelines expectation metrics stored?",
       "options": [
-        "In the DLT event log, queryable as a Delta table",
+        "In the pipeline event log, queryable as a Delta table",
         "In a separate monitoring database",
         "In the Spark driver logs only",
         "In the system catalog"
       ],
-      "correctAnswer": "In the DLT event log, queryable as a Delta table",
-      "explanation": "DLT automatically logs expectation results (pass/fail counts) to the event log. You can query this log as a Delta table to build quality dashboards and trending."
+      "correctAnswer": "In the pipeline event log, queryable as a Delta table",
+      "explanation": "Spark Declarative Pipelines (formerly DLT) automatically logs expectation results (pass/fail counts) to the event log. You can query this log as a Delta table to build quality dashboards and trending."
     },
     {
       "id": "q5",
-      "question": "What is the difference between dlt.read() and dlt.read_stream()?",
+      "question": "What is the difference between dp.read() and dp.read_stream()?",
       "options": [
         "read() is batch (for gold tables), read_stream() is streaming (for silver tables)",
         "They are identical",
@@ -58,7 +58,7 @@
         "read_stream() only works with Kafka"
       ],
       "correctAnswer": "read() is batch (for gold tables), read_stream() is streaming (for silver tables)",
-      "explanation": "dlt.read_stream() maintains streaming semantics (incremental processing), while dlt.read() performs a batch read of the entire table. Use read_stream() for silver layers and read() for gold aggregations."
+      "explanation": "dp.read_stream() maintains streaming semantics (incremental processing), while dp.read() performs a batch read of the entire table. Use read_stream() for silver layers and read() for gold aggregations."
     },
     {
       "id": "q6",
@@ -87,10 +87,11 @@
   ],
   "passingScore": 70,
   "learnings": [
-    "DLT provides declarative pipeline definitions",
+    "Spark Declarative Pipelines provide declarative pipeline definitions (formerly DLT)",
     "Expectations enforce data quality rules",
     "Quarantine tables capture rejected records",
     "Event log provides pipeline observability",
-    "Automatic dependency management simplifies pipelines"
+    "Automatic dependency management simplifies pipelines",
+    "Import as: from pyspark import pipelines as dp"
   ]
 }

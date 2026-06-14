@@ -4,15 +4,15 @@ export type CouponDefinition = {
 }
 
 export const COUPONS = {
-  INFOBEANS1000: {
+  DBSWORD1000: {
     xp: 1000,
     active: true,
   },
-  INFOBEANS10000: {
+  DBSWORD10000: {
     xp: 10000,
     active: true,
   },
-  PREPRABBIT15000: {
+  DBSWORD15000: {
     xp: 15000,
     active: true,
   },

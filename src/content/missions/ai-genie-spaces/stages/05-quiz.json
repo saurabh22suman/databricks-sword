@@ -1,0 +1,72 @@
+{
+  "questions": [
+    {
+      "id": "q1",
+      "question": "What is a Trusted Asset in an AI/BI Genie Space?",
+      "options": [
+        "A table, view, or function that Genie is explicitly allowed to query",
+        "Any table in Unity Catalog",
+        "A model that has been certified for production",
+        "A schema with row-level security"
+      ],
+      "correctAnswer": "A table, view, or function that Genie is explicitly allowed to query",
+      "explanation": "Trusted Assets are an explicit whitelist per Genie Space. Even if a table exists in Unity Catalog, Genie can only see it if it's been added to the Trusted Assets list. This is the governance boundary."
+    },
+    {
+      "id": "q2",
+      "question": "When should you write a Genie Instruction?",
+      "options": [
+        "When business users consistently ask the same question and get the wrong answer because of ambiguous column names",
+        "Only for metric views",
+        "Once when the Genie Space is created, never again",
+        "Only when a user reports a bug"
+      ],
+      "correctAnswer": "When business users consistently ask the same question and get the wrong answer because of ambiguous column names",
+      "explanation": "Instructions are for ambiguity that schema metadata can't resolve. Common examples: 'revenue' (gross vs net), 'active user' (DAU vs MAU), 'last quarter' (calendar vs fiscal). You add instructions iteratively as patterns emerge."
+    },
+    {
+      "id": "q3",
+      "question": "What's the difference between a Metric View and a regular SQL view?",
+      "options": [
+        "Metric Views are first-class UC objects with structured metric definitions (dimensions, measures, filters); regular views are just saved SQL",
+        "Metric Views are slower than regular views",
+        "Regular views are deprecated in Unity Catalog",
+        "There is no difference"
+      ],
+      "correctAnswer": "Metric Views are first-class UC objects with structured metric definitions (dimensions, measures, filters); regular views are just saved SQL",
+      "explanation": "Metric Views (UC-native) declare dimensions, measures, and filters as structured metadata. Genie understands this structure and can use it for NL→SQL translation. Regular SQL views are opaque to Genie — it has to parse the SQL itself."
+    },
+    {
+      "id": "q4",
+      "question": "A user edits a generated SQL answer in Genie. What happens?",
+      "options": [
+        "The edit becomes training signal — Genie is more likely to produce that SQL for similar future questions",
+        "Nothing — edits are not stored",
+        "The edit is sent to Databricks support",
+        "The edit triggers a pipeline re-run"
+      ],
+      "correctAnswer": "The edit becomes training signal — Genie is more likely to produce that SQL for similar future questions",
+      "explanation": "Edits in the Genie feedback loop create a positive training signal. Combined with upvotes on good answers, this is how Genie adapts to your specific data and terminology over time. It's a per-Space tuning loop."
+    },
+    {
+      "id": "q5",
+      "question": "[Recall: Unity Catalog] How is row-level access enforced when a user queries through Genie?",
+      "options": [
+        "Genie respects Unity Catalog permissions on the underlying tables; if a user can't SELECT the table directly, they can't see it in Genie",
+        "Genie has its own permission system separate from UC",
+        "Permissions are bypassed in Genie for self-service",
+        "Genie requires admin approval for every query"
+      ],
+      "correctAnswer": "Genie respects Unity Catalog permissions on the underlying tables; if a user can't SELECT the table directly, they can't see it in Genie",
+      "explanation": "Genie is governed by Unity Catalog. Permissions, row filters, and column masks all apply transparently. A user asking 'show me all orders' through Genie sees only the rows their UC permissions allow — same as if they'd written the SQL themselves."
+    }
+  ],
+  "passingScore": 70,
+  "learnings": [
+    "Trusted Assets are the security boundary for Genie",
+    "Instructions disambiguate business terms that schema metadata can't",
+    "Metric Views are structured semantic-layer objects Genie prefers",
+    "Feedback is a per-Space tuning loop",
+    "UC permissions are enforced transparently through Genie"
+  ]
+}

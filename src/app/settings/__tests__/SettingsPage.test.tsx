@@ -168,7 +168,7 @@ describe("SettingsPage", () => {
     render(<SettingsPage />)
 
     fireEvent.change(screen.getByPlaceholderText("Enter code"), {
-      target: { value: "infobeans1000" },
+      target: { value: "dbsword1000" },
     })
     fireEvent.click(screen.getByRole("button", { name: "Redeem" }))
 

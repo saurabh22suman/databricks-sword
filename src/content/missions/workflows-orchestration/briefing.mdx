@@ -19,7 +19,7 @@ Replace GlobalShip's fragile manual notebook execution with a production-grade o
 ## Key Intelligence
 
 - Databricks Workflows (Jobs) orchestrate multi-task pipelines with a DAG structure
-- Tasks can be notebooks, JARs, Python scripts, SQL queries, or Delta Live Tables pipelines
+- Tasks can be notebooks, JARs, Python scripts, SQL queries, or Spark Declarative Pipelines (formerly Delta Live Tables)
 - Serverless Jobs are the recommended default for most workloads — instant startup, automatic scaling, no cluster configuration. Classic Job Clusters remain available as a legacy fallback for specialized use cases.
 - Conditional tasks use `if/else` branching based on prior task outcomes
 - Built-in retry policies handle transient failures automatically

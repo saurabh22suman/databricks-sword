@@ -5,8 +5,8 @@
 ## Project Overview
 
 **Databricks Sword** is a gamified learning platform for mastering the Databricks ecosystem. It combines:
-- **Story-driven missions** — Deep learning through realistic industry scenarios (20 missions across 10 industries)
-- **Open challenge library** — Standalone drills for practice and interview prep (~50 challenges)
+- **Story-driven missions** — Deep learning through realistic industry scenarios (22 missions across 9 industries)
+- **Open challenge library** — Standalone drills for practice and interview prep (52 challenges)
 - **Spaced repetition** — SM-2 algorithm for long-term concept retention
 
 **All execution is simulated** — no real Spark, no AI APIs, no cloud costs.
@@ -41,13 +41,15 @@ pnpm build            # Production build
 
 ## Implementation Progress
 
-**Check `docs/live-status.md` for canonical implementation status.**
+**Read `docs/master-context.md` for the canonical project overview.**
 
-**Check `docs/audit_apr.md` for the April 2026 release audit and remediation checklist.**
+**Read `docs/01-architecture-and-apis.md` for architecture, API contracts, and data flow.**
 
-**Check `docs/readiness.md` for the May 2026 production readiness audit.**
+**Read `docs/02-agent-playbook-and-rca.md` for React standards and incident-debugging patterns.**
 
-**For incident debugging and root-cause analysis, use `docs/ai-agent-rca-guide.md`.**
+**Read `docs/03-feature-and-content-mapping.md` for gamification mechanics and the content map.**
+
+**For recent design + implementation specs, see `docs/superpowers/specs/` and `docs/superpowers/plans/`.**
 
 ## Core Architecture
 
@@ -81,7 +83,7 @@ Briefing (WHY) → Diagram (WHERE/WHAT) → Code Challenges (HOW)
 → Quiz (RECALL) → Debrief (REFLECT)
 ```
 
-Stage types: `briefing`, `diagram`, `drag-drop`, `fill-blank`, `free-text`, `quiz`, `compare`, `debrief`
+Stage types: `briefing`, `diagram`, `drag-drop`, `fill-blank`, `free-text`, `fix-bug`, `quiz`, `compare`, `debrief`
 
 ### Challenge Library (`src/lib/challenges/`)
 
@@ -108,6 +110,7 @@ pnpm start            # Start production server
 pnpm tsc --noEmit     # Type checking
 pnpm lint             # Linting
 pnpm format           # Format code
+pnpm validate:content # Validate mission/challenge JSON content
 ```
 
 ## Testing Instructions
@@ -141,16 +144,15 @@ pnpm test:coverage    # With coverage
 ### Agent Workflow
 
 ```
-1. Check docs/live-status.md for current progress and open items
-2. Check docs/audit_apr.md for remediation checklist
-3. Run pnpm validate (typecheck + lint + tests) to verify baseline
-4. Write failing test (RED)
-5. Run pnpm test:run — confirm tests FAIL
-6. Implement the code (GREEN)
-7. Run pnpm test:run — confirm tests PASS
-8. Run pnpm tsc --noEmit — confirm no type errors
-9. Update docs/live-status.md with any status changes
-10. Commit: `feat(scope): description`
+1. Read docs/master-context.md and docs/01-architecture-and-apis.md for context
+2. Run pnpm validate (typecheck + lint + tests) to verify baseline
+3. Write failing test (RED)
+4. Run pnpm test:run — confirm tests FAIL
+5. Implement the code (GREEN)
+6. Run pnpm test:run — confirm tests PASS
+7. Run pnpm tsc --noEmit — confirm no type errors
+8. Run pnpm validate:content if mission/challenge content changed
+9. Commit: `feat(scope): description`
 ```
 
 ## Code Style & Conventions
@@ -253,9 +255,12 @@ src/
 
 | File | Purpose |
 |------|---------|
-| `docs/live-status.md` | Canonical implementation status |
-| `docs/audit_apr.md` | April 2026 public release audit + remediation checklist |
-| `docs/ai-agent-rca-guide.md` | Full codebase map + RCA playbook for incidents |
+| `docs/master-context.md` | Canonical project overview |
+| `docs/01-architecture-and-apis.md` | Architecture, API contracts, data flow |
+| `docs/02-agent-playbook-and-rca.md` | React standards + RCA playbook |
+| `docs/03-feature-and-content-mapping.md` | Gamification mechanics, content map |
+| `docs/superpowers/specs/` | Recent design specs |
+| `docs/superpowers/plans/` | Recent implementation plans |
 | `src/lib/gamification/` | Ranks, achievements, streaks logic |
 | `src/lib/sandbox/` | localStorage + Turso sync |
 | `src/lib/missions/` | Mission loader, types, validation |

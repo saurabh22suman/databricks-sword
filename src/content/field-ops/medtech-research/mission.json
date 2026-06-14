@@ -1,0 +1,68 @@
+{
+  "industry": "medtech-research",
+  "title": "Medical Research Discovery",
+  "description": "Deploy a RAG-powered research assistant for medical literature. Uses Mosaic AI Vector Search, Foundation Model Serving (databricks-llama-3.1-8b-instruct), and a Databricks App. Compatible with Free Edition (1 VS endpoint, foundation model only).",
+  "difficulty": "advanced",
+  "estimatedMinutes": 90,
+  "xpReward": 2400,
+  "objectives": [
+    "Ingest 100 PubMed abstracts to Bronze layer",
+    "Chunk and embed abstracts using ai_embed() with the BGE large model",
+    "Create a Vector Search index synced to the Silver chunks table",
+    "Deploy a Databricks App that does RAG over the index using a foundation model",
+    "Pass all 4 validation queries with 100% accuracy"
+  ],
+  "technologies": [
+    "Mosaic AI Vector Search",
+    "Foundation Model Serving (databricks-llama-3.1-8b-instruct)",
+    "Databricks Apps (Streamlit)",
+    "ai_embed SQL function",
+    "Delta Lake"
+  ],
+  "scenario": {
+    "industry": "Medical Research (Pharma R&D)",
+    "challenge": "A clinical research team is buried under thousands of PubMed abstracts. They need a RAG assistant that gives evidence-backed answers in seconds, not days. The current pipeline has raw JSON dumps, no embeddings, no semantic search.",
+    "deployment": "4 notebooks + 1 vector index + 1 model serving endpoint + 1 Databricks App (Streamlit)"
+  },
+  "validations": [
+    {
+      "id": "bronze_ingestion",
+      "name": "Bronze Ingestion",
+      "query": "SELECT COUNT(*) FROM {catalog}.{schema_prefix}_bronze.papers_raw WHERE year >= 2020",
+      "expected": 80,
+      "hint": "Verify year filter uses >= (not >) — fix the comparison operator in notebook 01"
+    },
+    {
+      "id": "silver_embeddings",
+      "name": "Silver Embeddings",
+      "query": "SELECT COUNT(*) FROM {catalog}.{schema_prefix}_silver.paper_chunks WHERE embedding IS NOT NULL",
+      "expected": 200,
+      "hint": "Use the full model name 'databricks-bge-large-en-v1.5' — the short name 'bge-large' fails"
+    },
+    {
+      "id": "vector_index_online",
+      "name": "Vector Index Online",
+      "query": "SHOW INDEXES ON {catalog}.{schema_prefix}_silver",
+      "expected": "exists",
+      "hint": "Index needs SYNC SCHEDULE clause or it never syncs to the source table"
+    },
+    {
+      "id": "app_query_logged",
+      "name": "App Query Logged",
+      "query": "SELECT COUNT(*) FROM system.query.history WHERE statement_text LIKE '%medtech-rag%' AND start_time > current_timestamp - INTERVAL 1 HOUR",
+      "expected": 1,
+      "hint": "App entry point must be at bundle root as 'app.py' — not nested in a subdir"
+    }
+  ],
+  "hintsInNotebooks": false,
+  "hintsNote": "No SQL hints are provided in the notebooks. You must identify the issues and implement fixes using the briefing context and notebook error descriptions only.",
+  "dataFiles": [
+    "pubmed_abstracts.json"
+  ],
+  "notebooks": [
+    "01_ingest_abstracts.py",
+    "02_chunk_embed.py",
+    "03_vector_index.py",
+    "04_serve_rag_app.py"
+  ]
+}

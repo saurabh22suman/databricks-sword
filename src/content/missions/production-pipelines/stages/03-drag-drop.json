@@ -9,22 +9,22 @@
     },
     {
       "id": "bronze-ingest",
-      "code": "@dlt.table\ndef bronze_orders():\n    return spark.readStream.format('cloudFiles').load(f'/{env}/raw/orders')",
+      "code": "@dp.table\ndef bronze_orders():\n    return spark.readStream.format('cloudFiles').load(f'/{env}/raw/orders')",
       "label": "Bronze: Ingest Raw Orders"
     },
     {
       "id": "cdc-apply",
-      "code": "dlt.apply_changes(\n  target='silver_orders',\n  source='bronze_orders',\n  keys=['order_id'],\n  sequence_by='updated_at')",
+      "code": "dp.apply_changes(\n  target='silver_orders',\n  source='bronze_orders',\n  keys=['order_id'],\n  sequence_by='updated_at')",
       "label": "CDC: Apply Order Updates"
     },
     {
       "id": "quality-check",
-      "code": "@dlt.expect_or_fail('valid_total', 'order_total > 0')\n@dlt.table\ndef gold_order_summary(): ...",
+      "code": "@dp.table\ndef gold_order_summary():\n    dp.expect_or_fail('valid_total', col('order_total') > 0)\n    return ...",
       "label": "Quality Check + Gold Table"
     },
     {
       "id": "dlq-route",
-      "code": "@dlt.table\ndef dead_letter_orders():\n    return dlt.read_stream('bronze_orders').filter('order_total IS NULL')",
+      "code": "@dp.table\ndef dead_letter_orders():\n    return dp.read_stream('bronze_orders').filter(col('order_total').isNull())",
       "label": "Route Failures to DLQ"
     },
     {
@@ -50,10 +50,11 @@
     "SLA monitoring is the final observability layer"
   ],
   "learnings": [
-    "DLT pipelines are declarative - define what, not how",
-    "APPLY CHANGES handles CDC merge operations",
-    "Expectations enforce data quality at each step",
-    "Event log captures pipeline execution history",
-    "Monitoring alerts on freshness and failures"
+    "Spark Declarative Pipelines are declarative - define what, not how",
+    "dp.apply_changes() handles CDC merge operations",
+    "dp.expect_or_fail() enforces data quality at each step",
+    "Pipeline event log captures execution history",
+    "Monitoring alerts on freshness and failures",
+    "Import as: from pyspark import pipelines as dp"
   ]
 }

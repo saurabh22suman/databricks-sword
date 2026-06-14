@@ -7,16 +7,16 @@
 # ════════════════════════════════════════════════════════════════════════════
 #
 # OBJECTIVE:
-#   Build a Gold DLT layer that aggregates batch quality metrics into a
+#   Build a Gold SDP layer that aggregates batch quality metrics into a
 #   summary table used by quality engineers and dashboards.
 #   Key metric: defect_rate = (defect_qty / produced_qty) * 100
 #
 # WHAT YOU'LL LEARN:
-#   ✅ DLT Gold layer: business-ready aggregations
-#   ✅ Multi-source joins in DLT (batches + inspections + SPC)
+#   ✅ SDP Gold layer: business-ready aggregations
+#   ✅ Multi-source joins in SDP (batches + inspections + SPC)
 #   ✅ KPI calculation: OEE, defect rate, yield
 #   ✅ SQL CASE WHEN for categorical scoring
-#   ✅ DLT expectations on derived metrics
+#   ✅ SDP expectations on derived metrics
 #
 # ⚠️ KNOWN BUG:
 #   The defect_rate calculation is missing the division — it just uses
@@ -29,12 +29,12 @@
 #   OEE = Availability × Performance × Quality
 #
 # DOCUMENTATION:
-#   - DLT Python: https://docs.databricks.com/en/delta-live-tables/python-ref.html
+#   - SDP Python: https://docs.databricks.com/en/dlt/python-ref.html
 # ════════════════════════════════════════════════════════════════════════════
 
 # COMMAND ----------
 
-import dlt
+from pyspark import pipelines as dp
 from pyspark.sql.functions import (
     col, avg, sum as spark_sum, count, round as spark_round,
     when, current_timestamp, lit, coalesce
@@ -50,23 +50,23 @@ from pyspark.sql.functions import (
 #
 # ⚠️ BUG: defect_rate = defect_qty (should be defect_qty/produced_qty * 100)
 
-@dlt.table(
+@dp.table(
     name="batch_quality_summary",
     comment="Batch-level quality metrics: defect rate, yield, inspection results",
     table_properties={"quality": "gold"},
 )
-@dlt.expect("positive_defect_rate", "defect_rate >= 0")
-@dlt.expect("rate_under_100", "defect_rate <= 100")
 def batch_quality_summary():
     """
     Aggregate production and inspection data per batch.
     Expected defect rate: ~3.2% (industry baseline for this plant).
     """
-    df_batches = dlt.read("raw_production_batches")
+    dp.expect("positive_defect_rate", col("defect_rate") >= 0)
+    dp.expect("rate_under_100", col("defect_rate") <= 100)
+    df_batches = dp.read("raw_production_batches")
 
     # Aggregate inspections per batch
     df_inspections = (
-        dlt.read("raw_quality_inspections")
+        dp.read("raw_quality_inspections")
         .groupBy("batch_id")
         .agg(
             count("*").alias("inspection_count"),
@@ -77,7 +77,7 @@ def batch_quality_summary():
 
     # Get SPC anomaly counts per batch
     df_spc = (
-        dlt.read("spc_metrics")
+        dp.read("spc_metrics")
         .groupBy("batch_id")
         .agg(
             avg("mean_value").alias("avg_sensor_mean"),
@@ -138,7 +138,7 @@ def batch_quality_summary():
 # Aggregate quality across all batches for each product line.
 # Used for management dashboards and trend analysis.
 
-@dlt.table(
+@dp.table(
     name="product_line_quality",
     comment="Quality metrics aggregated by product line",
     table_properties={"quality": "gold"},
@@ -146,7 +146,7 @@ def batch_quality_summary():
 def product_line_quality():
     """Per-line quality rollup for executive dashboards."""
     return (
-        dlt.read("batch_quality_summary")
+        dp.read("batch_quality_summary")
         .groupBy("product_line", "product_type")
         .agg(
             count("*").alias("total_batches"),
@@ -163,7 +163,7 @@ def product_line_quality():
 # COMMAND ----------
 
 # ────────────────────────────────────────────────────────────────────────────
-# SQL Equivalent — Non-DLT Batch Quality (for reference)
+# SQL Equivalent — Non-SDP Batch Quality (for reference)
 # ────────────────────────────────────────────────────────────────────────────
 
 # ⚡ SQL APPROACH: Implement the correct SQL query yourself!
@@ -191,9 +191,9 @@ def product_line_quality():
 # that assume percentages, not raw counts.
 #
 # CONCEPTS LEARNED:
-#   1. DLT Gold layer: business-ready aggregations
-#   2. Multi-table joins in DLT with dlt.read()
+#   1. SDP Gold layer: business-ready aggregations
+#   2. Multi-table joins in SDP with dp.read()
 #   3. Manufacturing KPIs: defect rate, yield, quality grade
-#   4. DLT expectations on derived columns
+#   4. SDP expectations on derived columns
 #   5. coalesce() for handling missing aggregations
 # ────────────────────────────────────────────────────────────────────────────

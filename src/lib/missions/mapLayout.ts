@@ -1,7 +1,7 @@
 /**
  * Mission Map Layout Configuration
  *
- * Defines horizontal pipeline positions for all 20 missions and 8 Field Ops
+ * Defines horizontal pipeline positions for all 22 missions and 9 Field Ops
  * industries in a DLT-inspired data-flow diagram. Missions flow left-to-right
  * through 5 zones: Foundation → Core → Specialization → Mastery → Capstone.
  * Field Operations sit as a separate row below the main pipeline.
@@ -149,7 +149,7 @@ export const ZONES: Zone[] = [
     x: 1920,
     y: 60,
     width: 320,
-    height: 720,
+    height: 920,
     color: "rgba(255, 51, 102, 0.06)",
     glowColor: "#ff3366",
     borderColor: "rgba(255, 51, 102, 0.25)",
@@ -200,8 +200,10 @@ const MISSION_POSITIONS: Array<{
   { id: "mlflow-experiment-tracking", ring: 2, x: 1130, y: 570, zone: "specialization" },
 
   // Specialization — BI track (lower row)
-  { id: "bi-dashboards", ring: 2, x: 880, y: 700, zone: "specialization" },
-  { id: "advanced-sql-analytics", ring: 2, x: 1130, y: 700, zone: "specialization" },
+  { id: "bi-dashboards", ring: 2, x: 820, y: 700, zone: "specialization" },
+  { id: "advanced-sql-analytics", ring: 2, x: 1090, y: 700, zone: "specialization" },
+  // Specialization — BI track (extend)
+  { id: "ai-bi-dashboards", ring: 2, x: 1360, y: 700, zone: "specialization" },
 
   // Mastery — advanced DE missions
   { id: "performance-tuning", ring: 3, x: 1730, y: 220, zone: "mastery" },
@@ -209,9 +211,13 @@ const MISSION_POSITIONS: Array<{
   { id: "production-pipelines", ring: 3, x: 1730, y: 620, zone: "mastery" },
 
   // Capstone — final projects per track
-  { id: "lakehouse-platform-design", ring: 4, x: 2080, y: 220, zone: "capstone" },
-  { id: "ml-pipelines-production", ring: 4, x: 2080, y: 470, zone: "capstone" },
-  { id: "semantic-layer-governance", ring: 4, x: 2080, y: 680, zone: "capstone" },
+  // Capstone column spans y=60..980 but field-ops row starts at y=860,
+  // so missions must fit in y=60..860. With ~50px label below each icon,
+  // 200px spacing keeps everything above the field-ops boundary.
+  { id: "lakehouse-platform-design", ring: 4, x: 2080, y: 160, zone: "capstone" },
+  { id: "ml-pipelines-production", ring: 4, x: 2080, y: 360, zone: "capstone" },
+  { id: "semantic-layer-governance", ring: 4, x: 2080, y: 560, zone: "capstone" },
+  { id: "ai-genie-spaces", ring: 4, x: 2080, y: 760, zone: "capstone" },
 ]
 
 /**
@@ -219,13 +225,14 @@ const MISSION_POSITIONS: Array<{
  */
 const FIELD_OPS_POSITIONS: Array<{ industry: Industry; x: number; y: number }> = [
   { industry: "retail", x: 520, y: 970 },
-  { industry: "gaming", x: 740, y: 970 },
-  { industry: "healthcare", x: 960, y: 970 },
-  { industry: "fintech", x: 1180, y: 970 },
-  { industry: "automotive", x: 1400, y: 970 },
-  { industry: "manufacturing", x: 1620, y: 970 },
-  { industry: "telecom", x: 1840, y: 970 },
-  { industry: "agritech", x: 2060, y: 970 },
+  { industry: "gaming", x: 730, y: 970 },
+  { industry: "healthcare", x: 940, y: 970 },
+  { industry: "fintech", x: 1150, y: 970 },
+  { industry: "automotive", x: 1360, y: 970 },
+  { industry: "manufacturing", x: 1570, y: 970 },
+  { industry: "telecom", x: 1780, y: 970 },
+  { industry: "agritech", x: 1990, y: 970 },
+  { industry: "medtech-research", x: 2200, y: 970 },
 ]
 
 /**
@@ -303,6 +310,7 @@ const PREREQUISITE_EDGES: Array<[string, string]> = [
   ["sql-analytics-intro", "bi-dashboards"],
   ["advanced-transformations", "advanced-sql-analytics"],
   ["bi-dashboards", "advanced-sql-analytics"],
+  ["bi-dashboards", "ai-bi-dashboards"],
 
   // Ring 2/3 → Ring 3
   ["advanced-transformations", "performance-tuning"],
@@ -322,6 +330,8 @@ const PREREQUISITE_EDGES: Array<[string, string]> = [
   ["unity-catalog-governance", "ml-pipelines-production"],
   ["unity-catalog-governance", "semantic-layer-governance"],
   ["advanced-sql-analytics", "semantic-layer-governance"],
+  ["unity-catalog-governance", "ai-genie-spaces"],
+  ["semantic-layer-governance", "ai-genie-spaces"],
 ]
 
 /**
