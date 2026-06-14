@@ -217,7 +217,7 @@ describe("FlashcardViewer", () => {
 
   it("handles cards without hints", () => {
     const cardWithoutHint = { ...mockFlashcard, hint: undefined }
-    
+
     render(
       <FlashcardViewer
         flashcard={cardWithoutHint}
@@ -227,7 +227,135 @@ describe("FlashcardViewer", () => {
         onShowHint={mockHandlers.onShowHint}
       />
     )
-    
+
     expect(screen.queryByRole("button", { name: /hint/i })).not.toBeInTheDocument()
+  })
+
+  describe("keyboard navigation", () => {
+    it("calls onNext when Space is pressed and not flipped", () => {
+      render(
+        <FlashcardViewer
+          flashcard={mockFlashcard}
+          isFlipped={false}
+          onRating={mockHandlers.onRating}
+          onNext={mockHandlers.onNext}
+          onShowHint={mockHandlers.onShowHint}
+        />
+      )
+
+      fireEvent.keyDown(document, { key: " " })
+      expect(mockHandlers.onNext).toHaveBeenCalledTimes(1)
+    })
+
+    it("calls onRating with 0 (Again) when '1' is pressed while flipped", () => {
+      render(
+        <FlashcardViewer
+          flashcard={mockFlashcard}
+          isFlipped={true}
+          onRating={mockHandlers.onRating}
+          onNext={mockHandlers.onNext}
+          onShowHint={mockHandlers.onShowHint}
+        />
+      )
+
+      fireEvent.keyDown(document, { key: "1" })
+      expect(mockHandlers.onRating).toHaveBeenCalledWith(mockFlashcard.id, 0)
+    })
+
+    it("calls onRating with 2 (Hard) when '2' is pressed while flipped", () => {
+      render(
+        <FlashcardViewer
+          flashcard={mockFlashcard}
+          isFlipped={true}
+          onRating={mockHandlers.onRating}
+          onNext={mockHandlers.onNext}
+          onShowHint={mockHandlers.onShowHint}
+        />
+      )
+
+      fireEvent.keyDown(document, { key: "2" })
+      expect(mockHandlers.onRating).toHaveBeenCalledWith(mockFlashcard.id, 2)
+    })
+
+    it("calls onRating with 3 (Good) when '3' is pressed while flipped", () => {
+      render(
+        <FlashcardViewer
+          flashcard={mockFlashcard}
+          isFlipped={true}
+          onRating={mockHandlers.onRating}
+          onNext={mockHandlers.onNext}
+          onShowHint={mockHandlers.onShowHint}
+        />
+      )
+
+      fireEvent.keyDown(document, { key: "3" })
+      expect(mockHandlers.onRating).toHaveBeenCalledWith(mockFlashcard.id, 3)
+    })
+
+    it("calls onRating with 5 (Easy) when '4' is pressed while flipped", () => {
+      render(
+        <FlashcardViewer
+          flashcard={mockFlashcard}
+          isFlipped={true}
+          onRating={mockHandlers.onRating}
+          onNext={mockHandlers.onNext}
+          onShowHint={mockHandlers.onShowHint}
+        />
+      )
+
+      fireEvent.keyDown(document, { key: "4" })
+      expect(mockHandlers.onRating).toHaveBeenCalledWith(mockFlashcard.id, 5)
+    })
+
+    it("ignores Space and rating keys when focus is in a button", () => {
+      render(
+        <FlashcardViewer
+          flashcard={mockFlashcard}
+          isFlipped={true}
+          onRating={mockHandlers.onRating}
+          onNext={mockHandlers.onNext}
+          onShowHint={mockHandlers.onShowHint}
+        />
+      )
+
+      const goodButton = screen.getByRole("button", { name: /good/i })
+      goodButton.focus()
+      fireEvent.keyDown(goodButton, { key: " " })
+      fireEvent.keyDown(goodButton, { key: "3" })
+      // Only the click on the button (via button onClick) should fire, not the keydown shortcuts
+      expect(mockHandlers.onRating).not.toHaveBeenCalled()
+      expect(mockHandlers.onNext).not.toHaveBeenCalled()
+    })
+
+    it("ignores rating keys when card is not flipped", () => {
+      render(
+        <FlashcardViewer
+          flashcard={mockFlashcard}
+          isFlipped={false}
+          onRating={mockHandlers.onRating}
+          onNext={mockHandlers.onNext}
+          onShowHint={mockHandlers.onShowHint}
+        />
+      )
+
+      fireEvent.keyDown(document, { key: "1" })
+      expect(mockHandlers.onRating).not.toHaveBeenCalled()
+    })
+
+    it("cleans up the keydown listener on unmount", () => {
+      const { unmount } = render(
+        <FlashcardViewer
+          flashcard={mockFlashcard}
+          isFlipped={false}
+          onRating={mockHandlers.onRating}
+          onNext={mockHandlers.onNext}
+          onShowHint={mockHandlers.onShowHint}
+        />
+      )
+
+      unmount()
+      fireEvent.keyDown(document, { key: " " })
+      expect(mockHandlers.onNext).not.toHaveBeenCalled()
+    })
   })
 })
