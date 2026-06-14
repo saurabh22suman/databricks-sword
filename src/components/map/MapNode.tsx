@@ -119,7 +119,12 @@ export function MapNode({
   }, [estimatedMinutes, node.type, progress, state, title, xpRequired, xpReward])
 
   const handleClick = useCallback(async (): Promise<void> => {
-    if (!isInteractive) return
+    // For non-interactive nodes (locked or guest user), still show the
+    // tooltip on click so the user gets visual feedback about the mission.
+    if (!isInteractive) {
+      setIsHovered(true)
+      return
+    }
 
     if (onClick) {
       onClick()
@@ -143,7 +148,16 @@ export function MapNode({
     if (node.industry) {
       router.push(`/field-ops/${node.industry}`)
     }
-  }, [isInteractive, node.id, node.industry, node.type, onClick, router, syncNow])
+  }, [
+    isInteractive,
+    isGuest,
+    node.id,
+    node.industry,
+    node.type,
+    onClick,
+    router,
+    syncNow,
+  ])
 
   const handleFocus = useCallback(() => {
     if (hideTimeoutRef.current) {
@@ -229,13 +243,14 @@ export function MapNode({
       role="button"
       aria-label={ariaLabel}
       aria-disabled={!isInteractive}
-      style={{ cursor: isInteractive ? "pointer" : "default" }}
+      style={{ cursor: "pointer" }}
     >
       {/* Invisible larger hit area for stable hover */}
       <circle r={radius + 16} fill="transparent" />
 
-      {/* Hover highlight ring — no CSS transform, stays in place */}
-      {isHovered && (state !== "locked" || isGuest) && (
+      {/* Hover highlight ring — no CSS transform, stays in place.
+          Shown for any state on hover/click so users always get feedback. */}
+      {isHovered && (
         <circle
           r={radius + 6}
           fill="none"
@@ -387,8 +402,8 @@ export function MapNode({
         </g>
       )}
 
-      {/* Hover tooltip — 2x size */}
-      {isHovered && (state !== "locked" || isGuest) && (
+      {/* Hover tooltip — 2x size. Shown for any state on hover/click. */}
+      {isHovered && (
         <g transform={`translate(${radius + 20}, -100)`} style={{ pointerEvents: "none" }}>
           <rect
             x="0"

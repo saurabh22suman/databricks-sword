@@ -32,12 +32,13 @@ import {
     Maximize2,
     MousePointer,
     Move,
+    Search,
     X,
     Zap,
     ZoomIn,
     ZoomOut,
 } from "lucide-react"
-import { useCallback, useEffect, useMemo, useRef, useState } from "react"
+import { useCallback, useEffect, useLayoutEffect, useMemo, useRef, useState } from "react"
 import { CircuitPaths } from "./CircuitPath"
 import { HudGrid } from "./HudGrid"
 import { MapNode, type NodeState } from "./MapNode"
@@ -61,9 +62,38 @@ type Viewport = {
   scale: number
 }
 
-const MIN_SCALE = 0.25
-const MAX_SCALE = 2
+const MIN_SCALE = 0.15
+const MAX_SCALE = 2.5
 const ZOOM_STEP = 0.15
+
+/**
+ * Padding (in map units) around the auto-fit viewport so content
+ * doesn't touch the edges of the visible area.
+ */
+const FIT_PADDING = 60
+
+/**
+ * Compute a viewport that fits the entire map into the given container size.
+ */
+function computeFitViewport(
+  containerWidth: number,
+  containerHeight: number,
+  mapWidth: number,
+  mapHeight: number
+): Viewport {
+  if (containerWidth <= 0 || containerHeight <= 0) {
+    return { x: 0, y: 0, scale: 1 }
+  }
+  const availW = Math.max(1, containerWidth - FIT_PADDING * 2)
+  const availH = Math.max(1, containerHeight - FIT_PADDING * 2)
+  const scale = Math.min(availW / mapWidth, availH / mapHeight, MAX_SCALE)
+  // Center the scaled map in the container
+  const scaledW = mapWidth * scale
+  const scaledH = mapHeight * scale
+  const x = (containerWidth - scaledW) / 2
+  const y = (containerHeight - scaledH) / 2
+  return { x, y, scale }
+}
 
 /**
  * Determine the visual state of a node.
@@ -140,11 +170,7 @@ export function MissionMap({
   isGuest = false,
 }: MissionMapProps): React.ReactElement {
   const containerRef = useRef<HTMLDivElement>(null)
-  const [viewport, setViewport] = useState<Viewport>({
-    x: 100,
-    y: 30,
-    scale: 1,
-  })
+  const [viewport, setViewport] = useState<Viewport | null>(null)
   const [showHelp, setShowHelp] = useState(false)
   const [activeFilters, setActiveFilters] = useState<Set<Track>>(
     new Set(["de", "ml", "bi"])
@@ -155,10 +181,29 @@ export function MissionMap({
   const [sandbox, setSandbox] = useState<SandboxData | null>(null)
   // Track if component has mounted to avoid SSR mismatch with containerRef
   const [hasMounted, setHasMounted] = useState(false)
+  // Search query for filtering nodes by name
+  const [searchQuery, setSearchQuery] = useState("")
 
   // Set mounted state after hydration to ensure containerRef is available
   useEffect(() => {
     setHasMounted(true)
+  }, [])
+
+  // Auto-fit viewport on mount and on window resize, so the entire map is
+  // visible without requiring the user to zoom out manually.
+  useLayoutEffect(() => {
+    if (!containerRef.current) return
+    const el = containerRef.current
+    const apply = () => {
+      const rect = el.getBoundingClientRect()
+      setViewport(
+        computeFitViewport(rect.width, rect.height, MAP_WIDTH, MAP_HEIGHT)
+      )
+    }
+    apply()
+    const ro = new ResizeObserver(apply)
+    ro.observe(el)
+    return () => ro.disconnect()
   }, [])
 
   const refreshSandbox = useCallback(() => {
@@ -260,13 +305,27 @@ export function MissionMap({
 
   const edges = useMemo(() => getMapEdges(missionLookup), [missionLookup])
 
-  // Filter nodes by active tracks — locked nodes are always shown (dimmed), not hidden
+  // Filter nodes by active tracks and search query — locked nodes are always
+  // shown (dimmed) so the user can see the path ahead, but search hides
+  // non-matching nodes entirely (the user is explicitly looking for something).
   const filteredNodes = useMemo(
     () =>
       mapNodes.filter((node) => {
+        // Resolve a display title for search comparison
+        const nodeTitle =
+          node.type === "mission"
+            ? (missionLookup.get(node.id)?.title ?? node.id)
+            : (fieldOpsLookup.get(node.industry ?? "")?.title ?? node.industry ?? "")
+
+        // Search filter — when active, only matching nodes are shown
+        const normalizedQuery = searchQuery.trim().toLowerCase()
+        if (normalizedQuery.length > 0) {
+          return nodeTitle.toLowerCase().includes(normalizedQuery)
+        }
+
+        // Track filter — locked nodes stay visible (dimmed by state)
         if (node.type === "field-ops") return true
         if (!node.track) return true
-        // Always show node if it's locked — just dimmed
         const mission = missionLookup.get(node.id)
         const xpReq = mission?.xpRequired || 0
         const prereqs = getMissionPrerequisites(node.id, missionLookup)
@@ -277,7 +336,15 @@ export function MissionMap({
         if (isLocked) return true
         return activeFilters.has(node.track)
       }),
-    [mapNodes, activeFilters, missionLookup, sandbox, completedMissions]
+    [
+      mapNodes,
+      activeFilters,
+      missionLookup,
+      fieldOpsLookup,
+      sandbox,
+      completedMissions,
+      searchQuery,
+    ]
   )
 
   // Filter edges by active tracks
@@ -298,27 +365,34 @@ export function MissionMap({
 
   // Zoom handlers
   const handleZoomIn = useCallback(() => {
-    setViewport((v) => ({
-      ...v,
-      scale: Math.min(v.scale + ZOOM_STEP, MAX_SCALE),
-    }))
+    setViewport((v) =>
+      v
+        ? { ...v, scale: Math.min(v.scale + ZOOM_STEP, MAX_SCALE) }
+        : v
+    )
   }, [])
 
   const handleZoomOut = useCallback(() => {
-    setViewport((v) => ({
-      ...v,
-      scale: Math.max(v.scale - ZOOM_STEP, MIN_SCALE),
-    }))
+    setViewport((v) =>
+      v
+        ? { ...v, scale: Math.max(v.scale - ZOOM_STEP, MIN_SCALE) }
+        : v
+    )
   }, [])
 
   const handleResetView = useCallback(() => {
-    setViewport({ x: 100, y: 30, scale: 1 })
+    if (!containerRef.current) return
+    const rect = containerRef.current.getBoundingClientRect()
+    setViewport(
+      computeFitViewport(rect.width, rect.height, MAP_WIDTH, MAP_HEIGHT)
+    )
   }, [])
 
   // Pan handlers
   const handleMouseDown = useCallback(
     (e: React.MouseEvent) => {
       if (e.button !== 0) return
+      if (!viewport) return
       setIsDragging(true)
       setDragStart({ x: e.clientX - viewport.x, y: e.clientY - viewport.y })
     },
@@ -328,11 +402,9 @@ export function MissionMap({
   const handleMouseMove = useCallback(
     (e: React.MouseEvent) => {
       if (!isDragging) return
-      setViewport((v) => ({
-        ...v,
-        x: e.clientX - dragStart.x,
-        y: e.clientY - dragStart.y,
-      }))
+      setViewport((v) =>
+        v ? { ...v, x: e.clientX - dragStart.x, y: e.clientY - dragStart.y } : v
+      )
     },
     [isDragging, dragStart]
   )
@@ -368,10 +440,17 @@ export function MissionMap({
       <svg
         viewBox={`0 0 ${MAP_WIDTH} ${MAP_HEIGHT}`}
         className="w-full h-full"
-        style={{
-          transform: `translate(${viewport.x}px, ${viewport.y}px) scale(${viewport.scale})`,
-          transformOrigin: "center center",
-        }}
+        style={
+          viewport
+            ? {
+                transform: `translate(${viewport.x}px, ${viewport.y}px) scale(${viewport.scale})`,
+                // Use top-left origin so the translate values from
+                // computeFitViewport correctly position the SVG's top-left,
+                // matching the standard SVG coordinate system.
+                transformOrigin: "0 0",
+              }
+            : { visibility: "hidden" }
+        }
       >
         {/* Background: zones, grid, chevrons */}
         <HudGrid />
@@ -457,13 +536,53 @@ export function MissionMap({
         })}
       </svg>
 
-      {/* Control panel — top right */}
+      {/* Top bar — title, search, fit-to-view */}
+      <div className="absolute top-4 left-1/2 -translate-x-1/2 z-20 flex items-center gap-3">
+        <div className="bg-anime-900/90 border border-anime-700 rounded-lg px-4 py-2 backdrop-blur-sm">
+          <h1 className="text-sm font-bold text-anime-100 tracking-wide">
+            MISSION MAP
+          </h1>
+          <p className="text-[10px] text-anime-500 font-mono">
+            22 missions · 9 field ops · drag to pan
+          </p>
+        </div>
+      </div>
+
+      {/* Search bar — top center, below title */}
+      <div className="absolute top-20 left-1/2 -translate-x-1/2 z-20">
+        <div className="relative">
+          <Search
+            size={14}
+            className="absolute left-3 top-1/2 -translate-y-1/2 text-anime-500 pointer-events-none"
+          />
+          <input
+            type="text"
+            value={searchQuery}
+            onChange={(e) => setSearchQuery(e.target.value)}
+            placeholder="Search missions or industries..."
+            aria-label="Search missions and industries"
+            className="bg-anime-900/90 border border-anime-700 rounded-lg pl-9 pr-9 py-2 text-sm text-anime-100 placeholder-anime-500 focus:outline-none focus:border-anime-cyan/50 focus:ring-1 focus:ring-anime-cyan/30 w-72 backdrop-blur-sm"
+          />
+          {searchQuery.length > 0 && (
+            <button
+              onClick={() => setSearchQuery("")}
+              aria-label="Clear search"
+              className="absolute right-2 top-1/2 -translate-y-1/2 p-1 text-anime-500 hover:text-anime-cyan transition-colors"
+            >
+              <X size={12} />
+            </button>
+          )}
+        </div>
+      </div>
+
+      {/* Control panel — top right (zoom + minimap + help) */}
       <div className="absolute top-4 right-4 flex flex-col gap-2 z-10">
         <div className="flex flex-col bg-anime-900/90 border border-anime-700 rounded-lg overflow-hidden">
           <button
             onClick={handleZoomIn}
             className="p-2 hover:bg-anime-800 transition-colors text-anime-300 hover:text-anime-cyan"
             title="Zoom In"
+            aria-label="Zoom in"
           >
             <ZoomIn size={18} />
           </button>
@@ -471,13 +590,15 @@ export function MissionMap({
             onClick={handleZoomOut}
             className="p-2 hover:bg-anime-800 transition-colors text-anime-300 hover:text-anime-cyan border-t border-anime-700"
             title="Zoom Out"
+            aria-label="Zoom out"
           >
             <ZoomOut size={18} />
           </button>
           <button
             onClick={handleResetView}
             className="p-2 hover:bg-anime-800 transition-colors text-anime-300 hover:text-anime-cyan border-t border-anime-700"
-            title="Reset View"
+            title="Fit to view"
+            aria-label="Fit map to view"
           >
             <Maximize2 size={18} />
           </button>
@@ -514,39 +635,45 @@ export function MissionMap({
         </button>
       </div>
 
-      {/* Track filters — top left */}
+      {/* Track filters + legend — top left */}
       <div className="absolute top-4 left-4 z-10 flex flex-col gap-2">
-        <div className="bg-anime-900/90 border border-anime-700 rounded-lg p-2">
-          <div className="flex items-center gap-1 mb-2 text-anime-500 text-xs">
+        <div className="bg-anime-900/90 border border-anime-700 rounded-lg p-3 backdrop-blur-sm">
+          <div className="flex items-center gap-1 mb-2 text-anime-500 text-xs uppercase tracking-wider">
             <Filter size={12} />
             <span>Tracks</span>
           </div>
-          <div className="flex flex-col gap-1">
+          <div className="flex gap-1.5">
             {(["de", "ml", "bi"] as Track[]).map((track) => {
               const trackInfo = TRACKS[track]
               const isActive = activeFilters.has(track)
+              const colorClass =
+                track === "de"
+                  ? "border-anime-cyan/50 bg-anime-cyan/10 text-anime-cyan"
+                  : track === "ml"
+                    ? "border-anime-purple/50 bg-anime-purple/10 text-anime-purple"
+                    : "border-anime-yellow/50 bg-anime-yellow/10 text-anime-yellow"
+              const dotClass =
+                track === "de"
+                  ? "bg-anime-cyan"
+                  : track === "ml"
+                    ? "bg-anime-purple"
+                    : "bg-anime-yellow"
               return (
                 <button
                   key={track}
                   onClick={() => toggleFilter(track)}
                   className={cn(
-                    "px-3 py-1 rounded text-xs font-medium transition-all",
+                    "flex items-center gap-1.5 px-2.5 py-1.5 rounded text-xs font-medium transition-all border",
                     isActive
-                      ? cn(
-                          "border",
-                          track === "de" &&
-                            "bg-cyan-900/30 border-anime-cyan/50 text-anime-cyan",
-                          track === "ml" &&
-                            "bg-purple-900/30 border-anime-purple/50 text-anime-purple",
-                          track === "bi" &&
-                            "bg-yellow-900/30 border-anime-yellow/50 text-anime-yellow"
-                        )
-                      : "bg-anime-800/50 text-anime-500 hover:bg-anime-800"
+                      ? colorClass
+                      : "bg-anime-800/50 text-anime-500 hover:bg-anime-800 border-transparent"
                   )}
-                  aria-label={`Toggle ${trackInfo.shortName} track filter`}
+                  aria-label={`Toggle ${trackInfo.name} track filter`}
                   aria-pressed={isActive}
+                  title={trackInfo.name}
                 >
-                  {trackInfo.shortName}
+                  <span className={cn("w-2 h-2 rounded-full", dotClass)} />
+                  <span>{trackInfo.shortName}</span>
                 </button>
               )
             })}
@@ -556,8 +683,10 @@ export function MissionMap({
 
       {/* Stats panel — bottom left */}
       <div className="absolute bottom-4 left-4 z-10">
-        <div className="bg-anime-900/90 border border-anime-700 rounded-lg p-3 text-xs">
-          <div className="text-anime-500 mb-2">Progress</div>
+        <div className="bg-anime-900/90 border border-anime-700 rounded-lg p-3 text-xs backdrop-blur-sm">
+          <div className="text-anime-500 mb-2 uppercase tracking-wider">
+            Progress
+          </div>
           <div className="flex gap-4">
             <div className="text-center">
               <div className="text-lg font-bold text-anime-cyan">
@@ -574,6 +703,27 @@ export function MissionMap({
           </div>
         </div>
       </div>
+
+      {/* Empty state for no search results */}
+      {searchQuery.trim().length > 0 && filteredNodes.length === 0 && (
+        <div className="absolute inset-0 z-20 flex items-center justify-center pointer-events-none">
+          <div className="bg-anime-900/95 border border-anime-700 rounded-lg p-6 text-center max-w-sm pointer-events-auto">
+            <Search size={32} className="mx-auto mb-3 text-anime-500" />
+            <p className="text-anime-100 font-medium mb-1">
+              No matches for &ldquo;{searchQuery}&rdquo;
+            </p>
+            <p className="text-anime-500 text-sm mb-4">
+              Try a different keyword, or clear the search to see all nodes.
+            </p>
+            <button
+              onClick={() => setSearchQuery("")}
+              className="px-4 py-1.5 bg-anime-cyan/20 text-anime-cyan border border-anime-cyan/50 rounded text-sm hover:bg-anime-cyan/30 transition-colors"
+            >
+              Clear search
+            </button>
+          </div>
+        </div>
+      )}
 
       {/* Minimap — bottom right */}
       {showMinimap && (
@@ -603,7 +753,7 @@ export function MissionMap({
                 />
               )
             })}
-            {hasMounted && containerRef.current && (
+            {hasMounted && containerRef.current && viewport && (
               <rect
                 className="minimap-viewport"
                 x={
@@ -693,6 +843,19 @@ export function MissionMap({
                   <div className="font-medium text-anime-100">Track Filters</div>
                   <div className="text-anime-400">
                     Toggle tracks (DE/ML/BI) to focus on specific learning paths.
+                  </div>
+                </div>
+              </div>
+
+              <div className="flex items-start gap-3">
+                <div className="p-2 bg-anime-800 rounded-lg">
+                  <Search size={16} className="text-anime-cyan" />
+                </div>
+                <div>
+                  <div className="font-medium text-anime-100">Search</div>
+                  <div className="text-anime-400">
+                    Type a mission or industry name to quickly locate it on the
+                    map.
                   </div>
                 </div>
               </div>

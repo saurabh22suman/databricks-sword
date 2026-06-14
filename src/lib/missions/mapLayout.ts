@@ -200,10 +200,10 @@ const MISSION_POSITIONS: Array<{
   { id: "mlflow-experiment-tracking", ring: 2, x: 1130, y: 570, zone: "specialization" },
 
   // Specialization — BI track (lower row)
-  { id: "bi-dashboards", ring: 2, x: 880, y: 700, zone: "specialization" },
-  { id: "advanced-sql-analytics", ring: 2, x: 1130, y: 700, zone: "specialization" },
+  { id: "bi-dashboards", ring: 2, x: 820, y: 700, zone: "specialization" },
+  { id: "advanced-sql-analytics", ring: 2, x: 1090, y: 700, zone: "specialization" },
   // Specialization — BI track (extend)
-  { id: "ai-bi-dashboards", ring: 2, x: 1380, y: 700, zone: "specialization" },
+  { id: "ai-bi-dashboards", ring: 2, x: 1360, y: 700, zone: "specialization" },
 
   // Mastery — advanced DE missions
   { id: "performance-tuning", ring: 3, x: 1730, y: 220, zone: "mastery" },
@@ -211,10 +211,13 @@ const MISSION_POSITIONS: Array<{
   { id: "production-pipelines", ring: 3, x: 1730, y: 620, zone: "mastery" },
 
   // Capstone — final projects per track
-  { id: "lakehouse-platform-design", ring: 4, x: 2080, y: 220, zone: "capstone" },
-  { id: "ml-pipelines-production", ring: 4, x: 2080, y: 470, zone: "capstone" },
-  { id: "semantic-layer-governance", ring: 4, x: 2080, y: 680, zone: "capstone" },
-  { id: "ai-genie-spaces", ring: 4, x: 2080, y: 900, zone: "capstone" },
+  // Capstone column spans y=60..980 but field-ops row starts at y=860,
+  // so missions must fit in y=60..860. With ~50px label below each icon,
+  // 200px spacing keeps everything above the field-ops boundary.
+  { id: "lakehouse-platform-design", ring: 4, x: 2080, y: 160, zone: "capstone" },
+  { id: "ml-pipelines-production", ring: 4, x: 2080, y: 360, zone: "capstone" },
+  { id: "semantic-layer-governance", ring: 4, x: 2080, y: 560, zone: "capstone" },
+  { id: "ai-genie-spaces", ring: 4, x: 2080, y: 760, zone: "capstone" },
 ]
 
 /**
@@ -222,13 +225,13 @@ const MISSION_POSITIONS: Array<{
  */
 const FIELD_OPS_POSITIONS: Array<{ industry: Industry; x: number; y: number }> = [
   { industry: "retail", x: 520, y: 970 },
-  { industry: "gaming", x: 740, y: 970 },
-  { industry: "healthcare", x: 960, y: 970 },
-  { industry: "fintech", x: 1180, y: 970 },
-  { industry: "automotive", x: 1400, y: 970 },
-  { industry: "manufacturing", x: 1620, y: 970 },
-  { industry: "telecom", x: 1840, y: 970 },
-  { industry: "agritech", x: 2060, y: 970 },
+  { industry: "gaming", x: 730, y: 970 },
+  { industry: "healthcare", x: 940, y: 970 },
+  { industry: "fintech", x: 1150, y: 970 },
+  { industry: "automotive", x: 1360, y: 970 },
+  { industry: "manufacturing", x: 1570, y: 970 },
+  { industry: "telecom", x: 1780, y: 970 },
+  { industry: "agritech", x: 1990, y: 970 },
   { industry: "medtech-research", x: 2200, y: 970 },
 ]
 
