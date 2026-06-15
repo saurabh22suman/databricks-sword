@@ -6,6 +6,7 @@ import { Header } from "@/components/layout/Header"
 import { RouteChangeSound } from "@/components/layout/RouteChangeSound"
 import { ToastContainer } from "@/components/gamification/ToastContainer"
 import { XpFlyToBar } from "@/components/gamification/XpFlyToBar"
+import { RankUpWatcher } from "@/components/gamification/RankUpWatcher"
 import { StreakFreezeNudge } from "@/components/gamification/StreakFreezeNudge"
 import { StreakDailyBonus } from "@/components/gamification/StreakDailyBonus"
 import { PromoBanner } from "@/components/ui/PromoBanner"
@@ -90,6 +91,7 @@ export default async function RootLayout({
             <BackgroundMusic />
             <ToastContainer />
             <XpFlyToBar />
+            <RankUpWatcher />
             <StreakFreezeNudge />
             <StreakDailyBonus />
             <PromoBanner />
