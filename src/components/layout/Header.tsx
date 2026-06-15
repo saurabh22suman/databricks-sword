@@ -6,13 +6,27 @@ import { NotificationDropdown } from "@/components/ui/NotificationDropdown"
 import { RankProgressBar } from "@/components/gamification/RankProgressBar"
 import { onXpEvent } from "@/lib/gamification/xpEventBus"
 import { useSettings } from "@/lib/settings"
+import { useHasCompletedMission } from "@/lib/dashboard"
 import { loadSandbox } from "@/lib/sandbox"
 import { stopMusic } from "@/lib/sound"
 import { Menu, User, Volume2, VolumeX, X } from "lucide-react"
 import { useSession } from "next-auth/react"
 import Image from "next/image"
 import Link from "next/link"
-import { useEffect, useState } from "react"
+import { useEffect, useRef, useState } from "react"
+
+const STANDARD_NAV = [
+  { href: "/missions", label: "Missions" },
+  { href: "/intel", label: "Intel" },
+  { href: "/leaderboard", label: "Leaderboard" },
+  { href: "/blog", label: "Logs" },
+] as const
+
+const ADVANCED_NAV = [
+  { href: "/field-ops", label: "⚡ Field Ops", highlight: "cyan" as const },
+  { href: "/map", label: "Map", highlight: "purple" as const },
+  { href: "/cheat-sheet", label: "Cheat Sheet", highlight: "cyan" as const },
+] as const
 
 /**
  * Main site header with cyberpunk anime aesthetic.
@@ -23,9 +37,14 @@ import { useEffect, useState } from "react"
 export function Header(): React.ReactElement {
   const { data: session, status } = useSession()
   const { settings, updateSetting } = useSettings()
+  const hasCompletedMission = useHasCompletedMission()
   const [sidebarOpen, setSidebarOpen] = useState(false)
   const [mobileMenuOpen, setMobileMenuOpen] = useState(false)
+  const [moreDropdownOpen, setMoreDropdownOpen] = useState(false)
+  const [mobileShowMore, setMobileShowMore] = useState(false)
   const [userXp, setUserXp] = useState(0)
+
+  const moreDropdownRef = useRef<HTMLDivElement>(null)
 
   // Load XP from sandbox on mount.
 // Listen for XP events (emitted when milestones sync to server and local progress updates).
@@ -50,17 +69,39 @@ export function Header(): React.ReactElement {
     return unsubscribe
   }, [status])
 
-  // Close mobile menu on Escape key
+  // Close mobile menu and More dropdown on Escape key
   useEffect(() => {
     const handleEscape = (e: KeyboardEvent) => {
-      if (e.key === "Escape" && mobileMenuOpen) {
-        setMobileMenuOpen(false)
+      if (e.key === "Escape") {
+        if (mobileMenuOpen) {
+          setMobileMenuOpen(false)
+        }
+        if (moreDropdownOpen) {
+          setMoreDropdownOpen(false)
+        }
       }
     }
 
     document.addEventListener("keydown", handleEscape)
     return () => document.removeEventListener("keydown", handleEscape)
-  }, [mobileMenuOpen])
+  }, [mobileMenuOpen, moreDropdownOpen])
+
+  // Click outside handler for More dropdown
+  useEffect(() => {
+    if (!moreDropdownOpen) return
+
+    const handleClickOutside = (e: MouseEvent) => {
+      if (
+        moreDropdownRef.current &&
+        !moreDropdownRef.current.contains(e.target as Node)
+      ) {
+        setMoreDropdownOpen(false)
+      }
+    }
+
+    document.addEventListener("mousedown", handleClickOutside)
+    return () => document.removeEventListener("mousedown", handleClickOutside)
+  }, [moreDropdownOpen])
 
   // Don't render progress bar until we've hydrated to avoid flash of incorrect rank
   const isLoading = status === "loading" || !hasHydrated
@@ -77,6 +118,10 @@ export function Header(): React.ReactElement {
     updateSetting("sfxEnabled", false)
     updateSetting("musicEnabled", false)
     stopMusic()
+  }
+
+  const toggleMoreDropdown = (): void => {
+    setMoreDropdownOpen(!moreDropdownOpen)
   }
 
   return (
@@ -107,55 +152,69 @@ export function Header(): React.ReactElement {
 
           {/* Navigation */}
           <nav className="hidden md:flex items-center gap-8 text-xs font-bold uppercase tracking-widest text-gray-400">
-            <Link
-              href="/missions"
-              className="hover:text-white relative group transition-colors"
-            >
-              Missions
-              <span className="absolute -bottom-1 left-0 w-0 h-0.5 bg-anime-cyan group-hover:w-full transition-all duration-300" />
-            </Link>
-            <Link
-              href="/intel"
-              className="hover:text-white relative group transition-colors"
-            >
-              Intel
-              <span className="absolute -bottom-1 left-0 w-0 h-0.5 bg-anime-cyan group-hover:w-full transition-all duration-300" />
-            </Link>
-            <Link
-              href="/field-ops"
-              className="hover:text-white relative group transition-colors"
-            >
-              ⚡ Field Ops
-              <span className="absolute -bottom-1 left-0 w-0 h-0.5 bg-anime-cyan group-hover:w-full transition-all duration-300" />
-            </Link>
-            <Link
-              href="/map"
-              className="hover:text-white relative group transition-colors"
-            >
-              Map
-              <span className="absolute -bottom-1 left-0 w-0 h-0.5 bg-anime-purple group-hover:w-full transition-all duration-300" />
-            </Link>
-            <Link
-              href="/leaderboard"
-              className="hover:text-white relative group transition-colors"
-            >
-              Leaderboard
-              <span className="absolute -bottom-1 left-0 w-0 h-0.5 bg-anime-purple group-hover:w-full transition-all duration-300" />
-            </Link>
-            <Link
-              href="/cheat-sheet"
-              className="hover:text-anime-cyan relative group transition-colors"
-            >
-              Cheat Sheet
-              <span className="absolute -bottom-1 left-0 w-0 h-0.5 bg-anime-cyan group-hover:w-full transition-all duration-300" />
-            </Link>
-            <Link
-              href="/blog"
-              className="hover:text-white relative group transition-colors"
-            >
-              Logs
-              <span className="absolute -bottom-1 left-0 w-0 h-0.5 bg-anime-cyan group-hover:w-full transition-all duration-300" />
-            </Link>
+            {hasCompletedMission ? (
+              <>
+                {STANDARD_NAV.map((item) => (
+                  <Link
+                    key={item.href}
+                    href={item.href}
+                    className="hover:text-white relative group transition-colors"
+                  >
+                    {item.label}
+                    <span className="absolute -bottom-1 left-0 w-0 h-0.5 bg-anime-cyan group-hover:w-full transition-all duration-300" />
+                  </Link>
+                ))}
+                {ADVANCED_NAV.map((item) => (
+                  <Link
+                    key={item.href}
+                    href={item.href}
+                    className={`hover:text-white relative group transition-colors`}
+                  >
+                    {item.label}
+                    <span className={`absolute -bottom-1 left-0 w-0 h-0.5 bg-anime-${item.highlight} group-hover:w-full transition-all duration-300`} />
+                  </Link>
+                ))}
+              </>
+            ) : (
+              <>
+                {STANDARD_NAV.map((item) => (
+                  <Link
+                    key={item.href}
+                    href={item.href}
+                    className="hover:text-white relative group transition-colors"
+                  >
+                    {item.label}
+                    <span className="absolute -bottom-1 left-0 w-0 h-0.5 bg-anime-cyan group-hover:w-full transition-all duration-300" />
+                  </Link>
+                ))}
+                <div ref={moreDropdownRef} className="relative">
+                  <button
+                    onClick={toggleMoreDropdown}
+                    className="hover:text-white relative group transition-colors flex items-center gap-1"
+                    aria-expanded={moreDropdownOpen}
+                    aria-haspopup="true"
+                  >
+                    More
+                    <span className="text-[10px]">▾</span>
+                    <span className="absolute -bottom-1 left-0 w-0 h-0.5 bg-anime-cyan group-hover:w-full transition-all duration-300" />
+                  </button>
+                  {moreDropdownOpen && (
+                    <div className="absolute top-full right-0 mt-2 w-48 bg-anime-900 border border-anime-700 rounded-md shadow-lg py-2 flex flex-col gap-1 z-50">
+                      {ADVANCED_NAV.map((item) => (
+                        <Link
+                          key={item.href}
+                          href={item.href}
+                          onClick={() => setMoreDropdownOpen(false)}
+                          className={`px-4 py-2 hover:bg-anime-800 hover:text-white transition-colors text-xs font-bold uppercase tracking-widest`}
+                        >
+                          {item.label}
+                        </Link>
+                      ))}
+                    </div>
+                  )}
+                </div>
+              </>
+            )}
           </nav>
 
           {/* XP Progress bar - only show when authenticated and hydrated */}
@@ -246,55 +305,77 @@ export function Header(): React.ReactElement {
 
           {/* Menu Content */}
           <nav className="absolute top-20 left-0 right-0 bg-anime-950 border-b border-anime-700 p-6 flex flex-col gap-4">
-            <Link
-              href="/missions"
-              onClick={() => setMobileMenuOpen(false)}
-              className="text-sm font-bold uppercase tracking-widest text-gray-400 hover:text-white py-2 border-b border-anime-800 transition-colors"
-            >
-              Missions
-            </Link>
-            <Link
-              href="/intel"
-              onClick={() => setMobileMenuOpen(false)}
-              className="text-sm font-bold uppercase tracking-widest text-gray-400 hover:text-white py-2 border-b border-anime-800 transition-colors"
-            >
-              Intel
-            </Link>
-            <Link
-              href="/field-ops"
-              onClick={() => setMobileMenuOpen(false)}
-              className="text-sm font-bold uppercase tracking-widest text-gray-400 hover:text-white py-2 border-b border-anime-800 transition-colors"
-            >
-              ⚡ Field Ops
-            </Link>
-            <Link
-              href="/map"
-              onClick={() => setMobileMenuOpen(false)}
-              className="text-sm font-bold uppercase tracking-widest text-gray-400 hover:text-white py-2 border-b border-anime-800 transition-colors"
-            >
-              Map
-            </Link>
-            <Link
-              href="/leaderboard"
-              onClick={() => setMobileMenuOpen(false)}
-              className="text-sm font-bold uppercase tracking-widest text-gray-400 hover:text-white py-2 border-b border-anime-800 transition-colors"
-            >
-              Leaderboard
-            </Link>
-            <Link
-              href="/cheat-sheet"
-              onClick={() => setMobileMenuOpen(false)}
-              className="text-sm font-bold uppercase tracking-widest text-anime-cyan hover:text-white py-2 border-b border-anime-800 transition-colors"
-            >
-              Cheat Sheet
-            </Link>
-            <Link
-              href="/blog"
-              onClick={() => setMobileMenuOpen(false)}
-              className="text-sm font-bold uppercase tracking-widest text-gray-400 hover:text-white py-2 border-b border-anime-800 transition-colors"
-            >
-              Logs
-            </Link>
+            {hasCompletedMission ? (
+              <>
+                {STANDARD_NAV.map((item) => (
+                  <Link
+                    key={item.href}
+                    href={item.href}
+                    onClick={() => setMobileMenuOpen(false)}
+                    className="text-sm font-bold uppercase tracking-widest text-gray-400 hover:text-white py-2 border-b border-anime-800 transition-colors"
+                  >
+                    {item.label}
+                  </Link>
+                ))}
+                {ADVANCED_NAV.map((item) => (
+                  <Link
+                    key={item.href}
+                    href={item.href}
+                    onClick={() => setMobileMenuOpen(false)}
+                    className={`text-sm font-bold uppercase tracking-widest hover:text-white py-2 border-b border-anime-800 transition-colors ${
+                      item.highlight === "cyan" ? "text-anime-cyan" : "text-gray-400"
+                    }`}
+                  >
+                    {item.label}
+                  </Link>
+                ))}
+              </>
+            ) : (
+              <>
+                {STANDARD_NAV.map((item) => (
+                  <Link
+                    key={item.href}
+                    href={item.href}
+                    onClick={() => setMobileMenuOpen(false)}
+                    className="text-sm font-bold uppercase tracking-widest text-gray-400 hover:text-white py-2 border-b border-anime-800 transition-colors"
+                  >
+                    {item.label}
+                  </Link>
+                ))}
+                {!mobileShowMore ? (
+                  <button
+                    onClick={() => setMobileShowMore(true)}
+                    className="text-sm font-bold uppercase tracking-widest text-anime-cyan hover:text-white py-2 border-b border-anime-800 transition-colors text-left"
+                  >
+                    Show more ▾
+                  </button>
+                ) : (
+                  <>
+                    {ADVANCED_NAV.map((item) => (
+                      <Link
+                        key={item.href}
+                        href={item.href}
+                        onClick={() => {
+                          setMobileShowMore(false)
+                          setMobileMenuOpen(false)
+                        }}
+                        className={`text-sm font-bold uppercase tracking-widest hover:text-white py-2 border-b border-anime-800 transition-colors ${
+                          item.highlight === "cyan" ? "text-anime-cyan" : "text-gray-400"
+                        }`}
+                      >
+                        {item.label}
+                      </Link>
+                    ))}
+                    <button
+                      onClick={() => setMobileShowMore(false)}
+                      className="text-sm font-bold uppercase tracking-widest text-gray-400 hover:text-white py-2 border-b border-anime-800 transition-colors text-left"
+                    >
+                      Show less ▾
+                    </button>
+                  </>
+                )}
+              </>
+            )}
           </nav>
         </div>
       )}
