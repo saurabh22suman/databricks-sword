@@ -49,7 +49,10 @@ export function RankBadge({
 
       {/* Rank Info */}
       <div className="flex flex-col">
-        <span className="font-bold text-anime-cyan uppercase tracking-wider text-sm">
+        <span
+          className="font-bold text-anime-cyan uppercase tracking-wider text-sm"
+          aria-label={`Rank: ${rank.title}`}
+        >
           {rank.title}
         </span>
         {showDescription && (

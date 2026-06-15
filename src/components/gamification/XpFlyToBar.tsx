@@ -24,18 +24,30 @@ export function XpFlyToBar(): React.ReactElement | null {
   const counterRef = useRef(0)
 
   useEffect(() => {
+    const timers = new Set<ReturnType<typeof setTimeout>>()
+
     const unsubscribe = onXpEvent((event: XpEvent) => {
       if (event.amount <= 0) return
 
       const id = `fly-${++counterRef.current}`
       setEntries((prev) => [...prev, { id, amount: event.amount }])
 
-      setTimeout(() => {
+      const timer = setTimeout(() => {
+        timers.delete(timer)
         setEntries((prev) => prev.filter((e) => e.id !== id))
       }, ANIM_DURATION)
+      timers.add(timer)
     })
 
-    return unsubscribe
+    return () => {
+      unsubscribe()
+      // Clear any pending animation timers so we don't call setEntries
+      // on an unmounted component if the user navigates away mid-animation.
+      for (const timer of timers) {
+        clearTimeout(timer)
+      }
+      timers.clear()
+    }
   }, [])
 
   if (entries.length === 0) return <></>

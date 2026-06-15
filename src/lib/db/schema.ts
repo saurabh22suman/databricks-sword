@@ -28,23 +28,33 @@ export const users = sqliteTable("users", {
 
 /**
  * Flashcard progress for spaced repetition tracking.
+ *
+ * Indexed on `user_id` to keep per-user SRS queries (review queue, stats)
+ * fast even with thousands of cards in the system.
  */
-export const flashcardProgress = sqliteTable("flashcard_progress", {
-  id: text("id").primaryKey(),
-  userId: text("user_id")
-    .notNull()
-    .references(() => users.id),
-  flashcardId: text("flashcard_id").notNull(),
-  ease: integer("ease").notNull().default(250),
-  interval: integer("interval").notNull().default(0),
-  repetitions: integer("repetitions").notNull().default(0),
-  nextReviewAt: integer("next_review_at", { mode: "timestamp" }),
-  lastReviewedAt: integer("last_reviewed_at", { mode: "timestamp" }),
-})
+export const flashcardProgress = sqliteTable(
+  "flashcard_progress",
+  {
+    id: text("id").primaryKey(),
+    userId: text("user_id")
+      .notNull()
+      .references(() => users.id),
+    flashcardId: text("flashcard_id").notNull(),
+    ease: integer("ease").notNull().default(250),
+    interval: integer("interval").notNull().default(0),
+    repetitions: integer("repetitions").notNull().default(0),
+    nextReviewAt: integer("next_review_at", { mode: "timestamp" }),
+    lastReviewedAt: integer("last_reviewed_at", { mode: "timestamp" }),
+  },
+  (table) => [index("flashcard_progress_user_id_idx").on(table.userId)],
+)
 
 /**
  * Sandbox snapshots for syncing browser progress to server.
  * Stores complete sandbox state as JSON for cross-device continuity.
+ *
+ * `total_xp` is indexed (descending) so the leaderboard query can scan
+ * the index in order without sorting the full table.
  */
 export const sandboxSnapshots = sqliteTable(
   "sandbox_snapshots",
@@ -58,7 +68,10 @@ export const sandboxSnapshots = sqliteTable(
       .notNull()
       .$defaultFn(() => new Date()),
   },
-  (table) => [uniqueIndex("sandbox_snapshots_user_id_unique").on(table.userId)],
+  (table) => [
+    uniqueIndex("sandbox_snapshots_user_id_unique").on(table.userId),
+    index("sandbox_snapshots_total_xp_idx").on(table.totalXp),
+  ],
 )
 
 /**
@@ -357,5 +370,47 @@ export const couponRedemptions = sqliteTable(
       table.userId,
       table.code,
     ),
+  ],
+)
+
+/**
+ * Authoritative server-side XP ledger.
+ *
+ * One row per (user, source). Inserted by the progress claim endpoints
+ * (`/api/progress/*`) after validating the claim against mission/challenge
+ * content config. Used by `/api/user/sync` to recompute the user's total
+ * XP, streak, and achievement unlocks — values pushed from the client
+ * sandbox are no longer trusted.
+ *
+ * Idempotency: the unique index on (user_id, source_type, source_id)
+ * prevents duplicate awards from retries, double-clicks, or replay
+ * attacks. A duplicate insert is treated as a no-op that returns the
+ * existing row's XP.
+ */
+export const xpAwards = sqliteTable(
+  "xp_awards",
+  {
+    id: text("id")
+      .primaryKey()
+      .$defaultFn(() => crypto.randomUUID()),
+    userId: text("user_id")
+      .notNull()
+      .references(() => users.id, { onDelete: "cascade" }),
+    sourceType: text("source_type").notNull(), // 'stage' | 'mission' | 'challenge' | 'achievement'
+    sourceId: text("source_id").notNull(), // e.g. 'lakehouse-fundamentals:01-briefing'
+    xpAmount: integer("xp_amount").notNull(),
+    multiplier: integer("multiplier").notNull().default(100), // stored as 100 = 1.0x to preserve precision
+    awardedAt: integer("awarded_at", { mode: "timestamp" })
+      .notNull()
+      .$defaultFn(() => new Date()),
+  },
+  (table) => [
+    uniqueIndex("xp_awards_user_source_unique").on(
+      table.userId,
+      table.sourceType,
+      table.sourceId,
+    ),
+    // Speeds up "all awards for a user" reads (recompute totalXp, streak).
+    index("xp_awards_user_awarded_idx").on(table.userId, table.awardedAt),
   ],
 )

@@ -13,6 +13,14 @@ vi.mock("../../sandbox/storage", async () => {
   }
 })
 
+// Mock fetch — tests in this file expect the local-computation path
+// (offline / network failure). The server claim is exercised in
+// xpService.server.test.ts.
+vi.stubGlobal(
+  "fetch",
+  vi.fn().mockRejectedValue(new Error("network down (test stub)")),
+)
+
 import { loadSandbox, saveSandbox, updateSandbox } from "../../sandbox/storage"
 import {
     awardChallengeXp,
@@ -40,8 +48,8 @@ describe("XP Event Service", () => {
   })
 
   describe("awardStageXp", () => {
-    it("returns an XpEvent with correct type and source", () => {
-      const event = awardStageXp("mission-1", "01-briefing", 50)
+    it("returns an XpEvent with correct type and source", async () => {
+      const event = await awardStageXp("mission-1", "01-briefing", 50)
 
       expect(event.type).toBe("stage")
       expect(event.source).toBe("mission-1/01-briefing")
@@ -50,32 +58,32 @@ describe("XP Event Service", () => {
       expect(event.timestamp).toBeTruthy()
     })
 
-    it("applies streak multiplier to XP amount", () => {
+    it("applies streak multiplier to XP amount", async () => {
       sandbox.streakData.currentStreak = 7 // 1.5x multiplier
       vi.mocked(loadSandbox).mockReturnValue(sandbox)
 
-      const event = awardStageXp("mission-1", "01-briefing", 100)
+      const event = await awardStageXp("mission-1", "01-briefing", 100)
 
       expect(event.multiplier).toBe(1.5)
       expect(event.amount).toBe(150) // 100 * 1.5
     })
 
-    it("adds first-try bonus when option is set", () => {
-      const event = awardStageXp("mission-1", "01-briefing", 100, { firstTry: true })
+    it("adds first-try bonus when option is set", async () => {
+      const event = await awardStageXp("mission-1", "01-briefing", 100, { firstTry: true })
 
       // 100 base + 15 first-try bonus = 115
       expect(event.amount).toBe(115)
     })
 
-    it("adds no-hints bonus when option is set", () => {
-      const event = awardStageXp("mission-1", "01-briefing", 100, { noHints: true })
+    it("adds no-hints bonus when option is set", async () => {
+      const event = await awardStageXp("mission-1", "01-briefing", 100, { noHints: true })
 
       // 100 base + 50 no-hints bonus = 150
       expect(event.amount).toBe(150)
     })
 
-    it("writes XP to sandbox via updateSandbox", () => {
-      awardStageXp("mission-1", "01-briefing", 50)
+    it("writes XP to sandbox via updateSandbox", async () => {
+      await awardStageXp("mission-1", "01-briefing", 50)
 
       expect(updateSandbox).toHaveBeenCalled()
       // Verify saveSandbox was called with updated totalXp
@@ -88,11 +96,11 @@ describe("XP Event Service", () => {
       )
     })
 
-    it("accumulates XP with existing sandbox XP", () => {
+    it("accumulates XP with existing sandbox XP", async () => {
       sandbox.userStats.totalXp = 200
       vi.mocked(loadSandbox).mockReturnValue(sandbox)
 
-      awardStageXp("mission-1", "02-diagram", 75)
+      await awardStageXp("mission-1", "02-diagram", 75)
 
       expect(saveSandbox).toHaveBeenCalledWith(
         expect.objectContaining({
@@ -103,8 +111,8 @@ describe("XP Event Service", () => {
       )
     })
 
-    it("records stage progress with xpEarned and completedAt", () => {
-      awardStageXp("mission-1", "01-briefing", 50)
+    it("records stage progress with xpEarned and completedAt", async () => {
+      await awardStageXp("mission-1", "01-briefing", 50)
 
       expect(saveSandbox).toHaveBeenCalledWith(
         expect.objectContaining({
@@ -124,16 +132,16 @@ describe("XP Event Service", () => {
   })
 
   describe("awardMissionXp", () => {
-    it("returns an XpEvent with type mission", () => {
-      const event = awardMissionXp("mission-1", 200)
+    it("returns an XpEvent with type mission", async () => {
+      const event = await awardMissionXp("mission-1", 200)
 
       expect(event.type).toBe("mission")
       expect(event.source).toBe("mission-1")
       expect(event.amount).toBe(200)
     })
 
-    it("marks mission as completed in sandbox", () => {
-      awardMissionXp("mission-1", 200)
+    it("marks mission as completed in sandbox", async () => {
+      await awardMissionXp("mission-1", 200)
 
       expect(saveSandbox).toHaveBeenCalledWith(
         expect.objectContaining({
@@ -149,22 +157,22 @@ describe("XP Event Service", () => {
       )
     })
 
-    it("applies streak multiplier", () => {
+    it("applies streak multiplier", async () => {
       sandbox.streakData.currentStreak = 14 // 2.0x
       vi.mocked(loadSandbox).mockReturnValue(sandbox)
 
-      const event = awardMissionXp("mission-1", 100)
+      const event = await awardMissionXp("mission-1", 100)
 
       expect(event.multiplier).toBe(2.0)
       expect(event.amount).toBe(200)
     })
 
-    it("awards mission XP only once per mission", () => {
-      const firstEvent = awardMissionXp("mission-1", 200)
+    it("awards mission XP only once per mission", async () => {
+      const firstEvent = await awardMissionXp("mission-1", 200)
       const totalXpAfterFirst = sandbox.userStats.totalXp
       const missionsCompletedAfterFirst = sandbox.userStats.totalMissionsCompleted
 
-      const secondEvent = awardMissionXp("mission-1", 200)
+      const secondEvent = await awardMissionXp("mission-1", 200)
 
       expect(firstEvent.amount).toBe(200)
       expect(secondEvent.amount).toBe(0)
@@ -174,15 +182,15 @@ describe("XP Event Service", () => {
   })
 
   describe("awardChallengeXp", () => {
-    it("returns an XpEvent with type challenge", () => {
-      const event = awardChallengeXp("challenge-1", 75)
+    it("returns an XpEvent with type challenge", async () => {
+      const event = await awardChallengeXp("challenge-1", 75)
 
       expect(event.type).toBe("challenge")
       expect(event.source).toBe("challenge-1")
     })
 
-    it("records challenge result in sandbox", () => {
-      awardChallengeXp("challenge-1", 75)
+    it("records challenge result in sandbox", async () => {
+      await awardChallengeXp("challenge-1", 75)
 
       expect(saveSandbox).toHaveBeenCalledWith(
         expect.objectContaining({
@@ -199,77 +207,77 @@ describe("XP Event Service", () => {
       )
     })
 
-    it("awards 0 XP on second completion (cap at 1)", () => {
+    it("awards 0 XP on second completion (cap at 1)", async () => {
       // First completion earns XP
-      awardChallengeXp("challenge-1", 75)
+      await awardChallengeXp("challenge-1", 75)
       // Second completion should earn 0 XP (cap reached)
-      const event = awardChallengeXp("challenge-1", 75)
+      const event = await awardChallengeXp("challenge-1", 75)
       expect(event.amount).toBe(0)
       // xpEarned stays at 75 (not 150)
       expect(sandbox.challengeResults["challenge-1"].xpEarned).toBe(75)
       expect(sandbox.challengeResults["challenge-1"].completionCount).toBe(2)
     })
 
-    it("awards 0 XP on third completion (cap at 1)", () => {
+    it("awards 0 XP on third completion (cap at 1)", async () => {
       // First completion earns XP
-      awardChallengeXp("challenge-1", 75)
+      await awardChallengeXp("challenge-1", 75)
       // Second and third completions should earn 0 XP
-      awardChallengeXp("challenge-1", 75)
-      const event = awardChallengeXp("challenge-1", 75)
+      await awardChallengeXp("challenge-1", 75)
+      const event = await awardChallengeXp("challenge-1", 75)
       expect(event.amount).toBe(0)
       // xpEarned stays at 75
       expect(sandbox.challengeResults["challenge-1"].xpEarned).toBe(75)
       expect(sandbox.challengeResults["challenge-1"].completionCount).toBe(3)
     })
 
-    it("increments completionCount on every completion", () => {
-      awardChallengeXp("challenge-1", 75)
+    it("increments completionCount on every completion", async () => {
+      await awardChallengeXp("challenge-1", 75)
       expect(sandbox.challengeResults["challenge-1"].completionCount).toBe(1)
 
-      awardChallengeXp("challenge-1", 75)
+      await awardChallengeXp("challenge-1", 75)
       expect(sandbox.challengeResults["challenge-1"].completionCount).toBe(2)
 
-      awardChallengeXp("challenge-1", 75)
+      await awardChallengeXp("challenge-1", 75)
       expect(sandbox.challengeResults["challenge-1"].completionCount).toBe(3)
     })
   })
 
   describe("achievement unlocking", () => {
-    it("unlocks 'getting-started' achievement after first challenge", () => {
-      awardChallengeXp("challenge-1", 75)
+    it("unlocks 'getting-started' achievement after first challenge", async () => {
+      await awardChallengeXp("challenge-1", 75)
 
       // checkAndUnlockAchievements calls updateSandbox a second time
       // The final sandbox should contain the achievement
       expect(sandbox.achievements).toContain("getting-started")
     })
 
-    it("awards achievement XP bonus when unlocking", () => {
-      awardChallengeXp("challenge-1", 75)
+    it("awards achievement XP bonus when unlocking", async () => {
+      await awardChallengeXp("challenge-1", 75)
 
       // "getting-started" has xpBonus of 35
       // Total XP = 75 (challenge) + 35 (achievement bonus) = 110
       expect(sandbox.userStats.totalXp).toBe(110)
     })
 
-    it("updates totalAchievements count", () => {
-      awardChallengeXp("challenge-1", 75)
+    it("updates totalAchievements count", async () => {
+      await awardChallengeXp("challenge-1", 75)
 
       expect(sandbox.userStats.totalAchievements).toBe(1)
     })
 
-    it("unlocks 'first-blood' achievement after first mission", () => {
-      awardMissionXp("mission-1", 200)
+    it("unlocks 'first-blood' achievement after first mission", async () => {
+      await awardMissionXp("mission-1", 200)
 
       expect(sandbox.achievements).toContain("first-blood")
     })
 
-    it("does not duplicate already-unlocked achievements", () => {
+    it("does not duplicate already-unlocked achievements", async () => {
       // Complete first challenge → unlocks "getting-started"
-      awardChallengeXp("challenge-1", 75)
+      await awardChallengeXp("challenge-1", 75)
       expect(sandbox.achievements).toContain("getting-started")
 
       // Complete second challenge → "getting-started" should NOT be re-added
-      awardChallengeXp("challenge-2", 50)
+      await awardChallengeXp("challenge-2", 50)
 
       const gettingStartedCount = sandbox.achievements.filter(
         (id) => id === "getting-started",
@@ -277,9 +285,9 @@ describe("XP Event Service", () => {
       expect(gettingStartedCount).toBe(1)
     })
 
-    it("does not unlock achievements when conditions are not met", () => {
+    it("does not unlock achievements when conditions are not met", async () => {
       // Stage completion alone should not unlock "first-blood" (needs mission completion)
-      awardStageXp("mission-1", "01-briefing", 50)
+      await awardStageXp("mission-1", "01-briefing", 50)
 
       expect(sandbox.achievements).not.toContain("first-blood")
     })

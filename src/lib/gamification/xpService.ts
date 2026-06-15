@@ -2,10 +2,22 @@
  * @file xpService.ts
  * @description Client-side XP event tracking service.
  *
- * Produces XpEvent objects and writes them into the sandbox.
- * Applies streak multipliers and bonuses (first-try, no-hints).
- * Each function returns the XpEvent so the UI can animate it.
- * After every XP award, checks and unlocks any newly earned achievements.
+ * Server-first model: the canonical XP amount is determined by the server
+ * (`/api/progress/{stage,mission,challenge}` claim endpoints, which read
+ * mission/challenge content config and write to the `xp_awards` ledger).
+ * The client just sends an identifier and the server tells us how much
+ * XP to award.
+ *
+ * Offline fallback: if the network call fails or the server returns a
+ * non-OK status, the client falls back to the local-computation path
+ * (base XP + streak multiplier) so the UI can still show an XP animation
+ * while disconnected. When the user reconnects, the next claim through
+ * the new endpoints will write the canonical award to the ledger, and
+ * the sync route will recompute totalXp from the ledger on next sync.
+ *
+ * Idempotency: a duplicate claim returns `{ xpAwarded: 0, alreadyAwarded: true }`
+ * from the server. The client suppresses the XP event in that case so
+ * the user doesn't see the same XP animation twice.
  */
 
 import { initializeSandbox, loadSandbox, updateSandbox } from "@/lib/sandbox/storage"
@@ -23,11 +35,45 @@ const FIRST_TRY_BONUS = 15
 /** Bonus XP for completing a stage without using any hints */
 const NO_HINTS_BONUS = 50
 
+// -----------------------------------------------------------------------------
+// Server claim helpers
+// -----------------------------------------------------------------------------
+
+type ClaimResult = {
+  xpAwarded: number
+  alreadyAwarded: boolean
+}
+
+/**
+ * POSTs a claim to the server and returns the parsed result. Returns null
+ * on any error (network, non-2xx status, malformed JSON) so the caller
+ * can fall back to local computation.
+ */
+async function postClaim(
+  url: string,
+  body: Record<string, unknown>,
+): Promise<ClaimResult | null> {
+  try {
+    const response = await fetch(url, {
+      method: "POST",
+      headers: { "Content-Type": "application/json" },
+      body: JSON.stringify(body),
+    })
+    if (!response.ok) return null
+    const data = (await response.json()) as ClaimResult
+    if (typeof data?.xpAwarded !== "number") return null
+    return data
+  } catch {
+    return null
+  }
+}
+
+// -----------------------------------------------------------------------------
+// Profile / achievement helpers (unchanged)
+// -----------------------------------------------------------------------------
+
 /**
  * Builds a UserProfile from sandbox data for achievement condition checking.
- *
- * @param data - The current sandbox data
- * @returns A UserProfile suitable for checkAchievement()
  */
 function buildProfileFromSandbox(data: SandboxData): UserProfile {
   const perfectQuizzes = Object.values(data.missionProgress).reduce(
@@ -103,25 +149,15 @@ function checkAndUnlockAchievements(): void {
 
 /**
  * Updates streak data based on user activity.
- *
- * Called after every XP award to maintain streak state.
- * - If already active today, returns data unchanged
- * - If active yesterday, increments streak
- * - If older, uses calculateStreak with freeze support
- *
- * @param data - Current sandbox data
- * @returns Updated sandbox data with new streak info
  */
 function updateStreakOnActivity(data: SandboxData): SandboxData {
   const today = new Date().toISOString().split("T")[0]
   const lastActiveDate = data.streakData.lastActiveDate
 
-  // If already active today, no changes needed
   if (lastActiveDate === today) {
     return data
   }
 
-  // Calculate days between last activity and today
   const lastActive = new Date(lastActiveDate)
   const todayDate = new Date(today)
   const diffTime = todayDate.getTime() - lastActive.getTime()
@@ -131,23 +167,18 @@ function updateStreakOnActivity(data: SandboxData): SandboxData {
   let streakData = data.streakData
 
   if (diffDays === 1) {
-    // Active yesterday - increment streak
     newStreak += 1
   } else {
-    // Older than yesterday - use calculateStreak
     const result = calculateStreak(lastActiveDate, today, {
       freezesAvailable: streakData.freezesAvailable,
     })
 
     if (result.maintained && result.freezeUsed) {
-      // Used a freeze to maintain streak
       newStreak += 1
       streakData = useFreeze(streakData)
     } else if (result.maintained) {
-      // Shouldn't happen for diffDays > 1, but handle it
       newStreak += 1
     } else {
-      // Streak broken - start fresh
       newStreak = 1
     }
   }
@@ -165,36 +196,53 @@ function updateStreakOnActivity(data: SandboxData): SandboxData {
   }
 }
 
+// -----------------------------------------------------------------------------
+// Public API — server-first
+// -----------------------------------------------------------------------------
+
 type StageXpOptions = {
   firstTry?: boolean
   noHints?: boolean
 }
 
 /**
- * Awards XP for completing a mission stage.
- * Applies streak multiplier and optional bonuses.
- * Writes stage progress and updated totalXp to sandbox.
+ * Awards XP for completing a mission stage. Idempotent on the server via
+ * the `xp_awards` ledger. The server returns the canonical amount
+ * (base XP from content config + first-try/no-hints bonuses + streak
+ * multiplier). On network/5xx failure, falls back to local computation
+ * so the UI can still render an XP animation.
  *
  * @param missionId - The mission slug
  * @param stageId - The stage ID within the mission
- * @param baseXp - Base XP reward before multipliers
+ * @param baseXp - Base XP reward used for the offline-fallback path
  * @param options - Optional bonuses (firstTry, noHints)
- * @returns The XpEvent with final computed amount
+ * @returns The XpEvent with the final amount (server-authoritative when available)
  */
-export function awardStageXp(
+export async function awardStageXp(
   missionId: string,
   stageId: string,
   baseXp: number,
   options?: StageXpOptions,
-): XpEvent {
+): Promise<XpEvent> {
   const sandbox = loadSandbox() ?? initializeSandbox()
-  const multiplier = getStreakMultiplier(sandbox.streakData.currentStreak)
+  const localMultiplier = getStreakMultiplier(sandbox.streakData.currentStreak)
 
   let bonusXp = 0
   if (options?.firstTry) bonusXp += FIRST_TRY_BONUS
   if (options?.noHints) bonusXp += NO_HINTS_BONUS
+  const localAmount = Math.floor((baseXp + bonusXp) * localMultiplier)
 
-  const amount = Math.floor((baseXp + bonusXp) * multiplier)
+  const serverResult = await postClaim("/api/progress/stage", {
+    missionId,
+    stageId,
+    firstTry: options?.firstTry,
+    noHints: options?.noHints,
+  })
+
+  const amount = serverResult ? serverResult.xpAwarded : localAmount
+  const alreadyAwarded = serverResult?.alreadyAwarded ?? false
+  const multiplier =
+    serverResult && baseXp + bonusXp > 0 ? amount / (baseXp + bonusXp) : localMultiplier
 
   const event: XpEvent = {
     type: "stage",
@@ -204,52 +252,54 @@ export function awardStageXp(
     timestamp: new Date().toISOString(),
   }
 
-  updateSandbox((data) => {
-    const withStreak = updateStreakOnActivity(data)
-    const missionProgress = { ...withStreak.missionProgress }
-    const existing = missionProgress[missionId] ?? {
-      started: true,
-      completed: false,
-      stageProgress: {},
-      sideQuestsCompleted: [],
-      totalXpEarned: 0,
-    }
+  if (amount > 0) {
+    updateSandbox((data) => {
+      const withStreak = updateStreakOnActivity(data)
+      const missionProgress = { ...withStreak.missionProgress }
+      const existing = missionProgress[missionId] ?? {
+        started: true,
+        completed: false,
+        stageProgress: {},
+        sideQuestsCompleted: [],
+        totalXpEarned: 0,
+      }
 
-    const stageProgress = { ...existing.stageProgress }
-    const existingStage = stageProgress[stageId] ?? {
-      completed: false,
-      xpEarned: 0,
-      codeAttempts: [],
-      hintsUsed: 0,
-    }
+      const stageProgress = { ...existing.stageProgress }
+      const existingStage = stageProgress[stageId] ?? {
+        completed: false,
+        xpEarned: 0,
+        codeAttempts: [],
+        hintsUsed: 0,
+      }
 
-    stageProgress[stageId] = {
-      ...existingStage,
-      completed: true,
-      xpEarned: amount,
-      completedAt: event.timestamp,
-    }
+      stageProgress[stageId] = {
+        ...existingStage,
+        completed: true,
+        xpEarned: amount,
+        completedAt: event.timestamp,
+      }
 
-    missionProgress[missionId] = {
-      ...existing,
-      started: true,
-      stageProgress,
-      totalXpEarned: existing.totalXpEarned + amount,
-    }
+      missionProgress[missionId] = {
+        ...existing,
+        started: true,
+        stageProgress,
+        totalXpEarned: existing.totalXpEarned + amount,
+      }
 
-    return {
-      ...withStreak,
-      missionProgress,
-      userStats: {
-        ...withStreak.userStats,
-        totalXp: withStreak.userStats.totalXp + amount,
-      },
-    }
-  })
+      return {
+        ...withStreak,
+        missionProgress,
+        userStats: {
+          ...withStreak.userStats,
+          totalXp: withStreak.userStats.totalXp + amount,
+        },
+      }
+    })
+  }
 
   checkAndUnlockAchievements()
 
-  if (amount > 0) {
+  if (!alreadyAwarded && amount > 0) {
     emitXpEvent(event)
   }
 
@@ -257,21 +307,31 @@ export function awardStageXp(
 }
 
 /**
- * Awards XP for completing an entire mission.
- * Applies streak multiplier. Marks mission as completed.
- *
- * @param missionId - The mission slug
- * @param baseXp - Mission completion bonus XP
- * @returns The XpEvent with final computed amount
+ * Awards XP for completing an entire mission. Idempotent on the server.
+ * Falls back to local computation when the server is unreachable.
  */
-export function awardMissionXp(
+export async function awardMissionXp(
   missionId: string,
   baseXp: number,
-): XpEvent {
+): Promise<XpEvent> {
   const sandbox = loadSandbox() ?? initializeSandbox()
-  const multiplier = getStreakMultiplier(sandbox.streakData.currentStreak)
-  const alreadyCompleted = sandbox.missionProgress[missionId]?.completed ?? false
-  const amount = alreadyCompleted ? 0 : Math.floor(baseXp * multiplier)
+  const localMultiplier = getStreakMultiplier(sandbox.streakData.currentStreak)
+  // Local idempotency: don't re-award a mission that was already completed
+  // in this sandbox. The server enforces the same via xp_awards, but in
+  // offline mode the local sandbox is the only record we have.
+  const localAlreadyCompleted =
+    sandbox.missionProgress[missionId]?.completed ?? false
+  const localAmount = localAlreadyCompleted
+    ? 0
+    : Math.floor(baseXp * localMultiplier)
+
+  const serverResult = await postClaim("/api/progress/mission", {
+    missionId,
+  })
+
+  const amount = serverResult ? serverResult.xpAwarded : localAmount
+  const alreadyAwarded = serverResult?.alreadyAwarded ?? false
+  const multiplier = serverResult && baseXp > 0 ? amount / baseXp : localMultiplier
 
   const event: XpEvent = {
     type: "mission",
@@ -281,45 +341,46 @@ export function awardMissionXp(
     timestamp: new Date().toISOString(),
   }
 
-  // Atomic check-and-set: evaluate completion inside the updater closure
-  // This prevents race conditions from double-clicks or concurrent network payloads
-  updateSandbox((data) => {
-    const withStreak = updateStreakOnActivity(data)
-    const missionProgress = { ...withStreak.missionProgress }
-    const existing = missionProgress[missionId] ?? {
-      started: true,
-      completed: false,
-      stageProgress: {},
-      sideQuestsCompleted: [],
-      totalXpEarned: 0,
-    }
+  // Idempotency: if the server says this mission was already completed,
+  // don't double-add the mission-completion bonus to the local sandbox.
+  if (!alreadyAwarded && amount > 0) {
+    updateSandbox((data) => {
+      const withStreak = updateStreakOnActivity(data)
+      const missionProgress = { ...withStreak.missionProgress }
+      const existing = missionProgress[missionId] ?? {
+        started: true,
+        completed: false,
+        stageProgress: {},
+        sideQuestsCompleted: [],
+        totalXpEarned: 0,
+      }
 
-    // Atomic check: if already completed in this transaction, return unchanged
-    if (existing.completed) {
-      return withStreak
-    }
+      if (existing.completed) {
+        return withStreak
+      }
 
-    missionProgress[missionId] = {
-      ...existing,
-      completed: true,
-      completedAt: event.timestamp,
-      totalXpEarned: existing.totalXpEarned + amount,
-    }
+      missionProgress[missionId] = {
+        ...existing,
+        completed: true,
+        completedAt: event.timestamp,
+        totalXpEarned: existing.totalXpEarned + amount,
+      }
 
-    return {
-      ...withStreak,
-      missionProgress,
-      userStats: {
-        ...withStreak.userStats,
-        totalXp: withStreak.userStats.totalXp + amount,
-        totalMissionsCompleted: withStreak.userStats.totalMissionsCompleted + 1,
-      },
-    }
-  })
+      return {
+        ...withStreak,
+        missionProgress,
+        userStats: {
+          ...withStreak.userStats,
+          totalXp: withStreak.userStats.totalXp + amount,
+          totalMissionsCompleted: withStreak.userStats.totalMissionsCompleted + 1,
+        },
+      }
+    })
+  }
 
   checkAndUnlockAchievements()
 
-  if (amount > 0) {
+  if (!alreadyAwarded && amount > 0) {
     emitXpEvent(event)
   }
 
@@ -327,26 +388,28 @@ export function awardMissionXp(
 }
 
 /**
- * Awards XP for completing a standalone challenge.
- * Applies streak multiplier. Records challenge result.
- * XP is only awarded for the first {@link MAX_CHALLENGE_XP_COMPLETIONS} completions.
- * After that the user can still practice but earns 0 XP.
- *
- * @param challengeId - The challenge identifier
- * @param baseXp - Base XP reward
- * @returns The XpEvent with final computed amount (0 if XP cap reached)
+ * Awards XP for completing a standalone challenge. Idempotent on the server.
+ * Falls back to local computation when the server is unreachable. Local
+ * fallback still respects the {@link MAX_CHALLENGE_XP_COMPLETIONS} cap.
  */
-export function awardChallengeXp(
+export async function awardChallengeXp(
   challengeId: string,
   baseXp: number,
-): XpEvent {
+): Promise<XpEvent> {
   const sandbox = loadSandbox() ?? initializeSandbox()
+  const localMultiplier = getStreakMultiplier(sandbox.streakData.currentStreak)
   const existing = sandbox.challengeResults[challengeId]
-  const completionCount = existing?.completionCount ?? 0
-  const xpMaxed = completionCount >= MAX_CHALLENGE_XP_COMPLETIONS
+  const localCompletionCount = existing?.completionCount ?? 0
+  const localXpMaxed = localCompletionCount >= MAX_CHALLENGE_XP_COMPLETIONS
+  const localAmount = localXpMaxed ? 0 : Math.floor(baseXp * localMultiplier)
 
-  const multiplier = getStreakMultiplier(sandbox.streakData.currentStreak)
-  const amount = xpMaxed ? 0 : Math.floor(baseXp * multiplier)
+  const serverResult = await postClaim("/api/progress/challenge", {
+    challengeId,
+  })
+
+  const amount = serverResult ? serverResult.xpAwarded : localAmount
+  const alreadyAwarded = serverResult?.alreadyAwarded ?? false
+  const multiplier = serverResult && baseXp > 0 ? amount / baseXp : localMultiplier
 
   const event: XpEvent = {
     type: "challenge",
@@ -386,7 +449,7 @@ export function awardChallengeXp(
 
   checkAndUnlockAchievements()
 
-  if (amount > 0) {
+  if (!alreadyAwarded && amount > 0) {
     emitXpEvent(event)
   }
 

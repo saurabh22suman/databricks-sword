@@ -10,6 +10,8 @@ import type { SandboxData } from "@/lib/sandbox"
 import { loadSandbox, saveSandbox, updateSandbox } from "@/lib/sandbox"
 import { useDisconnect } from "@/lib/sandbox/useDisconnect"
 import { SETTINGS_STORAGE_KEY, useSettings } from "@/lib/settings"
+import { resetOnboarding } from "@/lib/onboarding/state"
+import { ReducedMotionToggle } from "@/components/settings/ReducedMotionToggle"
 import { cn } from "@/lib/utils"
 import {
   AlertTriangle,
@@ -537,6 +539,36 @@ export default function SettingsPage(): React.ReactElement {
               enabled={settings.animationsEnabled}
               onChange={(v) => updateSetting("animationsEnabled", v)}
             />
+
+            {/* Reduced motion override (system / reduce / full motion) */}
+            <div className="px-6 py-4">
+              <ReducedMotionToggle />
+            </div>
+
+            {/* Replay onboarding tour */}
+            <div className="flex items-center gap-4 px-6 py-4">
+              <div className="text-anime-cyan">
+                <Monitor className="h-4 w-4" />
+              </div>
+              <div className="flex-1">
+                <div className="text-anime-100 text-sm font-bold">
+                  Onboarding Tour
+                </div>
+                <div className="text-anime-400 text-xs">
+                  Replay the 4-step new-operator walkthrough
+                </div>
+              </div>
+              <button
+                type="button"
+                onClick={() => {
+                  resetOnboarding()
+                  window.location.href = "/onboarding"
+                }}
+                className="bg-anime-800 border-anime-700 text-anime-cyan hover:border-anime-cyan/50 rounded-lg border px-4 py-2 text-sm font-bold transition-all"
+              >
+                Replay tour
+              </button>
+            </div>
             <ToggleRow
               icon={
                 settings.showHints ? (

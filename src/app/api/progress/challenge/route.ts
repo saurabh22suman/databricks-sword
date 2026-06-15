@@ -1,14 +1,21 @@
 /**
  * @file POST /api/progress/challenge
- * @description Confirms challenge completion from the server-side snapshot.
+ * @description Claims XP for completing a standalone challenge.
+ *
+ * Authoritative server-side endpoint: looks up the challenge's canonical
+ * `xpReward` from content config and writes to the `xp_awards` ledger.
+ * Idempotent on (userId, "challenge", challengeId).
+ *
+ * Replaces the old snapshot-confirmation flow that trusted the client-side
+ * sandbox for XP values.
  */
 
-import { getUserSandbox } from "@/app/api/user/helpers"
 import { authenticateApiRequest } from "@/lib/auth/api-auth"
+import { claimChallengeXp } from "@/lib/gamification/serverXpService"
 import { NextRequest, NextResponse } from "next/server"
 import { z } from "zod"
 
-const ChallengeCompleteSchema = z.object({
+const ChallengeClaimSchema = z.object({
   challengeId: z.string().min(1),
 })
 
@@ -20,28 +27,19 @@ export async function POST(request: NextRequest): Promise<NextResponse> {
 
   try {
     const body = await request.json()
-    const parsed = ChallengeCompleteSchema.safeParse(body)
+    const parsed = ChallengeClaimSchema.safeParse(body)
     if (!parsed.success) {
       return NextResponse.json({ error: "Invalid request" }, { status: 400 })
     }
 
-    const { challengeId } = parsed.data
-    const sandbox = await getUserSandbox(authResult.userId)
-
-    if (!sandbox) {
-      return NextResponse.json({ error: "No progress data found" }, { status: 404 })
-    }
-
-    const challengeResult = sandbox.challengeResults[challengeId]
-
-    return NextResponse.json({
-      confirmed: !!challengeResult?.completed,
-      xpEarned: challengeResult?.xpEarned ?? 0,
-      attempts: challengeResult?.attempts ?? 0,
-      totalXp: sandbox.userStats.totalXp,
+    const result = await claimChallengeXp({
+      userId: authResult.userId,
+      challengeId: parsed.data.challengeId,
     })
+
+    return NextResponse.json(result)
   } catch (error) {
-    console.error("Error confirming challenge progress:", error)
+    console.error("Error claiming challenge XP:", error)
     return NextResponse.json({ error: "Internal server error" }, { status: 500 })
   }
 }

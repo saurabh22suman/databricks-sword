@@ -5,7 +5,7 @@ import { getAchievementIconPath } from "@/lib/gamification/achievementIcons";
 import type { Achievement } from "@/lib/gamification/types";
 import { playSound } from "@/lib/sound";
 import { cn } from "@/lib/utils";
-import { useEffect } from "react";
+import { useEffect, useRef, useState } from "react";
 import { ConfettiCanvas } from "./ConfettiCanvas";
 
 /**
@@ -26,27 +26,38 @@ export interface AchievementToastProps {
 
 /**
  * AchievementToast Component
- * 
+ *
  * Displays a floating toast notification for achievement unlocks.
  * Features slide-in animation and auto-dismiss functionality.
+ * Hovering the toast pauses the auto-dismiss timer so users can read it.
  */
-export function AchievementToast({ 
+export function AchievementToast({
   achievement,
   showAnimation = false,
   onDismiss,
   autoDismiss,
-  className 
+  className
 }: AchievementToastProps): React.ReactElement {
-  // Auto-dismiss functionality
-  useEffect(() => {
-    if (autoDismiss && onDismiss) {
-      const timer = setTimeout(() => {
-        onDismiss()
-      }, autoDismiss)
+  // Pause the auto-dismiss timer while the user is hovering the toast so
+  // they have time to read longer descriptions without it disappearing.
+  const [isPaused, setIsPaused] = useState(false)
+  const timerRef = useRef<ReturnType<typeof setTimeout> | null>(null)
 
-      return () => clearTimeout(timer)
+  useEffect(() => {
+    if (!autoDismiss || !onDismiss) return
+    if (isPaused) return
+
+    timerRef.current = setTimeout(() => {
+      onDismiss()
+    }, autoDismiss)
+
+    return () => {
+      if (timerRef.current) {
+        clearTimeout(timerRef.current)
+        timerRef.current = null
+      }
     }
-  }, [autoDismiss, onDismiss])
+  }, [autoDismiss, onDismiss, isPaused])
 
   // Play sound on mount
   useEffect(() => {
@@ -54,9 +65,14 @@ export function AchievementToast({
   }, [])
 
   return (
-    <div 
+    <div
       data-testid="achievement-toast"
       data-achievement-id={achievement.id}
+      role="status"
+      aria-live="polite"
+      aria-atomic="true"
+      onMouseEnter={() => setIsPaused(true)}
+      onMouseLeave={() => setIsPaused(false)}
       className={cn(
         "fixed top-4 right-4 z-40 max-w-sm",
         "bg-anime-900/95 border border-anime-yellow backdrop-blur-sm",

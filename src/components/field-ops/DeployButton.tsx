@@ -9,6 +9,7 @@ import type { Industry } from "@/lib/field-ops/types"
 import { cn } from "@/lib/utils"
 import { useRouter } from "next/navigation"
 import { useState } from "react"
+import { DeployConfirmDialog } from "./DeployConfirmDialog"
 
 type DeployButtonProps = {
   industry: Industry
@@ -30,15 +31,26 @@ export function DeployButton({
   const router = useRouter()
   const [isDeploying, setIsDeploying] = useState(false)
   const [error, setError] = useState<string | null>(null)
+  const [isConfirming, setIsConfirming] = useState(false)
 
-  const handleDeploy = async () => {
-    const idempotencyKey = crypto.randomUUID()
-    const requestId = crypto.randomUUID()
-    const correlationId = requestId
+  const handleDeployClick = () => {
     if (!isConnected) {
       setError("Please connect Databricks in Settings first")
       return
     }
+    setError(null)
+    setIsConfirming(true)
+  }
+
+  const handleConfirm = async () => {
+    setIsConfirming(false)
+    await performDeploy()
+  }
+
+  const performDeploy = async () => {
+    const idempotencyKey = crypto.randomUUID()
+    const requestId = crypto.randomUUID()
+    const correlationId = requestId
 
     setIsDeploying(true)
     setError(null)
@@ -72,7 +84,7 @@ export function DeployButton({
   return (
     <div className="flex flex-col gap-2">
       <button
-        onClick={handleDeploy}
+        onClick={handleDeployClick}
         disabled={isDeploying || disabled || !isConnected}
         className={cn(
           "cut-corner font-semibold px-8 py-3 text-lg transition-all duration-300",
@@ -125,6 +137,15 @@ export function DeployButton({
       {error && (
         <p className="text-anime-accent text-sm">{error}</p>
       )}
+
+      <DeployConfirmDialog
+        isOpen={isConfirming}
+        industryName={industry.replace(/-/g, " ")}
+        estimatedCost="$0.25 – $1.00"
+        estimatedTime="3 – 8 min"
+        onConfirm={handleConfirm}
+        onCancel={() => setIsConfirming(false)}
+      />
     </div>
   )
 }

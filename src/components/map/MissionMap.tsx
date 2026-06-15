@@ -13,6 +13,7 @@
 
 import type { IndustryConfig } from "@/lib/field-ops/types"
 import {
+    CONTENT_BOUNDS,
     MAP_HEIGHT,
     MAP_WIDTH,
     type MapNode as MapNodeType,
@@ -70,28 +71,38 @@ const ZOOM_STEP = 0.15
  * Padding (in map units) around the auto-fit viewport so content
  * doesn't touch the edges of the visible area.
  */
-const FIT_PADDING = 60
+const FIT_PADDING = 20
 
 /**
- * Compute a viewport that fits the entire map into the given container size.
+ * Compute a viewport that fits the given content bounds (in viewBox units)
+ * into the given container size, returning a translate+scale that
+ * centers the content within the container.
+ *
+ * `bounds.x` / `bounds.y` are the content's top-left in the SVG viewBox,
+ * used to offset the SVG's transform so the content (not the SVG's 0,0
+ * origin) ends up centered.
  */
 function computeFitViewport(
   containerWidth: number,
   containerHeight: number,
-  mapWidth: number,
-  mapHeight: number
+  bounds: { x: number; y: number; width: number; height: number }
 ): Viewport {
   if (containerWidth <= 0 || containerHeight <= 0) {
     return { x: 0, y: 0, scale: 1 }
   }
   const availW = Math.max(1, containerWidth - FIT_PADDING * 2)
   const availH = Math.max(1, containerHeight - FIT_PADDING * 2)
-  const scale = Math.min(availW / mapWidth, availH / mapHeight, MAX_SCALE)
-  // Center the scaled map in the container
-  const scaledW = mapWidth * scale
-  const scaledH = mapHeight * scale
-  const x = (containerWidth - scaledW) / 2
-  const y = (containerHeight - scaledH) / 2
+  const scale = Math.min(
+    availW / bounds.width,
+    availH / bounds.height,
+    MAX_SCALE
+  )
+  // Center the scaled content area in the container, accounting for
+  // the content's offset within the SVG viewBox.
+  const scaledW = bounds.width * scale
+  const scaledH = bounds.height * scale
+  const x = (containerWidth - scaledW) / 2 - bounds.x * scale
+  const y = (containerHeight - scaledH) / 2 - bounds.y * scale
   return { x, y, scale }
 }
 
@@ -196,9 +207,7 @@ export function MissionMap({
     const el = containerRef.current
     const apply = () => {
       const rect = el.getBoundingClientRect()
-      setViewport(
-        computeFitViewport(rect.width, rect.height, MAP_WIDTH, MAP_HEIGHT)
-      )
+      setViewport(computeFitViewport(rect.width, rect.height, CONTENT_BOUNDS))
     }
     apply()
     const ro = new ResizeObserver(apply)
@@ -383,9 +392,7 @@ export function MissionMap({
   const handleResetView = useCallback(() => {
     if (!containerRef.current) return
     const rect = containerRef.current.getBoundingClientRect()
-    setViewport(
-      computeFitViewport(rect.width, rect.height, MAP_WIDTH, MAP_HEIGHT)
-    )
+    setViewport(computeFitViewport(rect.width, rect.height, CONTENT_BOUNDS))
   }, [])
 
   // Pan handlers

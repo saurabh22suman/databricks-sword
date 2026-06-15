@@ -33,8 +33,13 @@ export function XpBar({
   const nextRankXp = nextRank?.minXp ?? currentXp
 
   return (
-    <div 
+    <div
       data-testid="xp-bar"
+      aria-label={
+        isMaxRank
+          ? `Current rank ${currentRank.title} with ${currentXp} XP at maximum rank.`
+          : `Current rank ${currentRank.title} with ${currentXp} of ${nextRankXp} XP toward ${nextRank?.title ?? "next rank"}. ${progress}% complete.`
+      }
       className={cn(
         "relative overflow-hidden rounded-lg bg-anime-900 border border-anime-700 p-4",
         "shadow-neon-cyan",

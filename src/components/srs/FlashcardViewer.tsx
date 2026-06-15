@@ -3,7 +3,7 @@ import { Button } from "@/components/ui/Button"
 import type { Flashcard, QualityRating } from "@/lib/srs"
 import { cn } from "@/lib/utils"
 import { AnimatePresence, motion } from "framer-motion"
-import React from "react"
+import React, { useEffect } from "react"
 
 interface FlashcardViewerProps {
   /** Flashcard to display */
@@ -41,6 +41,47 @@ export function FlashcardViewer({
   onNext,
   onShowHint
 }: FlashcardViewerProps): React.ReactElement {
+  // Keyboard shortcuts:
+  //   Space   → show answer (when not flipped)
+  //   1-4     → rate 0 (Again) / 2 (Hard) / 3 (Good) / 5 (Easy) (when flipped)
+  // Shortcuts are ignored when focus is inside a button/input so the user can
+  // still use Space/Enter to activate controls with the keyboard.
+  useEffect(() => {
+    const handler = (e: KeyboardEvent) => {
+      const target = e.target as HTMLElement | null
+      if (target) {
+        const tag = target.tagName
+        if (tag === "BUTTON" || tag === "INPUT" || tag === "TEXTAREA" || target.isContentEditable) {
+          return
+        }
+      }
+
+      if (e.key === " " || e.code === "Space") {
+        if (!isFlipped) {
+          e.preventDefault()
+          onNext()
+        }
+        return
+      }
+
+      if (isFlipped) {
+        const ratingMap: Record<string, QualityRating> = {
+          "1": 0,
+          "2": 2,
+          "3": 3,
+          "4": 5,
+        }
+        const rating = ratingMap[e.key]
+        if (rating !== undefined) {
+          e.preventDefault()
+          onRating(flashcard.id, rating)
+        }
+      }
+    }
+    document.addEventListener("keydown", handler)
+    return () => document.removeEventListener("keydown", handler)
+  }, [isFlipped, flashcard.id, onRating, onNext])
+
   return (
     <div className="relative w-full max-w-2xl mx-auto">
       {/* Card Container */}
@@ -152,6 +193,7 @@ export function FlashcardViewer({
                         variant={config.variant}
                         size="sm"
                         onClick={() => onRating(flashcard.id, parseInt(quality) as QualityRating)}
+                        aria-label={`Rate as ${config.label} (quality ${quality})`}
                         className="flex flex-col h-16"
                       >
                         <span className="text-sm font-bold">{config.label}</span>

@@ -68,6 +68,26 @@ export const MAP_WIDTH = 2800
 export const MAP_HEIGHT = 1300
 
 /**
+ * Content bounds — the actual extent of zone rectangles drawn on the map.
+ * Used for auto-fit so the visible content fills more of the container
+ * (MAP_WIDTH/MAP_HEIGHT include trailing empty space reserved for the
+ *  SVG viewBox and minimap).
+ *
+ *  Left:  foundation zone starts at x=40
+ *  Right: capstone zone ends at x=2240 (40 + 1920 + 320)
+ *  Top:   zones start at y=60
+ *  Bottom: field-ops zone ends at y=1080 (60 + 860 + 220) — but we use
+ *          MAP_HEIGHT (1300) so labels under the field-ops row aren't
+ *          clipped by the auto-fit crop.
+ */
+export const CONTENT_BOUNDS = {
+  x: 40,
+  y: 60,
+  width: 2200, // 40 → 2240
+  height: MAP_HEIGHT - 60, // 60 → 1300 (full vertical extent)
+} as const
+
+/**
  * Kept for backward compatibility — points to center of the map area.
  */
 export const MAP_CENTER = { x: MAP_WIDTH / 2, y: MAP_HEIGHT / 2 }

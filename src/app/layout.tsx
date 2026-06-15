@@ -1,10 +1,12 @@
 import { SandboxSyncProvider, SessionProvider } from "@/components/auth"
+import { SkipToContent } from "@/components/a11y/SkipToContent"
 import { BackgroundMusic } from "@/components/layout/BackgroundMusic"
 import { Footer } from "@/components/layout/Footer"
 import { Header } from "@/components/layout/Header"
 import { RouteChangeSound } from "@/components/layout/RouteChangeSound"
 import { ToastContainer } from "@/components/gamification/ToastContainer"
 import { XpFlyToBar } from "@/components/gamification/XpFlyToBar"
+import { RankUpWatcher } from "@/components/gamification/RankUpWatcher"
 import { StreakFreezeNudge } from "@/components/gamification/StreakFreezeNudge"
 import { StreakDailyBonus } from "@/components/gamification/StreakDailyBonus"
 import { PromoBanner } from "@/components/ui/PromoBanner"
@@ -83,16 +85,20 @@ export default async function RootLayout({
       >
         <SessionProvider session={session}>
           <SandboxSyncProvider>
+            <SkipToContent />
             <Header />
             <RouteChangeSound />
             <BackgroundMusic />
             <ToastContainer />
             <XpFlyToBar />
+            <RankUpWatcher />
             <StreakFreezeNudge />
             <StreakDailyBonus />
             <PromoBanner />
             <AutoCleanupRunner />
-            <main className="flex-1">{children}</main>
+            <main id="main-content" tabIndex={-1} className="flex-1">
+              {children}
+            </main>
             <Footer />
           </SandboxSyncProvider>
         </SessionProvider>

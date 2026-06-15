@@ -116,7 +116,6 @@ export function calculateInterval(
 export function calculateNextReviewDate(currentDate: Date, intervalDays: number): string {
   const nextDate = new Date(currentDate)
   nextDate.setDate(nextDate.getDate() + intervalDays)
-  // nextDate.setHours(0, 0, 0, 0) // Reset to start of day
   return nextDate.toISOString()
 }
 

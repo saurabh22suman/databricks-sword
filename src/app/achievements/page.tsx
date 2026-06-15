@@ -303,6 +303,8 @@ export default function AchievementsPage(): React.ReactElement {
                           <img
                             src={r.badge.src}
                             alt={r.badge.alt}
+                            loading="lazy"
+                            decoding="async"
                             className="w-full h-full object-contain"
                           />
                         </div>

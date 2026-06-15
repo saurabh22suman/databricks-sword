@@ -99,8 +99,41 @@ describe("AchievementToast", () => {
 
   it("displays achievement ID for tracking", () => {
     render(<AchievementToast achievement={mockAchievement} />)
-    
+
     const container = screen.getByTestId("achievement-toast")
     expect(container).toHaveAttribute("data-achievement-id", mockAchievement.id)
+  })
+
+  it("is announced to screen readers via aria-live polite", () => {
+    render(<AchievementToast achievement={mockAchievement} />)
+    const container = screen.getByTestId("achievement-toast")
+    expect(container).toHaveAttribute("role", "status")
+    expect(container).toHaveAttribute("aria-live", "polite")
+    expect(container).toHaveAttribute("aria-atomic", "true")
+  })
+
+  it("pauses auto-dismiss while the user hovers the toast", async () => {
+    const handleDismiss = vi.fn()
+    render(
+      <AchievementToast
+        achievement={mockAchievement}
+        onDismiss={handleDismiss}
+        autoDismiss={500}
+      />
+    )
+
+    const container = screen.getByTestId("achievement-toast")
+    fireEvent.mouseEnter(container)
+
+    // Wait longer than autoDismiss — handler must NOT have fired
+    await new Promise((r) => setTimeout(r, 700))
+    expect(handleDismiss).not.toHaveBeenCalled()
+
+    // On mouse leave, the timer restarts and the toast eventually dismisses
+    fireEvent.mouseLeave(container)
+    await waitFor(
+      () => expect(handleDismiss).toHaveBeenCalledTimes(1),
+      { timeout: 800 },
+    )
   })
 })

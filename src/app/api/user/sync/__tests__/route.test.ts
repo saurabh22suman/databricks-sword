@@ -23,9 +23,16 @@ function mockRewardXp(totalCouponXp: number, totalFieldOpsXp: number): void {
   const whereFieldOps = vi.fn().mockResolvedValue([{ totalFieldOpsXp }])
   const fromFieldOps = vi.fn().mockReturnValue({ where: whereFieldOps })
 
+  // The xp_awards aggregation query chains .groupBy() after .where(),
+  // so the where result needs a groupBy method that resolves the rows.
+  const groupBy = vi.fn().mockResolvedValue([])
+  const whereLedger: any = vi.fn().mockReturnValue({ groupBy })
+  const fromLedger = vi.fn().mockReturnValue({ where: whereLedger })
+
   vi.mocked(mockDb.select)
     .mockReturnValueOnce({ from: fromCoupon } as any)
     .mockReturnValueOnce({ from: fromFieldOps } as any)
+    .mockReturnValueOnce({ from: fromLedger } as any)
 }
 vi.mock("@/lib/db/client", () => ({
   getDb: vi.fn(() => mockDb),

@@ -1,18 +1,27 @@
 /**
  * @file POST /api/progress/stage
- * @description Confirms stage completion by validating against the server-side snapshot.
- * Returns the XP earned and current total XP. Triggers sync if snapshot differs.
+ * @description Claims XP for a completed stage.
+ *
+ * Authoritative server-side endpoint: looks up the stage's canonical
+ * `xpReward` from mission content config (the client cannot inflate it),
+ * applies first-try / no-hints bonuses and the server-computed streak
+ * multiplier, and writes a row to the `xp_awards` ledger. Idempotent on
+ * (userId, "stage", `${missionId}:${stageId}`).
+ *
+ * Replaces the old snapshot-confirmation flow that trusted the client-side
+ * sandbox for XP values.
  */
 
-import { getUserSandbox } from "@/app/api/user/helpers"
 import { authenticateApiRequest } from "@/lib/auth/api-auth"
-import { getRankForXp } from "@/lib/gamification/ranks"
+import { claimStageXp } from "@/lib/gamification/serverXpService"
 import { NextRequest, NextResponse } from "next/server"
 import { z } from "zod"
 
-const StageCompleteSchema = z.object({
+const StageClaimSchema = z.object({
   missionId: z.string().min(1),
   stageId: z.string().min(1),
+  firstTry: z.boolean().optional(),
+  noHints: z.boolean().optional(),
 })
 
 export async function POST(request: NextRequest): Promise<NextResponse> {
@@ -23,30 +32,27 @@ export async function POST(request: NextRequest): Promise<NextResponse> {
 
   try {
     const body = await request.json()
-    const parsed = StageCompleteSchema.safeParse(body)
+    const parsed = StageClaimSchema.safeParse(body)
     if (!parsed.success) {
       return NextResponse.json({ error: "Invalid request" }, { status: 400 })
     }
 
-    const { missionId, stageId } = parsed.data
-    const sandbox = await getUserSandbox(authResult.userId)
+    const { missionId, stageId, firstTry, noHints } = parsed.data
+    const options =
+      firstTry !== undefined || noHints !== undefined
+        ? { firstTry, noHints }
+        : undefined
 
-    if (!sandbox) {
-      return NextResponse.json({ error: "No progress data found" }, { status: 404 })
-    }
-
-    const missionProgress = sandbox.missionProgress[missionId]
-    const stageProgress = missionProgress?.stageProgress[stageId]
-    const rank = getRankForXp(sandbox.userStats.totalXp)
-
-    return NextResponse.json({
-      confirmed: !!stageProgress?.completed,
-      xpEarned: stageProgress?.xpEarned ?? 0,
-      totalXp: sandbox.userStats.totalXp,
-      rank,
+    const result = await claimStageXp({
+      userId: authResult.userId,
+      missionId,
+      stageId,
+      options,
     })
+
+    return NextResponse.json(result)
   } catch (error) {
-    console.error("Error confirming stage progress:", error)
+    console.error("Error claiming stage XP:", error)
     return NextResponse.json({ error: "Internal server error" }, { status: 500 })
   }
 }
