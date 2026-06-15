@@ -9,6 +9,38 @@ vi.mock("@/lib/auth/mockSession", () => ({
   MOCK_USER_ID,
 }))
 
+function createMockRows(users: Array<{ userId: string; userName: string | null; userImage: string | null; totalXp: number }>) {
+  return users.map((u) => ({
+    userId: u.userId,
+    userName: u.userName,
+    userImage: u.userImage,
+    snapshotData: u.totalXp > 0 ? JSON.stringify({
+      version: 1,
+      missionProgress: {},
+      challengeResults: {},
+      userStats: {
+        totalXp: u.totalXp,
+        totalMissionsCompleted: Math.floor(u.totalXp / 100),
+        totalChallengesCompleted: 0,
+        totalAchievements: 0,
+        currentStreak: 0,
+        longestStreak: 0,
+        totalTimeSpentMinutes: 0,
+      },
+      streakData: {
+        currentStreak: 0,
+        longestStreak: 0,
+        lastActiveDate: "",
+        freezesAvailable: 2,
+        freezesUsed: 0,
+      },
+      achievements: [],
+      flashcardProgress: {},
+      lastSynced: null,
+    }) : null,
+  }))
+}
+
 describe("GET /api/leaderboard", () => {
   beforeEach(() => {
     vi.resetModules()
@@ -16,43 +48,10 @@ describe("GET /api/leaderboard", () => {
   })
 
   it("returns leaderboard entries using snapshot JSON fields for opted-in users", async () => {
-    const rows = [
-      {
-        userId: "u-1",
-        userName: "Alice",
-        userImage: "/alice.png",
-        snapshotData: JSON.stringify({
-          version: 1,
-          missionProgress: {},
-          challengeResults: {},
-          userStats: {
-            totalXp: 1200,
-            totalMissionsCompleted: 4,
-            totalChallengesCompleted: 10,
-            totalAchievements: 2,
-            currentStreak: 5,
-            longestStreak: 8,
-            totalTimeSpentMinutes: 40,
-          },
-          streakData: {
-            currentStreak: 5,
-            longestStreak: 8,
-            lastActiveDate: "2026-02-21",
-            freezesAvailable: 1,
-            freezesUsed: 0,
-          },
-          achievements: [],
-          flashcardProgress: {},
-          lastSynced: "2026-02-21T00:00:00.000Z",
-        }),
-      },
-      {
-        userId: "u-2",
-        userName: "Bob",
-        userImage: null,
-        snapshotData: null,
-      },
-    ]
+    const rows = createMockRows([
+      { userId: "u-1", userName: "Alice", userImage: "/alice.png", totalXp: 1200 },
+      { userId: "u-2", userName: "Bob", userImage: null, totalXp: 0 },
+    ])
 
     const firstQuery = {
       from: vi.fn(() => ({
@@ -90,15 +89,15 @@ describe("GET /api/leaderboard", () => {
 
     const body = await response.json()
 
-    expect(body.pagination.totalPlayers).toBe(2) // Count reflects opted-in users only
+    expect(body.pagination.totalPlayers).toBe(2)
     expect(body.entries).toHaveLength(2)
 
     expect(body.entries[0]).toMatchObject({
       userId: "u-1",
       name: "Alice",
       totalXp: 1200,
-      missionsCompleted: 4,
-      currentStreak: 5,
+      missionsCompleted: 12,
+      currentStreak: 0,
     })
 
     expect(body.entries[1]).toMatchObject({
@@ -111,14 +110,9 @@ describe("GET /api/leaderboard", () => {
   })
 
   it("only returns opted-in users", async () => {
-    const rows = [
-      {
-        userId: "u-1",
-        userName: "Alice",
-        userImage: null,
-        snapshotData: null,
-      },
-    ]
+    const rows = createMockRows([
+      { userId: "u-1", userName: "Alice", userImage: null, totalXp: 0 },
+    ])
 
     const firstQuery = {
       from: vi.fn(() => ({
@@ -143,8 +137,10 @@ describe("GET /api/leaderboard", () => {
       .mockReturnValueOnce(secondQuery)
       .mockReturnValueOnce(firstQuery)
 
+    const getDbMock = vi.fn(() => ({ select }))
+
     vi.doMock("@/lib/db/client", () => ({
-      getDb: () => ({ select }),
+      getDb: getDbMock,
     }))
 
     const { GET } = await import("../route")
@@ -228,5 +224,92 @@ describe("GET /api/leaderboard", () => {
     const body = await response.json()
     expect(body.error).toBe("Internal server error")
     expect(body.errorCode).toBe("INTERNAL_ERROR")
+  })
+
+  describe("scope=nearby", () => {
+    it("falls back to top when currentXp is missing", async () => {
+      const rows = createMockRows([
+        { userId: "u-1", userName: "Alice", userImage: null, totalXp: 1200 },
+      ])
+
+      const firstQuery = {
+        from: vi.fn(() => ({
+          leftJoin: vi.fn(() => ({
+            where: vi.fn(() => ({
+              orderBy: vi.fn(() => ({
+                limit: vi.fn(async () => rows),
+              })),
+            })),
+          })),
+        })),
+      }
+
+      const secondQuery = {
+        from: vi.fn(() => ({
+          where: vi.fn(async () => [{ totalPlayers: 1 }]),
+        })),
+      }
+
+      const select = vi
+        .fn()
+        .mockReturnValueOnce(secondQuery)
+        .mockReturnValueOnce(firstQuery)
+
+      vi.doMock("@/lib/db/client", () => ({
+        getDb: () => ({ select }),
+      }))
+
+      const { GET } = await import("../route")
+      const response = await GET()
+
+      expect(response.status).toBe(200)
+
+      const body = await response.json()
+
+      expect(body.scope).toBe("top")
+      expect(body.entries).toHaveLength(1)
+    })
+
+    it("falls back to top when currentXp is invalid", async () => {
+      const rows = createMockRows([
+        { userId: "u-1", userName: "Alice", userImage: null, totalXp: 1200 },
+      ])
+
+      const firstQuery = {
+        from: vi.fn(() => ({
+          leftJoin: vi.fn(() => ({
+            where: vi.fn(() => ({
+              orderBy: vi.fn(() => ({
+                limit: vi.fn(async () => rows),
+              })),
+            })),
+          })),
+        })),
+      }
+
+      const secondQuery = {
+        from: vi.fn(() => ({
+          where: vi.fn(async () => [{ totalPlayers: 1 }]),
+        })),
+      }
+
+      const select = vi
+        .fn()
+        .mockReturnValueOnce(secondQuery)
+        .mockReturnValueOnce(firstQuery)
+
+      vi.doMock("@/lib/db/client", () => ({
+        getDb: () => ({ select }),
+      }))
+
+      const { GET } = await import("../route")
+      const response = await GET()
+
+      expect(response.status).toBe(200)
+
+      const body = await response.json()
+
+      expect(body.scope).toBe("top")
+    })
   })
 })

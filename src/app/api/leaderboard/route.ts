@@ -24,6 +24,7 @@ type LeaderboardEntry = {
   rank: ReturnType<typeof getRankForXp>
   missionsCompleted: number
   currentStreak: number
+  isCurrentUser?: boolean
 }
 
 type LeaderboardResponse = {
@@ -33,6 +34,7 @@ type LeaderboardResponse = {
     hasMore: boolean
     totalPlayers: number
   }
+  scope?: "top" | "nearby"
 }
 
 function isMissingLeaderboardOptInColumnError(error: unknown): boolean {
@@ -48,7 +50,8 @@ function mapLeaderboardEntries(
     userId: string
     userName: string | null
     userImage: string | null
-  }>
+  }>,
+  options?: { markCurrentUserByXp?: number }
 ): LeaderboardEntry[] {
   const entries: LeaderboardEntry[] = []
 
@@ -83,6 +86,15 @@ function mapLeaderboardEntries(
     }
   }
 
+  if (options?.markCurrentUserByXp !== undefined) {
+    for (const entry of entries) {
+      if (entry.totalXp === options.markCurrentUserByXp) {
+        entry.isCurrentUser = true
+        break
+      }
+    }
+  }
+
   return entries
 }
 
@@ -100,6 +112,18 @@ export async function GET(request?: NextRequest): Promise<NextResponse> {
     const url = request?.url
     const searchParams = url ? new URL(url).searchParams : new URLSearchParams()
 
+    // Parse scope parameter
+    const scopeParam = searchParams.get("scope")
+    const scope: "top" | "nearby" = scopeParam === "nearby" ? "nearby" : "top"
+
+    // Parse currentXp for nearby scope
+    const currentXpStr = searchParams.get("currentXp")
+    const currentXp = currentXpStr ? parseInt(currentXpStr, 10) : null
+    const isValidCurrentXp = currentXp !== null && !isNaN(currentXp) && currentXp >= 0
+
+    // For nearby scope, we need currentXp to be valid
+    const useNearby = scope === "nearby" && isValidCurrentXp
+
     // Parse pagination parameters
     const cursor = searchParams.get("cursor")
     const pageSize = Math.min(
@@ -111,7 +135,141 @@ export async function GET(request?: NextRequest): Promise<NextResponse> {
 
     let totalPlayers = 0
 
-    // Get total count first
+    // Handle nearby scope
+    if (useNearby) {
+      // For nearby scope, we don't need total count upfront - compute it from results
+      // Load all opted-in users (limit to 100 to avoid OOM)
+      let nearbyRows: Array<{
+        snapshotData: string | null
+        userId: string
+        userName: string | null
+        userImage: string | null
+      }> = []
+
+      const nearbyPageSize = 100
+
+      try {
+        const baseWhere = and(
+          ne(users.id, MOCK_USER_ID),
+          eq(users.leaderboardOptIn, true)
+        )
+
+        nearbyRows = await db
+          .select({
+            snapshotData: sandboxSnapshots.snapshotData,
+            userId: users.id,
+            userName: users.name,
+            userImage: users.image,
+          })
+          .from(users)
+          .leftJoin(sandboxSnapshots, eq(sandboxSnapshots.userId, users.id))
+          .where(baseWhere)
+          .orderBy(desc(xpExtractor))
+          .limit(nearbyPageSize)
+      } catch (error) {
+        if (!isMissingLeaderboardOptInColumnError(error)) {
+          console.error("Leaderboard query error:", error)
+        }
+
+        nearbyRows = await db
+          .select({
+            snapshotData: sandboxSnapshots.snapshotData,
+            userId: users.id,
+            userName: users.name,
+            userImage: users.image,
+          })
+          .from(users)
+          .leftJoin(sandboxSnapshots, eq(sandboxSnapshots.userId, users.id))
+          .where(ne(users.id, MOCK_USER_ID))
+          .orderBy(desc(xpExtractor))
+          .limit(nearbyPageSize)
+      }
+
+      // Map entries to get XP values
+      const mappedEntries = mapLeaderboardEntries(nearbyRows)
+
+      // Find the position of current user
+      const allEntries = mappedEntries
+      let userPosition = -1
+      for (let i = 0; i < allEntries.length; i++) {
+        if (allEntries[i].totalXp === currentXp) {
+          userPosition = i + 1 // 1-based position
+          break
+        }
+      }
+
+      // If user not found by exact XP match, find closest position
+      if (userPosition === -1) {
+        for (let i = 0; i < allEntries.length; i++) {
+          if (allEntries[i].totalXp <= currentXp) {
+            userPosition = i + 1
+            break
+          }
+        }
+        if (userPosition === -1 && allEntries.length > 0) {
+          userPosition = allEntries.length
+        }
+      }
+
+      // If no players found or position invalid, fall back to top
+      if (allEntries.length === 0 || userPosition === -1) {
+        const topEntries = mapLeaderboardEntries(
+          nearbyRows.slice(0, 10),
+          { markCurrentUserByXp: currentXp ?? undefined }
+        )
+        return apiOk({
+          entries: topEntries,
+          pagination: {
+            cursor: null,
+            hasMore: false,
+            totalPlayers: nearbyRows.length,
+          },
+          scope: "top",
+        } satisfies LeaderboardResponse)
+      }
+
+      // Calculate window: 5 above, current, 5 below
+      const windowStart = Math.max(0, userPosition - 6) // userPosition is 1-based, want 5 above
+      const windowEnd = Math.min(allEntries.length, userPosition + 5)
+
+      // Adjust if we're at the boundaries
+      let finalStart = windowStart
+      let finalEnd = windowEnd
+
+      // If we can't get 5 above, extend below
+      if (userPosition <= 6) {
+        finalEnd = Math.min(allEntries.length, userPosition + 5 + (6 - userPosition))
+      }
+      // If we can't get 5 below, extend above
+      if (userPosition + 5 > allEntries.length) {
+        finalStart = Math.max(0, windowStart - ((userPosition + 5) - allEntries.length))
+      }
+
+      finalStart = Math.max(0, finalStart)
+      finalEnd = Math.min(allEntries.length, finalEnd)
+
+      const windowEntries = allEntries.slice(finalStart, finalEnd)
+
+      // Mark current user
+      for (const entry of windowEntries) {
+        if (entry.totalXp === currentXp) {
+          entry.isCurrentUser = true
+          break
+        }
+      }
+
+      return apiOk({
+        entries: windowEntries,
+        pagination: {
+          cursor: null,
+          hasMore: allEntries.length > finalEnd,
+          totalPlayers: allEntries.length,
+        },
+        scope: "nearby",
+      } satisfies LeaderboardResponse)
+    }
+
+    // Get total count for top scope
     try {
       const [countRow] = await db
         .select({ totalPlayers: sql<number>`count(*)` })
@@ -124,7 +282,7 @@ export async function GET(request?: NextRequest): Promise<NextResponse> {
       totalPlayers = -1
     }
 
-    // Build query with cursor-based pagination
+    // Build query with cursor-based pagination (top scope)
     let rows: Array<{
       snapshotData: string | null
       userId: string
@@ -205,6 +363,7 @@ export async function GET(request?: NextRequest): Promise<NextResponse> {
         hasMore,
         totalPlayers,
       },
+      scope: "top",
     } satisfies LeaderboardResponse)
   } catch (error) {
     console.error("Error fetching leaderboard:", error)
