@@ -171,7 +171,7 @@ export function Header(): React.ReactElement {
                     className={`hover:text-white relative group transition-colors`}
                   >
                     {item.label}
-                    <span className={`absolute -bottom-1 left-0 w-0 h-0.5 bg-anime-${item.highlight} group-hover:w-full transition-all duration-300`} />
+                    <span className={`absolute -bottom-1 left-0 w-0 h-0.5 ${item.highlight === "cyan" ? "bg-anime-cyan" : "bg-anime-purple"} group-hover:w-full transition-all duration-300`} />
                   </Link>
                 ))}
               </>
