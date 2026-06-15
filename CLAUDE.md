@@ -11,6 +11,7 @@ Key files for reference:
 - `docs/01-architecture-and-apis.md` - Architecture, API contracts, data flow
 - `docs/02-agent-playbook-and-rca.md` - React standards + RCA playbook
 - `docs/03-feature-and-content-mapping.md` - Gamification mechanics, content map
+- **`.claude/skills/drizzle-turso/SKILL.md`** - **Turso/libSQL + Drizzle patterns, one-off scripts, gotchas** (read before touching `src/lib/db/` or `scripts/`)
 - `docs/superpowers/specs/` and `docs/superpowers/plans/` - Recent design + implementation specs
 
 ## Quick Commands
