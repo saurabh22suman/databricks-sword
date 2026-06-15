@@ -193,6 +193,7 @@ export function FlashcardViewer({
                         variant={config.variant}
                         size="sm"
                         onClick={() => onRating(flashcard.id, parseInt(quality) as QualityRating)}
+                        aria-label={`Rate as ${config.label} (quality ${quality})`}
                         className="flex flex-col h-16"
                       >
                         <span className="text-sm font-bold">{config.label}</span>

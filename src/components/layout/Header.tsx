@@ -1,6 +1,7 @@
 "use client"
 
 import { ProfileSidebar } from "@/components/auth/ProfileSidebar"
+import { Button } from "@/components/ui/Button"
 import { NotificationDropdown } from "@/components/ui/NotificationDropdown"
 import { RankProgressBar } from "@/components/gamification/RankProgressBar"
 import { onXpEvent } from "@/lib/gamification/xpEventBus"
@@ -166,23 +167,25 @@ export function Header(): React.ReactElement {
 
           {/* Actions */}
           <div className="flex items-center gap-4">
-            <button
+            <Button
               onClick={toggleAudioMute}
-              className="p-2 rounded-md text-gray-400 hover:text-white hover:bg-anime-800/60 transition-colors"
+              variant="ghost"
+              className="p-2 h-auto rounded-md text-gray-400 hover:text-white hover:bg-anime-800/60"
               aria-label={audioMuted ? "Unmute all audio" : "Mute all audio"}
               aria-pressed={!audioMuted}
               title={audioMuted ? "Unmute all audio" : "Mute all audio"}
             >
               {audioMuted ? <VolumeX className="w-5 h-5" /> : <Volume2 className="w-5 h-5" />}
-            </button>
+            </Button>
 
             {/* Notifications Dropdown */}
             <NotificationDropdown />
 
             {/* Mobile Menu Toggle */}
-            <button
+            <Button
               onClick={() => setMobileMenuOpen(!mobileMenuOpen)}
-              className="md:hidden p-2 text-gray-400 hover:text-white transition-colors"
+              variant="ghost"
+              className="md:hidden p-2 h-auto text-gray-400 hover:text-white"
               aria-label={mobileMenuOpen ? "Close menu" : "Open menu"}
               aria-expanded={mobileMenuOpen}
             >
@@ -191,7 +194,7 @@ export function Header(): React.ReactElement {
               ) : (
                 <Menu className="w-6 h-6" />
               )}
-            </button>
+            </Button>
 
             {/* Auth: Avatar ring (logged in) or Start Training CTA */}
             {status === "loading" ? (

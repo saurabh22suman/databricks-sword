@@ -86,20 +86,8 @@ export default async function FieldOpsPage(): Promise<React.ReactElement> {
         {/* Connection Status Banner */}
         <ConnectionStatus isConnected={isConnected} refreshOnInitialSync />
 
-        {/* Industries Grid */}
-        <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-6 mt-8">
-          {industries.map((industry) => (
-            <IndustryCard
-              key={industry.industry}
-              industry={industry}
-              userXp={userXp}
-              isConnected={isConnected}
-            />
-          ))}
-        </div>
-
         {/* Info Section */}
-        <div className="mt-12 cut-corner bg-anime-900 border border-anime-700 p-6">
+        <div className="mt-8 cut-corner bg-anime-900 border border-anime-700 p-6">
           <h2 className="font-heading text-2xl text-anime-cyan mb-4">
             How It Works
           </h2>
@@ -111,6 +99,18 @@ export default async function FieldOpsPage(): Promise<React.ReactElement> {
             <li>• Validate your work with automated checks</li>
             <li>• Earn XP and badges for completion</li>
           </ul>
+        </div>
+
+        {/* Industries Grid */}
+        <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-6 mt-8">
+          {industries.map((industry) => (
+            <IndustryCard
+              key={industry.industry}
+              industry={industry}
+              userXp={userXp}
+              isConnected={isConnected}
+            />
+          ))}
         </div>
       </div>
     </div>
