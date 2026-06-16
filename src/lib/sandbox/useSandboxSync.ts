@@ -19,6 +19,7 @@ import {
   syncFromServer,
   syncToServer,
 } from "./sync"
+import { drainPendingClaims } from "./pendingClaims"
 
 export type UseSandboxSyncResult = {
   /** Push current sandbox to server immediately */
@@ -136,6 +137,9 @@ export function useSandboxSync(): UseSandboxSyncResult {
 
           // Push merged result back so server always has latest
           await syncToServer(userId, { ...validatedMerged, lastSynced })
+
+          // Drain the offline-claim queue now that the user is online
+          await drainPendingClaims()
         } else if (local.userStats.totalXp > 0) {
           // No remote snapshot exists — push local data to server
           const result = await syncToServer(userId, local)
@@ -158,26 +162,31 @@ export function useSandboxSync(): UseSandboxSyncResult {
 
     const handleVisibilityChange = (): void => {
       if (document.visibilityState === "hidden") {
-        const sandbox = loadSandbox()
-        if (sandbox && shouldSync(sandbox)) {
-          // Update lastSynced timestamp locally BEFORE sending beacon
-          // This prevents consecutive merge conflicts on next load
-          const now = new Date().toISOString()
-          const sandboxWithSync = { ...sandbox, lastSynced: now }
-          saveSandbox(sandboxWithSync)
-
-          // Use sendBeacon for reliability on tab close
-          const blob = new Blob([JSON.stringify(sandboxWithSync)], {
-            type: "application/json",
-          })
-          navigator.sendBeacon("/api/user/sync", blob)
-        }
+        // Best-effort drain of the offline-claim queue. If the page is
+        // actually unloading, fetch + keepalive gives the browser one
+        // more chance to deliver the request. We don't await — the
+        // beacon/keepalive pattern is fire-and-forget.
+        void drainPendingClaims()
       }
     }
 
     document.addEventListener("visibilitychange", handleVisibilityChange)
     return () => {
       document.removeEventListener("visibilitychange", handleVisibilityChange)
+    }
+  }, [status, userId])
+
+  // Drain queue when the browser regains connectivity
+  useEffect(() => {
+    if (status !== "authenticated" || !userId) return
+
+    const handleOnline = (): void => {
+      void drainPendingClaims()
+    }
+
+    window.addEventListener("online", handleOnline)
+    return () => {
+      window.removeEventListener("online", handleOnline)
     }
   }, [status, userId])
 

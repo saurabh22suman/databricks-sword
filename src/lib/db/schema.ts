@@ -2,6 +2,7 @@ import { sql } from "drizzle-orm"
 import {
   index,
   integer,
+  primaryKey,
   sqliteTable,
   text,
   uniqueIndex,
@@ -412,5 +413,36 @@ export const xpAwards = sqliteTable(
     ),
     // Speeds up "all awards for a user" reads (recompute totalXp, streak).
     index("xp_awards_user_awarded_idx").on(table.userId, table.awardedAt),
+  ],
+)
+
+/**
+ * Server-side per-user per-stage attempt tracking.
+ *
+ * Records attempts and hints used for each stage so /api/progress/stage
+ * can derive the first-try / no-hints bonuses authoritatively — the
+ * client no longer controls these flags.
+ *
+ * One row per (user, mission, stage). A `null` `completedAt` means the
+ * user has attempted the stage but not yet completed it.
+ */
+export const stageAttempts = sqliteTable(
+  "stage_attempts",
+  {
+    userId: text("user_id")
+      .notNull()
+      .references(() => users.id, { onDelete: "cascade" }),
+    missionId: text("mission_id").notNull(),
+    stageId: text("stage_id").notNull(),
+    attemptCount: integer("attempt_count").notNull().default(0),
+    hintsUsed: integer("hints_used").notNull().default(0),
+    completedAt: integer("completed_at", { mode: "timestamp" }),
+    updatedAt: integer("updated_at", { mode: "timestamp" })
+      .notNull()
+      .$defaultFn(() => new Date()),
+  },
+  (table) => [
+    primaryKey({ columns: [table.userId, table.missionId, table.stageId] }),
+    index("stage_attempts_user_idx").on(table.userId),
   ],
 )

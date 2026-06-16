@@ -27,12 +27,15 @@ vi.mock("@/app/api/user/helpers", () => ({
 }))
 
 import {
+  claimAchievementXp,
   claimChallengeXp,
   claimMissionXp,
   claimStageXp,
   computeStreakFromAwards,
   getXpMultiplierForUser,
 } from "../serverXpService"
+
+import { ACHIEVEMENTS } from "../achievements"
 
 // -----------------------------------------------------------------------------
 // Test helpers
@@ -51,25 +54,80 @@ function setupInsertReturning(rows: Array<{ id: string; xpAmount: number }>) {
 }
 
 /**
- * Sets up a mock chain for `db.select(...).from(xpAwards).where(...).orderBy(...).all()`.
+ * Sets up a mock chain for `db.insert(stageAttempts).values(...).onConflictDoUpdate()`.
+ * Returns the chain so the test can configure resolution.
+ *
+ * This modifies the mock to always include onConflictDoUpdate in the chain.
+ */
+function setupStageAttemptUpsert() {
+  const onConflictDoUpdate = vi.fn().mockResolvedValue(undefined)
+
+  // Store reference to the existing insert mock
+  const prevInsert = mockDb.insert.getMockImplementation()
+
+  mockDb.insert.mockImplementation((table: any) => {
+    // Always add onConflictDoUpdate to the chain result
+    const result: any = prevInsert ? prevInsert(table) : {}
+
+    // If we got a values method, wrap it to add onConflictDoUpdate
+    if (result.values) {
+      const originalValues = result.values
+      result.values = (...args: any[]) => {
+        const valuesResult = originalValues(...args)
+        // Add onConflictDoUpdate to whatever the original returns
+        return {
+          ...valuesResult,
+          onConflictDoUpdate,
+        }
+      }
+    }
+
+    return result
+  })
+
+  return { values: vi.fn(), onConflictDoUpdate }
+}
+
+// Track select call count for multiple select calls in one test
+let selectCallCount = 0
+
+/**
+ * Sets up a mock chain for `db.select(...).from(table).where(...).orderBy(...).all()`.
  * The where result must be both thenable (so `await` works) and have an
  * orderBy method (since the production query chains orderBy after where).
+ *
+ * For stage_attempts queries (from stageAttempts table), returns empty rows
+ * when no prior attempts exist. For xp_awards, returns the provided rows.
  */
-function setupSelectRows(rows: Array<{ awardedAt: Date }>) {
-  const orderBy = vi.fn().mockReturnValue({
-    then: (resolve: (rows: Array<{ awardedAt: Date }>) => void) =>
-      Promise.resolve(rows).then(resolve),
+function setupSelectRows(rows: Array<{ awardedAt: Date }>, tableName?: string) {
+  selectCallCount++
+
+  // Create a mock that returns different results based on the table being selected
+  const prevSelect = mockDb.select.getMockImplementation()
+
+  mockDb.select.mockImplementation((table: any) => {
+    // Check if this is a stage_attempts query by examining the table object
+    const isStageAttempts = table && typeof table === 'object' &&
+      'columnNames' in table && table.columnNames &&
+      'userId' in table.columnNames
+
+    const orderBy = vi.fn().mockReturnValue({
+      then: (resolve: (rows: any) => void) => Promise.resolve(rows).then(resolve),
+    })
+
+    const resultRows = isStageAttempts ? [] : rows
+
+    const whereThenable: any = {
+      then: (resolve: (rows: any) => void) => Promise.resolve(resultRows).then(resolve),
+      orderBy,
+    }
+
+    return {
+      from: vi.fn().mockReturnValue({
+        where: vi.fn().mockReturnValue(whereThenable),
+      }),
+    }
   })
-  const whereThenable: any = {
-    then: (resolve: (rows: Array<{ awardedAt: Date }>) => void) =>
-      Promise.resolve(rows).then(resolve),
-    orderBy,
-  }
-  mockDb.select.mockReturnValue({
-    from: vi.fn().mockReturnValue({
-      where: vi.fn().mockReturnValue(whereThenable),
-    }),
-  } as any)
 }
 
 const MISSION_ID = "test-mission"
@@ -112,13 +170,16 @@ describe("serverXpService", () => {
     it("uses server-side xpReward from content config (ignores any client-sent amount)", async () => {
       // Mission has a 100-XP stage. Server must read 100 from config,
       // not trust any client-provided amount.
+      // With hintsUsed undefined/defaults to 0, both first-try and no-hints apply (15 + 50 = 65)
       mockGetMission.mockResolvedValue({
         id: MISSION_ID,
         stages: [{ id: STAGE_ID, xpReward: 100 }],
       })
+      // 100 + 15 first-try + 50 no-hints = 165
       const { values } = setupInsertReturning([
-        { id: "row-1", xpAmount: 100 },
+        { id: "row-1", xpAmount: 165 },
       ])
+      setupStageAttemptUpsert()
 
       const result = await claimStageXp({
         userId: USER_ID,
@@ -126,16 +187,17 @@ describe("serverXpService", () => {
         stageId: STAGE_ID,
       })
 
-      expect(result.xpAwarded).toBe(100)
+      expect(result.xpAwarded).toBe(165)
       // The values payload should contain the canonical server-computed amount
-      expect(values).toHaveBeenCalledWith(
-        expect.objectContaining({
-          userId: USER_ID,
-          sourceType: "stage",
-          sourceId: `${MISSION_ID}:${STAGE_ID}`,
-          xpAmount: 100,
-        }),
-      )
+      // There are 2 insert calls - check the xp_awards call (2nd)
+      expect(values).toHaveBeenCalledTimes(2)
+      const lastCall = values.mock.calls[1][0]
+      expect(lastCall).toMatchObject({
+        userId: USER_ID,
+        sourceType: "stage",
+        sourceId: `${MISSION_ID}:${STAGE_ID}`,
+        xpAmount: 165,
+      })
     })
 
     it("applies firstTry and noHints bonuses on top of base xp", async () => {
@@ -148,12 +210,13 @@ describe("serverXpService", () => {
       const { values } = setupInsertReturning([
         { id: "row-1", xpAmount: 165 },
       ])
+      setupStageAttemptUpsert()
 
       const result = await claimStageXp({
         userId: USER_ID,
         missionId: MISSION_ID,
         stageId: STAGE_ID,
-        options: { firstTry: true, noHints: true },
+        options: { hintsUsed: 0 },
       })
 
       expect(result.xpAwarded).toBe(165)
@@ -178,6 +241,7 @@ describe("serverXpService", () => {
       })
       // 100 * 1.5 = 150
       setupInsertReturning([{ id: "row-1", xpAmount: 150 }])
+      setupStageAttemptUpsert()
 
       const result = await claimStageXp({
         userId: USER_ID,
@@ -195,6 +259,7 @@ describe("serverXpService", () => {
       })
       // onConflictDoNothing returns empty array when row already exists
       const { values } = setupInsertReturning([])
+      setupStageAttemptUpsert()
 
       const result = await claimStageXp({
         userId: USER_ID,
@@ -203,8 +268,52 @@ describe("serverXpService", () => {
       })
 
       expect(result).toEqual({ xpAwarded: 0, alreadyAwarded: true })
-      // Insert was still called (so the unique index can do its job)
-      expect(values).toHaveBeenCalledTimes(1)
+      // Insert was called twice: stage_attempts (upsert) and xp_awards (conflict)
+      expect(values).toHaveBeenCalledTimes(2)
+    })
+
+    it("applies first-try bonus when no prior stage_attempts row exists", async () => {
+      mockGetMission.mockResolvedValue({
+        id: MISSION_ID,
+        stages: [{ id: STAGE_ID, xpReward: 100 }],
+      })
+      // Empty select — no prior attempts
+      setupSelectRows([])
+      const { returning } = setupInsertReturning([
+        { id: "award-1", xpAmount: 165 }, // 100 base + 15 first-try + 50 no-hints = 165
+      ])
+      setupStageAttemptUpsert()
+
+      const result = await claimStageXp({
+        userId: USER_ID,
+        missionId: MISSION_ID,
+        stageId: STAGE_ID,
+        options: { hintsUsed: 0 }, // hintsUsed: 0 triggers no-hints bonus, no prior row triggers first-try bonus
+      })
+
+      // Actual computed value: 100 + 15 (first-try) + 50 (no-hints) = 165
+      expect(result.xpAwarded).toBe(165)
+    })
+
+    it("applies no-hints bonus when hintsUsed in the request is 0", async () => {
+      mockGetMission.mockResolvedValue({
+        id: MISSION_ID,
+        stages: [{ id: STAGE_ID, xpReward: 100 }],
+      })
+      // Empty select — no prior attempts (tests both bonuses applied to base)
+      setupSelectRows([])
+      setupInsertReturning([{ id: "award-1", xpAmount: 165 }]) // 100 + 15 + 50 = 165
+      setupStageAttemptUpsert()
+
+      const result = await claimStageXp({
+        userId: USER_ID,
+        missionId: MISSION_ID,
+        stageId: STAGE_ID,
+        options: { hintsUsed: 0 },
+      })
+
+      // With hintsUsed: 0 AND no prior row: both bonuses apply (100 + 15 + 50 = 165)
+      expect(result.xpAwarded).toBe(165)
     })
   })
 
@@ -337,6 +446,37 @@ describe("serverXpService", () => {
       setupSelectRows(recent)
       const multiplier = await getXpMultiplierForUser(USER_ID)
       expect(multiplier).toBe(1.5)
+    })
+  })
+
+  describe("claimAchievementXp", () => {
+    it("returns 0 when achievementId is unknown", async () => {
+      const result = await claimAchievementXp({
+        userId: USER_ID,
+        achievementId: "does-not-exist",
+      })
+      expect(result).toEqual({ xpAwarded: 0, alreadyAwarded: false })
+    })
+
+    it("inserts an award with the achievement's xpBonus", async () => {
+      const { returning } = setupInsertReturning([
+        { id: "award-1", xpAmount: ACHIEVEMENTS[0].xpBonus },
+      ])
+      const result = await claimAchievementXp({
+        userId: USER_ID,
+        achievementId: ACHIEVEMENTS[0].id, // "first-blood", xpBonus 75
+      })
+      expect(result).toEqual({ xpAwarded: 75, alreadyAwarded: false })
+      expect(returning).toHaveBeenCalled()
+    })
+
+    it("returns alreadyAwarded: true when insert is a no-op", async () => {
+      setupInsertReturning([]) // empty returning → conflict
+      const result = await claimAchievementXp({
+        userId: USER_ID,
+        achievementId: ACHIEVEMENTS[0].id,
+      })
+      expect(result).toEqual({ xpAwarded: 0, alreadyAwarded: true })
     })
   })
 })

@@ -40,6 +40,12 @@ function mockFetchOnce(response: Response) {
   vi.stubGlobal("fetch", vi.fn().mockResolvedValueOnce(response))
 }
 
+function mockFetchTwice(response1: Response, response2: Response) {
+  vi.stubGlobal("fetch", vi.fn()
+    .mockResolvedValueOnce(response1)
+    .mockResolvedValueOnce(response2))
+}
+
 describe("xpService — server-first", () => {
   let sandbox: SandboxData
 
@@ -64,8 +70,8 @@ describe("xpService — server-first", () => {
       )
 
       await awardStageXp(MISSION_ID, STAGE_ID, 50, {
-        firstTry: true,
-        noHints: true,
+        attempts: 1,
+        hintsUsed: 0,
       })
 
       const fetchMock = vi.mocked(global.fetch)
@@ -77,8 +83,8 @@ describe("xpService — server-first", () => {
       expect(body).toEqual({
         missionId: MISSION_ID,
         stageId: STAGE_ID,
-        firstTry: true,
-        noHints: true,
+        attempts: 1,
+        hintsUsed: 0,
       })
     })
 
@@ -153,14 +159,16 @@ describe("xpService — server-first", () => {
 
   describe("awardMissionXp", () => {
     it("POSTs to /api/progress/mission and uses the server XP", async () => {
-      mockFetchOnce(
+      // First call for mission claim, second for achievement claim (first-blood)
+      mockFetchTwice(
         mockFetchResponse({ xpAwarded: 300, alreadyAwarded: false }),
+        mockFetchResponse({ xpAwarded: 75, alreadyAwarded: false }),
       )
 
       const event = await awardMissionXp(MISSION_ID, 250)
 
       const fetchMock = vi.mocked(global.fetch)
-      expect(fetchMock).toHaveBeenCalledTimes(1)
+      expect(fetchMock).toHaveBeenCalledTimes(2)
       expect(fetchMock.mock.calls[0][0]).toBe("/api/progress/mission")
       expect(event.amount).toBe(300)
     })
@@ -178,14 +186,16 @@ describe("xpService — server-first", () => {
 
   describe("awardChallengeXp", () => {
     it("POSTs to /api/progress/challenge and uses the server XP", async () => {
-      mockFetchOnce(
+      // First call for challenge claim, second for achievement claim (getting-started)
+      mockFetchTwice(
         mockFetchResponse({ xpAwarded: 75, alreadyAwarded: false }),
+        mockFetchResponse({ xpAwarded: 35, alreadyAwarded: false }),
       )
 
       const event = await awardChallengeXp(CHALLENGE_ID, 50)
 
       const fetchMock = vi.mocked(global.fetch)
-      expect(fetchMock).toHaveBeenCalledTimes(1)
+      expect(fetchMock).toHaveBeenCalledTimes(2)
       expect(fetchMock.mock.calls[0][0]).toBe("/api/progress/challenge")
       expect(event.amount).toBe(75)
     })

@@ -113,6 +113,16 @@ pnpm format           # Format code
 pnpm validate:content # Validate mission/challenge JSON content
 ```
 
+## Database & One-off Scripts
+
+Database: Turso (libSQL) + Drizzle ORM. See the **drizzle-turso** skill for the
+full guide (schema, queries, JSON columns, `drizzle-kit` migrations, JSON
+gotchas, env-var loading). One-off admin scripts live under `scripts/*.mjs`
+and use raw `@libsql/client` with parameterized SQL — `seed-fresh-user.mjs`
+and `grant-grandmaster-demo.mjs` are the canonical examples.
+
+Run with: `export $(grep -v '^#' .env | xargs) && node scripts/<name>.mjs`
+
 ## Testing Instructions
 
 ```bash

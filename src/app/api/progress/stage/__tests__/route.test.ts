@@ -78,7 +78,7 @@ describe("POST /api/progress/stage", () => {
     })
   })
 
-  it("forwards firstTry/noHints options to the service", async () => {
+  it("forwards attempts/hintsUsed options to the service", async () => {
     mockAuthenticate.mockResolvedValue({
       authenticated: true,
       userId: USER_ID,
@@ -89,8 +89,8 @@ describe("POST /api/progress/stage", () => {
       makeRequest({
         missionId: MISSION_ID,
         stageId: STAGE_ID,
-        firstTry: true,
-        noHints: true,
+        attempts: 1,
+        hintsUsed: 0,
       }),
     )
     expect(response.status).toBe(200)
@@ -98,7 +98,40 @@ describe("POST /api/progress/stage", () => {
       userId: USER_ID,
       missionId: MISSION_ID,
       stageId: STAGE_ID,
-      options: { firstTry: true, noHints: true },
+      options: { attempts: 1, hintsUsed: 0 },
+    })
+  })
+
+  it("returns 400 when body uses legacy firstTry/noHints flags", async () => {
+    mockAuthenticate.mockResolvedValue({ authenticated: true, userId: USER_ID })
+    mockClaimStageXp.mockResolvedValue({ xpAwarded: 50, alreadyAwarded: false })
+    const response = await POST(
+      makeRequest({ missionId: MISSION_ID, stageId: STAGE_ID, firstTry: true }),
+    )
+    // Legacy keys are rejected - the API contract has changed
+    expect(response.status).toBe(400)
+    const data = await response.json()
+    expect(data.error).toContain("firstTry")
+    expect(mockClaimStageXp).not.toHaveBeenCalled()
+  })
+
+  it("accepts new body shape with attempts and hintsUsed", async () => {
+    mockAuthenticate.mockResolvedValue({ authenticated: true, userId: USER_ID })
+    mockClaimStageXp.mockResolvedValue({ xpAwarded: 100, alreadyAwarded: false })
+    const response = await POST(
+      makeRequest({
+        missionId: MISSION_ID,
+        stageId: STAGE_ID,
+        attempts: 1,
+        hintsUsed: 0,
+      }),
+    )
+    expect(response.status).toBe(200)
+    expect(mockClaimStageXp).toHaveBeenCalledWith({
+      userId: USER_ID,
+      missionId: MISSION_ID,
+      stageId: STAGE_ID,
+      options: { attempts: 1, hintsUsed: 0 },
     })
   })
 

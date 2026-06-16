@@ -1,4 +1,4 @@
-import type { SandboxData } from "./types"
+import type { PendingClaim, SandboxData } from "./types"
 import { SandboxDataSchema } from "./types"
 import { validateStreakData } from "../gamification/streaks"
 
@@ -33,7 +33,7 @@ let cachedLastSynced: string | null = null
  */
 export function initializeSandbox(): SandboxData {
   return {
-    version: 1,
+    version: 2,
     missionProgress: {},
     challengeResults: {},
     userStats: {
@@ -55,6 +55,7 @@ export function initializeSandbox(): SandboxData {
     achievements: [],
     completedFieldOps: [],
     flashcardProgress: {},
+    pendingClaims: [], // P0-1: offline claim queue
     lastSynced: null,
   }
 }
@@ -100,17 +101,30 @@ export function loadSandbox(): SandboxData | null {
     const parsed = JSON.parse(stored)
     const validated = SandboxDataSchema.parse(parsed)
 
+    // v1 → v2: add pendingClaims: [] if missing (version was 1)
+    // The schema's .default([]) already adds the field, but we need to bump version
+    let migrated = validated
+    if (validated.version < 2) {
+      migrated = {
+        ...validated,
+        version: 2,
+        pendingClaims: (validated as { pendingClaims?: PendingClaim[] }).pendingClaims ?? [],
+      }
+      // Persist the migration immediately so we don't re-run it
+      saveSandbox(migrated)
+    }
+
     // Validate and decay streak if needed
     const today = new Date().toISOString().split("T")[0]
-    const validatedStreakData = validateStreakData(validated.streakData, today)
+    const validatedStreakData = validateStreakData(migrated.streakData, today)
 
     // If streak was corrected, update the sandbox
-    if (validatedStreakData !== validated.streakData) {
+    if (validatedStreakData !== migrated.streakData) {
       const corrected = {
-        ...validated,
+        ...migrated,
         streakData: validatedStreakData,
         userStats: {
-          ...validated.userStats,
+          ...migrated.userStats,
           currentStreak: validatedStreakData.currentStreak,
           longestStreak: validatedStreakData.longestStreak,
         },
@@ -122,23 +136,23 @@ export function loadSandbox(): SandboxData | null {
 
     // Only recalculate stats if lastSynced actually changed
     // This prevents O(n) iteration on every load
-    if (validated.lastSynced !== cachedLastSynced) {
-      cachedLastSynced = validated.lastSynced
-      const healed = recalculateStats(validated)
+    if (migrated.lastSynced !== cachedLastSynced) {
+      cachedLastSynced = migrated.lastSynced
+      const healed = recalculateStats(migrated)
       // Only save if we actually corrected something
       if (
-        healed.userStats.totalXp !== validated.userStats.totalXp ||
+        healed.userStats.totalXp !== migrated.userStats.totalXp ||
         healed.userStats.totalMissionsCompleted !==
-          validated.userStats.totalMissionsCompleted ||
+          migrated.userStats.totalMissionsCompleted ||
         healed.userStats.totalChallengesCompleted !==
-          validated.userStats.totalChallengesCompleted
+          migrated.userStats.totalChallengesCompleted
       ) {
         saveSandbox(healed)
         return healed
       }
     }
 
-    return validated
+    return migrated
   } catch (error) {
     // Invalid JSON or failed Zod validation
     return null

@@ -2,6 +2,13 @@ import { act, renderHook } from "@testing-library/react"
 import { beforeEach, describe, expect, it, vi } from "vitest"
 import { initializeSandbox } from "../storage"
 
+// Mock navigator.sendBeacon globally
+const mockSendBeacon = vi.fn().mockReturnValue(true)
+Object.defineProperty(navigator, "sendBeacon", {
+  value: mockSendBeacon,
+  writable: true,
+})
+
 // Mock storage
 vi.mock("../storage", async () => {
   const actual = await vi.importActual("../storage")
@@ -19,6 +26,16 @@ vi.mock("../sync", () => ({
   mergeConflicts: vi.fn(),
   shouldSync: vi.fn(),
 }))
+
+// Mock pendingClaims
+const mockDrainPendingClaims = vi.fn().mockResolvedValue({ drained: 0, failed: 0 })
+vi.mock("../pendingClaims", async () => {
+  const actual = await vi.importActual("../pendingClaims")
+  return {
+    ...actual,
+    drainPendingClaims: (...args: unknown[]) => mockDrainPendingClaims(...args),
+  }
+})
 
 // Mock next-auth
 vi.mock("next-auth/react", () => ({
@@ -43,6 +60,8 @@ describe("useSandboxSync", () => {
     })
     vi.mocked(loadSandbox).mockReturnValue(initializeSandbox())
     vi.mocked(shouldSync).mockReturnValue(false)
+    mockDrainPendingClaims.mockClear()
+    mockDrainPendingClaims.mockResolvedValue({ drained: 0, failed: 0 })
   })
 
   it("pulls remote sandbox and merges on mount when authenticated", async () => {
@@ -142,5 +161,60 @@ describe("useSandboxSync", () => {
     expect(saveSandbox).toHaveBeenCalledWith(
       expect.objectContaining({ lastSynced: "2026-02-13T10:00:00Z" }),
     )
+  })
+
+  it("drains the pending claim queue on mount when authenticated", async () => {
+    const local = initializeSandbox()
+    const remote = initializeSandbox()
+    const merged = initializeSandbox()
+    vi.mocked(loadSandbox).mockReturnValue(local)
+    vi.mocked(syncFromServer).mockResolvedValue(remote)
+    vi.mocked(mergeConflicts).mockReturnValue(merged)
+
+    const { useSandboxSync } = await importHook()
+    await act(async () => {
+      renderHook(() => useSandboxSync())
+    })
+
+    // Wait for the pull-and-merge to complete, then check the drain ran
+    await act(async () => {
+      await new Promise((resolve) => setTimeout(resolve, 0))
+    })
+
+    expect(mockDrainPendingClaims).toHaveBeenCalled()
+  })
+
+  it("drains the pending claim queue when window 'online' event fires", async () => {
+    const { useSandboxSync } = await importHook()
+    await act(async () => {
+      renderHook(() => useSandboxSync())
+    })
+    mockDrainPendingClaims.mockClear()
+
+    await act(async () => {
+      window.dispatchEvent(new Event("online"))
+    })
+
+    expect(mockDrainPendingClaims).toHaveBeenCalled()
+  })
+
+  it("uses fetch with keepalive (not sendBeacon) on tab hide", async () => {
+    const sendBeaconSpy = vi.spyOn(navigator, "sendBeacon").mockImplementation(() => true)
+
+    const { useSandboxSync } = await importHook()
+    await act(async () => {
+      renderHook(() => useSandboxSync())
+    })
+
+    // simulate tab hide
+    Object.defineProperty(document, "visibilityState", { value: "hidden", configurable: true })
+    await act(async () => {
+      document.dispatchEvent(new Event("visibilitychange"))
+    })
+
+    expect(sendBeaconSpy).not.toHaveBeenCalled()
+    expect(mockDrainPendingClaims).toHaveBeenCalled()
+
+    sendBeaconSpy.mockRestore()
   })
 })

@@ -21,6 +21,7 @@
  */
 
 import { initializeSandbox, loadSandbox, updateSandbox } from "@/lib/sandbox/storage"
+import { enqueuePendingClaim } from "@/lib/sandbox/pendingClaims"
 import type { SandboxData } from "@/lib/sandbox/types"
 import { MAX_CHALLENGE_XP_COMPLETIONS } from "@/lib/sandbox/types"
 import { ACHIEVEMENTS, checkAchievement } from "./achievements"
@@ -29,11 +30,6 @@ import { getRankForXp } from "./ranks"
 import { calculateStreak, getStreakMultiplier, useFreeze } from "./streaks"
 import type { UserProfile, XpEvent } from "./types"
 
-/** Bonus XP for completing a stage on the first attempt */
-const FIRST_TRY_BONUS = 15
-
-/** Bonus XP for completing a stage without using any hints */
-const NO_HINTS_BONUS = 50
 
 // -----------------------------------------------------------------------------
 // Server claim helpers
@@ -112,37 +108,72 @@ function buildProfileFromSandbox(data: SandboxData): UserProfile {
 }
 
 /**
- * Checks all achievements against current sandbox state
- * and unlocks any newly earned ones, awarding their XP bonuses.
+ * Checks all achievements against current sandbox state and unlocks any
+ * newly earned ones, claiming their XP bonuses from the server.
+ *
+ * Each newly-unlocked achievement is POSTed to `/api/progress/achievement`.
+ * The server is authoritative for the XP amount and for idempotency:
+ * a retry returns `alreadyAwarded: true, xpAwarded: 0`, and we suppress
+ * the local XP addition in that case.
+ *
+ * If the network call fails (postClaim returns null), we still unlock
+ * the achievement locally (so the user sees the badge) but add zero XP.
+ * The claim is enqueued in the offline-claim queue (P0-1) so it will
+ * be replayed on the next drain (mount / online / tab-hide).
  *
  * Called automatically after every XP award (stage, mission, challenge).
  */
-function checkAndUnlockAchievements(): void {
+async function checkAndUnlockAchievements(): Promise<void> {
   const sandbox = loadSandbox()
   if (!sandbox) return
 
   const profile = buildProfileFromSandbox(sandbox)
   const alreadyUnlocked = new Set(sandbox.achievements)
   const newlyUnlocked: string[] = []
-  let bonusXp = 0
 
   for (const achievement of ACHIEVEMENTS) {
     if (alreadyUnlocked.has(achievement.id)) continue
     if (checkAchievement(achievement.condition, profile)) {
       newlyUnlocked.push(achievement.id)
-      bonusXp += achievement.xpBonus
     }
   }
 
   if (newlyUnlocked.length === 0) return
 
+  // Claim each achievement server-side, in parallel.
+  const serverResults = await Promise.all(
+    newlyUnlocked.map((id) =>
+      postClaim("/api/progress/achievement", { achievementId: id }),
+    ),
+  )
+
+  const newlyAwarded: string[] = []
+  let bonusXp = 0
+  newlyUnlocked.forEach((id, i) => {
+    const result = serverResults[i]
+    if (result && !result.alreadyAwarded && result.xpAwarded > 0) {
+      newlyAwarded.push(id)
+      bonusXp += result.xpAwarded
+    } else if (!result) {
+      // Network error — unlock locally with no XP, and queue the claim for retry
+      newlyAwarded.push(id)
+      enqueuePendingClaim({
+        type: "achievement",
+        achievementId: id,
+        queuedAt: new Date().toISOString(),
+      })
+    }
+  })
+
+  if (newlyAwarded.length === 0) return
+
   updateSandbox((data) => ({
     ...data,
-    achievements: [...data.achievements, ...newlyUnlocked],
+    achievements: [...data.achievements, ...newlyAwarded],
     userStats: {
       ...data.userStats,
       totalXp: data.userStats.totalXp + bonusXp,
-      totalAchievements: data.achievements.length + newlyUnlocked.length,
+      totalAchievements: data.achievements.length + newlyAwarded.length,
     },
   }))
 }
@@ -201,8 +232,10 @@ function updateStreakOnActivity(data: SandboxData): SandboxData {
 // -----------------------------------------------------------------------------
 
 type StageXpOptions = {
-  firstTry?: boolean
-  noHints?: boolean
+  /** Number of attempts the user made on this stage. Defaults to 1. */
+  attempts?: number
+  /** Number of hints the user used on this stage. */
+  hintsUsed?: number
 }
 
 /**
@@ -215,7 +248,7 @@ type StageXpOptions = {
  * @param missionId - The mission slug
  * @param stageId - The stage ID within the mission
  * @param baseXp - Base XP reward used for the offline-fallback path
- * @param options - Optional bonuses (firstTry, noHints)
+ * @param options - Stage attempt metadata (attempts, hintsUsed)
  * @returns The XpEvent with the final amount (server-authoritative when available)
  */
 export async function awardStageXp(
@@ -227,22 +260,32 @@ export async function awardStageXp(
   const sandbox = loadSandbox() ?? initializeSandbox()
   const localMultiplier = getStreakMultiplier(sandbox.streakData.currentStreak)
 
-  let bonusXp = 0
-  if (options?.firstTry) bonusXp += FIRST_TRY_BONUS
-  if (options?.noHints) bonusXp += NO_HINTS_BONUS
-  const localAmount = Math.floor((baseXp + bonusXp) * localMultiplier)
+  // Local fallback: base XP + streak multiplier only.
+  // Server is authoritative for first-try/no-hints bonuses - we don't apply them locally.
+  const localAmount = Math.floor(baseXp * localMultiplier)
 
   const serverResult = await postClaim("/api/progress/stage", {
     missionId,
     stageId,
-    firstTry: options?.firstTry,
-    noHints: options?.noHints,
+    attempts: options?.attempts ?? 1,
+    hintsUsed: options?.hintsUsed ?? 0,
   })
+
+  // Enqueue for retry if network error
+  if (!serverResult) {
+    enqueuePendingClaim({
+      type: "stage",
+      missionId,
+      stageId,
+      attempts: options?.attempts ?? 1,
+      hintsUsed: options?.hintsUsed ?? 0,
+      queuedAt: new Date().toISOString(),
+    })
+  }
 
   const amount = serverResult ? serverResult.xpAwarded : localAmount
   const alreadyAwarded = serverResult?.alreadyAwarded ?? false
-  const multiplier =
-    serverResult && baseXp + bonusXp > 0 ? amount / (baseXp + bonusXp) : localMultiplier
+  const multiplier = serverResult && baseXp > 0 ? amount / baseXp : localMultiplier
 
   const event: XpEvent = {
     type: "stage",
@@ -297,7 +340,7 @@ export async function awardStageXp(
     })
   }
 
-  checkAndUnlockAchievements()
+  await checkAndUnlockAchievements()
 
   if (!alreadyAwarded && amount > 0) {
     emitXpEvent(event)
@@ -328,6 +371,15 @@ export async function awardMissionXp(
   const serverResult = await postClaim("/api/progress/mission", {
     missionId,
   })
+
+  // Enqueue for retry if network error
+  if (!serverResult) {
+    enqueuePendingClaim({
+      type: "mission",
+      missionId,
+      queuedAt: new Date().toISOString(),
+    })
+  }
 
   const amount = serverResult ? serverResult.xpAwarded : localAmount
   const alreadyAwarded = serverResult?.alreadyAwarded ?? false
@@ -378,7 +430,7 @@ export async function awardMissionXp(
     })
   }
 
-  checkAndUnlockAchievements()
+  await checkAndUnlockAchievements()
 
   if (!alreadyAwarded && amount > 0) {
     emitXpEvent(event)
@@ -407,6 +459,15 @@ export async function awardChallengeXp(
     challengeId,
   })
 
+  // Enqueue for retry if network error
+  if (!serverResult) {
+    enqueuePendingClaim({
+      type: "challenge",
+      challengeId,
+      queuedAt: new Date().toISOString(),
+    })
+  }
+
   const amount = serverResult ? serverResult.xpAwarded : localAmount
   const alreadyAwarded = serverResult?.alreadyAwarded ?? false
   const multiplier = serverResult && baseXp > 0 ? amount / baseXp : localMultiplier
@@ -419,6 +480,12 @@ export async function awardChallengeXp(
     timestamp: new Date().toISOString(),
   }
 
+  // isNewCompletion: true only when server confirms this is a fresh award.
+  // When server says alreadyAwarded: true, this is a retry that was
+  // already counted - don't double-increment XP/completionCount.
+  // Note: local cap (amount=0) is different - user DID complete, just hit XP cap.
+  const isNewCompletion = !alreadyAwarded
+
   updateSandbox((data) => {
     const withStreak = updateStreakOnActivity(data)
     const challengeResults = { ...withStreak.challengeResults }
@@ -427,10 +494,15 @@ export async function awardChallengeXp(
     challengeResults[challengeId] = {
       attempted: true,
       completed: true,
-      xpEarned: (prev?.xpEarned ?? 0) + amount,
+      // Only add to xpEarned on a NEW completion. A retry against an
+      // already-awarded challenge must not double-count.
+      xpEarned: (prev?.xpEarned ?? 0) + (isNewCompletion ? amount : 0),
       hintsUsed: prev?.hintsUsed ?? 0,
+      // attempts always increments — the user genuinely tried again.
       attempts: (prev?.attempts ?? 0) + 1,
-      completionCount: (prev?.completionCount ?? 0) + 1,
+      // completionCount increments on any completion (local cap or new award).
+      // Only skips when server says alreadyAwarded (to prevent double-count).
+      completionCount: (prev?.completionCount ?? 0) + (isNewCompletion ? 1 : 0),
       completedAt: event.timestamp,
     }
 
@@ -439,15 +511,18 @@ export async function awardChallengeXp(
       challengeResults,
       userStats: {
         ...withStreak.userStats,
-        totalXp: withStreak.userStats.totalXp + amount,
-        totalChallengesCompleted: prev?.completed
-          ? withStreak.userStats.totalChallengesCompleted
-          : withStreak.userStats.totalChallengesCompleted + 1,
+        // totalXp only bumps on a new completion.
+        totalXp: withStreak.userStats.totalXp + (isNewCompletion ? amount : 0),
+        totalChallengesCompleted: isNewCompletion
+          ? prev?.completed
+            ? withStreak.userStats.totalChallengesCompleted
+            : withStreak.userStats.totalChallengesCompleted + 1
+          : withStreak.userStats.totalChallengesCompleted,
       },
     }
   })
 
-  checkAndUnlockAchievements()
+  await checkAndUnlockAchievements()
 
   if (!alreadyAwarded && amount > 0) {
     emitXpEvent(event)

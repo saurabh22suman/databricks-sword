@@ -36,6 +36,7 @@ describe("RankUpWatcher", () => {
       achievements: [],
       completedFieldOps: [],
       flashcardProgress: {},
+      pendingClaims: [],
       lastSynced: null,
     }
     mockLoadSandbox.mockReturnValue(sandboxWithCadet)
@@ -63,6 +64,7 @@ describe("RankUpWatcher", () => {
       achievements: [],
       completedFieldOps: [],
       flashcardProgress: {},
+      pendingClaims: [],
       lastSynced: null,
     }
     mockLoadSandbox.mockReturnValue(sandboxWithCadet)
@@ -88,6 +90,7 @@ describe("RankUpWatcher", () => {
       achievements: [],
       completedFieldOps: [],
       flashcardProgress: {},
+      pendingClaims: [],
       lastSynced: null,
     }
     mockLoadSandbox.mockReturnValue(sandboxAtZero)
@@ -131,6 +134,7 @@ describe("RankUpWatcher", () => {
       achievements: [],
       completedFieldOps: [],
       flashcardProgress: {},
+      pendingClaims: [],
       lastSynced: null,
     }
     mockLoadSandbox.mockReturnValue(sandboxWithCadet)

@@ -20,8 +20,8 @@ import { z } from "zod"
 const StageClaimSchema = z.object({
   missionId: z.string().min(1),
   stageId: z.string().min(1),
-  firstTry: z.boolean().optional(),
-  noHints: z.boolean().optional(),
+  attempts: z.number().int().nonnegative().optional(),
+  hintsUsed: z.number().int().nonnegative().optional(),
 })
 
 export async function POST(request: NextRequest): Promise<NextResponse> {
@@ -32,15 +32,24 @@ export async function POST(request: NextRequest): Promise<NextResponse> {
 
   try {
     const body = await request.json()
+
+    // Reject legacy keys explicitly
+    if ("firstTry" in body || "noHints" in body) {
+      return NextResponse.json(
+        { error: "Legacy firstTry/noHints keys are no longer supported. Use attempts/hintsUsed." },
+        { status: 400 },
+      )
+    }
+
     const parsed = StageClaimSchema.safeParse(body)
     if (!parsed.success) {
       return NextResponse.json({ error: "Invalid request" }, { status: 400 })
     }
 
-    const { missionId, stageId, firstTry, noHints } = parsed.data
+    const { missionId, stageId, attempts, hintsUsed } = parsed.data
     const options =
-      firstTry !== undefined || noHints !== undefined
-        ? { firstTry, noHints }
+      attempts !== undefined || hintsUsed !== undefined
+        ? { attempts, hintsUsed }
         : undefined
 
     const result = await claimStageXp({
