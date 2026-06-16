@@ -1,14 +1,17 @@
 /**
  * @file grant-grandmaster-demo.mjs
- * @description One-off admin script. Writes a fully-unlocked "Grandmaster
- * demo" sandbox to the given user's `sandbox_snapshots` row on Turso.
+ * @description One-off admin script. Writes a fully-unlocked "all content
+ * completed" sandbox to the given user's `sandbox_snapshots` row on Turso.
  *
  * Effects:
- *   - totalXp set to 30,000 (above Grandmaster threshold of 25,000)
- *   - All 22 missions marked `completed: true`
- *   - All 52 challenges marked `completed: true`
+ *   - totalXp set to the sum of all mission `xpReward` + challenge `xpReward`
+ *     in `src/content/` (the actual content XP, so it survives
+ *     `recalculateStats` on the client — see `src/lib/sandbox/storage.ts:238`)
+ *   - All 22 missions marked `completed: true` with per-stage `xpEarned`
+ *     populated (sum per mission == mission.xpReward)
+ *   - All 52 challenges marked `completed: true` with `xpEarned` from content
  *   - All ~29 achievement IDs added to the unlocked list
- *   - All 9 field-ops industries added to `completedFieldOps`
+ *   - All field-ops industries added to `completedFieldOps`
  *   - Streak data filled out
  *   - User record created if it does not already exist
  *
@@ -36,7 +39,6 @@ import { randomUUID } from "crypto";
 
 const TARGET_EMAIL = process.argv[2] ?? "saurabh22suman@gmail.com";
 const TARGET_NAME = "Saurabh Suman";
-const TARGET_XP = 30_000; // Above Grandmaster threshold (25,000)
 const TARGET_STREAK = 30;
 const TODAY = new Date().toISOString().split("T")[0];
 
@@ -64,14 +66,24 @@ function readJson(p) {
 }
 
 const missionsRoot = join(process.cwd(), "src/content/missions");
-const missionIds = listDirs(missionsRoot)
-  .map((slug) => readJson(join(missionsRoot, slug, "mission.json")).id)
-  .filter(Boolean);
+const missionEntries = listDirs(missionsRoot).map((slug) => {
+  const json = readJson(join(missionsRoot, slug, "mission.json"));
+  return {
+    id: json.id,
+    slug,
+    xpReward: Number(json.xpReward ?? 0),
+    stages: Array.isArray(json.stages) ? json.stages : [],
+  };
+}).filter((m) => m.id);
 
 const challengesRoot = join(process.cwd(), "src/content/challenges");
-const challengeIds = readdirSync(challengesRoot, { recursive: true })
-  .filter((f) => typeof f === "string" && f.endsWith(".json"))
-  .map((rel) => rel.replace(/\.json$/, ""));
+const challengeFiles = readdirSync(challengesRoot, { recursive: true })
+  .filter((f) => typeof f === "string" && f.endsWith(".json"));
+const challengeEntries = challengeFiles.map((rel) => {
+  const id = rel.replace(/\.json$/, "");
+  const xpReward = Number(readJson(join(challengesRoot, rel)).xpReward ?? 0);
+  return { id, xpReward };
+});
 
 const fieldOpsRoot = join(process.cwd(), "src/content/field-ops");
 const fieldOpsIndustries = listDirs(fieldOpsRoot);
@@ -84,11 +96,21 @@ const achievementIds = [
   ...achievementsSrc.matchAll(/^\s*id:\s*"([a-z0-9-]+)"/gm),
 ].map((m) => m[1]);
 
+// Compute the actual content XP total so the sandbox survives
+// `recalculateStats` on the client (which overwrites userStats.totalXp
+// with sum(stage.xpEarned) + sum(challenge.xpEarned)).
+const totalMissionXp = missionEntries.reduce((s, m) => s + m.xpReward, 0);
+const totalChallengeXp = challengeEntries.reduce((s, c) => s + c.xpReward, 0);
+const targetXp = totalMissionXp + totalChallengeXp;
+
 console.log("📦 Discovered content:");
-console.log(`   missions:      ${missionIds.length}`);
-console.log(`   challenges:    ${challengeIds.length}`);
+console.log(`   missions:      ${missionEntries.length}`);
+console.log(`   challenges:    ${challengeEntries.length}`);
 console.log(`   achievements:  ${achievementIds.length}`);
 console.log(`   field-ops:     ${fieldOpsIndustries.length}`);
+console.log(`   mission XP:    ${totalMissionXp}`);
+console.log(`   challenge XP:  ${totalChallengeXp}`);
+console.log(`   TOTAL XP:      ${targetXp}`);
 
 // ---------------------------------------------------------------------------
 // Build the SandboxData payload (matches SandboxDataSchema in
@@ -99,27 +121,53 @@ const now = new Date().toISOString();
 const oneDayAgo = new Date(Date.now() - 86_400_000).toISOString();
 
 const missionProgress = Object.fromEntries(
-  missionIds.map((id) => [
-    id,
-    {
-      started: true,
-      completed: true,
-      stageProgress: {},
-      sideQuestsCompleted: [],
-      totalXpEarned: 500,
-      startedAt: oneDayAgo,
-      completedAt: now,
-    },
-  ]),
+  missionEntries.map((m) => {
+    // Distribute mission.xpReward across stages so the per-stage sum
+    // equals the mission's `xpReward` from mission.json. The last stage
+    // absorbs any rounding remainder.
+    const numStages = Math.max(m.stages.length, 1);
+    const basePerStage = Math.floor(m.xpReward / numStages);
+    const remainder = m.xpReward - basePerStage * numStages;
+
+    const stageProgress = Object.fromEntries(
+      m.stages.map((stage, i) => {
+        const isLast = i === m.stages.length - 1;
+        const xpEarned = isLast ? basePerStage + remainder : basePerStage;
+        return [
+          stage.id,
+          {
+            completed: true,
+            xpEarned,
+            codeAttempts: [],
+            hintsUsed: 0,
+            completedAt: now,
+          },
+        ];
+      }),
+    );
+
+    return [
+      m.id,
+      {
+        started: true,
+        completed: true,
+        stageProgress,
+        sideQuestsCompleted: [],
+        totalXpEarned: m.xpReward,
+        startedAt: oneDayAgo,
+        completedAt: now,
+      },
+    ];
+  }),
 );
 
 const challengeResults = Object.fromEntries(
-  challengeIds.map((id) => [
-    id,
+  challengeEntries.map((c) => [
+    c.id,
     {
       attempted: true,
       completed: true,
-      xpEarned: 200,
+      xpEarned: c.xpReward,
       hintsUsed: 0,
       attempts: 1,
       completionCount: 1,
@@ -130,13 +178,13 @@ const challengeResults = Object.fromEntries(
 );
 
 const sandboxData = {
-  version: 1,
+  version: 2, // SandboxDataSchema v2: adds pendingClaims (P0-1)
   missionProgress,
   challengeResults,
   userStats: {
-    totalXp: TARGET_XP,
-    totalMissionsCompleted: missionIds.length,
-    totalChallengesCompleted: challengeIds.length,
+    totalXp: targetXp,
+    totalMissionsCompleted: missionEntries.length,
+    totalChallengesCompleted: challengeEntries.length,
     totalAchievements: achievementIds.length,
     currentStreak: TARGET_STREAK,
     longestStreak: 100,
@@ -152,6 +200,7 @@ const sandboxData = {
   achievements: achievementIds,
   completedFieldOps: fieldOpsIndustries,
   flashcardProgress: {},
+  pendingClaims: [],
   lastSynced: now,
 };
 
@@ -194,7 +243,7 @@ if (existingSnap.rows.length > 0) {
     sql: `UPDATE sandbox_snapshots
           SET snapshot_data = ?, total_xp = ?, current_streak = ?, updated_at = unixepoch()
           WHERE user_id = ?`,
-    args: [snapshotJson, TARGET_XP, TARGET_STREAK, userId],
+    args: [snapshotJson, targetXp, TARGET_STREAK, userId],
   });
   console.log(`✅ Updated sandbox_snapshots for ${userId}`);
 } else {
@@ -202,7 +251,7 @@ if (existingSnap.rows.length > 0) {
     sql: `INSERT INTO sandbox_snapshots
             (id, user_id, snapshot_data, total_xp, current_streak, updated_at)
           VALUES (?, ?, ?, ?, ?, unixepoch())`,
-    args: [userId, userId, snapshotJson, TARGET_XP, TARGET_STREAK],
+    args: [userId, userId, snapshotJson, targetXp, TARGET_STREAK],
   });
   console.log(`✅ Inserted sandbox_snapshots for ${userId}`);
 }
