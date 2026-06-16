@@ -1,5 +1,5 @@
-import type { ChallengeResult, FlashcardProgress, MissionProgress, SandboxData, SyncResult } from "./types"
-import { SandboxDataSchema } from "./types"
+import type { ChallengeResult, FlashcardProgress, MissionProgress, SandboxData, SyncResult, SyncStatus } from "./types"
+import { SandboxDataSchema, SyncStatusSchema } from "./types"
 
 /**
  * Browser Sandbox Sync
@@ -80,6 +80,48 @@ export async function syncFromServer(
     return validated
   } catch (error) {
     return null
+  }
+}
+
+/**
+ * Cheap probe: asks the server whether the user's sandbox snapshot has been
+ * updated since the given timestamp. Used on tab focus to decide if a full
+ * pull+merge is needed.
+ *
+ * @param since - ISO timestamp of the client's last successful sync (or null)
+ * @returns { updated, updatedAt } on success; { updated: false, updatedAt: null } on any error
+ *
+ * @example
+ * ```ts
+ * const status = await checkSyncStatus("2026-02-12T10:00:00Z")
+ * if (status.updated) {
+ *   // Pull latest from server
+ * }
+ * ```
+ */
+export async function checkSyncStatus(since: string | null): Promise<SyncStatus> {
+  try {
+    const url = since
+      ? `/api/user/sync/status?since=${encodeURIComponent(since)}`
+      : "/api/user/sync/status"
+
+    const response = await fetch(url)
+
+    if (!response.ok) {
+      return { updated: false, updatedAt: null }
+    }
+
+    const data = await response.json()
+
+    if (!data) {
+      return { updated: false, updatedAt: null }
+    }
+
+    // Validate the response shape
+    const validated = SyncStatusSchema.parse(data)
+    return validated
+  } catch (error) {
+    return { updated: false, updatedAt: null }
   }
 }
 

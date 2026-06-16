@@ -264,6 +264,14 @@ export type SyncResult = {
 }
 
 /**
+ * Result of a sync status check (cheap probe for hybrid pull).
+ */
+export type SyncStatus = {
+  updated: boolean
+  updatedAt: string | null
+}
+
+/**
  * Zod schema for SyncResult validation.
  */
 export const SyncResultSchema = z.object({
@@ -278,4 +286,12 @@ export const SyncResultSchema = z.object({
       }),
     )
     .optional(),
+})
+
+/**
+ * Zod schema for SyncStatus validation.
+ */
+export const SyncStatusSchema = z.object({
+  updated: z.boolean(),
+  updatedAt: z.string().nullable(),
 })

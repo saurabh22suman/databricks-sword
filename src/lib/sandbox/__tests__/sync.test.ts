@@ -1,12 +1,13 @@
 import { beforeEach, describe, expect, it, vi } from "vitest"
 import { initializeSandbox } from "../storage"
 import {
+    checkSyncStatus,
     mergeConflicts,
     shouldSync,
     syncFromServer,
     syncToServer,
 } from "../sync"
-import type { SyncResult } from "../types"
+import type { SyncResult, SyncStatus } from "../types"
 
 // Mock fetch
 global.fetch = vi.fn()
@@ -337,6 +338,162 @@ describe("Sandbox Sync", () => {
 
       // Should sync despite being recently synced
       expect(shouldSync(sandbox)).toBe(true)
+    })
+  })
+
+  describe("checkSyncStatus", () => {
+    it("calls /api/user/sync/status?since=<encoded> when since is provided", async () => {
+      const mockStatus: SyncStatus = {
+        updated: true,
+        updatedAt: "2026-02-12T12:00:00Z",
+      }
+
+      vi.mocked(fetch).mockResolvedValueOnce({
+        ok: true,
+        json: async () => mockStatus,
+      } as Response)
+
+      const result = await checkSyncStatus("2026-02-12T10:00:00Z")
+
+      expect(fetch).toHaveBeenCalledWith(
+        "/api/user/sync/status?since=2026-02-12T10%3A00%3A00Z",
+      )
+      expect(result.updated).toBe(true)
+      expect(result.updatedAt).toBe("2026-02-12T12:00:00Z")
+    })
+
+    it("calls /api/user/sync/status (no query string) when since is null", async () => {
+      const mockStatus: SyncStatus = {
+        updated: true,
+        updatedAt: "2026-02-12T12:00:00Z",
+      }
+
+      vi.mocked(fetch).mockResolvedValueOnce({
+        ok: true,
+        json: async () => mockStatus,
+      } as Response)
+
+      const result = await checkSyncStatus(null)
+
+      expect(fetch).toHaveBeenCalledWith("/api/user/sync/status")
+      expect(result.updated).toBe(true)
+    })
+
+    it("returns { updated: true, updatedAt: ... } on 200 with updated: true", async () => {
+      const mockStatus: SyncStatus = {
+        updated: true,
+        updatedAt: "2026-02-12T12:00:00Z",
+      }
+
+      vi.mocked(fetch).mockResolvedValueOnce({
+        ok: true,
+        json: async () => mockStatus,
+      } as Response)
+
+      const result = await checkSyncStatus("2026-02-12T10:00:00Z")
+
+      expect(result.updated).toBe(true)
+      expect(result.updatedAt).toBe("2026-02-12T12:00:00Z")
+    })
+
+    it("returns { updated: false, updatedAt: ... } on 200 with updated: false", async () => {
+      const mockStatus: SyncStatus = {
+        updated: false,
+        updatedAt: "2026-02-12T10:00:00Z",
+      }
+
+      vi.mocked(fetch).mockResolvedValueOnce({
+        ok: true,
+        json: async () => mockStatus,
+      } as Response)
+
+      const result = await checkSyncStatus("2026-02-12T10:00:00Z")
+
+      expect(result.updated).toBe(false)
+      expect(result.updatedAt).toBe("2026-02-12T10:00:00Z")
+    })
+
+    it("returns { updated: false, updatedAt: null } on 200 with updatedAt: null", async () => {
+      const mockStatus: SyncStatus = {
+        updated: false,
+        updatedAt: null,
+      }
+
+      vi.mocked(fetch).mockResolvedValueOnce({
+        ok: true,
+        json: async () => mockStatus,
+      } as Response)
+
+      const result = await checkSyncStatus(null)
+
+      expect(result.updated).toBe(false)
+      expect(result.updatedAt).toBeNull()
+    })
+
+    it("returns { updated: false, updatedAt: null } on non-OK status (e.g., 500)", async () => {
+      vi.mocked(fetch).mockResolvedValueOnce({
+        ok: false,
+        status: 500,
+      } as Response)
+
+      const result = await checkSyncStatus("2026-02-12T10:00:00Z")
+
+      expect(result.updated).toBe(false)
+      expect(result.updatedAt).toBeNull()
+    })
+
+    it("returns { updated: false, updatedAt: null } on network error", async () => {
+      vi.mocked(fetch).mockRejectedValueOnce(new Error("Network error"))
+
+      const result = await checkSyncStatus("2026-02-12T10:00:00Z")
+
+      expect(result.updated).toBe(false)
+      expect(result.updatedAt).toBeNull()
+    })
+
+    it("returns { updated: false, updatedAt: null } on malformed JSON", async () => {
+      vi.mocked(fetch).mockResolvedValueOnce({
+        ok: true,
+        json: async () => {
+          throw new Error("Invalid JSON")
+        },
+      } as unknown as Response)
+
+      const result = await checkSyncStatus("2026-02-12T10:00:00Z")
+
+      expect(result.updated).toBe(false)
+      expect(result.updatedAt).toBeNull()
+    })
+
+    it("returns { updated: false, updatedAt: null } on wrong shape", async () => {
+      vi.mocked(fetch).mockResolvedValueOnce({
+        ok: true,
+        json: async () => ({ invalid: "shape" }),
+      } as Response)
+
+      const result = await checkSyncStatus("2026-02-12T10:00:00Z")
+
+      expect(result.updated).toBe(false)
+      expect(result.updatedAt).toBeNull()
+    })
+
+    it("URL-encodes the since parameter correctly (timestamp with colon and +)", async () => {
+      const mockStatus: SyncStatus = {
+        updated: false,
+        updatedAt: null,
+      }
+
+      vi.mocked(fetch).mockResolvedValueOnce({
+        ok: true,
+        json: async () => mockStatus,
+      } as Response)
+
+      await checkSyncStatus("2026-02-12T10:00:00+05:30")
+
+      // + should be encoded as %2B
+      expect(fetch).toHaveBeenCalledWith(
+        "/api/user/sync/status?since=2026-02-12T10%3A00%3A00%2B05%3A30",
+      )
     })
   })
 })
