@@ -137,6 +137,69 @@ describe("pendingClaims", () => {
     })
   })
 
+  describe("enqueuePendingClaim graceful degradation", () => {
+    it("does not throw when updateSandbox throws (graceful degradation)", () => {
+      const sandbox = initializeSandbox()
+      vi.mocked(loadSandbox).mockReturnValue(sandbox)
+      vi.mocked(updateSandbox).mockImplementation(() => {
+        throw new Error("QuotaExceededError")
+      })
+
+      const warnSpy = vi.spyOn(console, "warn").mockImplementation(() => {})
+
+      expect(() => {
+        enqueuePendingClaim({
+          type: "mission",
+          missionId: "m1",
+          queuedAt: "2026-06-16T00:00:00Z",
+        })
+      }).not.toThrow()
+
+      expect(warnSpy).toHaveBeenCalled()
+      warnSpy.mockRestore()
+    })
+
+    it("warns with error details when storage throws", () => {
+      const sandbox = initializeSandbox()
+      vi.mocked(loadSandbox).mockReturnValue(sandbox)
+      vi.mocked(updateSandbox).mockImplementation(() => {
+        throw new Error("quota exceeded")
+      })
+
+      const warnSpy = vi.spyOn(console, "warn")
+
+      enqueuePendingClaim({
+        type: "mission",
+        missionId: "m1",
+        queuedAt: "2026-06-16T00:00:00Z",
+      })
+
+      expect(warnSpy).toHaveBeenCalled()
+      // The warning should mention the error - verify at least one call includes error info
+      const warnCall = warnSpy.mock.calls.flat()
+      expect(warnCall.some((arg) => String(arg).includes("quota exceeded"))).toBe(true)
+    })
+
+    it("still enqueues successfully on the happy path", () => {
+      const sandbox = initializeSandbox()
+      vi.mocked(loadSandbox).mockReturnValue(sandbox)
+      vi.mocked(updateSandbox).mockImplementation((updater) => {
+        const next = updater(sandbox)
+        vi.mocked(loadSandbox).mockReturnValue(next)
+      })
+
+      enqueuePendingClaim({
+        type: "mission",
+        missionId: "m1",
+        queuedAt: "2026-06-16T00:00:00Z",
+      })
+
+      const queue = getPendingClaims()
+      expect(queue).toHaveLength(1)
+      expect((queue[0] as { missionId: string }).missionId).toBe("m1")
+    })
+  })
+
   describe("enqueuePendingClaim FIFO eviction", () => {
     it("evicts the oldest claim when the queue is at capacity", () => {
       const sandbox = initializeSandbox()

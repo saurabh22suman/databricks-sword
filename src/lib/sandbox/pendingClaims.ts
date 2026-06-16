@@ -58,16 +58,27 @@ export { MAX_PENDING_CLAIMS }
 /**
  * Append a claim to the queue, evicting the oldest entry (FIFO) if the
  * queue is at {@link MAX_PENDING_CLAIMS}. No-op if `loadSandbox` returns null.
+ *
+ * Graceful degradation: If localStorage is unavailable (quota exceeded, private
+ * browsing mode, security errors), the function catches the error, logs a
+ * warning, and returns normally without throwing. This ensures the XP award
+ * flow continues even when storage is unavailable.
  */
 export function enqueuePendingClaim(claim: PendingClaim): void {
-  updateSandbox((data) => {
-    const current = data.pendingClaims ?? []
-    // FIFO: if at cap, drop the oldest entry to make room for the new one
-    const next = current.length >= MAX_PENDING_CLAIMS
-      ? [...current.slice(current.length - MAX_PENDING_CLAIMS + 1), claim]
-      : [...current, claim]
-    return { ...data, pendingClaims: next }
-  })
+  try {
+    updateSandbox((data) => {
+      const current = data.pendingClaims ?? []
+      // FIFO: if at cap, drop the oldest entry to make room for the new one
+      const next = current.length >= MAX_PENDING_CLAIMS
+        ? [...current.slice(current.length - MAX_PENDING_CLAIMS + 1), claim]
+        : [...current, claim]
+      return { ...data, pendingClaims: next }
+    })
+  } catch (error) {
+    // Graceful degradation: localStorage unavailable (quota exceeded, private browsing, etc.)
+    // Log a warning and return normally - the XP award flow should not break
+    console.warn("Failed to enqueue pending claim (storage unavailable):", error)
+  }
 }
 
 /** Read the current queue (returns [] if no sandbox). */
