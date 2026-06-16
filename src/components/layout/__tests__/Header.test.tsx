@@ -22,12 +22,12 @@ vi.mock("next/link", () => ({
   ),
 }))
 
+// Mutable state for session mock - hoisted before mock
+const mockSessionState: { data: unknown; status: string } = { data: null, status: "unauthenticated" }
+
 // Mock next-auth/react
 vi.mock("next-auth/react", () => ({
-  useSession: () => ({
-    data: null,
-    status: "unauthenticated",
-  }),
+  useSession: () => mockSessionState,
   signIn: vi.fn(),
   signOut: vi.fn(),
 }))
@@ -52,6 +52,8 @@ vi.mock("lucide-react", () => ({
   Award: () => <span data-testid="award-icon" />,
   Settings: () => <span data-testid="settings-icon" />,
   LogOut: () => <span data-testid="logout-icon" />,
+  RefreshCw: () => <span data-testid="refresh-icon" />,
+  Bell: () => <span data-testid="bell-icon" />,
 }))
 
 vi.mock("@/lib/settings", () => ({
@@ -82,10 +84,25 @@ vi.mock("@/lib/dashboard", () => ({
   useHasCompletedMission: () => mockHasCompletedMission(),
 }))
 
+// Mutable state for sandbox sync mock
+const mockSyncState = {
+  refreshFromServer: vi.fn().mockResolvedValue(true),
+  isSyncing: false,
+}
+
+// Mock useSandboxSync
+vi.mock("@/lib/sandbox/useSandboxSync", () => ({
+  useSandboxSync: () => mockSyncState,
+}))
+
 describe("Header", () => {
   beforeEach(() => {
     vi.clearAllMocks()
     mockHasCompletedMission.mockReturnValue(true)
+    mockSessionState.data = null
+    mockSessionState.status = "unauthenticated"
+    mockSyncState.refreshFromServer = vi.fn().mockResolvedValue(true)
+    mockSyncState.isSyncing = false
   })
 
   it("renders top-right mute button", () => {
@@ -121,10 +138,7 @@ describe("Header", () => {
     render(<Header />)
     expect(screen.getByText("Missions")).toBeInTheDocument()
     expect(screen.getByText("Intel")).toBeInTheDocument()
-    expect(screen.getByText("⚡ Field Ops")).toBeInTheDocument()
-    expect(screen.getByText("Map")).toBeInTheDocument()
     expect(screen.getByText("Leaderboard")).toBeInTheDocument()
-    expect(screen.getByText("Cheat Sheet")).toBeInTheDocument()
     expect(screen.getByText("Logs")).toBeInTheDocument()
   })
 
@@ -155,6 +169,85 @@ describe("Header", () => {
   it("renders Start Training CTA", () => {
     render(<Header />)
     expect(screen.getByText("Start Training")).toBeInTheDocument()
+  })
+})
+
+describe("Header refresh button", () => {
+  beforeEach(() => {
+    vi.clearAllMocks()
+    mockHasCompletedMission.mockReturnValue(true)
+    mockSyncState.refreshFromServer = vi.fn().mockResolvedValue(true)
+    mockSyncState.isSyncing = false
+  })
+
+  it("renders the refresh button when authenticated", () => {
+    mockSessionState.data = { user: { id: "user-123", name: "Test User" } }
+    mockSessionState.status = "authenticated"
+
+    render(<Header />)
+    expect(screen.getByRole("button", { name: "Sync from server" })).toBeInTheDocument()
+  })
+
+  it("does NOT render the refresh button when unauthenticated", () => {
+    mockSessionState.data = null
+    mockSessionState.status = "unauthenticated"
+
+    render(<Header />)
+    expect(screen.queryByRole("button", { name: "Sync from server" })).not.toBeInTheDocument()
+  })
+
+  it("clicking the button calls refreshFromServer", () => {
+    mockSessionState.data = { user: { id: "user-123", name: "Test User" } }
+    mockSessionState.status = "authenticated"
+
+    render(<Header />)
+
+    fireEvent.click(screen.getByRole("button", { name: "Sync from server" }))
+
+    expect(mockSyncState.refreshFromServer).toHaveBeenCalled()
+  })
+
+  it("when isSyncing is true, the button is disabled", () => {
+    mockSyncState.isSyncing = true
+    mockSessionState.data = { user: { id: "user-123", name: "Test User" } }
+    mockSessionState.status = "authenticated"
+
+    render(<Header />)
+
+    expect(screen.getByRole("button", { name: "Sync from server" })).toBeDisabled()
+  })
+
+  it("when isSyncing is true, the icon has animate-spin class", () => {
+    mockSyncState.isSyncing = true
+    mockSessionState.data = { user: { id: "user-123", name: "Test User" } }
+    mockSessionState.status = "authenticated"
+
+    render(<Header />)
+
+    const iconSpan = document.querySelector(".animate-spin")
+    expect(iconSpan).toBeInTheDocument()
+  })
+
+  it("when isSyncing is false, the icon does NOT have animate-spin class", () => {
+    mockSyncState.isSyncing = false
+    mockSessionState.data = { user: { id: "user-123", name: "Test User" } }
+    mockSessionState.status = "authenticated"
+
+    render(<Header />)
+
+    const iconSpan = document.querySelector(".animate-spin")
+    expect(iconSpan).not.toBeInTheDocument()
+  })
+
+  it("button has aria-label and title set to 'Sync from server'", () => {
+    mockSessionState.data = { user: { id: "user-123", name: "Test User" } }
+    mockSessionState.status = "authenticated"
+
+    render(<Header />)
+
+    const button = screen.getByRole("button", { name: "Sync from server" })
+    expect(button).toHaveAttribute("aria-label", "Sync from server")
+    expect(button).toHaveAttribute("title", "Sync from server")
   })
 })
 
@@ -193,7 +286,7 @@ describe("Header with progressive disclosure", () => {
       const moreButton = screen.getByText("More")
       fireEvent.click(moreButton)
 
-      expect(screen.getByText("⚡ Field Ops")).toBeInTheDocument()
+      expect(screen.getByText("Field Ops")).toBeInTheDocument()
       expect(screen.getByText("Map")).toBeInTheDocument()
       expect(screen.getByText("Cheat Sheet")).toBeInTheDocument()
     })
@@ -203,7 +296,7 @@ describe("Header with progressive disclosure", () => {
 
       const moreButton = screen.getByText("More")
       fireEvent.click(moreButton)
-      expect(screen.getByText("⚡ Field Ops")).toBeInTheDocument()
+      expect(screen.getByText("Field Ops")).toBeInTheDocument()
 
       fireEvent.click(moreButton)
     })
@@ -214,7 +307,7 @@ describe("Header with progressive disclosure", () => {
       const moreButton = screen.getByText("More")
       fireEvent.click(moreButton)
 
-      expect(screen.getByText("⚡ Field Ops")).toBeInTheDocument()
+      expect(screen.getByText("Field Ops")).toBeInTheDocument()
 
       fireEvent.keyDown(document, { key: "Escape" })
     })
@@ -225,7 +318,7 @@ describe("Header with progressive disclosure", () => {
       const moreButton = screen.getByText("More")
       fireEvent.click(moreButton)
 
-      expect(screen.getByText("⚡ Field Ops")).toBeInTheDocument()
+      expect(screen.getByText("Field Ops")).toBeInTheDocument()
 
       fireEvent.mouseDown(document.body)
     })
@@ -240,10 +333,7 @@ describe("Header with progressive disclosure", () => {
       render(<Header />)
       expect(screen.getByText("Missions")).toBeInTheDocument()
       expect(screen.getByText("Intel")).toBeInTheDocument()
-      expect(screen.getByText("⚡ Field Ops")).toBeInTheDocument()
-      expect(screen.getByText("Map")).toBeInTheDocument()
       expect(screen.getByText("Leaderboard")).toBeInTheDocument()
-      expect(screen.getByText("Cheat Sheet")).toBeInTheDocument()
       expect(screen.getByText("Logs")).toBeInTheDocument()
     })
 
@@ -268,7 +358,7 @@ describe("Header with progressive disclosure", () => {
       const mobileNav = document.querySelector('[role="dialog"] nav')
       expect(mobileNav).toBeInTheDocument()
       // The mobile nav should have Show more toggle when not completed
-      expect(screen.getAllByText("Show more ▾").length).toBeGreaterThan(0)
+      expect(screen.getAllByText("Show more").length).toBeGreaterThan(0)
     })
 
     it("shows Show more toggle in mobile menu when not completed", () => {
@@ -278,7 +368,7 @@ describe("Header with progressive disclosure", () => {
       fireEvent.click(menuButton)
 
       // In mobile menu, should see "Show more" toggle
-      expect(screen.getAllByText("Show more ▾").length).toBeGreaterThan(0)
+      expect(screen.getAllByText("Show more").length).toBeGreaterThan(0)
     })
 
     it("clicking Show more reveals advanced items in mobile", () => {
@@ -288,7 +378,7 @@ describe("Header with progressive disclosure", () => {
       fireEvent.click(menuButton)
 
       // Click the "Show more" button in mobile menu
-      const showMoreButtons = screen.getAllByText("Show more ▾")
+      const showMoreButtons = screen.getAllByText("Show more")
       const mobileShowMore = showMoreButtons.find(
         (el) => el.closest('[role="dialog"]') !== null,
       )
@@ -296,7 +386,7 @@ describe("Header with progressive disclosure", () => {
       fireEvent.click(mobileShowMore!)
 
       // Advanced items should now be visible in mobile menu
-      expect(screen.getAllByText("⚡ Field Ops").length).toBeGreaterThan(0)
+      expect(screen.getAllByText("Field Ops").length).toBeGreaterThan(0)
       expect(screen.getAllByText("Map").length).toBeGreaterThan(0)
       expect(screen.getAllByText("Cheat Sheet").length).toBeGreaterThan(0)
     })
