@@ -15,6 +15,16 @@
 import type { PendingClaim } from "./types"
 import { loadSandbox, updateSandbox } from "./storage"
 
+/**
+ * Maximum number of pending claims allowed in the queue.
+ *
+ * Rationale: 50 claims is well within the localStorage quota (5-10MB), provides
+ * ample buffer for offline periods (the user can complete at most a handful of
+ * stages/challenges per session), and is generous enough that legitimate
+ * claims shouldn't be dropped.
+ */
+const MAX_PENDING_CLAIMS = 50
+
 type DrainResult = { drained: number; failed: number }
 
 const CLAIM_ENDPOINTS: Record<PendingClaim["type"], string> = {
@@ -42,12 +52,22 @@ function bodyFor(claim: PendingClaim): Record<string, unknown> {
   }
 }
 
-/** Append a claim to the queue. No-op if `loadSandbox` returns null. */
+/** Export the cap constant for external reference (e.g., UI display). */
+export { MAX_PENDING_CLAIMS }
+
+/**
+ * Append a claim to the queue, evicting the oldest entry (FIFO) if the
+ * queue is at {@link MAX_PENDING_CLAIMS}. No-op if `loadSandbox` returns null.
+ */
 export function enqueuePendingClaim(claim: PendingClaim): void {
-  updateSandbox((data) => ({
-    ...data,
-    pendingClaims: [...(data.pendingClaims ?? []), claim],
-  }))
+  updateSandbox((data) => {
+    const current = data.pendingClaims ?? []
+    // FIFO: if at cap, drop the oldest entry to make room for the new one
+    const next = current.length >= MAX_PENDING_CLAIMS
+      ? [...current.slice(current.length - MAX_PENDING_CLAIMS + 1), claim]
+      : [...current, claim]
+    return { ...data, pendingClaims: next }
+  })
 }
 
 /** Read the current queue (returns [] if no sandbox). */
