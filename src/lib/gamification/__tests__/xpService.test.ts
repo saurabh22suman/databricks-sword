@@ -189,6 +189,84 @@ describe("XP Event Service", () => {
       expect(event.source).toBe("challenge-1")
     })
 
+  describe("awardChallengeXp (P0-4: alreadyAwarded guard)", () => {
+    it("does not double-increment xpEarned when server returns alreadyAwarded", async () => {
+      // First call: success
+      vi.mocked(fetch).mockResolvedValueOnce(
+        new Response(JSON.stringify({ xpAwarded: 100, alreadyAwarded: false }), {
+          status: 200,
+          headers: { "Content-Type": "application/json" },
+        }),
+      )
+      await awardChallengeXp("challenge-1", 100)
+      const firstXp = vi.mocked(saveSandbox).mock.calls.at(-1)![0].userStats.totalXp
+
+      // Second call: server says already-awarded
+      vi.mocked(fetch).mockResolvedValueOnce(
+        new Response(JSON.stringify({ xpAwarded: 0, alreadyAwarded: true }), {
+          status: 200,
+          headers: { "Content-Type": "application/json" },
+        }),
+      )
+      await awardChallengeXp("challenge-1", 100)
+      const secondXp = vi.mocked(saveSandbox).mock.calls.at(-1)![0].userStats.totalXp
+
+      expect(secondXp).toBe(firstXp) // no double-count
+    })
+
+    it("does not double-increment completionCount when alreadyAwarded", async () => {
+      vi.mocked(fetch).mockResolvedValueOnce(
+        new Response(JSON.stringify({ xpAwarded: 100, alreadyAwarded: false }), {
+          status: 200,
+          headers: { "Content-Type": "application/json" },
+        }),
+      )
+      await awardChallengeXp("challenge-2", 100)
+      const firstCount =
+        vi.mocked(saveSandbox).mock.calls.at(-1)![0].challengeResults["challenge-2"]
+          .completionCount
+
+      vi.mocked(fetch).mockResolvedValueOnce(
+        new Response(JSON.stringify({ xpAwarded: 0, alreadyAwarded: true }), {
+          status: 200,
+          headers: { "Content-Type": "application/json" },
+        }),
+      )
+      await awardChallengeXp("challenge-2", 100)
+      const secondCount =
+        vi.mocked(saveSandbox).mock.calls.at(-1)![0].challengeResults["challenge-2"]
+          .completionCount
+
+      expect(secondCount).toBe(firstCount)
+    })
+
+    it("still increments attempts when alreadyAwarded (genuine attempt happened)", async () => {
+      vi.mocked(fetch).mockResolvedValueOnce(
+        new Response(JSON.stringify({ xpAwarded: 100, alreadyAwarded: false }), {
+          status: 200,
+          headers: { "Content-Type": "application/json" },
+        }),
+      )
+      await awardChallengeXp("challenge-3", 100)
+      const firstAttempts =
+        vi.mocked(saveSandbox).mock.calls.at(-1)![0].challengeResults["challenge-3"]
+          .attempts
+
+      vi.mocked(fetch).mockResolvedValueOnce(
+        new Response(JSON.stringify({ xpAwarded: 0, alreadyAwarded: true }), {
+          status: 200,
+          headers: { "Content-Type": "application/json" },
+        }),
+      )
+      await awardChallengeXp("challenge-3", 100)
+      const secondAttempts =
+        vi.mocked(saveSandbox).mock.calls.at(-1)![0].challengeResults["challenge-3"]
+          .attempts
+
+      expect(secondAttempts).toBe(firstAttempts + 1)
+    })
+  })
+
     it("records challenge result in sandbox", async () => {
       await awardChallengeXp("challenge-1", 75)
 

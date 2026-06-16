@@ -419,6 +419,12 @@ export async function awardChallengeXp(
     timestamp: new Date().toISOString(),
   }
 
+  // isNewCompletion: true only when server confirms this is a fresh award.
+  // When server says alreadyAwarded: true, this is a retry that was
+  // already counted - don't double-increment XP/completionCount.
+  // Note: local cap (amount=0) is different - user DID complete, just hit XP cap.
+  const isNewCompletion = !alreadyAwarded
+
   updateSandbox((data) => {
     const withStreak = updateStreakOnActivity(data)
     const challengeResults = { ...withStreak.challengeResults }
@@ -427,10 +433,15 @@ export async function awardChallengeXp(
     challengeResults[challengeId] = {
       attempted: true,
       completed: true,
-      xpEarned: (prev?.xpEarned ?? 0) + amount,
+      // Only add to xpEarned on a NEW completion. A retry against an
+      // already-awarded challenge must not double-count.
+      xpEarned: (prev?.xpEarned ?? 0) + (isNewCompletion ? amount : 0),
       hintsUsed: prev?.hintsUsed ?? 0,
+      // attempts always increments — the user genuinely tried again.
       attempts: (prev?.attempts ?? 0) + 1,
-      completionCount: (prev?.completionCount ?? 0) + 1,
+      // completionCount increments on any completion (local cap or new award).
+      // Only skips when server says alreadyAwarded (to prevent double-count).
+      completionCount: (prev?.completionCount ?? 0) + (isNewCompletion ? 1 : 0),
       completedAt: event.timestamp,
     }
 
@@ -439,10 +450,13 @@ export async function awardChallengeXp(
       challengeResults,
       userStats: {
         ...withStreak.userStats,
-        totalXp: withStreak.userStats.totalXp + amount,
-        totalChallengesCompleted: prev?.completed
-          ? withStreak.userStats.totalChallengesCompleted
-          : withStreak.userStats.totalChallengesCompleted + 1,
+        // totalXp only bumps on a new completion.
+        totalXp: withStreak.userStats.totalXp + (isNewCompletion ? amount : 0),
+        totalChallengesCompleted: isNewCompletion
+          ? prev?.completed
+            ? withStreak.userStats.totalChallengesCompleted
+            : withStreak.userStats.totalChallengesCompleted + 1
+          : withStreak.userStats.totalChallengesCompleted,
       },
     }
   })
