@@ -159,4 +159,23 @@ describe("recalculateStats", () => {
 
     expect(sandbox.userStats.totalXp).toBe(originalXp)
   })
+
+  it("adds field-ops XP from INDUSTRY_CONFIGS for each completed industry", () => {
+    // retail = 700, agritech = 2000, see src/lib/field-ops/industries.ts
+    const sandbox = initializeSandbox()
+    sandbox.completedFieldOps = ["retail", "agritech"]
+
+    const result = recalculateStats(sandbox)
+
+    expect(result.userStats.totalXp).toBe(2700) // 700 + 2000
+  })
+
+  it("ignores unknown industry IDs in completedFieldOps", () => {
+    const sandbox = initializeSandbox()
+    sandbox.completedFieldOps = ["retail", "unknown-industry", "agritech"]
+
+    const result = recalculateStats(sandbox)
+
+    expect(result.userStats.totalXp).toBe(2700) // unknown is skipped
+  })
 })

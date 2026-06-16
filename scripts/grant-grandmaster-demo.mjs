@@ -4,16 +4,20 @@
  * completed" sandbox to the given user's `sandbox_snapshots` row on Turso.
  *
  * Effects:
- *   - totalXp set to the sum of all mission `xpReward` + challenge `xpReward`
- *     in `src/content/` (the actual content XP, so it survives
- *     `recalculateStats` on the client — see `src/lib/sandbox/storage.ts:238`)
+ *   - totalXp set to the sum of all mission `xpReward` + side-quest `xpBonus`
+ *     + challenge `xpReward` + field-ops `xpReward` in `src/content/` and
+ *     `src/lib/field-ops/industries.ts` (so it survives `recalculateStats`
+ *     on the client — see `src/lib/sandbox/storage.ts:238`).
  *   - All 22 missions marked `completed: true` with per-stage `xpEarned`
- *     populated (sum per mission == mission.xpReward)
- *   - All 52 challenges marked `completed: true` with `xpEarned` from content
- *   - All ~29 achievement IDs added to the unlocked list
- *   - All field-ops industries added to `completedFieldOps`
- *   - Streak data filled out
- *   - User record created if it does not already exist
+ *     populated (sum per mission == mission.xpReward + per-mission side-quest
+ *     bonus, since the client's `recalculateStats` can only see stage XP).
+ *   - All 52 challenges marked `completed: true` with `xpEarned` from content.
+ *   - All 9 side-quest IDs added to `sideQuestsCompleted` for their mission.
+ *   - All ~29 achievement IDs added to the unlocked list.
+ *   - All 9 field-ops industries added to `completedFieldOps` (the client's
+ *     `recalculateStats` looks each up in `INDUSTRY_CONFIGS` to add the XP).
+ *   - Streak data filled out.
+ *   - User record created if it does not already exist.
  *
  * Usage:
  *   export $(grep -v '^#' .env | xargs) && \
@@ -68,11 +72,16 @@ function readJson(p) {
 const missionsRoot = join(process.cwd(), "src/content/missions");
 const missionEntries = listDirs(missionsRoot).map((slug) => {
   const json = readJson(join(missionsRoot, slug, "mission.json"));
+  const sideQuests = Array.isArray(json.sideQuests) ? json.sideQuests : [];
   return {
     id: json.id,
     slug,
     xpReward: Number(json.xpReward ?? 0),
     stages: Array.isArray(json.stages) ? json.stages : [],
+    sideQuests: sideQuests.map((sq) => ({
+      id: String(sq.id),
+      xpBonus: Number(sq.xpBonus ?? 0),
+    })),
   };
 }).filter((m) => m.id);
 
@@ -84,6 +93,24 @@ const challengeEntries = challengeFiles.map((rel) => {
   const xpReward = Number(readJson(join(challengesRoot, rel)).xpReward ?? 0);
   return { id, xpReward };
 });
+
+// Field-ops XP comes from INDUSTRY_CONFIGS in
+// src/lib/field-ops/industries.ts (the source of truth — the per-mission
+// `mission.json` files in src/content/field-ops/*/ are out of date and
+// only have xpReward on 4 of the 9 industries). We parse the constant
+// to stay consistent with the client's `recalculateStats`.
+const industriesSrc = readFileSync(
+  join(process.cwd(), "src/lib/field-ops/industries.ts"),
+  "utf-8",
+);
+const industryEntries = [
+  ...industriesSrc.matchAll(
+    /^\s*"?(?<id>[a-z0-9-]+)"?\s*:\s*\{[\s\S]*?xpReward:\s*(?<xp>\d+)/gm,
+  ),
+].map((m) => ({ id: m.groups.id, xpReward: Number(m.groups.xp) }));
+const uniqueIndustryEntries = Array.from(
+  new Map(industryEntries.map((e) => [e.id, e])).values(),
+);
 
 const fieldOpsRoot = join(process.cwd(), "src/content/field-ops");
 const fieldOpsIndustries = listDirs(fieldOpsRoot);
@@ -98,19 +125,28 @@ const achievementIds = [
 
 // Compute the actual content XP total so the sandbox survives
 // `recalculateStats` on the client (which overwrites userStats.totalXp
-// with sum(stage.xpEarned) + sum(challenge.xpEarned)).
+// with sum(stage.xpEarned) + sum(challenge.xpEarned) + sum(field-ops XP)).
 const totalMissionXp = missionEntries.reduce((s, m) => s + m.xpReward, 0);
+const totalSideQuestXp = missionEntries.reduce(
+  (s, m) => s + m.sideQuests.reduce((ss, sq) => ss + sq.xpBonus, 0),
+  0,
+);
 const totalChallengeXp = challengeEntries.reduce((s, c) => s + c.xpReward, 0);
-const targetXp = totalMissionXp + totalChallengeXp;
+const totalFieldOpsXp = uniqueIndustryEntries.reduce((s, i) => s + i.xpReward, 0);
+const targetXp =
+  totalMissionXp + totalSideQuestXp + totalChallengeXp + totalFieldOpsXp;
 
 console.log("📦 Discovered content:");
-console.log(`   missions:      ${missionEntries.length}`);
-console.log(`   challenges:    ${challengeEntries.length}`);
-console.log(`   achievements:  ${achievementIds.length}`);
-console.log(`   field-ops:     ${fieldOpsIndustries.length}`);
-console.log(`   mission XP:    ${totalMissionXp}`);
-console.log(`   challenge XP:  ${totalChallengeXp}`);
-console.log(`   TOTAL XP:      ${targetXp}`);
+console.log(`   missions:        ${missionEntries.length}`);
+console.log(`   challenges:      ${challengeEntries.length}`);
+console.log(`   side quests:     ${missionEntries.reduce((s, m) => s + m.sideQuests.length, 0)}`);
+console.log(`   achievements:    ${achievementIds.length}`);
+console.log(`   field-ops:       ${fieldOpsIndustries.length}`);
+console.log(`   mission XP:      ${totalMissionXp}`);
+console.log(`   side-quest XP:   ${totalSideQuestXp}`);
+console.log(`   challenge XP:    ${totalChallengeXp}`);
+console.log(`   field-ops XP:    ${totalFieldOpsXp}`);
+console.log(`   TOTAL XP:        ${targetXp}`);
 
 // ---------------------------------------------------------------------------
 // Build the SandboxData payload (matches SandboxDataSchema in
@@ -122,12 +158,17 @@ const oneDayAgo = new Date(Date.now() - 86_400_000).toISOString();
 
 const missionProgress = Object.fromEntries(
   missionEntries.map((m) => {
-    // Distribute mission.xpReward across stages so the per-stage sum
-    // equals the mission's `xpReward` from mission.json. The last stage
-    // absorbs any rounding remainder.
+    // Total stage XP must equal mission.xpReward + this mission's side-quest
+    // xpBonus sum, because the client's `recalculateStats` only sums
+    // stage.xpEarned. Side-quest XP itself is not stored anywhere on the
+    // client (sideQuestsCompleted is just an array of IDs), so we bake the
+    // bonus into the per-stage distribution. The last stage absorbs any
+    // rounding remainder.
+    const totalMissionStageXp =
+      m.xpReward + m.sideQuests.reduce((s, sq) => s + sq.xpBonus, 0);
     const numStages = Math.max(m.stages.length, 1);
-    const basePerStage = Math.floor(m.xpReward / numStages);
-    const remainder = m.xpReward - basePerStage * numStages;
+    const basePerStage = Math.floor(totalMissionStageXp / numStages);
+    const remainder = totalMissionStageXp - basePerStage * numStages;
 
     const stageProgress = Object.fromEntries(
       m.stages.map((stage, i) => {
@@ -152,8 +193,8 @@ const missionProgress = Object.fromEntries(
         started: true,
         completed: true,
         stageProgress,
-        sideQuestsCompleted: [],
-        totalXpEarned: m.xpReward,
+        sideQuestsCompleted: m.sideQuests.map((sq) => sq.id),
+        totalXpEarned: totalMissionStageXp,
         startedAt: oneDayAgo,
         completedAt: now,
       },
