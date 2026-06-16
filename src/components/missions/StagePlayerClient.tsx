@@ -27,7 +27,7 @@ import type {
     FreeTextConfig,
     QuizConfig,
 } from "@/lib/missions";
-import { updateSandbox } from "@/lib/sandbox";
+import { loadSandbox, updateSandbox } from "@/lib/sandbox";
 import { playSound } from "@/lib/sound";
 import { useRouter } from "next/navigation";
 import React, { useCallback, useState } from "react";
@@ -186,7 +186,13 @@ export function StagePlayerClient({
 
     // Award XP for stage completion and mission completion (final stage only)
     if (stageXpReward > 0) {
-      await awardStageXp(missionId, stageId, stageXpReward);
+      // Get hintsUsed and attempts from sandbox progress for accurate bonus calculation
+      const sandbox = loadSandbox()
+      const stageProgress = sandbox?.missionProgress[missionId]?.stageProgress[stageId]
+      const hintsUsed = stageProgress?.hintsUsed ?? 0
+      const attempts = stageProgress?.codeAttempts.length ?? 1
+
+      await awardStageXp(missionId, stageId, stageXpReward, { attempts, hintsUsed });
     }
     if (isFinalStage && missionXpReward > 0) {
       await awardMissionXp(missionId, missionXpReward);

@@ -6,12 +6,14 @@ import { StagePlayerClient } from "../StagePlayerClient"
 const {
   mockSyncNow,
   mockUpdateSandbox,
+  mockLoadSandbox,
   mockPush,
   mockAwardStageXp,
   mockAwardMissionXp,
 } = vi.hoisted(() => ({
   mockSyncNow: vi.fn(),
   mockUpdateSandbox: vi.fn(),
+  mockLoadSandbox: vi.fn(),
   mockPush: vi.fn(),
   mockAwardStageXp: vi.fn(),
   mockAwardMissionXp: vi.fn(),
@@ -32,6 +34,7 @@ vi.mock("@/components/auth", () => ({
 
 vi.mock("@/lib/sandbox", () => ({
   updateSandbox: mockUpdateSandbox,
+  loadSandbox: mockLoadSandbox,
 }))
 
 vi.mock("@/lib/gamification/xpService", () => ({
@@ -159,6 +162,7 @@ describe("StagePlayerClient — Side Quests", () => {
     mockPush.mockReset()
     mockAwardStageXp.mockReset()
     mockAwardMissionXp.mockReset()
+    mockLoadSandbox.mockReset()
   })
 
   const briefingConfig = {
@@ -434,7 +438,105 @@ describe("StagePlayerClient — Side Quests", () => {
     await user.click(await screen.findByText("Complete Quiz"))
 
     expect(mockPush).toHaveBeenCalledWith("/missions/test/stage/04")
-    expect(mockAwardStageXp).toHaveBeenCalledWith("test-mission", "03-quiz", 120)
+    expect(mockAwardStageXp).toHaveBeenCalledWith(
+      "test-mission",
+      "03-quiz",
+      120,
+      expect.objectContaining({ hintsUsed: 0, attempts: 1 }),
+    )
     expect(mockSyncNow).toHaveBeenCalledTimes(1)
+  })
+
+  it("passes hintsUsed and attempts from sandbox to awardStageXp", async () => {
+    const user = userEvent.setup()
+
+    // Set up sandbox mock with hintsUsed and codeAttempts
+    mockLoadSandbox.mockReturnValue({
+      missionProgress: {
+        "test-mission": {
+          stageProgress: {
+            "03-quiz": {
+              completed: false,
+              xpEarned: 0,
+              codeAttempts: ["attempt-1", "attempt-2", "attempt-3"],
+              hintsUsed: 2,
+            },
+          },
+        },
+      },
+    } as any)
+
+    render(
+      <StagePlayerClient
+        stageType="quiz"
+        config={{
+          questions: [
+            {
+              id: "q1",
+              question: "q",
+              options: ["a", "b"],
+              correctAnswer: 0,
+              explanation: "e",
+            },
+          ],
+          passingScore: 70,
+        }}
+        nextUrl="/missions/test/stage/04"
+        missionId="test-mission"
+        stageId="03-quiz"
+        sideQuests={[]}
+        stageXpReward={120}
+      />,
+    )
+
+    await user.click(await screen.findByText("Complete Quiz"))
+
+    expect(mockAwardStageXp).toHaveBeenCalledWith(
+      "test-mission",
+      "03-quiz",
+      120,
+      expect.objectContaining({ hintsUsed: 2, attempts: 3 }),
+    )
+  })
+
+  it("defaults to attempts=1, hintsUsed=0 when no prior sandbox progress", async () => {
+    const user = userEvent.setup()
+
+    // Set up sandbox mock with no missionProgress for this mission
+    mockLoadSandbox.mockReturnValue({
+      missionProgress: {},
+    } as any)
+
+    render(
+      <StagePlayerClient
+        stageType="quiz"
+        config={{
+          questions: [
+            {
+              id: "q1",
+              question: "q",
+              options: ["a", "b"],
+              correctAnswer: 0,
+              explanation: "e",
+            },
+          ],
+          passingScore: 70,
+        }}
+        nextUrl="/missions/test/stage/04"
+        missionId="test-mission"
+        stageId="03-quiz"
+        sideQuests={[]}
+        stageXpReward={120}
+      />,
+    )
+
+    await user.click(await screen.findByText("Complete Quiz"))
+
+    expect(mockAwardStageXp).toHaveBeenCalledWith(
+      "test-mission",
+      "03-quiz",
+      120,
+      expect.objectContaining({ hintsUsed: 0, attempts: 1 }),
+    )
   })
 })
