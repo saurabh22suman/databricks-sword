@@ -138,7 +138,7 @@ describe("recalculateStats", () => {
 
     expect(result.userStats.totalTimeSpentMinutes).toBe(120)
     expect(result.lastSynced).toBe("2026-02-13T09:00:00Z")
-    expect(result.version).toBe(1)
+    expect(result.version).toBe(2)
   })
 
   it("does not mutate the input sandbox", () => {

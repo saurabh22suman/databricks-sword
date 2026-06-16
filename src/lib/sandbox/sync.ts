@@ -251,6 +251,7 @@ export function mergeConflicts(
     achievements: mergedAchievements,
     completedFieldOps: mergedCompletedFieldOps,
     flashcardProgress: mergedFlashcardProgress,
+    pendingClaims: local.pendingClaims ?? [],
     lastSynced: mergedLastSynced,
   }
 }

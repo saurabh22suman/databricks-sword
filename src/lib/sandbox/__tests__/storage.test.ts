@@ -50,7 +50,7 @@ describe("Sandbox Storage", () => {
     it("returns default empty sandbox state", () => {
       const sandbox = initializeSandbox()
 
-      expect(sandbox.version).toBe(1)
+      expect(sandbox.version).toBe(2)
       expect(sandbox.missionProgress).toEqual({})
       expect(sandbox.challengeResults).toEqual({})
       expect(sandbox.achievements).toEqual([])
@@ -138,7 +138,7 @@ describe("Sandbox Storage", () => {
 
       expect(loaded).not.toBeNull()
       expect(loaded!.userStats.totalXp).toBe(350)
-      expect(loaded!.version).toBe(1)
+      expect(loaded!.version).toBe(2)
     })
 
     it("returns null for invalid JSON", () => {
@@ -178,6 +178,50 @@ describe("Sandbox Storage", () => {
       expect(loaded).toHaveProperty("achievements")
       expect(loaded).toHaveProperty("flashcardProgress")
       expect(loaded).toHaveProperty("lastSynced")
+    })
+
+    it("migrates v1 data to v2 with pendingClaims: []", () => {
+      // Simulate v1 data in localStorage (version: 1, no pendingClaims field)
+      const v1Data = {
+        version: 1,
+        missionProgress: {},
+        challengeResults: {},
+        userStats: {
+          totalXp: 0,
+          totalMissionsCompleted: 0,
+          totalChallengesCompleted: 0,
+          totalAchievements: 0,
+          currentStreak: 0,
+          longestStreak: 0,
+          totalTimeSpentMinutes: 0,
+        },
+        streakData: {
+          currentStreak: 0,
+          longestStreak: 0,
+          lastActiveDate: "",
+          freezesAvailable: 2,
+          freezesUsed: 0,
+        },
+        achievements: [],
+        flashcardProgress: {},
+        lastSynced: null,
+        // Note: no pendingClaims field - this is v1 data
+      }
+
+      localStorageMock.setItem(SANDBOX_KEY, JSON.stringify(v1Data))
+
+      // Call loadSandbox - should trigger migration
+      const loaded = loadSandbox()
+
+      // Verify migrated data has version: 2 and pendingClaims: []
+      expect(loaded).not.toBeNull()
+      expect(loaded!.version).toBe(2)
+      expect(loaded!.pendingClaims).toEqual([])
+
+      // Verify migration was persisted to localStorage
+      const stored = JSON.parse(localStorageMock.getItem(SANDBOX_KEY)!)
+      expect(stored.version).toBe(2)
+      expect(stored.pendingClaims).toEqual([])
     })
   })
 

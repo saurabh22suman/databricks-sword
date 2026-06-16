@@ -151,10 +151,41 @@ export const FlashcardProgressSchema = z.object({
 })
 
 /**
+ * A claim request that failed to reach the server (network error) and
+ * is queued for retry. Discriminated by `type` so the queue can replay
+ * it through the correct endpoint.
+ */
+export type PendingClaim =
+  | {
+      type: "stage"
+      missionId: string
+      stageId: string
+      attempts: number
+      hintsUsed: number
+      queuedAt: string
+    }
+  | {
+      type: "mission"
+      missionId: string
+      queuedAt: string
+    }
+  | {
+      type: "challenge"
+      challengeId: string
+      queuedAt: string
+    }
+  | {
+      type: "achievement"
+      achievementId: string
+      queuedAt: string
+    }
+
+/**
  * Complete sandbox data structure stored in localStorage.
+ * Schema version 2 - added pendingClaims for offline claim queue.
  */
 export type SandboxData = {
-  version: number // Schema version for migrations
+  version: number // Schema version for migrations. Bumped to 2 when pendingClaims was added.
   missionProgress: Record<string, MissionProgress>
   challengeResults: Record<string, ChallengeResult>
   userStats: UserStats
@@ -168,6 +199,8 @@ export type SandboxData = {
   achievements: string[] // Achievement IDs
   completedFieldOps: string[] // Industry IDs for completed Field Ops
   flashcardProgress: Record<string, FlashcardProgress>
+  /** Claims that failed to reach the server, queued for retry. */
+  pendingClaims: PendingClaim[]
   lastSynced: string | null // ISO timestamp
 }
 
@@ -189,6 +222,31 @@ export const SandboxDataSchema = z.object({
   achievements: z.array(z.string()),
   completedFieldOps: z.array(z.string()).default([]),
   flashcardProgress: z.record(z.string(), FlashcardProgressSchema),
+  pendingClaims: z.array(z.discriminatedUnion("type", [
+    z.object({
+      type: z.literal("stage"),
+      missionId: z.string(),
+      stageId: z.string(),
+      attempts: z.number().int().nonnegative(),
+      hintsUsed: z.number().int().nonnegative(),
+      queuedAt: z.string(),
+    }),
+    z.object({
+      type: z.literal("mission"),
+      missionId: z.string(),
+      queuedAt: z.string(),
+    }),
+    z.object({
+      type: z.literal("challenge"),
+      challengeId: z.string(),
+      queuedAt: z.string(),
+    }),
+    z.object({
+      type: z.literal("achievement"),
+      achievementId: z.string(),
+      queuedAt: z.string(),
+    }),
+  ])).default([]),
   lastSynced: z.string().nullable(),
 })
 

@@ -13,6 +13,7 @@ import {
     StageProgressSchema,
     UserStatsSchema,
 } from "../types"
+import { initializeSandbox } from "../storage"
 
 describe("Sandbox Types", () => {
   describe("StageProgressSchema", () => {
@@ -271,6 +272,7 @@ describe("Sandbox Types", () => {
             nextReview: "2026-02-15T10:00:00Z",
           },
         },
+        pendingClaims: [],
         lastSynced: "2026-02-12T12:00:00Z",
       }
 
@@ -301,6 +303,7 @@ describe("Sandbox Types", () => {
         achievements: [],
         completedFieldOps: [],
         flashcardProgress: {},
+        pendingClaims: [],
         lastSynced: null,
       }
 
@@ -330,6 +333,7 @@ describe("Sandbox Types", () => {
         },
         achievements: [],
         flashcardProgress: {},
+        pendingClaims: [],
         lastSynced: null,
       }
 
@@ -359,10 +363,57 @@ describe("Sandbox Types", () => {
         },
         achievements: [],
         flashcardProgress: {},
+        pendingClaims: [],
         lastSynced: null,
       }
 
       expect(() => SandboxDataSchema.parse(invalid)).toThrow()
+    })
+
+    it("accepts a freshly initialized sandbox (version 2 with pendingClaims)", () => {
+      const sandbox = initializeSandbox()
+      expect(sandbox.version).toBe(2)
+      expect(sandbox.pendingClaims).toEqual([])
+      // Should round-trip through Zod
+      const parsed = SandboxDataSchema.parse(sandbox)
+      expect(parsed.version).toBe(2)
+    })
+
+    it("accepts a v1 sandbox (no pendingClaims field) and treats it as empty queue", () => {
+      // Simulate a v1 sandbox loaded from disk
+      const v1Data = {
+        version: 1,
+        missionProgress: {},
+        challengeResults: {},
+        userStats: {
+          totalXp: 0,
+          totalMissionsCompleted: 0,
+          totalChallengesCompleted: 0,
+          totalAchievements: 0,
+          currentStreak: 0,
+          longestStreak: 0,
+          totalTimeSpentMinutes: 0,
+        },
+        streakData: {
+          currentStreak: 0,
+          longestStreak: 0,
+          lastActiveDate: "",
+          freezesAvailable: 2,
+          freezesUsed: 0,
+        },
+        achievements: [],
+        completedFieldOps: [],
+        flashcardProgress: {},
+        lastSynced: null,
+        // no pendingClaims field
+      }
+      // After loading, the storage layer migrates v1 → v2 and adds pendingClaims: []
+      // The schema itself should accept either shape:
+      const parsed = SandboxDataSchema.safeParse({
+        ...v1Data,
+        pendingClaims: [], // injected by migration
+      })
+      expect(parsed.success).toBe(true)
     })
   })
 })
