@@ -21,6 +21,7 @@
  */
 
 import { initializeSandbox, loadSandbox, updateSandbox } from "@/lib/sandbox/storage"
+import { enqueuePendingClaim } from "@/lib/sandbox/pendingClaims"
 import type { SandboxData } from "@/lib/sandbox/types"
 import { MAX_CHALLENGE_XP_COMPLETIONS } from "@/lib/sandbox/types"
 import { ACHIEVEMENTS, checkAchievement } from "./achievements"
@@ -155,8 +156,13 @@ async function checkAndUnlockAchievements(): Promise<void> {
       newlyAwarded.push(id)
       bonusXp += result.xpAwarded
     } else if (!result) {
-      // Network error — unlock locally with no XP (queue does not cover achievements yet)
+      // Network error — unlock locally with no XP, and queue the claim for retry
       newlyAwarded.push(id)
+      enqueuePendingClaim({
+        type: "achievement",
+        achievementId: id,
+        queuedAt: new Date().toISOString(),
+      })
     }
   })
 
@@ -266,6 +272,18 @@ export async function awardStageXp(
     hintsUsed: options?.hintsUsed ?? 0,
   })
 
+  // Enqueue for retry if network error
+  if (!serverResult) {
+    enqueuePendingClaim({
+      type: "stage",
+      missionId,
+      stageId,
+      attempts: options?.attempts ?? 1,
+      hintsUsed: options?.hintsUsed ?? 0,
+      queuedAt: new Date().toISOString(),
+    })
+  }
+
   const amount = serverResult ? serverResult.xpAwarded : localAmount
   const alreadyAwarded = serverResult?.alreadyAwarded ?? false
   const multiplier = serverResult && baseXp > 0 ? amount / baseXp : localMultiplier
@@ -355,6 +373,15 @@ export async function awardMissionXp(
     missionId,
   })
 
+  // Enqueue for retry if network error
+  if (!serverResult) {
+    enqueuePendingClaim({
+      type: "mission",
+      missionId,
+      queuedAt: new Date().toISOString(),
+    })
+  }
+
   const amount = serverResult ? serverResult.xpAwarded : localAmount
   const alreadyAwarded = serverResult?.alreadyAwarded ?? false
   const multiplier = serverResult && baseXp > 0 ? amount / baseXp : localMultiplier
@@ -432,6 +459,15 @@ export async function awardChallengeXp(
   const serverResult = await postClaim("/api/progress/challenge", {
     challengeId,
   })
+
+  // Enqueue for retry if network error
+  if (!serverResult) {
+    enqueuePendingClaim({
+      type: "challenge",
+      challengeId,
+      queuedAt: new Date().toISOString(),
+    })
+  }
 
   const amount = serverResult ? serverResult.xpAwarded : localAmount
   const alreadyAwarded = serverResult?.alreadyAwarded ?? false

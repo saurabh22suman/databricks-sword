@@ -13,6 +13,17 @@ vi.mock("../../sandbox/storage", async () => {
   }
 })
 
+// Mock pending claims queue
+vi.mock("../../sandbox/pendingClaims", async () => {
+  const actual = await vi.importActual<typeof import("../../sandbox/pendingClaims")>(
+    "../../sandbox/pendingClaims",
+  )
+  return {
+    ...actual,
+    enqueuePendingClaim: vi.fn(),
+  }
+})
+
 // Mock fetch — tests in this file expect the local-computation path
 // (offline / network failure). The server claim is exercised in
 // xpService.server.test.ts.
@@ -22,6 +33,7 @@ vi.stubGlobal(
 )
 
 import { loadSandbox, saveSandbox, updateSandbox } from "../../sandbox/storage"
+import { enqueuePendingClaim } from "../../sandbox/pendingClaims"
 import {
     awardChallengeXp,
     awardMissionXp,
@@ -498,6 +510,62 @@ describe("XP Event Service", () => {
         c[0].toString().includes("/api/progress/achievement"),
       )
       expect(achievementCalls).toHaveLength(0)
+    })
+  })
+
+  describe("XP service (P0-1: offline claim queue)", () => {
+    it("enqueues the claim when postClaim returns null (network error)", async () => {
+      // The top-level fetch mock already rejects. So all award functions
+      // hit the offline path. Verify enqueuePendingClaim is called.
+      vi.mocked(enqueuePendingClaim).mockClear()
+
+      await awardStageXp("mission-1", "01-briefing", 100)
+
+      expect(enqueuePendingClaim).toHaveBeenCalledWith(
+        expect.objectContaining({
+          type: "stage",
+          missionId: "mission-1",
+          stageId: "01-briefing",
+        }),
+      )
+    })
+
+    it("does not enqueue when the server returns success", async () => {
+      vi.mocked(fetch).mockResolvedValueOnce(
+        new Response(
+          JSON.stringify({ xpAwarded: 100, alreadyAwarded: false }),
+          { status: 200, headers: { "Content-Type": "application/json" } },
+        ),
+      )
+      vi.mocked(enqueuePendingClaim).mockClear()
+
+      await awardStageXp("mission-2", "01-briefing", 100)
+
+      expect(enqueuePendingClaim).not.toHaveBeenCalled()
+    })
+
+    it("does not enqueue when the server returns alreadyAwarded: true", async () => {
+      // Mock challenge claim (alreadyAwarded) AND achievement claim (success)
+      vi.mocked(fetch)
+        .mockResolvedValueOnce(
+          new Response(
+            JSON.stringify({ xpAwarded: 0, alreadyAwarded: true }),
+            { status: 200, headers: { "Content-Type": "application/json" } },
+          ),
+        )
+        .mockResolvedValueOnce(
+          new Response(
+            JSON.stringify({ xpAwarded: 35, alreadyAwarded: false }),
+            { status: 200, headers: { "Content-Type": "application/json" } },
+          ),
+        )
+      vi.mocked(enqueuePendingClaim).mockClear()
+
+      await awardChallengeXp("challenge-1", 100)
+
+      // Only the challenge claim should NOT be enqueued
+      // (achievement succeeds, so nothing gets enqueued)
+      expect(enqueuePendingClaim).not.toHaveBeenCalled()
     })
   })
 })
