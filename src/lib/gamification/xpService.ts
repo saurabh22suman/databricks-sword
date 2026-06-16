@@ -112,37 +112,68 @@ function buildProfileFromSandbox(data: SandboxData): UserProfile {
 }
 
 /**
- * Checks all achievements against current sandbox state
- * and unlocks any newly earned ones, awarding their XP bonuses.
+ * Checks all achievements against current sandbox state and unlocks any
+ * newly earned ones, claiming their XP bonuses from the server.
+ *
+ * Each newly-unlocked achievement is POSTed to `/api/progress/achievement`.
+ * The server is authoritative for the XP amount and for idempotency:
+ * a retry returns `alreadyAwarded: true, xpAwarded: 0`, and we suppress
+ * the local XP addition in that case.
+ *
+ * If the network call fails (postClaim returns null), we still unlock
+ * the achievement locally (so the user sees the badge) but add zero XP.
+ * The achievement XP is then lost for that session — the offline-claim
+ * queue (P0-1) does not yet cover achievements. (Future work: extend
+ * the queue to include achievement claims.)
  *
  * Called automatically after every XP award (stage, mission, challenge).
  */
-function checkAndUnlockAchievements(): void {
+async function checkAndUnlockAchievements(): Promise<void> {
   const sandbox = loadSandbox()
   if (!sandbox) return
 
   const profile = buildProfileFromSandbox(sandbox)
   const alreadyUnlocked = new Set(sandbox.achievements)
   const newlyUnlocked: string[] = []
-  let bonusXp = 0
 
   for (const achievement of ACHIEVEMENTS) {
     if (alreadyUnlocked.has(achievement.id)) continue
     if (checkAchievement(achievement.condition, profile)) {
       newlyUnlocked.push(achievement.id)
-      bonusXp += achievement.xpBonus
     }
   }
 
   if (newlyUnlocked.length === 0) return
 
+  // Claim each achievement server-side, in parallel.
+  const serverResults = await Promise.all(
+    newlyUnlocked.map((id) =>
+      postClaim("/api/progress/achievement", { achievementId: id }),
+    ),
+  )
+
+  const newlyAwarded: string[] = []
+  let bonusXp = 0
+  newlyUnlocked.forEach((id, i) => {
+    const result = serverResults[i]
+    if (result && !result.alreadyAwarded && result.xpAwarded > 0) {
+      newlyAwarded.push(id)
+      bonusXp += result.xpAwarded
+    } else if (!result) {
+      // Network error — unlock locally with no XP (queue does not cover achievements yet)
+      newlyAwarded.push(id)
+    }
+  })
+
+  if (newlyAwarded.length === 0) return
+
   updateSandbox((data) => ({
     ...data,
-    achievements: [...data.achievements, ...newlyUnlocked],
+    achievements: [...data.achievements, ...newlyAwarded],
     userStats: {
       ...data.userStats,
       totalXp: data.userStats.totalXp + bonusXp,
-      totalAchievements: data.achievements.length + newlyUnlocked.length,
+      totalAchievements: data.achievements.length + newlyAwarded.length,
     },
   }))
 }
@@ -297,7 +328,7 @@ export async function awardStageXp(
     })
   }
 
-  checkAndUnlockAchievements()
+  await checkAndUnlockAchievements()
 
   if (!alreadyAwarded && amount > 0) {
     emitXpEvent(event)
@@ -378,7 +409,7 @@ export async function awardMissionXp(
     })
   }
 
-  checkAndUnlockAchievements()
+  await checkAndUnlockAchievements()
 
   if (!alreadyAwarded && amount > 0) {
     emitXpEvent(event)
@@ -461,7 +492,7 @@ export async function awardChallengeXp(
     }
   })
 
-  checkAndUnlockAchievements()
+  await checkAndUnlockAchievements()
 
   if (!alreadyAwarded && amount > 0) {
     emitXpEvent(event)

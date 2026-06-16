@@ -330,9 +330,24 @@ describe("XP Event Service", () => {
     })
 
     it("awards achievement XP bonus when unlocking", async () => {
+      // Mock fetch for both challenge claim and achievement claim
+      vi.mocked(fetch)
+        .mockResolvedValueOnce(
+          new Response(
+            JSON.stringify({ xpAwarded: 75, alreadyAwarded: false }),
+            { status: 200, headers: { "Content-Type": "application/json" } },
+          ),
+        )
+        .mockResolvedValueOnce(
+          new Response(
+            JSON.stringify({ xpAwarded: 35, alreadyAwarded: false }),
+            { status: 200, headers: { "Content-Type": "application/json" } },
+          ),
+        )
+
       await awardChallengeXp("challenge-1", 75)
 
-      // "getting-started" has xpBonus of 35
+      // "getting-started" has xpBonus of 35 (from server)
       // Total XP = 75 (challenge) + 35 (achievement bonus) = 110
       expect(sandbox.userStats.totalXp).toBe(110)
     })
@@ -368,6 +383,113 @@ describe("XP Event Service", () => {
       await awardStageXp("mission-1", "01-briefing", 50)
 
       expect(sandbox.achievements).not.toContain("first-blood")
+    })
+  })
+
+  describe("checkAndUnlockAchievements (P0-2: server claim)", () => {
+    it("claims each newly-unlocked achievement via the server", async () => {
+      // Set up a sandbox where the user has completed 1 mission.
+      // That should trigger the "first-blood" achievement (xpBonus 75).
+      sandbox.missionProgress["mission-1"] = {
+        started: true,
+        completed: true,
+        stageProgress: {},
+        sideQuestsCompleted: [],
+        totalXpEarned: 200,
+        completedAt: new Date().toISOString(),
+      }
+      vi.mocked(loadSandbox).mockReturnValue(sandbox)
+
+      // Mock fetch for both mission claim AND achievement claim
+      vi.mocked(fetch)
+        .mockResolvedValueOnce(
+          new Response(
+            JSON.stringify({ xpAwarded: 200, alreadyAwarded: false }),
+            { status: 200, headers: { "Content-Type": "application/json" } },
+          ),
+        )
+        .mockResolvedValueOnce(
+          new Response(
+            JSON.stringify({ xpAwarded: 75, alreadyAwarded: false }),
+            { status: 200, headers: { "Content-Type": "application/json" } },
+          ),
+        )
+
+      await awardMissionXp("mission-1", 200)
+
+      expect(fetch).toHaveBeenCalledWith(
+        "/api/progress/achievement",
+        expect.objectContaining({
+          method: "POST",
+          body: expect.stringContaining("first-blood"),
+        }),
+      )
+    })
+
+    it("adds the server-claimed XP to userStats.totalXp", async () => {
+      // Set up a sandbox where the mission is NOT completed yet, so mission XP is awarded
+      sandbox.missionProgress["mission-1"] = {
+        started: true,
+        completed: false, // NOT completed yet - mission XP will be awarded
+        stageProgress: {},
+        sideQuestsCompleted: [],
+        totalXpEarned: 0,
+        completedAt: "",
+      }
+      vi.mocked(loadSandbox).mockReturnValue(sandbox)
+      // Mock fetch for both mission claim AND achievement claim
+      vi.mocked(fetch)
+        .mockResolvedValueOnce(
+          new Response(
+            JSON.stringify({ xpAwarded: 200, alreadyAwarded: false }),
+            { status: 200, headers: { "Content-Type": "application/json" } },
+          ),
+        )
+        .mockResolvedValueOnce(
+          new Response(
+            JSON.stringify({ xpAwarded: 75, alreadyAwarded: false }),
+            { status: 200, headers: { "Content-Type": "application/json" } },
+          ),
+        )
+
+      await awardMissionXp("mission-1", 200)
+
+      // Find the call that added the achievement (contains "first-blood" in achievements)
+      const achievementCall = vi.mocked(saveSandbox).mock.calls.find(
+        (call) => call[0]?.achievements?.includes("first-blood"),
+      )
+      expect(achievementCall).toBeDefined()
+      // Total XP should be at least: mission XP (200) + achievement XP (75)
+      expect(achievementCall![0].userStats.totalXp).toBeGreaterThanOrEqual(200 + 75)
+      expect(achievementCall![0].achievements).toContain("first-blood")
+    })
+
+    it("does not double-add XP when server returns alreadyAwarded", async () => {
+      sandbox.achievements = ["first-blood"] // already unlocked locally
+      sandbox.missionProgress["mission-1"] = {
+        started: true,
+        completed: true,
+        stageProgress: {},
+        sideQuestsCompleted: [],
+        totalXpEarned: 0,
+        completedAt: new Date().toISOString(),
+      }
+      vi.mocked(loadSandbox).mockReturnValue(sandbox)
+      // Mock fetch for mission claim only (achievement should be skipped)
+      vi.mocked(fetch).mockResolvedValueOnce(
+        new Response(
+          JSON.stringify({ xpAwarded: 200, alreadyAwarded: false }),
+          { status: 200, headers: { "Content-Type": "application/json" } },
+        ),
+      )
+
+      await awardMissionXp("mission-1", 200)
+
+      // Find any call to /api/progress/achievement
+      const achievementCalls = vi.mocked(fetch).mock.calls.filter((c) =>
+        c[0].toString().includes("/api/progress/achievement"),
+      )
+      expect(achievementCalls).toHaveLength(0)
     })
   })
 })
