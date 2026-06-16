@@ -55,4 +55,33 @@ describe("MissionStatusCard", () => {
       expect(screen.getByTestId("resume-mission-card")).toBeInTheDocument()
     })
   })
+
+  it("shows the all-complete state when every started mission is finished", async () => {
+    initializeSandbox()
+    updateSandbox((data) => ({
+      ...data,
+      missionProgress: {
+        ...data.missionProgress,
+        "sql-essentials": {
+          started: true,
+          completed: true,
+          stageProgress: {},
+          sideQuestsCompleted: [],
+          totalXpEarned: 100,
+        },
+        "pyspark-intro": {
+          started: true,
+          completed: true,
+          stageProgress: {},
+          sideQuestsCompleted: [],
+          totalXpEarned: 150,
+        },
+      },
+    }))
+    render(<MissionStatusCard />)
+    await waitFor(() => {
+      expect(screen.getByTestId("all-missions-complete-state")).toBeInTheDocument()
+    })
+    expect(screen.queryByTestId("no-mission-empty-state")).not.toBeInTheDocument()
+  })
 })

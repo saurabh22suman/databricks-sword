@@ -1,6 +1,8 @@
 import type { PendingClaim, SandboxData } from "./types"
 import { SandboxDataSchema } from "./types"
 import { validateStreakData } from "../gamification/streaks"
+import { INDUSTRY_CONFIGS } from "../field-ops/industries"
+import type { Industry } from "../field-ops/types"
 
 /**
  * Browser Sandbox Storage
@@ -255,6 +257,17 @@ export function recalculateStats(sandbox: SandboxData): SandboxData {
     totalXp += challenge.xpEarned
     if (challenge.completed) {
       totalChallengesCompleted++
+    }
+  }
+
+  // Sum XP from all completed field ops. The server's /api/user/sync also
+  // adds field-ops XP into totalXp (see legacySandboxAggregate /
+  // recomputeFromLedger), so the client must agree or it overwrites the
+  // server-supplied total on the next load.
+  for (const industry of sandbox.completedFieldOps ?? []) {
+    const config = INDUSTRY_CONFIGS[industry as Industry]
+    if (config) {
+      totalXp += config.xpReward
     }
   }
 
