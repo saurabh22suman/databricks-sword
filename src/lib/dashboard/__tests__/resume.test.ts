@@ -1,5 +1,9 @@
 import { describe, it, expect } from "vitest"
-import { findResumeMission } from "../resume"
+import {
+  findResumeMission,
+  hasCompletedAllStartedMissions,
+  hasStartedAnyMission,
+} from "../resume"
 import type { SandboxData } from "@/lib/sandbox/types"
 
 function makeSandbox(overrides: Partial<SandboxData> = {}): SandboxData {
@@ -126,5 +130,54 @@ describe("findResumeMission", () => {
     })
     const result = findResumeMission(sandbox)
     expect(result?.missionId).toBe("active")
+  })
+})
+
+describe("hasStartedAnyMission", () => {
+  it("returns false when sandbox is null", () => {
+    expect(hasStartedAnyMission(null)).toBe(false)
+  })
+
+  it("returns false when no missions are started", () => {
+    expect(hasStartedAnyMission(makeSandbox())).toBe(false)
+  })
+
+  it("returns true when at least one mission has started=true", () => {
+    const sandbox = makeSandbox({
+      missionProgress: {
+        m1: { started: true, completed: false, stageProgress: {}, sideQuestsCompleted: [], totalXpEarned: 0 },
+      },
+    })
+    expect(hasStartedAnyMission(sandbox)).toBe(true)
+  })
+})
+
+describe("hasCompletedAllStartedMissions", () => {
+  it("returns false when sandbox is null", () => {
+    expect(hasCompletedAllStartedMissions(null)).toBe(false)
+  })
+
+  it("returns false when no missions have been started", () => {
+    expect(hasCompletedAllStartedMissions(makeSandbox())).toBe(false)
+  })
+
+  it("returns true when every started mission is also completed", () => {
+    const sandbox = makeSandbox({
+      missionProgress: {
+        m1: { started: true, completed: true, stageProgress: {}, sideQuestsCompleted: [], totalXpEarned: 100 },
+        m2: { started: true, completed: true, stageProgress: {}, sideQuestsCompleted: [], totalXpEarned: 200 },
+      },
+    })
+    expect(hasCompletedAllStartedMissions(sandbox)).toBe(true)
+  })
+
+  it("returns false when at least one started mission is still in progress", () => {
+    const sandbox = makeSandbox({
+      missionProgress: {
+        m1: { started: true, completed: true, stageProgress: {}, sideQuestsCompleted: [], totalXpEarned: 100 },
+        m2: { started: true, completed: false, stageProgress: {}, sideQuestsCompleted: [], totalXpEarned: 50 },
+      },
+    })
+    expect(hasCompletedAllStartedMissions(sandbox)).toBe(false)
   })
 })
