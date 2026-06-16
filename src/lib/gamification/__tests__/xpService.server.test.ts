@@ -70,8 +70,8 @@ describe("xpService — server-first", () => {
       )
 
       await awardStageXp(MISSION_ID, STAGE_ID, 50, {
-        firstTry: true,
-        noHints: true,
+        attempts: 1,
+        hintsUsed: 0,
       })
 
       const fetchMock = vi.mocked(global.fetch)
@@ -83,8 +83,8 @@ describe("xpService — server-first", () => {
       expect(body).toEqual({
         missionId: MISSION_ID,
         stageId: STAGE_ID,
-        firstTry: true,
-        noHints: true,
+        attempts: 1,
+        hintsUsed: 0,
       })
     })
 

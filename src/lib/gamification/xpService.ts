@@ -29,11 +29,6 @@ import { getRankForXp } from "./ranks"
 import { calculateStreak, getStreakMultiplier, useFreeze } from "./streaks"
 import type { UserProfile, XpEvent } from "./types"
 
-/** Bonus XP for completing a stage on the first attempt */
-const FIRST_TRY_BONUS = 15
-
-/** Bonus XP for completing a stage without using any hints */
-const NO_HINTS_BONUS = 50
 
 // -----------------------------------------------------------------------------
 // Server claim helpers
@@ -232,8 +227,10 @@ function updateStreakOnActivity(data: SandboxData): SandboxData {
 // -----------------------------------------------------------------------------
 
 type StageXpOptions = {
-  firstTry?: boolean
-  noHints?: boolean
+  /** Number of attempts the user made on this stage. Defaults to 1. */
+  attempts?: number
+  /** Number of hints the user used on this stage. */
+  hintsUsed?: number
 }
 
 /**
@@ -246,7 +243,7 @@ type StageXpOptions = {
  * @param missionId - The mission slug
  * @param stageId - The stage ID within the mission
  * @param baseXp - Base XP reward used for the offline-fallback path
- * @param options - Optional bonuses (firstTry, noHints)
+ * @param options - Stage attempt metadata (attempts, hintsUsed)
  * @returns The XpEvent with the final amount (server-authoritative when available)
  */
 export async function awardStageXp(
@@ -258,22 +255,20 @@ export async function awardStageXp(
   const sandbox = loadSandbox() ?? initializeSandbox()
   const localMultiplier = getStreakMultiplier(sandbox.streakData.currentStreak)
 
-  let bonusXp = 0
-  if (options?.firstTry) bonusXp += FIRST_TRY_BONUS
-  if (options?.noHints) bonusXp += NO_HINTS_BONUS
-  const localAmount = Math.floor((baseXp + bonusXp) * localMultiplier)
+  // Local fallback: base XP + streak multiplier only.
+  // Server is authoritative for first-try/no-hints bonuses - we don't apply them locally.
+  const localAmount = Math.floor(baseXp * localMultiplier)
 
   const serverResult = await postClaim("/api/progress/stage", {
     missionId,
     stageId,
-    firstTry: options?.firstTry,
-    noHints: options?.noHints,
+    attempts: options?.attempts ?? 1,
+    hintsUsed: options?.hintsUsed ?? 0,
   })
 
   const amount = serverResult ? serverResult.xpAwarded : localAmount
   const alreadyAwarded = serverResult?.alreadyAwarded ?? false
-  const multiplier =
-    serverResult && baseXp + bonusXp > 0 ? amount / (baseXp + bonusXp) : localMultiplier
+  const multiplier = serverResult && baseXp > 0 ? amount / baseXp : localMultiplier
 
   const event: XpEvent = {
     type: "stage",
