@@ -27,12 +27,15 @@ vi.mock("@/app/api/user/helpers", () => ({
 }))
 
 import {
+  claimAchievementXp,
   claimChallengeXp,
   claimMissionXp,
   claimStageXp,
   computeStreakFromAwards,
   getXpMultiplierForUser,
 } from "../serverXpService"
+
+import { ACHIEVEMENTS } from "../achievements"
 
 // -----------------------------------------------------------------------------
 // Test helpers
@@ -337,6 +340,37 @@ describe("serverXpService", () => {
       setupSelectRows(recent)
       const multiplier = await getXpMultiplierForUser(USER_ID)
       expect(multiplier).toBe(1.5)
+    })
+  })
+
+  describe("claimAchievementXp", () => {
+    it("returns 0 when achievementId is unknown", async () => {
+      const result = await claimAchievementXp({
+        userId: USER_ID,
+        achievementId: "does-not-exist",
+      })
+      expect(result).toEqual({ xpAwarded: 0, alreadyAwarded: false })
+    })
+
+    it("inserts an award with the achievement's xpBonus", async () => {
+      const { returning } = setupInsertReturning([
+        { id: "award-1", xpAmount: ACHIEVEMENTS[0].xpBonus },
+      ])
+      const result = await claimAchievementXp({
+        userId: USER_ID,
+        achievementId: ACHIEVEMENTS[0].id, // "first-blood", xpBonus 75
+      })
+      expect(result).toEqual({ xpAwarded: 75, alreadyAwarded: false })
+      expect(returning).toHaveBeenCalled()
+    })
+
+    it("returns alreadyAwarded: true when insert is a no-op", async () => {
+      setupInsertReturning([]) // empty returning → conflict
+      const result = await claimAchievementXp({
+        userId: USER_ID,
+        achievementId: ACHIEVEMENTS[0].id,
+      })
+      expect(result).toEqual({ xpAwarded: 0, alreadyAwarded: true })
     })
   })
 })

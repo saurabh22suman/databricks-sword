@@ -23,6 +23,7 @@ import { getDb } from "@/lib/db/client"
 import { xpAwards } from "@/lib/db/schema"
 import { getMission } from "@/lib/missions/loader"
 import { getStreakMultiplier } from "./streaks"
+import { ACHIEVEMENTS } from "./achievements"
 
 // -----------------------------------------------------------------------------
 // Constants
@@ -58,6 +59,11 @@ export type ClaimMissionArgs = {
 export type ClaimChallengeArgs = {
   userId: string
   challengeId: string
+}
+
+export type ClaimAchievementArgs = {
+  userId: string
+  achievementId: string
 }
 
 export type ClaimResult = {
@@ -159,6 +165,28 @@ export async function claimChallengeXp(args: ClaimChallengeArgs): Promise<ClaimR
     sourceType: "challenge",
     sourceId: challengeId,
     xpAmount,
+  })
+}
+
+/**
+ * Awards XP for an achievement unlock. Idempotent on
+ * (userId, "achievement", achievementId). XP amount is the achievement's
+ * configured `xpBonus` (achievements do not get the streak multiplier —
+ * matches the pre-existing client-side behavior).
+ */
+export async function claimAchievementXp(
+  args: ClaimAchievementArgs,
+): Promise<ClaimResult> {
+  const achievement = ACHIEVEMENTS.find((a) => a.id === args.achievementId)
+  if (!achievement) {
+    return { xpAwarded: 0, alreadyAwarded: false }
+  }
+
+  return insertAward({
+    userId: args.userId,
+    sourceType: "achievement",
+    sourceId: args.achievementId,
+    xpAmount: achievement.xpBonus,
   })
 }
 
