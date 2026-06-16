@@ -20,7 +20,7 @@ import { and, desc, eq, gte, sql } from "drizzle-orm"
 import { getUserSandbox } from "@/app/api/user/helpers"
 import { getChallenge } from "@/lib/challenges/loader"
 import { getDb } from "@/lib/db/client"
-import { xpAwards } from "@/lib/db/schema"
+import { stageAttempts, xpAwards } from "@/lib/db/schema"
 import { getMission } from "@/lib/missions/loader"
 import { getStreakMultiplier } from "./streaks"
 import { ACHIEVEMENTS } from "./achievements"
@@ -40,8 +40,10 @@ const NO_HINTS_BONUS = 50
 // -----------------------------------------------------------------------------
 
 export type ClaimStageOptions = {
-  firstTry?: boolean
-  noHints?: boolean
+  /** Number of attempts the user made on this stage. Defaults to 1. */
+  attempts?: number
+  /** Number of hints the user used. If 0, the no-hints bonus applies. */
+  hintsUsed?: number
 }
 
 export type ClaimStageArgs = {
@@ -79,6 +81,106 @@ type AwardRow = {
 }
 
 // -----------------------------------------------------------------------------
+// Server-side derivation helpers
+// -----------------------------------------------------------------------------
+
+/**
+ * Server-side context for a stage claim: counts how many prior attempts
+ * and how many prior hints the user has on this stage, and whether the
+ * stage was already completed.
+ */
+type StageAttemptContext = {
+  attemptCount: number
+  hintsUsed: number
+  isFirstTry: boolean // true if no prior completion
+  isNoHints: boolean // true if the request says hintsUsed === 0
+}
+
+/**
+ * Fetches the user's prior attempt on a stage from stage_attempts table.
+ * Used to derive firstTry and noHints bonuses server-side.
+ */
+async function fetchStageAttemptContext(
+  userId: string,
+  missionId: string,
+  stageId: string,
+  requestHintsUsed: number,
+): Promise<StageAttemptContext> {
+  try {
+    const rows = await getDb()
+      .select({
+        attemptCount: stageAttempts.attemptCount,
+        hintsUsed: stageAttempts.hintsUsed,
+        completedAt: stageAttempts.completedAt,
+      })
+      .from(stageAttempts)
+      .where(
+        and(
+          eq(stageAttempts.userId, userId),
+          eq(stageAttempts.missionId, missionId),
+          eq(stageAttempts.stageId, stageId),
+        ),
+      )
+    if (rows.length === 0) {
+      return {
+        attemptCount: 0,
+        hintsUsed: 0,
+        isFirstTry: true,
+        isNoHints: requestHintsUsed === 0,
+      }
+    }
+    const row = rows[0]
+    return {
+      attemptCount: row.attemptCount,
+      hintsUsed: row.hintsUsed,
+      isFirstTry: row.completedAt === null,
+      isNoHints: requestHintsUsed === 0,
+    }
+  } catch {
+    // Fallback: be conservative, no bonuses
+    return {
+      attemptCount: 0,
+      hintsUsed: 0,
+      isFirstTry: false,
+      isNoHints: false,
+    }
+  }
+}
+
+/**
+ * Records or updates the user's attempt on a stage.
+ * Uses ON CONFLICT DO UPDATE to handle upserts.
+ */
+async function recordStageAttempt(
+  userId: string,
+  missionId: string,
+  stageId: string,
+  attemptIncrement: number,
+  hintsUsedIncrement: number,
+): Promise<void> {
+  await getDb()
+    .insert(stageAttempts)
+    .values({
+      userId,
+      missionId,
+      stageId,
+      attemptCount: attemptIncrement,
+      hintsUsed: hintsUsedIncrement,
+      completedAt: new Date(),
+      updatedAt: new Date(),
+    })
+    .onConflictDoUpdate({
+      target: [stageAttempts.userId, stageAttempts.missionId, stageAttempts.stageId],
+      set: {
+        attemptCount: sql`${stageAttempts.attemptCount} + ${attemptIncrement}`,
+        hintsUsed: sql`${stageAttempts.hintsUsed} + ${hintsUsedIncrement}`,
+        completedAt: new Date(),
+        updatedAt: new Date(),
+      },
+    })
+}
+
+// -----------------------------------------------------------------------------
 // Public API
 // -----------------------------------------------------------------------------
 
@@ -105,12 +207,31 @@ export async function claimStageXp(args: ClaimStageArgs): Promise<ClaimResult> {
     return { xpAwarded: 0, alreadyAwarded: false }
   }
 
+  // Server-side derivation: firstTry depends on whether the user has
+  // already completed this stage, and noHints depends on the request's
+  // hintsUsed value. The client can no longer spoof these flags.
+  const ctx = await fetchStageAttemptContext(
+    userId,
+    missionId,
+    stageId,
+    options?.hintsUsed ?? 0,
+  )
+
   let bonusXp = 0
-  if (options?.firstTry) bonusXp += FIRST_TRY_BONUS
-  if (options?.noHints) bonusXp += NO_HINTS_BONUS
+  if (ctx.isFirstTry) bonusXp += FIRST_TRY_BONUS
+  if (ctx.isNoHints) bonusXp += NO_HINTS_BONUS
 
   const multiplier = await getXpMultiplierForUser(userId)
   const xpAmount = Math.floor((stage.xpReward + bonusXp) * multiplier)
+
+  // Record the attempt so the next claim sees the updated state.
+  await recordStageAttempt(
+    userId,
+    missionId,
+    stageId,
+    /* attemptIncrement */ 1,
+    /* hintsUsedIncrement */ options?.hintsUsed ?? 0,
+  )
 
   return insertAward({
     userId,
