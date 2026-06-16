@@ -118,9 +118,8 @@ function buildProfileFromSandbox(data: SandboxData): UserProfile {
  *
  * If the network call fails (postClaim returns null), we still unlock
  * the achievement locally (so the user sees the badge) but add zero XP.
- * The achievement XP is then lost for that session — the offline-claim
- * queue (P0-1) does not yet cover achievements. (Future work: extend
- * the queue to include achievement claims.)
+ * The claim is enqueued in the offline-claim queue (P0-1) so it will
+ * be replayed on the next drain (mount / online / tab-hide).
  *
  * Called automatically after every XP award (stage, mission, challenge).
  */
