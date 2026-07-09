@@ -209,7 +209,7 @@ df_processed = (
 )
 
 # Cache and trigger materialization
-df_processed.cache()
+df_processed.persist(StorageLevel.MEMORY_AND_DISK)  # explicit level preferred over .cache()
 df_processed.count()  # Force cache to materialize
 
 # Now use multiple times (fast)

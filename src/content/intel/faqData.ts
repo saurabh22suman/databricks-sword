@@ -883,7 +883,7 @@ df.select(from_json(col("json_data"), schema).alias("parsed"))`,
         codeExample: `from pyspark import StorageLevel
 
 # Cache in memory (default)
-df_cached = df.cache()
+df_cached = df.persist(StorageLevel.MEMORY_AND_DISK)  # explicit level preferred over .cache()
 
 # Persist with specific storage level
 df_persisted = df.persist(StorageLevel.MEMORY_AND_DISK)

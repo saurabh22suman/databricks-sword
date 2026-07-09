@@ -37,7 +37,7 @@
       },
       {
         "id": "mem",
-        "code": "df.cache()",
+        "code": "df.persist(StorageLevel.MEMORY_AND_DISK)  # explicit level preferred over .cache()",
         "label": "Memory Only (least durable)"
       }
     ],
