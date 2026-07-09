@@ -24,6 +24,14 @@ export {
 // Sync functions
 export { mergeConflicts, shouldSync, syncFromServer, syncToServer } from "./sync"
 
+// Sandbox change notification bus (client-only)
+// Lets components react when the sandbox is mutated (e.g. by
+// refreshFromServer) so they can re-read the authoritative XP value
+// from localStorage without a full remount.
+export {
+  subscribeSandboxChange,
+} from "./sandboxChangeBus"
+
 // Sync hook (client-only)
 export { useSandboxSync } from "./useSandboxSync"
 export type { UseSandboxSyncResult } from "./useSandboxSync"

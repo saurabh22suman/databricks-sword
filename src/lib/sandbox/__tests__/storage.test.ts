@@ -9,6 +9,10 @@ import {
     updateSandbox,
 } from "../storage"
 import type { SandboxData } from "../types"
+import {
+  notifySandboxChange,
+  subscribeSandboxChange,
+} from "../sandboxChangeBus"
 
 // Mock localStorage
 const localStorageMock = (() => {
@@ -121,6 +125,43 @@ describe("Sandbox Storage", () => {
       const saved = JSON.parse(localStorageMock.getItem(SANDBOX_KEY)!)
       expect(saved.userStats.totalXp).toBe(200)
     })
+
+    it("notifies sandbox-change subscribers after writing", () => {
+      // Header XP bar and other UI components subscribe here so they
+      // pick up server-merged XP (e.g. after refreshFromServer) without
+      // a full remount.
+      const listener = vi.fn()
+      const unsubscribe = subscribeSandboxChange(listener)
+
+      saveSandbox(initializeSandbox())
+
+      expect(listener).toHaveBeenCalledTimes(1)
+
+      saveSandbox(initializeSandbox())
+      expect(listener).toHaveBeenCalledTimes(2)
+
+      unsubscribe()
+    })
+
+    it("notifies subscribers on updateSandbox (via saveSandbox)", () => {
+      const listener = vi.fn()
+      const unsubscribe = subscribeSandboxChange(listener)
+
+      // Seed a v3 sandbox so loadSandbox() inside updateSandbox doesn't
+      // also fire the migration path's notify (which would inflate the
+      // call count and confuse this assertion).
+      saveSandbox({ ...initializeSandbox(), version: 3 })
+      listener.mockClear()
+
+      updateSandbox((data) => ({
+        ...data,
+        userStats: { ...data.userStats, totalXp: 999 },
+      }))
+
+      expect(listener).toHaveBeenCalledTimes(1)
+
+      unsubscribe()
+    })
   })
 
   describe("loadSandbox", () => {
@@ -138,7 +179,10 @@ describe("Sandbox Storage", () => {
 
       expect(loaded).not.toBeNull()
       expect(loaded!.userStats.totalXp).toBe(350)
-      expect(loaded!.version).toBe(2)
+      // initializeSandbox() returns v2, but loadSandbox() migrates to v3
+      // to backfill the redeemedCoupons field. So loaded version is the
+      // current schema version, not what was saved.
+      expect(loaded!.version).toBe(3)
     })
 
     it("returns null for invalid JSON", () => {
@@ -180,8 +224,9 @@ describe("Sandbox Storage", () => {
       expect(loaded).toHaveProperty("lastSynced")
     })
 
-    it("migrates v1 data to v2 with pendingClaims: []", () => {
-      // Simulate v1 data in localStorage (version: 1, no pendingClaims field)
+    it("migrates v1 data through v2 to v3 (pendingClaims + redeemedCoupons)", () => {
+      // Simulate v1 data in localStorage (version: 1, no pendingClaims or
+      // redeemedCoupons fields).
       const v1Data = {
         version: 1,
         missionProgress: {},
@@ -205,23 +250,26 @@ describe("Sandbox Storage", () => {
         achievements: [],
         flashcardProgress: {},
         lastSynced: null,
-        // Note: no pendingClaims field - this is v1 data
+        // Note: no pendingClaims / redeemedCoupons fields - this is v1 data
       }
 
       localStorageMock.setItem(SANDBOX_KEY, JSON.stringify(v1Data))
 
-      // Call loadSandbox - should trigger migration
+      // Call loadSandbox - should trigger both migrations
       const loaded = loadSandbox()
 
-      // Verify migrated data has version: 2 and pendingClaims: []
+      // Verify both migration steps ran: v1→v2 (pendingClaims) and
+      // v2→v3 (redeemedCoupons), ending at the current schema version.
       expect(loaded).not.toBeNull()
-      expect(loaded!.version).toBe(2)
+      expect(loaded!.version).toBe(3)
       expect(loaded!.pendingClaims).toEqual([])
+      expect(loaded!.redeemedCoupons).toEqual([])
 
-      // Verify migration was persisted to localStorage
+      // Verify final state was persisted to localStorage
       const stored = JSON.parse(localStorageMock.getItem(SANDBOX_KEY)!)
-      expect(stored.version).toBe(2)
+      expect(stored.version).toBe(3)
       expect(stored.pendingClaims).toEqual([])
+      expect(stored.redeemedCoupons).toEqual([])
     })
   })
 

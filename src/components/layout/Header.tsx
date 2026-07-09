@@ -7,7 +7,7 @@ import { RankProgressBar } from "@/components/gamification/RankProgressBar"
 import { onXpEvent } from "@/lib/gamification/xpEventBus"
 import { useSettings } from "@/lib/settings"
 import { useHasCompletedMission } from "@/lib/dashboard"
-import { loadSandbox } from "@/lib/sandbox"
+import { loadSandbox, subscribeSandboxChange } from "@/lib/sandbox"
 import { useSandboxSync } from "@/lib/sandbox/useSandboxSync"
 import { stopMusic } from "@/lib/sound"
 import { Menu, RefreshCw, User, Volume2, VolumeX, X } from "lucide-react"
@@ -63,12 +63,30 @@ export function Header(): React.ReactElement {
     }
     setHasHydrated(true)
 
-    // Subscribe to XP events for live updates
-    const unsubscribe = onXpEvent((event) => {
+    // Subscribe to XP events for live updates (delta XP awarded
+    // locally — missions, challenges, etc.).
+    const unsubscribeXp = onXpEvent((event) => {
       setUserXp((prevXp) => Math.max(0, prevXp + event.amount))
     })
 
-    return unsubscribe
+    // Subscribe to sandbox changes (e.g. refreshFromServer pulled new
+    // data, recalculateStats healed drift, migration ran). We re-read
+    // the authoritative total from localStorage instead of adding a
+    // delta, because these notifications represent absolute state
+    // changes — not incremental awards. Without this subscription,
+    // the header XP would freeze at the mount-time value until a
+    // hard navigation.
+    const unsubscribeSandbox = subscribeSandboxChange(() => {
+      const latest = loadSandbox()
+      if (latest) {
+        setUserXp(latest.userStats.totalXp)
+      }
+    })
+
+    return () => {
+      unsubscribeXp()
+      unsubscribeSandbox()
+    }
   }, [status])
 
   // Close mobile menu and More dropdown on Escape key

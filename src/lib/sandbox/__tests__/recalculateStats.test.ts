@@ -178,4 +178,60 @@ describe("recalculateStats", () => {
 
     expect(result.userStats.totalXp).toBe(2700) // unknown is skipped
   })
+
+  it("sums XP from redeemed coupons", () => {
+    const sandbox = initializeSandbox()
+    sandbox.redeemedCoupons = [
+      { code: "LAUNCH10000", xp: 10000, redeemedAt: "2026-07-01T00:00:00Z" },
+      { code: "REDDIT1K", xp: 1000, redeemedAt: "2026-07-02T00:00:00Z" },
+    ]
+
+    const result = recalculateStats(sandbox)
+
+    expect(result.userStats.totalXp).toBe(11000) // 10000 + 1000
+  })
+
+  it("combines missions, challenges, field ops, AND coupon XP", () => {
+    const sandbox = initializeSandbox()
+    sandbox.missionProgress["mission-a"] = {
+      started: true,
+      completed: true,
+      stageProgress: {
+        "01-briefing": { completed: true, xpEarned: 50, codeAttempts: [], hintsUsed: 0 },
+      },
+      sideQuestsCompleted: [],
+      totalXpEarned: 50,
+      completedAt: "2026-01-01T00:00:00Z",
+    }
+    sandbox.challengeResults["challenge-1"] = {
+      attempted: true,
+      completed: true,
+      xpEarned: 25,
+      hintsUsed: 0,
+      attempts: 1,
+      completionCount: 1,
+    }
+    sandbox.completedFieldOps = ["retail"] // 700 XP
+    sandbox.redeemedCoupons = [
+      { code: "LAUNCH10000", xp: 10000, redeemedAt: "2026-07-01T00:00:00Z" },
+    ]
+
+    const result = recalculateStats(sandbox)
+
+    // 50 (mission) + 25 (challenge) + 700 (field ops) + 10000 (coupon) = 10775
+    expect(result.userStats.totalXp).toBe(10775)
+  })
+
+  it("does not throw when redeemedCoupons is undefined (back-compat with v2 sandboxes)", () => {
+    const sandbox = initializeSandbox()
+    // Simulate an older v2 sandbox that predates the field
+    const sandboxWithoutCoupons = {
+      ...sandbox,
+      redeemedCoupons: undefined,
+    } as unknown as Parameters<typeof recalculateStats>[0]
+
+    expect(() => recalculateStats(sandboxWithoutCoupons)).not.toThrow()
+    const result = recalculateStats(sandboxWithoutCoupons)
+    expect(result.userStats.totalXp).toBe(0)
+  })
 })
