@@ -4,7 +4,7 @@
   "blocks": [
     {
       "id": "read-data",
-      "code": "events_df = spark.read.format(\"delta\").load(\"/mnt/data/user_events\")",
+      "code": "events_df = spark.read.format(\"delta\").load(\"/Volumes/main/default/data/user_events\")",
       "label": "Read from Delta"
     },
     {
@@ -24,12 +24,12 @@
     },
     {
       "id": "join-customers",
-      "code": "customers_df = spark.read.format(\"delta\").load(\"/mnt/data/customers\")\nresult_df = aggregated_df.join(customers_df, \"user_id\", \"inner\")",
+      "code": "customers_df = spark.read.format(\"delta\").load(\"/Volumes/main/default/data/customers\")\nresult_df = aggregated_df.join(customers_df, \"user_id\", \"inner\")",
       "label": "Join with Customers"
     },
     {
       "id": "write-results",
-      "code": "result_df.write.format(\"delta\").mode(\"overwrite\").save(\"/mnt/data/user_activity\")",
+      "code": "result_df.write.format(\"delta\").mode(\"overwrite\").save(\"/Volumes/main/default/data/user_activity\")",
       "label": "Write to Delta"
     }
   ],

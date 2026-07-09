@@ -29,7 +29,7 @@
     },
     {
       "id": "write",
-      "code": "df.write.format(\"delta\").mode(\"overwrite\")\n  .save(\"/mnt/data/ranked_sales\")",
+      "code": "df.write.format(\"delta\").mode(\"overwrite\")\n  .save(\"/Volumes/main/default/data/ranked_sales\")",
       "label": "Write Results"
     }
   ],
