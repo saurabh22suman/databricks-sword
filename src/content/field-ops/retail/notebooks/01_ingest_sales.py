@@ -65,8 +65,7 @@ print(f"📂 Volume Path:   {volume_path}")
 # In Databricks notebooks, `.show(truncate=False)` renders tables for DAB compatibility.
 
 # List files in the Volume
-files = dbutils.fs.ls(volume_path)
-files.show(truncate=False)
+print(dbutils.fs.ls(volume_path))
 
 # COMMAND ----------
 
