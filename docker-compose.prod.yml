@@ -48,6 +48,11 @@ services:
       # Set to "true" in Dokploy to use databricks bundle deploy/destroy
       # Default off (false) — keep off until verified in staging
       - FIELD_OPS_USE_DAB=${FIELD_OPS_USE_DAB:-false}
+      # ── Coupons (XP reward codes) ──
+      # Set in Dokploy as BARE JSON — do NOT wrap in single quotes, the
+      # quotes are stored literally and JSON.parse() will fail silently.
+      # Example value: {"LAUNCH10000":{"xp":10000,"active":true}}
+      - COUPONS_JSON=${COUPONS_JSON}
       # SMTP
       - SMTP_HOST=${SMTP_HOST}
       - SMTP_PORT=${SMTP_PORT}

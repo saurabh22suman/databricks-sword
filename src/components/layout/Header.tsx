@@ -8,8 +8,9 @@ import { onXpEvent } from "@/lib/gamification/xpEventBus"
 import { useSettings } from "@/lib/settings"
 import { useHasCompletedMission } from "@/lib/dashboard"
 import { loadSandbox } from "@/lib/sandbox"
+import { useSandboxSync } from "@/lib/sandbox/useSandboxSync"
 import { stopMusic } from "@/lib/sound"
-import { Menu, User, Volume2, VolumeX, X } from "lucide-react"
+import { Menu, RefreshCw, User, Volume2, VolumeX, X } from "lucide-react"
 import { useSession } from "next-auth/react"
 import Image from "next/image"
 import Link from "next/link"
@@ -43,6 +44,7 @@ export function Header(): React.ReactElement {
   const [moreDropdownOpen, setMoreDropdownOpen] = useState(false)
   const [mobileShowMore, setMobileShowMore] = useState(false)
   const [userXp, setUserXp] = useState(0)
+  const { refreshFromServer, isSyncing } = useSandboxSync()
 
   const moreDropdownRef = useRef<HTMLDivElement>(null)
 
@@ -236,6 +238,22 @@ export function Header(): React.ReactElement {
             >
               {audioMuted ? <VolumeX className="w-5 h-5" /> : <Volume2 className="w-5 h-5" />}
             </Button>
+
+            {/* Sync from server button - only show when authenticated */}
+            {session?.user && (
+              <Button
+                onClick={() => refreshFromServer()}
+                variant="ghost"
+                className="p-2 h-auto rounded-md text-gray-400 hover:text-white hover:bg-anime-800/60"
+                aria-label="Sync from server"
+                title="Sync from server"
+                disabled={isSyncing}
+              >
+                <span className={isSyncing ? "animate-spin" : ""}>
+                  <RefreshCw className="w-5 h-5" />
+                </span>
+              </Button>
+            )}
 
             {/* Notifications Dropdown */}
             <NotificationDropdown />

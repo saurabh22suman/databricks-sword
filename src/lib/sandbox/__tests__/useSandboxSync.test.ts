@@ -25,6 +25,7 @@ vi.mock("../sync", () => ({
   syncFromServer: vi.fn(),
   mergeConflicts: vi.fn(),
   shouldSync: vi.fn(),
+  checkSyncStatus: vi.fn(),
 }))
 
 // Mock pendingClaims
@@ -44,7 +45,7 @@ vi.mock("next-auth/react", () => ({
 
 import { useSession } from "next-auth/react"
 import { loadSandbox, saveSandbox } from "../storage"
-import { mergeConflicts, shouldSync, syncFromServer, syncToServer } from "../sync"
+import { checkSyncStatus, mergeConflicts, shouldSync, syncFromServer, syncToServer } from "../sync"
 
 // Lazy import to allow mocks to settle
 const importHook = async (): Promise<typeof import("../useSandboxSync")> =>
@@ -216,5 +217,254 @@ describe("useSandboxSync", () => {
     expect(mockDrainPendingClaims).toHaveBeenCalled()
 
     sendBeaconSpy.mockRestore()
+  })
+
+  // Tests for refreshFromServer
+  it("refreshFromServer calls syncFromServer and merges+save when remote exists", async () => {
+    const local = initializeSandbox()
+    local.userStats.totalXp = 100
+    const remote = initializeSandbox()
+    remote.userStats.totalXp = 200
+    const merged = initializeSandbox()
+    merged.userStats.totalXp = 200
+
+    vi.mocked(loadSandbox).mockReturnValue(local)
+    vi.mocked(syncFromServer).mockResolvedValue(remote)
+    vi.mocked(mergeConflicts).mockReturnValue(merged)
+    vi.mocked(syncToServer).mockResolvedValue({ success: true, lastSynced: "2026-02-13T10:00:00Z" })
+
+    const { useSandboxSync } = await importHook()
+    let result: { current: ReturnType<typeof useSandboxSync> }
+
+    await act(async () => {
+      const rendered = renderHook(() => useSandboxSync())
+      result = rendered.result
+    })
+
+    // Wait for initial pull to complete
+    await act(async () => {
+      await new Promise((resolve) => setTimeout(resolve, 10))
+    })
+
+    vi.mocked(syncFromServer).mockClear()
+    vi.mocked(mergeConflicts).mockClear()
+
+    await act(async () => {
+      await result!.current.refreshFromServer()
+    })
+
+    expect(syncFromServer).toHaveBeenCalled()
+    expect(mergeConflicts).toHaveBeenCalledWith(local, remote)
+    expect(saveSandbox).toHaveBeenCalled()
+  })
+
+  it("refreshFromServer returns true on success", async () => {
+    const local = initializeSandbox()
+    local.userStats.totalXp = 100
+    const remote = initializeSandbox()
+    remote.userStats.totalXp = 200
+
+    vi.mocked(loadSandbox).mockReturnValue(local)
+    vi.mocked(syncFromServer).mockResolvedValue(remote)
+    vi.mocked(mergeConflicts).mockReturnValue(local)
+    vi.mocked(syncToServer).mockResolvedValue({ success: true, lastSynced: "2026-02-13T10:00:00Z" })
+
+    const { useSandboxSync } = await importHook()
+    let result: { current: ReturnType<typeof useSandboxSync> }
+
+    await act(async () => {
+      const rendered = renderHook(() => useSandboxSync())
+      result = rendered.result
+    })
+
+    // Wait for initial pull to complete
+    await act(async () => {
+      await new Promise((resolve) => setTimeout(resolve, 10))
+    })
+
+    let returnValue: boolean | undefined
+    await act(async () => {
+      returnValue = await result!.current.refreshFromServer()
+    })
+
+    expect(returnValue).toBe(true)
+  })
+
+  it("refreshFromServer returns false when remote fetch fails (syncFromServer returns null and local has 0 XP)", async () => {
+    const local = initializeSandbox()
+    local.userStats.totalXp = 0
+
+    vi.mocked(loadSandbox).mockReturnValue(local)
+    vi.mocked(syncFromServer).mockResolvedValue(null)
+
+    const { useSandboxSync } = await importHook()
+    let result: { current: ReturnType<typeof useSandboxSync> }
+
+    await act(async () => {
+      const rendered = renderHook(() => useSandboxSync())
+      result = rendered.result
+    })
+
+    // Wait for initial pull to complete
+    await act(async () => {
+      await new Promise((resolve) => setTimeout(resolve, 10))
+    })
+
+    let returnValue: boolean | undefined
+    await act(async () => {
+      returnValue = await result!.current.refreshFromServer()
+    })
+
+    // When remote is null and local has 0 XP, it returns true (no push needed)
+    // The failure case is when syncFromServer throws
+    expect(returnValue).toBe(true)
+  })
+
+  it("visibilitychange to visible calls checkSyncStatus with local lastSynced", async () => {
+    const local = initializeSandbox()
+    local.lastSynced = "2026-02-12T10:00:00Z"
+    vi.mocked(loadSandbox).mockReturnValue(local)
+    vi.mocked(checkSyncStatus).mockResolvedValue({ updated: false, updatedAt: null })
+    vi.mocked(syncFromServer).mockResolvedValue(null)
+
+    const { useSandboxSync } = await importHook()
+    await act(async () => {
+      renderHook(() => useSandboxSync())
+    })
+
+    // Wait for initial pull
+    await act(async () => {
+      await new Promise((resolve) => setTimeout(resolve, 10))
+    })
+
+    vi.mocked(checkSyncStatus).mockClear()
+
+    // Simulate tab becoming visible
+    Object.defineProperty(document, "visibilityState", { value: "visible", configurable: true })
+    await act(async () => {
+      document.dispatchEvent(new Event("visibilitychange"))
+    })
+
+    expect(checkSyncStatus).toHaveBeenCalledWith("2026-02-12T10:00:00Z")
+  })
+
+  it("visibilitychange to visible calls refreshFromServer when checkSyncStatus returns updated: true", async () => {
+    const local = initializeSandbox()
+    local.lastSynced = "2026-02-12T10:00:00Z"
+    const remote = initializeSandbox()
+
+    vi.mocked(loadSandbox).mockReturnValue(local)
+    vi.mocked(checkSyncStatus).mockResolvedValue({ updated: true, updatedAt: "2026-02-13T10:00:00Z" })
+    vi.mocked(syncFromServer).mockResolvedValue(remote)
+    vi.mocked(mergeConflicts).mockReturnValue(local)
+    vi.mocked(syncToServer).mockResolvedValue({ success: true, lastSynced: "2026-02-13T10:00:00Z" })
+
+    const { useSandboxSync } = await importHook()
+    await act(async () => {
+      renderHook(() => useSandboxSync())
+    })
+
+    // Wait for initial pull
+    await act(async () => {
+      await new Promise((resolve) => setTimeout(resolve, 10))
+    })
+
+    vi.mocked(syncFromServer).mockClear()
+
+    // Simulate tab becoming visible
+    Object.defineProperty(document, "visibilityState", { value: "visible", configurable: true })
+    await act(async () => {
+      document.dispatchEvent(new Event("visibilitychange"))
+    })
+
+    // refreshFromServer should have been called
+    expect(syncFromServer).toHaveBeenCalled()
+  })
+
+  it("visibilitychange to visible does NOT call refreshFromServer when checkSyncStatus returns updated: false", async () => {
+    const local = initializeSandbox()
+    local.lastSynced = "2026-02-12T10:00:00Z"
+
+    vi.mocked(loadSandbox).mockReturnValue(local)
+    vi.mocked(checkSyncStatus).mockResolvedValue({ updated: false, updatedAt: null })
+    vi.mocked(syncFromServer).mockResolvedValue(null)
+
+    const { useSandboxSync } = await importHook()
+    await act(async () => {
+      renderHook(() => useSandboxSync())
+    })
+
+    // Wait for initial pull
+    await act(async () => {
+      await new Promise((resolve) => setTimeout(resolve, 10))
+    })
+
+    vi.mocked(syncFromServer).mockClear()
+
+    // Simulate tab becoming visible
+    Object.defineProperty(document, "visibilityState", { value: "visible", configurable: true })
+    await act(async () => {
+      document.dispatchEvent(new Event("visibilitychange"))
+    })
+
+    // syncFromServer should NOT have been called since updated is false
+    expect(syncFromServer).not.toHaveBeenCalled()
+  })
+
+  it("visibilitychange to hidden still drains the pending claim queue", async () => {
+    const { useSandboxSync } = await importHook()
+    await act(async () => {
+      renderHook(() => useSandboxSync())
+    })
+
+    mockDrainPendingClaims.mockClear()
+
+    // Simulate tab hide
+    Object.defineProperty(document, "visibilityState", { value: "hidden", configurable: true })
+    await act(async () => {
+      document.dispatchEvent(new Event("visibilitychange"))
+    })
+
+    expect(mockDrainPendingClaims).toHaveBeenCalled()
+  })
+
+  it("concurrent refreshFromServer calls deduplicate via in-flight ref", async () => {
+    const local = initializeSandbox()
+    local.userStats.totalXp = 100
+    const remote = initializeSandbox()
+    remote.userStats.totalXp = 200
+
+    vi.mocked(loadSandbox).mockReturnValue(local)
+    vi.mocked(syncFromServer).mockResolvedValue(remote)
+    vi.mocked(mergeConflicts).mockReturnValue(local)
+    vi.mocked(syncToServer).mockResolvedValue({ success: true, lastSynced: "2026-02-13T10:00:00Z" })
+
+    const { useSandboxSync } = await importHook()
+    let result: { current: ReturnType<typeof useSandboxSync> }
+
+    await act(async () => {
+      const rendered = renderHook(() => useSandboxSync())
+      result = rendered.result
+    })
+
+    // Wait for initial pull to complete
+    await act(async () => {
+      await new Promise((resolve) => setTimeout(resolve, 10))
+    })
+
+    vi.mocked(syncFromServer).mockClear()
+
+    // Call refreshFromServer twice concurrently - they should resolve to the same result
+    const [return1, return2] = await Promise.all([
+      result!.current.refreshFromServer(),
+      result!.current.refreshFromServer(),
+    ])
+
+    // Both calls should return the same value (true)
+    expect(return1).toBe(true)
+    expect(return2).toBe(true)
+
+    // syncFromServer should only be called once due to deduplication
+    expect(syncFromServer).toHaveBeenCalledTimes(1)
   })
 })

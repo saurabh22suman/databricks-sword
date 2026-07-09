@@ -14,6 +14,7 @@ import { useCallback, useEffect, useRef, useState } from "react"
 import { validateStreakData } from "../gamification/streaks"
 import { initializeSandbox, loadSandbox, saveSandbox } from "./storage"
 import {
+  checkSyncStatus,
   mergeConflicts,
   shouldSync,
   syncFromServer,
@@ -24,6 +25,8 @@ import { drainPendingClaims } from "./pendingClaims"
 export type UseSandboxSyncResult = {
   /** Push current sandbox to server immediately */
   syncNow: () => Promise<boolean>
+  /** Pull and merge remote sandbox with local (for manual refresh) */
+  refreshFromServer: () => Promise<boolean>
   /** Whether a sync operation is in progress */
   isSyncing: boolean
   /** Whether initial pull/merge sync has completed for this auth session */
@@ -106,7 +109,31 @@ export function useSandboxSync(): UseSandboxSyncResult {
     hasPulledRef.current = true
     setIsInitialSyncComplete(false)
 
-    const pullAndMerge = async (): Promise<void> => {
+    // Use refreshFromServer for the initial pull
+    const doInitialPull = async (): Promise<void> => {
+      const success = await refreshFromServerInternal()
+      setIsInitialSyncComplete(true)
+      if (!success) {
+        console.warn("Initial pull failed, continuing with local data")
+      }
+    }
+
+    void doInitialPull()
+  }, [status, userId])
+
+  // Internal refresh function (shared by mount, visibility, and manual refresh)
+  const refreshFromServerInternal = useCallback(async (): Promise<boolean> => {
+    if (!userId) {
+      console.warn("refreshFromServer: No userId available, skipping refresh")
+      return false
+    }
+
+    // Deduplicate concurrent refresh calls
+    if (inFlightSyncRef.current) {
+      return inFlightSyncRef.current
+    }
+
+    const runRefresh = async (): Promise<boolean> => {
       setIsSyncing(true)
 
       try {
@@ -140,32 +167,61 @@ export function useSandboxSync(): UseSandboxSyncResult {
 
           // Drain the offline-claim queue now that the user is online
           await drainPendingClaims()
+
+          return true
         } else if (local.userStats.totalXp > 0) {
           // No remote snapshot exists — push local data to server
           const result = await syncToServer(userId, local)
           if (result.success && result.lastSynced) {
             saveSandbox({ ...local, lastSynced: result.lastSynced })
           }
+          return result.success
         }
+
+        return true
+      } catch (error) {
+        console.error("refreshFromServer: Error during refresh:", error)
+        return false
       } finally {
         setIsSyncing(false)
-        setIsInitialSyncComplete(true)
+        inFlightSyncRef.current = null
       }
     }
 
-    void pullAndMerge()
-  }, [status, userId])
+    inFlightSyncRef.current = runRefresh()
+    return inFlightSyncRef.current
+  }, [userId])
 
-  // Auto-push on tab hide / beforeunload
+  // Exposed refreshFromServer function for manual/visibility-triggered refresh
+  const refreshFromServer = useCallback(async (): Promise<boolean> => {
+    if (!userId) {
+      return false
+    }
+    return refreshFromServerInternal()
+  }, [userId, refreshFromServerInternal])
+
+  // Auto-push on tab hide / beforeunload, plus since-check on tab focus
   useEffect(() => {
     if (status !== "authenticated" || !userId) return
 
-    const handleVisibilityChange = (): void => {
+    const handleVisibilityChange = async (): Promise<void> => {
       if (document.visibilityState === "hidden") {
         // Best-effort drain of the offline-claim queue. If the page is
         // actually unloading, fetch + keepalive gives the browser one
         // more chance to deliver the request. We don't await — the
         // beacon/keepalive pattern is fire-and-forget.
+        void drainPendingClaims()
+      } else if (document.visibilityState === "visible") {
+        // Tab gained focus — check if server has newer data
+        const local = loadSandbox() ?? initializeSandbox()
+        const status = await checkSyncStatus(local.lastSynced)
+
+        if (status.updated) {
+          // Server is newer — pull and merge
+          await refreshFromServerInternal()
+        }
+
+        // Always drain pending claims after potential refresh
         void drainPendingClaims()
       }
     }
@@ -192,6 +248,7 @@ export function useSandboxSync(): UseSandboxSyncResult {
 
   return {
     syncNow,
+    refreshFromServer,
     isSyncing,
     isInitialSyncComplete,
   }
