@@ -511,7 +511,9 @@ OPTIMIZE my_table;
 ALTER TABLE my_table CLUSTER BY (date, region);
 
 -- Legacy: Z-order (avoid for new tables)
--- OPTIMIZE my_table ZORDER BY (date, region);
+-- Liquid clustering (replaces partitioning + ZORDER); keys can be redefined without rewriting data.
+ALTER TABLE my_table CLUSTER BY (date, region);
+OPTIMIZE my_table;
 
 -- Enable predictive optimization (auto-OPTIMIZE + auto-VACUUM)
 ALTER TABLE my_table SET TBLPROPERTIES (
@@ -1352,11 +1354,10 @@ DESCRIBE DETAIL my_table;  -- file count, size, partitions
 -- Analyze table for cost-based optimization
 ANALYZE TABLE my_table COMPUTE STATISTICS FOR ALL COLUMNS;
 
--- Optimize with Z-order for multi-column queries
-OPTIMIZE my_table ZORDER BY (customer_id, order_date);
-
--- Or use liquid clustering (preferred for new tables)
+-- Optimize with Liquid Clustering for multi-column queries (replaces ZORDER)
+-- Liquid clustering (replaces partitioning + ZORDER); keys can be redefined without rewriting data.
 ALTER TABLE my_table CLUSTER BY (customer_id, order_date);
+OPTIMIZE my_table;
 
 -- Verify data skipping is working
 SET spark.databricks.delta.stats.skipping = true;
