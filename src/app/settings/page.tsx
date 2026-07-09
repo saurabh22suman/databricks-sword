@@ -214,12 +214,19 @@ export default function SettingsPage(): React.ReactElement {
       }
 
       if (payload?.applied && typeof payload?.xpAwarded === "number") {
+        const code = normalizedCode
+        const xpAwarded = payload.xpAwarded
+        const redeemedAt = new Date().toISOString()
         updateSandbox((data) => ({
           ...data,
           userStats: {
             ...data.userStats,
-            totalXp: data.userStats.totalXp + payload.xpAwarded,
+            totalXp: data.userStats.totalXp + xpAwarded,
           },
+          redeemedCoupons: [
+            ...(data.redeemedCoupons ?? []),
+            { code, xp: xpAwarded, redeemedAt },
+          ],
         }))
 
         const refreshedSandbox = loadSandbox()

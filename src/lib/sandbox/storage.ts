@@ -1,8 +1,9 @@
-import type { PendingClaim, SandboxData } from "./types"
+import type { PendingClaim, RedeemedCoupon, SandboxData } from "./types"
 import { SandboxDataSchema } from "./types"
 import { validateStreakData } from "../gamification/streaks"
 import { INDUSTRY_CONFIGS } from "../field-ops/industries"
 import type { Industry } from "../field-ops/types"
+import { notifySandboxChange } from "./sandboxChangeBus"
 
 /**
  * Browser Sandbox Storage
@@ -58,6 +59,7 @@ export function initializeSandbox(): SandboxData {
     completedFieldOps: [],
     flashcardProgress: {},
     pendingClaims: [], // P0-1: offline claim queue
+    redeemedCoupons: [],
     lastSynced: null,
   }
 }
@@ -77,6 +79,11 @@ export function initializeSandbox(): SandboxData {
 export function saveSandbox(data: SandboxData): void {
   const serialized = JSON.stringify(data)
   localStorage.setItem(SANDBOX_KEY, serialized)
+  // Notify subscribers (Header XP bar, etc.) that the sandbox changed.
+  // They should re-read via loadSandbox() rather than trust this
+  // payload, since loadSandbox may also write again during validation
+  // / migration and the listener would want the canonical value.
+  notifySandboxChange(data)
 }
 
 /**
@@ -104,6 +111,7 @@ export function loadSandbox(): SandboxData | null {
     const validated = SandboxDataSchema.parse(parsed)
 
     // v1 → v2: add pendingClaims: [] if missing (version was 1)
+    // v2 → v3: add redeemedCoupons: [] if missing
     // The schema's .default([]) already adds the field, but we need to bump version
     let migrated = validated
     if (validated.version < 2) {
@@ -111,6 +119,16 @@ export function loadSandbox(): SandboxData | null {
         ...validated,
         version: 2,
         pendingClaims: (validated as { pendingClaims?: PendingClaim[] }).pendingClaims ?? [],
+      }
+      // Persist the migration immediately so we don't re-run it
+      saveSandbox(migrated)
+    }
+    if (migrated.version < 3) {
+      migrated = {
+        ...migrated,
+        version: 3,
+        redeemedCoupons:
+          (migrated as { redeemedCoupons?: RedeemedCoupon[] }).redeemedCoupons ?? [],
       }
       // Persist the migration immediately so we don't re-run it
       saveSandbox(migrated)
@@ -269,6 +287,14 @@ export function recalculateStats(sandbox: SandboxData): SandboxData {
     if (config) {
       totalXp += config.xpReward
     }
+  }
+
+  // Sum XP from redeemed coupons. Without this, every page load would
+  // overwrite the optimistically-added coupon XP back to zero, because
+  // the server-stored snapshot in couponRedemptions is invisible to the
+  // client's recompute.
+  for (const coupon of sandbox.redeemedCoupons ?? []) {
+    totalXp += coupon.xp
   }
 
   return {

@@ -1,8 +1,16 @@
 import { auth } from "@/lib/auth"
 import { getDb } from "@/lib/db/client"
 import { NextRequest } from "next/server"
-import { beforeEach, describe, expect, it, vi } from "vitest"
+import { beforeAll, beforeEach, describe, expect, it, vi } from "vitest"
+import { decryptSandbox, encryptSandbox } from "@/lib/sandbox/encryption"
 import { GET, POST } from "../route"
+
+// Production runs with ENCRYPTION_KEY set, so the POST handler stores
+// ciphertext. To exercise the real round-trip the GET handler must
+// support, we need encryption actually enabled during these tests.
+beforeAll(() => {
+  process.env.ENCRYPTION_KEY = "test-encryption-key-must-be-at-least-32-chars-long"
+})
 
 // Mock next-auth
 vi.mock("@/lib/auth", () => ({
@@ -221,7 +229,10 @@ describe("Sandbox Sync API Route", () => {
 
       expect(values).toHaveBeenCalledTimes(1)
       const insertedPayload = values.mock.calls[0][0]
-      const persistedSnapshot = JSON.parse(insertedPayload.snapshotData)
+      // Production POST stores snapshotData encrypted (see route.ts:295
+      // encryptSandbox). Tests now run with ENCRYPTION_KEY set so we
+      // must decrypt before inspecting the persisted payload.
+      const persistedSnapshot = JSON.parse(decryptSandbox(insertedPayload.snapshotData))
 
       expect(persistedSnapshot.userStats).toMatchObject({
         totalXp: 185,
@@ -302,7 +313,10 @@ describe("Sandbox Sync API Route", () => {
       expect(response.status).toBe(200)
 
       const insertedPayload = values.mock.calls[0][0]
-      const persistedSnapshot = JSON.parse(insertedPayload.snapshotData)
+      // Production POST stores snapshotData encrypted (see route.ts:295
+      // encryptSandbox). Tests now run with ENCRYPTION_KEY set so we
+      // must decrypt before inspecting the persisted payload.
+      const persistedSnapshot = JSON.parse(decryptSandbox(insertedPayload.snapshotData))
 
       // 50 mission + 25 challenge + 75 achievement(first-blood) + 11000 coupons
       expect(persistedSnapshot.userStats.totalXp).toBe(11150)
@@ -385,6 +399,11 @@ describe("Sandbox Sync API Route", () => {
         lastSynced: new Date().toISOString(),
       }
 
+      // Production stores the snapshot encrypted (POST route uses
+      // encryptSandbox). The GET handler must decrypt before parsing —
+      // otherwise JSON.parse throws on ciphertext and every GET 500s.
+      const encryptedSnapshot = encryptSandbox(JSON.stringify(snapshotData))
+
       const mockSelect = vi.fn().mockReturnValue({
         from: vi.fn().mockReturnValue({
           where: vi.fn().mockReturnValue({
@@ -393,7 +412,7 @@ describe("Sandbox Sync API Route", () => {
                 {
                   id: "snapshot-1",
                   userId,
-                  snapshotData: JSON.stringify(snapshotData),
+                  snapshotData: encryptedSnapshot,
                   updatedAt: new Date(),
                 },
               ]),
@@ -411,6 +430,47 @@ describe("Sandbox Sync API Route", () => {
       expect(response.status).toBe(200)
       const data = await response.json()
       expect(data).toEqual(snapshotData)
+    })
+
+    it("should return 500 when the stored snapshot is corrupted (decryption fails)", async () => {
+      const userId = "user-123"
+      vi.mocked(auth).mockResolvedValue({
+        user: { id: userId, email: "test@example.com" },
+        expires: "2025-01-01",
+      } as any)
+
+      // Garbage that encryptSandbox would never produce — verifies the
+      // GET handler surfaces decryption errors as 500s (not 200 with
+      // parsed garbage) so the client can distinguish corruption from
+      // a genuinely empty snapshot.
+      const corrupted = "not-valid-base64-or-ciphertext-at-all"
+
+      const mockSelect = vi.fn().mockReturnValue({
+        from: vi.fn().mockReturnValue({
+          where: vi.fn().mockReturnValue({
+            orderBy: vi.fn().mockReturnValue({
+              limit: vi.fn().mockResolvedValue([
+                {
+                  id: "snapshot-1",
+                  userId,
+                  snapshotData: corrupted,
+                  updatedAt: new Date(),
+                },
+              ]),
+            }),
+          }),
+        }),
+      })
+      vi.mocked(mockDb.select).mockReturnValue(mockSelect())
+
+      const request = new NextRequest("http://localhost:3000/api/user/sync", {
+        method: "GET",
+      })
+
+      const response = await GET(request)
+      expect(response.status).toBe(500)
+      const data = await response.json()
+      expect(data.error).toBeDefined()
     })
   })
 })

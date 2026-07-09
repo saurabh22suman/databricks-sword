@@ -10,7 +10,7 @@ import {
   xpAwards,
 } from "@/lib/db/schema"
 import { ACHIEVEMENTS } from "@/lib/gamification/achievements"
-import { encryptSandbox } from "@/lib/sandbox/encryption"
+import { encryptSandbox, decryptSandbox } from "@/lib/sandbox/encryption"
 import type { SandboxData } from "@/lib/sandbox/types"
 import { SandboxDataSchema } from "@/lib/sandbox/types"
 import { desc, eq, sql } from "drizzle-orm"
@@ -382,7 +382,13 @@ export async function GET(request: NextRequest): Promise<NextResponse> {
     }
 
     const snapshot = snapshots[0]
-    const sandboxData = JSON.parse(snapshot.snapshotData)
+    // The POST handler stores snapshot.snapshotData ENCRYPTED via
+    // encryptSandbox. We must decrypt before parsing, otherwise
+    // JSON.parse throws on ciphertext and every GET 500s. Without this
+    // fix, clients on a fresh device (or after a localStorage wipe)
+    // never see server-side XP (e.g. redeemed coupons, server-tracked
+    // field-ops completions) because the pull always fails.
+    const sandboxData = JSON.parse(decryptSandbox(snapshot.snapshotData))
 
     return NextResponse.json(sandboxData, { status: 200 })
   } catch (error) {

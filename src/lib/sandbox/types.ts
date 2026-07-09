@@ -181,11 +181,25 @@ export type PendingClaim =
     }
 
 /**
+ * A coupon redeemed by the user. Persisted in the sandbox so that the
+ * client's `recalculateStats` knows to include the coupon XP in the local
+ * `userStats.totalXp`. Without this, refreshes would silently drop coupon XP
+ * because the server's authoritative totalXp would be recomputed from the
+ * ledger/coupon/field-ops tables on the next sync, but the client has no
+ * other record of which coupons were redeemed.
+ */
+export type RedeemedCoupon = {
+  code: string
+  xp: number
+  redeemedAt: string // ISO timestamp
+}
+
+/**
  * Complete sandbox data structure stored in localStorage.
- * Schema version 2 - added pendingClaims for offline claim queue.
+ * Schema version 3 - added redeemedCoupons so local XP recompute survives refreshes.
  */
 export type SandboxData = {
-  version: number // Schema version for migrations. Bumped to 2 when pendingClaims was added.
+  version: number // Schema version for migrations. Bumped to 3 when redeemedCoupons was added.
   missionProgress: Record<string, MissionProgress>
   challengeResults: Record<string, ChallengeResult>
   userStats: UserStats
@@ -201,6 +215,8 @@ export type SandboxData = {
   flashcardProgress: Record<string, FlashcardProgress>
   /** Claims that failed to reach the server, queued for retry. */
   pendingClaims: PendingClaim[]
+  /** Coupons redeemed locally. Used by recalculateStats to keep totalXp in sync after refresh. */
+  redeemedCoupons?: RedeemedCoupon[]
   lastSynced: string | null // ISO timestamp
 }
 
@@ -247,6 +263,15 @@ export const SandboxDataSchema = z.object({
       queuedAt: z.string(),
     }),
   ])).default([]),
+  // Optional in TS (so old fixtures/serialized blobs don't break), but the
+  // Zod default of [] ensures the parsed value is always present.
+  redeemedCoupons: z.array(
+    z.object({
+      code: z.string(),
+      xp: z.number().nonnegative(),
+      redeemedAt: z.string(),
+    })
+  ).default([]),
   lastSynced: z.string().nullable(),
 })
 
