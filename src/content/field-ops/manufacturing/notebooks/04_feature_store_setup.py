@@ -105,7 +105,7 @@ df_features = (
 )
 
 print(f"📊 Feature table shape: {df_features.count()} rows × {len(df_features.columns)} cols")
-display(df_features.limit(5))
+df_features.show(5, truncate=False)
 
 # COMMAND ----------
 
