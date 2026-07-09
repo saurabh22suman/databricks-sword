@@ -24,7 +24,7 @@
     },
     {
       "id": "delete-data",
-      "code": "DELETE FROM transactions\nWHERE amount < 50",
+      "code": "DELETE FROM transactions\nWHERE transaction_id = 'TXN002'  -- Refund reversal: customer cancelled the high-value order",
       "label": "Delete Records"
     },
     {
@@ -36,22 +36,22 @@
   "correctOrder": [
     "create-table",
     "insert-data",
-    "update-data",
     "query-data",
+    "update-data",
     "delete-data",
     "verify-delete"
   ],
   "hints": [
     "Start by creating the table structure before inserting data",
     "UPDATE modifies existing records, so it must come after INSERT",
-    "DELETE operations come after queries to demonstrate ACID transactions",
+    "The DELETE represents a refund reversal — the customer's order was cancelled after the price update",
     "Always verify your operations with SELECT queries"
   ],
   "learnings": [
     "CREATE TABLE must come before INSERT - you cannot add data to a table that does not exist",
     "UPDATE modifies existing records and requires data to already be present",
     "Aggregate queries (GROUP BY) only work on existing data",
-    "DELETE operations demonstrate ACID transactions - changes are atomic",
+    "DELETE operations are reversible within Delta's retention window using time travel",
     "Verify operations with SELECT to confirm your changes took effect"
   ]
 }
