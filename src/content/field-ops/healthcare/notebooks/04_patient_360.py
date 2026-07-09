@@ -129,7 +129,7 @@ df_patient_360 = (
                         "no_shows", "abnormal_results"])
 )
 
-display(df_patient_360.limit(10))
+df_patient_360.show(10, truncate=False)
 
 # COMMAND ----------
 
@@ -208,7 +208,7 @@ df_patient_360_final = (
     )
 )
 
-display(df_patient_360_final.limit(10))
+df_patient_360_final.show(10, truncate=False)
 
 # COMMAND ----------
 

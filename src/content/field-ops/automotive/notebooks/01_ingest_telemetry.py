@@ -109,7 +109,7 @@ df_telemetry = (
 # The timestamp is still a string — this will cause errors in
 # downstream window functions that ORDER BY timestamp!
 print(f"⚠️ timestamp column type: {df_telemetry.schema['timestamp'].dataType}")
-display(df_telemetry.select("reading_id", "vehicle_id", "timestamp", "engine_temp_f").limit(5))
+df_telemetry.select("reading_id", "vehicle_id", "timestamp", "engine_temp_f").show(5, truncate=False)
 
 # COMMAND ----------
 
@@ -171,7 +171,7 @@ print(f"✅ Service Records: {df_service.count()} → {bronze_schema}.service_re
 # SECTION 6: Data Quality Summary
 # ────────────────────────────────────────────────────────────────────────────
 
-display(spark.sql(f"""
+spark.sql(f"""
     SELECT
         COUNT(*) AS total_readings,
         COUNT(DISTINCT vehicle_id) AS unique_vehicles,
@@ -183,7 +183,7 @@ display(spark.sql(f"""
         SUM(CASE WHEN oil_pressure_psi < 20 THEN 1 ELSE 0 END) AS low_oil_readings,
         SUM(CASE WHEN battery_voltage < 12 THEN 1 ELSE 0 END) AS low_battery_readings
     FROM {bronze_schema}.vehicle_telemetry
-"""))
+""").show(truncate=False)
 
 # COMMAND ----------
 

@@ -91,13 +91,9 @@ print(f"📊 Fields: {df_fields.count()}")
 # ────────────────────────────────────────────────────────────────────────────
 # Before setting validation rules, profile the data to understand distributions.
 
-display(
-    df_sensors
-    .select("moisture_percent", "temperature_c", "ph_level",
+df_sensors.select("moisture_percent", "temperature_c", "ph_level",
             "nitrogen_ppm", "phosphorus_ppm", "potassium_ppm",
-            "electrical_conductivity")
-    .describe()
-)
+            "electrical_conductivity").describe().show(truncate=False)
 
 # COMMAND ----------
 
@@ -107,7 +103,7 @@ display(
 # Look at p1, p5, p95, p99 to find the natural range of values.
 # Data outside p1-p99 is likely noise or sensor malfunction.
 
-display(spark.sql(f"""
+spark.sql(f"""
     SELECT
         PERCENTILE(ph_level, 0.01) AS ph_p01,
         PERCENTILE(ph_level, 0.05) AS ph_p05,
@@ -119,7 +115,7 @@ display(spark.sql(f"""
         PERCENTILE(temperature_c, 0.01) AS temp_p01,
         PERCENTILE(temperature_c, 0.99) AS temp_p99
     FROM {bronze_schema}.soil_sensors
-"""))
+""").show(truncate=False)
 
 # COMMAND ----------
 
@@ -189,7 +185,7 @@ print(f"   Invalid readings: {invalid} ({100*invalid/total:.1f}%)")
 print(f"   ⚠️ If >30% fail, the pH range is probably too strict!")
 
 # Per-check failure breakdown
-display(spark.sql(f"""
+spark.sql(f"""
     SELECT
         SUM(CASE WHEN qc_timestamp = 'FAIL' THEN 1 ELSE 0 END) AS timestamp_failures,
         SUM(CASE WHEN qc_moisture = 'FAIL' THEN 1 ELSE 0 END) AS moisture_failures,
@@ -198,7 +194,7 @@ display(spark.sql(f"""
         SUM(CASE WHEN qc_nitrogen = 'FAIL' THEN 1 ELSE 0 END) AS nitrogen_failures,
         SUM(CASE WHEN qc_ec = 'FAIL' THEN 1 ELSE 0 END) AS ec_failures
     FROM {bronze_schema}.soil_sensors_validated
-"""))
+""").show(truncate=False)
 
 # COMMAND ----------
 

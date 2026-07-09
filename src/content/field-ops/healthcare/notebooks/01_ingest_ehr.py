@@ -80,7 +80,7 @@ df_ehr = (
 
 print(f"📊 EHR records: {df_ehr.count()}")
 df_ehr.printSchema()
-display(df_ehr.limit(10))
+df_ehr.show(10, truncate=False)
 
 # COMMAND ----------
 
@@ -99,7 +99,7 @@ df_ehr_sql = spark.sql(f"""
     )
 """)
 
-display(df_ehr_sql.limit(5))
+df_ehr_sql.show(5, truncate=False)
 
 # COMMAND ----------
 
@@ -114,7 +114,7 @@ df_ehr_flat = (
     .withColumn("_source_file", input_file_name())
 )
 
-display(df_ehr_flat.limit(10))
+df_ehr_flat.show(10, truncate=False)
 
 # COMMAND ----------
 

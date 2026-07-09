@@ -16,7 +16,7 @@
 #   ✅ SQL: read_files() table-valued function
 #   ✅ Writing Delta tables with saveAsTable()
 #   ✅ SQL: CREATE OR REPLACE TABLE ... AS SELECT
-#   ✅ Using display() for Databricks-native visualization
+#   ✅ Using .show() for Databricks-native visualization
 #   ✅ Idempotent ingestion with MERGE INTO (SQL + DeltaTable API)
 #
 # INPUT:
@@ -62,12 +62,11 @@ print(f"📂 Volume Path:   {volume_path}")
 # SECTION 1: Explore the Raw Data
 # ────────────────────────────────────────────────────────────────────────────
 # Before ingesting, always explore the raw data to understand its structure.
-# In Databricks notebooks, `display()` renders interactive tables with
-# filtering, sorting, and charting — ALWAYS use display() instead of show().
+# In Databricks notebooks, `.show(truncate=False)` renders tables for DAB compatibility.
 
 # List files in the Volume
 files = dbutils.fs.ls(volume_path)
-display(files)
+files.show(truncate=False)
 
 # COMMAND ----------
 
@@ -105,7 +104,7 @@ df_sales = (
 )
 
 print(f"✅ Loaded {df_sales.count()} sales records via PySpark")
-display(df_sales.limit(10))
+df_sales.show(10, truncate=False)
 
 # COMMAND ----------
 
@@ -129,7 +128,7 @@ df_sales_sql = spark.sql(f"""
 """)
 
 print(f"✅ Loaded {df_sales_sql.count()} sales records via SQL read_files()")
-display(df_sales_sql.limit(5))
+df_sales_sql.show(5, truncate=False)
 
 # COMMAND ----------
 
@@ -149,7 +148,7 @@ quality_report = df_sales.select(
     spark_sum(when(col("total_amount") < 0, 1).otherwise(0)).alias("negative_amt"),
 )
 
-display(quality_report)
+quality_report.show(truncate=False)
 
 # COMMAND ----------
 
@@ -283,7 +282,7 @@ for table in ["sales_transactions", "products", "inventory_levels"]:
     print(f"📊 {bronze_schema}.{table}: {row_count} rows")
 
 # Inspect Delta table history — shows all operations performed
-display(spark.sql(f"DESCRIBE HISTORY {bronze_schema}.sales_transactions LIMIT 5"))
+spark.sql(f"DESCRIBE HISTORY {bronze_schema}.sales_transactions LIMIT 5").show(truncate=False)
 
 # COMMAND ----------
 
@@ -293,7 +292,7 @@ display(spark.sql(f"DESCRIBE HISTORY {bronze_schema}.sales_transactions LIMIT 5"
 # CONCEPTS LEARNED:
 #   1. PySpark spark.read.csv() vs SQL read_files() for CSV ingestion
 #   2. Schema definition for type safety
-#   3. display() for Databricks-native data exploration
+#   3. .show() for Databricks-native data exploration
 #   4. saveAsTable() vs CREATE OR REPLACE TABLE for Delta writes
 #   5. MERGE INTO for idempotent loads (SQL + DeltaTable API)
 #   6. Ingestion metadata (_ingested_at, _source_file) for lineage

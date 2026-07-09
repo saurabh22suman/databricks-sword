@@ -86,7 +86,7 @@ SAFETY_FACTOR  = 1.5     # Multiplier for safety stock
 df_inventory = spark.read.table(f"{silver_schema}.inventory")
 print(f"📊 Silver inventory: {df_inventory.count()} rows")
 df_inventory.printSchema()
-display(df_inventory.limit(10))
+df_inventory.show(10, truncate=False)
 
 # COMMAND ----------
 

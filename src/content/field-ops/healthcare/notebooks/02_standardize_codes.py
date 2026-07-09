@@ -94,7 +94,7 @@ print(f"📊 Standardized EHR records: {df_ehr_standardized.count()}")
 unmapped = df_ehr_standardized.filter("diagnosis_description = 'UNKNOWN CODE'").count()
 print(f"⚠️  Unmapped diagnosis codes: {unmapped}")
 
-display(df_ehr_standardized.limit(10))
+df_ehr_standardized.show(10, truncate=False)
 
 # COMMAND ----------
 
@@ -114,7 +114,7 @@ df_ehr_standardized_sql = spark.sql(f"""
         ON ehr.diagnosis_code = icd.code
 """)
 
-display(df_ehr_standardized_sql.limit(5))
+df_ehr_standardized_sql.show(5, truncate=False)
 
 # COMMAND ----------
 
@@ -133,7 +133,7 @@ df_labs_standardized = (
     .withColumn("_standardized_at", current_timestamp())
 )
 
-display(df_labs_standardized.limit(10))
+df_labs_standardized.show(10, truncate=False)
 
 # COMMAND ----------
 

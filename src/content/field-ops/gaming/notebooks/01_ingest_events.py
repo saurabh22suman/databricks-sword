@@ -54,7 +54,7 @@ volume_path = f"/Volumes/{catalog}/{schema_prefix}_bronze/raw_files"
 # SECTION 1: Explore the Raw JSON Data
 # ────────────────────────────────────────────────────────────────────────────
 
-display(dbutils.fs.ls(volume_path))
+print(dbutils.fs.ls(volume_path))
 
 # COMMAND ----------
 
@@ -96,7 +96,7 @@ df_events = (
 )
 
 print(f"✅ Loaded {df_events.count()} events via PySpark")
-display(df_events.limit(10))
+df_events.show(10, truncate=False)
 
 # COMMAND ----------
 
@@ -113,7 +113,7 @@ df_events_sql = spark.sql(f"""
 """)
 
 print(f"✅ Loaded {df_events_sql.count()} events via SQL read_files()")
-display(df_events_sql.limit(5))
+df_events_sql.show(5, truncate=False)
 
 # COMMAND ----------
 
@@ -136,7 +136,7 @@ df_events_parsed = (
     .drop("event_timestamp")  # Drop raw string, keep parsed timestamp
 )
 
-display(df_events_parsed.limit(10))
+df_events_parsed.show(10, truncate=False)
 
 # COMMAND ----------
 
@@ -223,12 +223,12 @@ print(f"🔍 Duplicate event_ids: {dup_count}")
 print(f"{'✅' if dup_count == 0 else '❌'} Deduplication {'working' if dup_count == 0 else 'FAILED'}")
 
 # Event type distribution
-display(spark.sql(f"""
+spark.sql(f"""
     SELECT event_type, COUNT(*) as event_count
     FROM {bronze_schema}.player_events
     GROUP BY event_type
     ORDER BY event_count DESC
-"""))
+""").show(truncate=False)
 
 # COMMAND ----------
 

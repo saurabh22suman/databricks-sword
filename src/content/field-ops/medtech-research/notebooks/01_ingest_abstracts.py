@@ -58,7 +58,7 @@ raw_path = json_files[0]
 df_raw = spark.read.option("multiline", "true").json(raw_path)
 print(f"📊 Total records read: {df_raw.count()}")
 print(f"📊 Columns: {df_raw.columns}")
-display(df_raw.limit(3))
+df_raw.show(3, truncate=False)
 
 # COMMAND ----------
 

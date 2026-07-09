@@ -85,7 +85,7 @@ df_enriched = (
 )
 
 print(f"📊 Enriched metrics: {df_enriched.count()} rows")
-display(df_enriched.select("tower_id", "region", "latency_ms", "throughput_mbps").limit(5))
+df_enriched.select("tower_id", "region", "latency_ms", "throughput_mbps").show(5, truncate=False)
 
 # COMMAND ----------
 
@@ -153,12 +153,8 @@ df_kpis = (
     .withColumn("_calculated_at", current_timestamp())
 )
 
-display(
-    df_kpis
-    .select("tower_id", "region", "avg_latency_ms", "avg_throughput_mbps",
-            "avg_packet_loss", "health_status")
-    .limit(20)
-)
+df_kpis.select("tower_id", "region", "avg_latency_ms", "avg_throughput_mbps",
+            "avg_packet_loss", "health_status").show(20, truncate=False)
 
 # COMMAND ----------
 
@@ -203,7 +199,7 @@ print("✅ Liquid Clustering applied: (region, tower_id, event_ts)")
 # SECTION 6: Verify KPIs
 # ────────────────────────────────────────────────────────────────────────────
 
-display(spark.sql(f"""
+spark.sql(f"""
     SELECT
         region,
         COUNT(DISTINCT tower_id) AS towers,
@@ -215,7 +211,7 @@ display(spark.sql(f"""
     FROM {silver_schema}.network_kpis
     GROUP BY region
     ORDER BY region
-"""))
+""").show(truncate=False)
 
 # COMMAND ----------
 

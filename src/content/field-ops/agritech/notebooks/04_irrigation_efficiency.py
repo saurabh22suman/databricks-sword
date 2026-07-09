@@ -101,17 +101,12 @@ print(f"📊 Fields:            {df_fields.count()}")
 # ────────────────────────────────────────────────────────────────────────────
 # Understand the distribution of irrigation methods and water usage.
 
-display(
-    df_irrigation
-    .groupBy("method")
-    .agg(
+df_irrigation.groupBy("method").agg(
         count("*").alias("event_count"),
         spark_round(avg("water_used_liters"), 2).alias("avg_water_liters"),
         spark_round(avg("duration_minutes"), 2).alias("avg_duration_min"),
         spark_round(spark_sum("water_used_liters"), 0).alias("total_water_liters"),
-    )
-    .orderBy("method")
-)
+    ).orderBy("method").show(truncate=False)
 
 # COMMAND ----------
 
@@ -219,7 +214,7 @@ df_efficiency = (
     )
 )
 
-display(df_efficiency.orderBy("water_use_efficiency"))
+df_efficiency.orderBy("water_use_efficiency").show(truncate=False)
 
 # COMMAND ----------
 
@@ -269,7 +264,7 @@ df_corn_wue = spark.sql(f"""
     GROUP BY crop_type
 """)
 
-display(df_corn_wue)
+df_corn_wue.show(truncate=False)
 
 # COMMAND ----------
 
