@@ -1,64 +1,26 @@
 # Mission Briefing: Data Ingestion Pipeline
 
-## The Situation
+## Situation Report
 
-TechCorp's lakehouse is operational, and teams are querying data successfully. Now the data sources are multiplying.
+TechCorp's lakehouse is operational, but data sources are multiplying. They need to ingest from 12 different systems: application logs (JSON), customer databases (CDC/Parquet), clickstream events (CSV), and third-party APIs.
 
-The engineering team needs to ingest data from **12 different systems**:
-- **Application logs** (JSON, 500K files/day landing in S3)
-- **Customer database** (CDC feeds, Parquet, hourly dumps)
-- **Clickstream events** (CSV, real-time uploads)
-- **Third-party APIs** (JSON, varying schemas)
+The current approach is manual Python scripts running on cron that re-process entire datasets, break when schemas change, and require 40+ hours/month of maintenance.
 
-The current approach is **manual Python scripts** that:
-- Run on cron schedules (batch processing only)
-- Re-process entire datasets (expensive, slow)
-- Break when schemas change (no schema inference)
-- Require 40+ hours/month of maintenance
+## Objectives
+- Configure Auto Loader for JSON/CSV/Parquet files with incremental streaming
+- Enable schema inference and evolution for evolving data sources
+- Write data to bronze Delta tables
+- Implement COPY INTO for batch historical loads
+- Understand batch vs streaming tradeoffs
 
-The VP of Engineering wants **automated incremental ingestion** with minimal operational overhead.
-
-## The Opportunity
-
-Databricks provides two ingestion tools:
-
-**Auto Loader** (recommended for most cases):
-- **Incremental streaming** — processes only new files since last run
-- **Schema inference** — auto-detects column types, handles evolution
-- **Exactly-once semantics** — no duplicates, no missing data
-- **Scalable** — 100K+ files/hour with automatic parallelization
-
-**COPY INTO** (for simple batch loads):  
-- **Idempotent** — re-run safe, skips already loaded files
-- **SQL-based** — simple syntax for batch ingestion
-- **Manual schema** — you define the schema explicitly
-
-Industry adoption:
-- **Streaming platforms:** Auto Loader handles billions of events per day at scale
-- **Connected vehicles:** Real-time telemetry from hundreds of thousands of devices via Auto Loader
-- **Digital media:** Large-scale data ingestion with Auto Loader schema inference
-
-## Your Mission
-
-Build **streaming and batch ingestion pipelines** into the lakehouse bronze layer:
-
-1. **Configure** Auto Loader for JSON/CSV/Parquet files
-2. **Enable** schema inference and evolution
-3. **Write** data to bronze Delta tables
-4. **Implement** COPY INTO for batch historical loads
-5. **Understand** batch vs streaming tradeoffs
+## Key Intelligence
+- **Auto Loader:** Incremental streaming — processes only new files since last run; auto-detects column types; exactly-once semantics; scalable to 100K+ files/hour
+- **COPY INTO:** Idempotent, SQL-based, simple syntax for batch ingestion — define schema explicitly
 
 ## Success Criteria
-
-- **Auto Loader pipeline** running in streaming mode
-- **Schema inference** handling evolving data sources
-- **Bronze tables** populated with raw data
-- **COPY INTO** used for historical batch load
-
-## The Stakes
-
-If Auto Loader works, Tech Corp eliminates manual ingestion scripts, saving **40 hours/month** of engineer time ($8K/month) and enabling **real-time analytics** (5-minute data latency vs 24-hour batch delays).
-
----
+- Auto Loader pipeline running in streaming mode
+- Schema inference handling evolving data sources
+- Bronze tables populated with raw data
+- COPY INTO used for historical batch load
 
 **Next Step:** Diagram — Understand the ingestion architecture
