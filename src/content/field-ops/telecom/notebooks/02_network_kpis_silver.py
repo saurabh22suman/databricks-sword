@@ -187,14 +187,15 @@ display(
 
 print(f"✅ Silver table: {silver_schema}.network_kpis")
 
-# Z-ORDER optimization: co-locate data for common query patterns
+# Liquid Clustering: co-locate data for common query patterns
 # (filtering by region + tower_id + time range)
+# Liquid clustering (replaces partitioning + ZORDER); keys can be redefined without rewriting data.
 spark.sql(f"""
-    OPTIMIZE {silver_schema}.network_kpis
-    ZORDER BY (region, tower_id, event_ts)
+    ALTER TABLE {silver_schema}.network_kpis CLUSTER BY (region, tower_id, event_ts);
+    OPTIMIZE {silver_schema}.network_kpis;
 """)
 
-print("✅ Z-ORDER applied: (region, tower_id, event_ts)")
+print("✅ Liquid Clustering applied: (region, tower_id, event_ts)")
 
 # COMMAND ----------
 

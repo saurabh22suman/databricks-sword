@@ -1,7 +1,7 @@
 {
   "description": "Complete the Delta Lake commands for time travel, optimization, and change data capture.",
-  "expectedOutput": "When completed correctly, this code will:\n1. Query the patients table as it existed 24 hours ago (time travel)\n2. Restore the table to version 42\n3. Compact small files with OPTIMIZE\n4. Z-ORDER by patient_id and admission_date for faster filtering\n5. Clean up files older than 7 days (168 hours) with VACUUM\n6. Enable Change Data Feed to track row-level changes",
-  "codeTemplate": "-- Time travel: query table as it was 24 hours ago\nSELECT * FROM patients __BLANK_0__ AS OF '2024-01-14 10:00:00';\n\n-- Restore table to previous version\n__BLANK_1__ TABLE patients TO VERSION AS OF 42;\n\n-- Compact small files\n__BLANK_2__ patients;\n\n-- Z-ORDER by frequently filtered columns\nOPTIMIZE patients __BLANK_3__ BY (patient_id, admission_date);\n\n-- Clean up old files (keep 7 days)\n__BLANK_4__ patients RETAIN __BLANK_5__ HOURS;\n\n-- Enable Change Data Feed\nALTER TABLE patients SET TBLPROPERTIES (\n  '__BLANK_6__' = 'true'\n);",
+  "expectedOutput": "When completed correctly, this code will:\n1. Query the patients table as it existed 24 hours ago (time travel)\n2. Restore the table to version 42\n3. Compact small files with OPTIMIZE\n4. Apply Liquid Clustering by patient_id and admission_date for faster filtering\n5. Clean up files older than 7 days (168 hours) with VACUUM\n6. Enable Change Data Feed to track row-level changes",
+  "codeTemplate": "-- Time travel: query table as it was 24 hours ago\nSELECT * FROM patients __BLANK_0__ AS OF '2024-01-14 10:00:00';\n\n-- Restore table to previous version\n__BLANK_1__ TABLE patients TO VERSION AS OF 42;\n\n-- Apply Liquid Clustering (replaces ZORDER)\nALTER TABLE patients __BLANK_2__ BY (patient_id, admission_date);\n\n-- Compact small files\nOPTIMIZE patients;\n\n-- Clean up old files (keep 7 days)\n__BLANK_4__ patients RETAIN __BLANK_5__ HOURS;\n\n-- Enable Change Data Feed\nALTER TABLE patients SET TBLPROPERTIES (\n  '__BLANK_6__' = 'true'\n);",
   "blanks": [
     {
       "id": 0,
@@ -26,22 +26,12 @@
     {
       "id": 2,
       "options": [
-        "OPTIMIZE",
-        "COMPACT",
-        "DEFRAG",
-        "REBUILD"
-      ],
-      "correctAnswer": "OPTIMIZE"
-    },
-    {
-      "id": 3,
-      "options": [
-        "ZORDER",
         "CLUSTER",
+        "ZORDER",
         "SORT",
         "INDEX"
       ],
-      "correctAnswer": "ZORDER"
+      "correctAnswer": "CLUSTER"
     },
     {
       "id": 4,
@@ -82,7 +72,7 @@
   ],
   "learnings": [
     "VERSION AS OF reads historical table versions",
-    "OPTIMIZE ZORDER BY colocates related data",
+    "Liquid Clustering (CLUSTER BY) colocates related data for faster filtering",
     "VACUUM removes files older than retention period",
     "MERGE handles upsert (update + insert) operations",
     "DESCRIBE HISTORY shows the transaction log"
