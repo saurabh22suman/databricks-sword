@@ -342,25 +342,6 @@ ALTER TABLE sales SET TBLPROPERTIES (
 )
 ```
 
-### 3. Enable Change Data Feed
-
-Track row-level changes for CDC pipelines:
-
-```sql
-ALTER TABLE sales SET TBLPROPERTIES (delta.enableChangeDataFeed = true)
-```
-
-### 4. Set Appropriate Retention
-
-Balance time travel needs with storage costs:
-
-```sql
-ALTER TABLE sales SET TBLPROPERTIES (
-    delta.logRetentionDuration = 'interval 30 days',
-    delta.deletedFileRetentionDuration = 'interval 7 days'
-)
-```
-
 ---
 
 ## Practice with Databricks Sword
