@@ -1,58 +1,23 @@
 # Mission Briefing: Lakehouse Fundamentals
 
-## The Situation
+## Situation Report
+You've joined **TechCorp's** data team as they migrate from a traditional warehouse to a **lakehouse**. The old stack can't keep up — queries that took 2 minutes last year now take 15, storage costs are climbing 30% per quarter, and schema changes take 3 weeks.
 
-You've just joined **TechCorp**, a high-growth SaaS company with 10,000 enterprise customers. The data team is in crisis.
+## Objectives
+- Build a production-grade Delta Lake table for customer transactions
+- Insert, update, and delete rows with ACID guarantees
+- Query the data with sub-second latency
+- Explain lakehouse architecture layers
 
-Their **data warehouse** (running on a traditional MPP system) is buckling under pressure:
-- **Query times:** 15 minutes for simple analytics (used to be 2 minutes last year)
-- **Storage costs:** $47K/month and climbing 30% every quarter
-- **Schema changes:** 3-week turnaround due to rigid schema enforcement
-- **Data freshness:** 24-hour lag between transaction and analytics
-
-The CEO is furious. Marketing can't run campaigns. Product can't analyze user behavior. The CFO is threatening to pull the plug on the entire data stack.
-
-## The Opportunity
-
-The VP of Engineering has been researching **lakehouse architecture** — a new paradigm that combines:
-- **Data lake flexibility:** Store structured, semi-structured, and unstructured data
-- **Data warehouse performance:** ACID transactions, indexing, query optimization
-- **Open formats:** Parquet + Delta Lake = portability and vendor independence
-
-**Databricks** pioneered the lakehouse with **Delta Lake**, an open-source storage layer that brings ACID transactions to data lakes.
-
-Early adopters are seeing major wins:
-- **Stitch Fix:** 70% cost reduction vs traditional warehouse
-- **Riot Games:** Real-time analytics on 1.4B events/day
-- **Comcast:** Unified streaming and batch processing in one platform
-
-## Your Mission
-
-Prove the lakehouse concept by building a **production-grade Delta Lake table**:
-
-1. **Create** a Delta table for customer transaction data
-2. **Insert** records using SQL
-3. **Update** and **delete** rows with ACID guarantees
-4. **Query** data with sub-second latency
-5. **Understand** the lakehouse architecture layers
+## Key Intelligence
+- **Delta Lake** adds ACID transactions, schema enforcement, and time travel on top of Parquet files in your data lake.
+- The lakehouse pattern unifies data lake flexibility with warehouse performance — no more ETL duplication.
+- Tables can be managed (Databricks controls files) or external (you control files via cloud URIs or Unity Catalog volumes).
 
 ## Success Criteria
+- Working Delta table with proper schema
+- All CRUD operations executed without error
+- Aggregate query returns expected results
+- Quiz confirms architecture understanding
 
-- **Working Delta table** with proper schema
-- **CRUD operations** executed successfully
-- **Data integrity** verified after transactions
-- **Architecture understanding** demonstrated in quiz
-
-## The Stakes
-
-If this pilot succeeds, TechCorp will migrate their entire data warehouse (250+ tables, 80TB) to Databricks. This would enable them to:
-
-- **Reduce operational overhead** by consolidating ETL and analytics on a single platform
-- **Improve data freshness** from batch-processed daily tables to near real-time updates
-- **Enable self-service analytics** for business users through SQL Warehouses
-
-The exact cost savings and performance improvements depend on workload patterns, current infrastructure, and team expertise. Treat these as directional goals rather than guaranteed outcomes.
-
----
-
-**Next Step:** Architecture Diagram — Understand the lakehouse layers
+**Next Step:** Architecture Diagram — visualize the lakehouse layers you'll be working with
