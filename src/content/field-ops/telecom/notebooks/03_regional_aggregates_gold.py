@@ -239,7 +239,7 @@ print(f"✅ Gold table: {gold_schema}.regional_performance")
 # SECTION 8: Validation
 # ────────────────────────────────────────────────────────────────────────────
 
-display(spark.sql(f"""
+spark.sql(f"""
     SELECT
         region,
         COUNT(*) AS daily_records,
@@ -249,7 +249,7 @@ display(spark.sql(f"""
     FROM {gold_schema}.regional_performance
     GROUP BY region
     ORDER BY region
-"""))
+""").show(truncate=False)
 
 distinct_regions = spark.sql(f"""
     SELECT COUNT(DISTINCT region) AS count

@@ -1,6 +1,6 @@
 {
-  "description": "Complete the ALS model configuration by filling in the correct hyperparameters and column names.",
-  "expectedOutput": "When completed correctly, this code will:\n1. Split data into training (80%) and test (20%) sets\n2. Create a feature vector from numeric columns\n3. Configure a RandomForestClassifier with specified parameters\n4. Build a pipeline combining vectorizer and classifier\n5. Train the model and generate predictions on test data",
+  "description": "Complete the ALS (Alternating Least Squares) collaborative filtering code to recommend items to users based on implicit feedback.",
+  "expectedOutput": "When completed correctly, this code will:\n1. Configure ALS with user, item, and rating columns\n2. Set hyperparameters (rank, maxIter, regParam)\n3. Handle cold start users/items with a drop strategy\n4. Train the ALS model on the data\n5. Generate top-N recommendations for all users",
   "codeTemplate": "# Configure ALS model for collaborative filtering\nals = ALS(\n    # Specify column names\n    userCol=__BLANK_0__,\n    itemCol=__BLANK_1__,\n    ratingCol=__BLANK_2__,\n    \n    # Hyperparameters\n    rank=__BLANK_3__,              # Number of latent features\n    maxIter=__BLANK_4__,           # Maximum training iterations\n    regParam=__BLANK_5__,          # Regularization parameter\n    \n    # Handle cold start problem\n    coldStartStrategy=__BLANK_6__\n)\n\n# Train the model\nmodel = als.fit(train_df)\n\n# Generate top 10 recommendations for all users\nuser_recs = model.__BLANK_7__(10)",
   "blanks": [
     {

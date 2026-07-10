@@ -209,7 +209,7 @@ df_processed = (
 )
 
 # Cache and trigger materialization
-df_processed.cache()
+df_processed.persist(StorageLevel.MEMORY_AND_DISK)  # explicit level preferred over .cache()
 df_processed.count()  # Force cache to materialize
 
 # Now use multiple times (fast)
@@ -426,6 +426,19 @@ The Spark UI is your best friend for optimization. Key things to check:
 | Spilling to disk | Increase memory or partitions |
 
 ---
+
+## Adaptive Query Execution (AQE)
+
+AQE is **enabled by default** in Databricks Runtime and Spark 3.2+. It re-optimizes query plans at runtime based on actual data statistics, automatically handling:
+
+- **Skew joins:** splits skewed partitions automatically
+- **Partition coalescing:** merges small partitions after shuffle
+- **Join strategy switching:** converts sort-merge joins to broadcast joins at runtime when stats show a small side
+
+You usually don't need to configure it, but if disabled:
+```python
+spark.conf.set("spark.sql.adaptive.enabled", "true")
+```
 
 ## Quick Reference Checklist
 

@@ -75,7 +75,7 @@ from pyspark.sql.window import Window
 
 df_satellite = spark.read.table(f"{bronze_schema}.satellite_imagery")
 
-display(df_satellite.limit(10))
+df_satellite.show(10, truncate=False)
 print(f"📊 Total satellite records: {df_satellite.count()}")
 
 # COMMAND ----------
@@ -137,12 +137,7 @@ df_classified = (
 )
 
 # Show distribution of classes
-display(
-    df_classified
-    .groupBy("vegetation_class")
-    .agg(count("*").alias("pixel_count"))
-    .orderBy("vegetation_class")
-)
+df_classified.groupBy("vegetation_class").agg(count("*").alias("pixel_count")).orderBy("vegetation_class").show(truncate=False)
 
 # COMMAND ----------
 
@@ -198,7 +193,7 @@ df_field_ndvi_stats = (
     )
 )
 
-display(df_field_ndvi_stats)
+df_field_ndvi_stats.show(truncate=False)
 
 # COMMAND ----------
 
@@ -234,7 +229,7 @@ df_check = spark.sql(f"""
     FROM {silver_schema}.ndvi_metrics
 """)
 
-display(df_check)
+df_check.show(truncate=False)
 print("⚠️ NOTE: If min_ndvi is very negative, check the formula — NIR and Red may be swapped!")
 
 # COMMAND ----------

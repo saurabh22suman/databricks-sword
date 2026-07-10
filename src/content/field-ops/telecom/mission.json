@@ -55,10 +55,10 @@
     },
     {
       "id": "zorder_optimization",
-      "name": "Z-Order Optimization Applied",
+      "name": "Liquid Clustering Applied",
       "query": "DESCRIBE HISTORY {catalog}.{schema_prefix}_silver.network_kpis",
-      "expected": "OPTIMIZE ... ZORDER BY (region, tower_id, timestamp)",
-      "hint": "Run OPTIMIZE with ZORDER BY on high-cardinality columns"
+      "expected": "ALTER TABLE ... CLUSTER BY (region, tower_id, event_ts)",
+      "hint": "Apply Liquid Clustering with CLUSTER BY on high-cardinality columns"
     }
   ],
   "hintsInNotebooks": false,

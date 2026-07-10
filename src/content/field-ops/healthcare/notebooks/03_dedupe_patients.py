@@ -57,7 +57,7 @@ df_ehr = spark.read.table(f"{silver_schema}.ehr_standardized")
 print(f"📊 Total EHR records: {df_ehr.count()}")
 
 # Check for variations in patient names
-display(spark.sql(f"""
+spark.sql(f"""
     SELECT
         patient_id,
         first_name,
@@ -69,7 +69,7 @@ display(spark.sql(f"""
     GROUP BY patient_id, first_name, last_name, date_of_birth, ssn
     ORDER BY last_name, first_name
     LIMIT 30
-"""))
+""").show(truncate=False)
 
 # COMMAND ----------
 
@@ -124,9 +124,9 @@ df_patients_normalized = (
     .withColumn("first_name_soundex", soundex("first_name_clean"))
 )
 
-display(df_patients_normalized.select(
+df_patients_normalized.select(
     "first_name", "first_name_soundex", "last_name", "last_name_soundex", "date_of_birth"
-).limit(20))
+).show(20, truncate=False)
 
 # COMMAND ----------
 
@@ -187,7 +187,7 @@ df_patients_sql = spark.sql(f"""
 """)
 
 print(f"📊 SQL fuzzy dedup result: {df_patients_sql.count()} unique patients")
-display(df_patients_sql.limit(10))
+df_patients_sql.show(10, truncate=False)
 
 # COMMAND ----------
 

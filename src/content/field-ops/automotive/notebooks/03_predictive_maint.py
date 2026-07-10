@@ -87,7 +87,7 @@ df_latest_service = (
 )
 
 print(f"📊 Vehicles with service records: {df_latest_service.count()}")
-display(df_latest_service.limit(5))
+df_latest_service.show(5, truncate=False)
 
 # COMMAND ----------
 
@@ -137,11 +137,7 @@ df_maintenance = (
 )
 
 # Because of the wrong join, these will all be NULL:
-display(
-    df_maintenance
-    .select("vehicle_id", "odometer", "last_service_date", "last_service_odometer")
-    .limit(5)
-)
+df_maintenance.select("vehicle_id", "odometer", "last_service_date", "last_service_odometer").show(5, truncate=False)
 
 # COMMAND ----------
 
@@ -199,14 +195,9 @@ df_predictions = (
     .withColumn("_predicted_at", current_timestamp())
 )
 
-display(
-    df_predictions
-    .select("vehicle_id", "make", "model", "odometer",
+df_predictions.select("vehicle_id", "make", "model", "odometer",
             "days_since_service", "miles_since_service",
-            "days_to_service", "total_anomalies", "maintenance_priority")
-    .orderBy("days_to_service")
-    .limit(20)
-)
+            "days_to_service", "total_anomalies", "maintenance_priority").orderBy("days_to_service").show(20, truncate=False)
 
 # COMMAND ----------
 

@@ -101,7 +101,7 @@ df_soil_features = (
     )
 )
 
-display(df_soil_features)
+df_soil_features.show(truncate=False)
 
 # COMMAND ----------
 
@@ -172,7 +172,7 @@ df_weather_features = (
     )
 )
 
-display(df_weather_features)
+df_weather_features.show(truncate=False)
 
 # COMMAND ----------
 
@@ -205,7 +205,7 @@ df_ndvi_features = (
     )
 )
 
-display(df_ndvi_features)
+df_ndvi_features.show(truncate=False)
 
 # COMMAND ----------
 
@@ -268,7 +268,7 @@ df_features = (
 )
 
 print(f"📊 Feature table: {df_features.count()} rows, {len(df_features.columns)} columns")
-display(df_features.limit(20))
+df_features.show(20, truncate=False)
 
 # COMMAND ----------
 
@@ -346,7 +346,7 @@ for fc in feature_cols:
 # SECTION 11: SQL Feature Summary
 # ────────────────────────────────────────────────────────────────────────────
 
-display(spark.sql(f"""
+spark.sql(f"""
     SELECT
         crop_type,
         COUNT(*) AS field_count,
@@ -357,7 +357,7 @@ display(spark.sql(f"""
     FROM {gold_schema}.yield_prediction_features
     GROUP BY crop_type
     ORDER BY avg_yield_kg DESC
-"""))
+""").show(truncate=False)
 
 # COMMAND ----------
 

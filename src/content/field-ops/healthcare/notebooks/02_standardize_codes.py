@@ -49,11 +49,12 @@ silver_schema = f"{catalog}.{schema_prefix}_silver"
 # Reference tables (ICD-10 codes, LOINC codes) are small — perfect
 # candidates for BROADCAST joins to avoid shuffling.
 
+from pyspark import StorageLevel
 from pyspark.sql.functions import broadcast, col, coalesce, lit, current_timestamp
 
 # Small reference tables — cache them for repeated use
-df_icd10 = spark.read.table(f"{bronze_schema}.icd10_codes").cache()
-df_loinc = spark.read.table(f"{bronze_schema}.loinc_codes").cache()
+df_icd10 = spark.read.table(f"{bronze_schema}.icd10_codes").persist(StorageLevel.MEMORY_AND_DISK)
+df_loinc = spark.read.table(f"{bronze_schema}.loinc_codes").persist(StorageLevel.MEMORY_AND_DISK)
 
 print(f"📊 ICD-10 codes: {df_icd10.count()} (small → broadcast candidate)")
 print(f"📊 LOINC codes:  {df_loinc.count()} (small → broadcast candidate)")
@@ -93,7 +94,7 @@ print(f"📊 Standardized EHR records: {df_ehr_standardized.count()}")
 unmapped = df_ehr_standardized.filter("diagnosis_description = 'UNKNOWN CODE'").count()
 print(f"⚠️  Unmapped diagnosis codes: {unmapped}")
 
-display(df_ehr_standardized.limit(10))
+df_ehr_standardized.show(10, truncate=False)
 
 # COMMAND ----------
 
@@ -113,7 +114,7 @@ df_ehr_standardized_sql = spark.sql(f"""
         ON ehr.diagnosis_code = icd.code
 """)
 
-display(df_ehr_standardized_sql.limit(5))
+df_ehr_standardized_sql.show(5, truncate=False)
 
 # COMMAND ----------
 
@@ -132,7 +133,7 @@ df_labs_standardized = (
     .withColumn("_standardized_at", current_timestamp())
 )
 
-display(df_labs_standardized.limit(10))
+df_labs_standardized.show(10, truncate=False)
 
 # COMMAND ----------
 

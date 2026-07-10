@@ -126,14 +126,14 @@ print(f"📊 Total events: {df_events.count()}")
 print(f"📊 Unique players: {df_events.select('player_id').distinct().count()}")
 
 # Date range
-display(spark.sql(f"""
+spark.sql(f"""
     SELECT
         MIN(event_date) AS first_date,
         MAX(event_date) AS last_date,
         DATEDIFF(MAX(event_date), MIN(event_date)) AS date_span_days,
         COUNT(DISTINCT player_id) AS total_players
     FROM {silver_schema}.events
-"""))
+""").show(truncate=False)
 
 # COMMAND ----------
 
@@ -212,13 +212,13 @@ except:
 # ────────────────────────────────────────────────────────────────────────────
 # SECTION 5: Visualize Retention Curve (after implementation)
 # ────────────────────────────────────────────────────────────────────────────
-# Use display() with charting to visualize the retention curve.
+# Use .show() with charting to visualize the retention curve.
 # In the Databricks chart settings:
 #   - X axis: retention_day
 #   - Y axis: retention_rate (avg)
 #   - Group by: cohort_date
 
-# display(spark.read.table(f"{gold_schema}.retention_cohorts"))
+# spark.read.table(f"{gold_schema}.retention_cohorts").show(truncate=False)
 
 # COMMAND ----------
 

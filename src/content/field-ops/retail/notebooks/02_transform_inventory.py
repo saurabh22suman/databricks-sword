@@ -105,7 +105,7 @@ df_sales_enriched = (
     )
 )
 
-display(df_sales_enriched.limit(10))
+df_sales_enriched.show(10, truncate=False)
 
 # COMMAND ----------
 
@@ -132,7 +132,7 @@ df_sales_enriched_sql = spark.sql(f"""
         ON s.product_id = p.sku  -- ⚠️ BUG: s.product_id should be s.sku
 """)
 
-display(df_sales_enriched_sql.limit(10))
+df_sales_enriched_sql.show(10, truncate=False)
 
 # COMMAND ----------
 
@@ -161,7 +161,7 @@ df_sku_metrics = (
     )
 )
 
-display(df_sku_metrics)
+df_sku_metrics.show(truncate=False)
 
 # COMMAND ----------
 
@@ -243,7 +243,7 @@ df_inventory_deduped_sql = spark.sql("""
     WHERE row_num = 1
 """)
 
-display(df_inventory_deduped_sql.limit(10))
+df_inventory_deduped_sql.show(10, truncate=False)
 
 # COMMAND ----------
 
@@ -297,7 +297,7 @@ if dup_count == 0:
     print("✅ No duplicates — deduplication working correctly!")
 else:
     print("❌ Duplicates found — check your dedup logic")
-    display(dup_check)
+    dup_check.show(truncate=False)
 
 # COMMAND ----------
 

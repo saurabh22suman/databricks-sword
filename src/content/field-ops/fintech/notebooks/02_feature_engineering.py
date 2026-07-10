@@ -55,7 +55,7 @@ silver_schema = f"{catalog}.{schema_prefix}_silver"
 df_txn = spark.read.table(f"{bronze_schema}.transactions")
 
 print(f"📊 Bronze transactions: {df_txn.count()}")
-display(df_txn.select("transaction_id", "account_id", "event_ts", "amount").limit(5))
+df_txn.select("transaction_id", "account_id", "event_ts", "amount").show(5, truncate=False)
 
 # COMMAND ----------
 
@@ -125,14 +125,8 @@ df_features = (
 
 # Preview features for a single account
 sample_account = df_features.select("account_id").first()["account_id"]
-display(
-    df_features
-    .filter(col("account_id") == sample_account)
-    .select("transaction_id", "event_ts", "amount",
-            "velocity_1h", "velocity_24h", "velocity_7d", "avg_amount_24h")
-    .orderBy("event_ts")
-    .limit(10)
-)
+df_features.filter(col("account_id") == sample_account).select("transaction_id", "event_ts", "amount",
+            "velocity_1h", "velocity_24h", "velocity_7d", "avg_amount_24h").orderBy("event_ts").show(10, truncate=False)
 
 # COMMAND ----------
 
@@ -192,7 +186,7 @@ print(f"✅ Silver table: {silver_schema}.transaction_features")
 # SECTION 7: Feature Distribution Check
 # ────────────────────────────────────────────────────────────────────────────
 
-display(spark.sql(f"""
+spark.sql(f"""
     SELECT
         ROUND(AVG(velocity_1h), 2) AS avg_velocity_1h,
         ROUND(AVG(velocity_24h), 2) AS avg_velocity_24h,
@@ -202,7 +196,7 @@ display(spark.sql(f"""
         PERCENTILE(velocity_24h, 0.99) AS p99_velocity_24h,
         COUNT(CASE WHEN velocity_1h > 10 THEN 1 END) AS high_velocity_count
     FROM {silver_schema}.transaction_features
-"""))
+""").show(truncate=False)
 
 # COMMAND ----------
 

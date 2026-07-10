@@ -29,7 +29,7 @@
     },
     {
       "id": "zorder",
-      "code": "OPTIMIZE gold.viewing_events ZORDER BY (user_id, view_date)",
+      "code": "ALTER TABLE gold.viewing_events CLUSTER BY (user_id, view_date);\nOPTIMIZE gold.viewing_events;",
       "label": "Optimize Storage Layout"
     }
   ],
@@ -47,7 +47,7 @@
     "Aggregation CTEs build on base CTEs with GROUP BY",
     "Window functions add rankings without reducing rows",
     "Materialized views cache the expensive query result",
-    "Z-ORDER co-locates related data for faster access"
+    "Liquid Clustering co-locates related data for faster access"
   ],
   "learnings": [
     "CTEs break complex queries into manageable parts",

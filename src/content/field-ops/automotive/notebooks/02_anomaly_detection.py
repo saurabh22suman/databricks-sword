@@ -165,7 +165,7 @@ df_all_anomalies = (
 )
 
 print(f"📊 Total anomaly events: {df_all_anomalies.count()}")
-display(df_all_anomalies.limit(10))
+df_all_anomalies.show(10, truncate=False)
 
 # COMMAND ----------
 
@@ -198,7 +198,7 @@ df_anomalies_enriched = (
     )
 )
 
-display(df_anomalies_enriched.limit(10))
+df_anomalies_enriched.show(10, truncate=False)
 
 # COMMAND ----------
 
@@ -222,7 +222,7 @@ print(f"✅ Silver table: {silver_schema}.anomaly_events")
 # SECTION 7: Anomaly Distribution Summary
 # ────────────────────────────────────────────────────────────────────────────
 
-display(spark.sql(f"""
+spark.sql(f"""
     SELECT
         anomaly_type,
         COUNT(*) AS event_count,
@@ -233,7 +233,7 @@ display(spark.sql(f"""
     FROM {silver_schema}.anomaly_events
     GROUP BY anomaly_type
     ORDER BY event_count DESC
-"""))
+""").show(truncate=False)
 
 # COMMAND ----------
 

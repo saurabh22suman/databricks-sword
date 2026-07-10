@@ -83,7 +83,7 @@ df_txn_raw = (
 )
 
 print(f"📊 Raw transactions loaded: {df_txn_raw.count()}")
-display(df_txn_raw.limit(5))
+df_txn_raw.show(5, truncate=False)
 
 # COMMAND ----------
 
@@ -106,7 +106,7 @@ df_txn = (
 null_ts = df_txn.filter(col("event_ts").isNull()).count()
 print(f"{'✅' if null_ts == 0 else '⚠️'} Null timestamps after parsing: {null_ts}")
 
-display(df_txn.select("transaction_id", "event_ts", "amount", "channel").limit(5))
+df_txn.select("transaction_id", "event_ts", "amount", "channel").show(5, truncate=False)
 
 # COMMAND ----------
 
@@ -203,7 +203,7 @@ df_quality = spark.sql(f"""
     FROM {bronze_schema}.transactions
 """)
 
-display(df_quality)
+df_quality.show(truncate=False)
 
 # COMMAND ----------
 

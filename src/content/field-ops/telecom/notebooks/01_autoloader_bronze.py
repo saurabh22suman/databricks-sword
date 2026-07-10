@@ -160,7 +160,7 @@ print(f"✅ Weather: {df_weather.count()} → {bronze_schema}.weather_data")
 # SECTION 5: Verify Auto Loader + Data Quality
 # ────────────────────────────────────────────────────────────────────────────
 
-display(spark.sql(f"""
+spark.sql(f"""
     SELECT
         COUNT(*) AS total_metrics,
         COUNT(DISTINCT tower_id) AS unique_towers,
@@ -170,7 +170,7 @@ display(spark.sql(f"""
         MIN(event_ts) AS earliest_metric,
         MAX(event_ts) AS latest_metric
     FROM {bronze_schema}.cell_tower_metrics
-"""))
+""").show(truncate=False)
 
 # COMMAND ----------
 

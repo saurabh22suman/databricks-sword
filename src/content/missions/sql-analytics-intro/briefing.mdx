@@ -1,57 +1,28 @@
 # Mission Briefing: SQL Analytics Intro
 
-## The Situation
+## Situation Report
 
-TechCorp's lakehouse is live, and the executive team is impressed. Now Marketing wants access.
+TechCorp's lakehouse is live. Marketing hired 3 new business analysts who only know SQL (no Python/Spark). They need to query the lakehouse, but traditional SQL tools can't connect to Delta Lake.
 
-The CMO hired **3 new business analysts** to build dashboards, but they only know SQL (no Python/Spark experience). They need to query the lakehouse, but traditional SQL tools can't connect to Delta Lake.
+Notebooks feel like coding to analysts, cluster management is confusing, and costs are unpredictable ($2,400 last week from a cluster left running overnight).
 
-The data team tried giving them Databricks Notebooks, but:
-- **Notebooks feel like coding** (analysts want a query editor)
-- **Cluster management is confusing** (start/stop, instance types, autoscaling)
-- **Costs are unpredictable** ($2,400 last week because someone left a cluster running overnight!)
+## Objectives
+- Understand SQL Warehouse architecture (clusters, endpoints, catalogs)
+- Write multi-table JOIN queries
+- Aggregate data with GROUP BY and window functions
+- Create views for reusable query logic
+- Compare SQL vs PySpark for different use cases
 
-The VP of Analytics wants a **SQL-native** experience with **serverless compute** — no cluster management, just write queries and get results.
-
-## The Opportunity
-
-**Serverless SQL Warehouses** are the default compute for all SQL workloads:
-- **Serverless by default** — instant-on, auto-scaling, zero infrastructure management
-- **BI tool integration** — Connect Tableau, Power BI, Looker directly
-- **Query editor** — Familiar SQL interface with intelligent autocomplete
-- **Cost optimization** — Automatic scale-to-zero, Photon acceleration, query result caching
-
-Industry adoption for SQL analysts on lakehouses:
-- **JetBlue:** 200+ analysts run 50K SQL queries/month on Delta Lake
-- **Zillow:** Real estate analysts query 300TB lakehouse via SQL Warehouse
-- **Conde Nast:** Editorial teams run ad-hoc SQL on 5B+ content events
-
-## Your Mission
-
-Build **SQL analytics queries** on the lakehouse using SQL Warehouses:
-
-1. **Understand** SQL Warehouse architecture (clusters, endpoints, catalogs)
-2. **Write** multi-table JOIN queries
-3. **Aggregate** data with GROUP BY and window functions
-4. **Create** views for reusable query logic
-5. **Compare** SQL vs PySpark for different use cases
+## Key Intelligence
+- **Serverless SQL Warehouses:** Default compute for SQL workloads — instant-on, auto-scaling, zero infrastructure management
+- **BI tool integration:** Connect Tableau, Power BI, Looker directly to the lakehouse
+- **Query editor:** Familiar SQL interface with intelligent autocomplete
+- **Cost optimization:** Automatic scale-to-zero, Photon acceleration, query result caching
 
 ## Success Criteria
-
-- **Working SQL queries** with JOINs and aggregations
-- **View created** for customer metrics
-- **Performance optimized** with proper JOIN order
-- **Tradeoff understanding** (when SQL, when PySpark)
-
-## The Stakes
-
-If SQL Warehouses work, TechCorp can onboard **30+ analysts** to the lakehouse without teaching them Python. This enables:
-- **Self-service analytics** (no more data engineer bottlenecks)
-- **Faster insights** (analysts query directly, no ticket queue)
-- **$180K/year savings** (replace 3 BI tool licenses)
-
-This democratizes data access across the company.
-
----
+- Working SQL queries with JOINs and aggregations
+- View created for customer metrics
+- Performance optimized with proper JOIN order
+- Tradeoff understanding (when SQL, when PySpark)
 
 **Next Step:** Architecture Diagram — Understand SQL Warehouse components

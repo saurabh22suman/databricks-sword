@@ -201,15 +201,9 @@ df_final = (
     .withColumn("_scored_at", current_timestamp())
 )
 
-display(
-    df_final
-    .filter(col("fraud_score") > 0)
-    .select("transaction_id", "account_id", "amount",
+df_final.filter(col("fraud_score") > 0).select("transaction_id", "account_id", "amount",
             "rule_velocity", "rule_amount", "rule_geo", "rule_merchant",
-            "fraud_score")
-    .orderBy(col("fraud_score").desc())
-    .limit(20)
-)
+            "fraud_score").orderBy(col("fraud_score").desc()).show(20, truncate=False)
 
 # COMMAND ----------
 

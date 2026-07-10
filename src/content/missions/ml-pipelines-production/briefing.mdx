@@ -3,71 +3,32 @@ title: "ML Pipelines in Production"
 subtitle: "Production ML systems with serving, monitoring, and governance"
 ---
 
-# MISSION BRIEFING: Operation Neural Fortress
+# Mission Briefing: ML Pipelines in Production
 
-**OPERATIVE CLASSIFICATION:** S-Rank — ML Track (Capstone)
+## Situation Report
 
----
+**Client:** QuantumRisk Analytics — returning from your previous MLflow mission. The CEO now wants real-time fraud detection.
 
-## SITUATION REPORT
+**Crisis:** Their batch-scoring model catches fraud 6 hours after it happens. By then, fraudulent transactions have cleared. The board demands sub-100ms predictions with automated model updates when fraud patterns shift.
 
-**Client:** QuantumRisk Analytics — returning from your previous MLflow mission. They successfully implemented experiment tracking, and now the CEO wants real-time fraud detection.
+**Your Mission:** Build the complete production ML pipeline: Feature Store for real-time features, model serving for inference, Champion/Challenger A/B testing, and drift monitoring.
 
-**Crisis:** Their batch-scoring model catches fraud 6 hours after it happens. By then, fraudulent transactions have already cleared. The board demands real-time inference — sub-100ms predictions on every transaction, with automated model updates when fraud patterns shift.
+## Objectives
+- Map the production ML architecture: Feature Store → Training → Serving → Monitoring
+- Build the end-to-end pipeline from feature engineering to real-time serving
+- Implement serving and monitoring code: endpoints, traffic routing, drift detection
+- Validate mastery by designing production ML systems
 
-**Your Mission:** Build the complete production ML pipeline: Feature Store for real-time features, model serving endpoint for inference, Champion/Challenger A/B testing, and drift monitoring to detect when the model degrades.
+## Key Intelligence
+- **Feature Store:** Centralized feature management with online tables for sub-ms lookups and Unity Catalog governance
+- **Model Serving:** Serverless endpoints with auto-scaling (0 to 1000+ QPS), GPU support, and traffic routing for A/B tests
+- **Champion/Challenger:** 90% traffic to current model, 10% to new challenger with automated rollback on underperformance
+- **Drift Monitoring:** Detect data drift (input distributions), concept drift (feature-target relationships), and trigger alerts
 
----
+## Success Criteria
+- Production-ready Feature Store with online table
+- Model serving endpoint with sub-100ms latency
+- Champion/Challenger traffic split configured
+- Drift monitoring alerts operational
 
-## INTELLIGENCE BRIEFING
-
-### The Production ML Stack
-
-Moving from notebook experimentation to production requires four critical systems:
-
-**Feature Store** — Centralized feature management:
-- Features computed once, shared across models and teams
-- Point-in-time correctness prevents data leakage
-- Online tables for real-time serving (sub-ms lookups)
-- Unity Catalog integration for governance
-
-**Model Serving** — Real-time inference endpoints:
-- Serverless endpoints with auto-scaling (0 to 1000+ QPS)
-- GPU support for deep learning models
-- Custom preprocessing via MLflow PyFunc
-- Traffic routing for A/B tests
-
-**Champion/Challenger** — Safe model updates:
-- Champion: Current production model (90% traffic)
-- Challenger: New model being tested (10% traffic)
-- Automated traffic shifting based on metric comparison
-- Rollback if Challenger underperforms
-
-**Drift Monitoring** — Model health surveillance:
-- Data drift: Input feature distributions changing
-- Concept drift: Relationship between features and target changing
-- Performance monitoring: Real-time accuracy tracking
-- Alerting: Slack/PagerDuty when thresholds breach
-
-### Why This Matters
-
-A model without monitoring is a ticking time bomb:
-- Fraud patterns evolve — a model trained in January is stale by March
-- Feature pipelines can break silently — garbage in, garbage out
-- Without A/B testing, bad models go to 100% traffic instantly
-- Regulatory requirements demand explainability and audit trails
-
----
-
-## MISSION OBJECTIVES
-
-1. **Map the production ML architecture** — Feature Store → Training → Serving → Monitoring
-2. **Build the end-to-end pipeline** — From feature engineering to real-time serving
-3. **Implement serving and monitoring code** — Endpoints, traffic routing, drift detection
-4. **Validate mastery** — Prove you can design production ML systems
-
----
-
-*"A model in a notebook is a prototype. A model behind a serving endpoint with monitoring — that's a weapon. Build me a weapon."*
-
-**— Director Sato, QuantumRisk Board**
+**Next Step:** Diagram — Understand the production ML architecture

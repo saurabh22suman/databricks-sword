@@ -60,12 +60,7 @@ print(f"📊 Total events: {df_events.count()}")
 print(f"📊 Event types: {[r['event_type'] for r in df_events.select('event_type').distinct().collect()]}")
 
 # Show session-related events
-display(
-    df_events
-    .filter("event_type IN ('session_start', 'session_end')")
-    .orderBy("player_id", "event_ts")
-    .limit(20)
-)
+df_events.filter("event_type IN ('session_start', 'session_end')").orderBy("player_id", "event_ts").show(20, truncate=False)
 
 # COMMAND ----------
 
@@ -96,7 +91,7 @@ df_session_events = (
     .withColumn("next_event_ts", lead("event_ts").over(player_window))
 )
 
-display(df_session_events.limit(20))
+df_session_events.show(20, truncate=False)
 
 # COMMAND ----------
 
@@ -131,7 +126,7 @@ df_sessions = (
 )
 
 print(f"📊 Sessions found: {df_sessions.count()}")
-display(df_sessions.limit(10))
+df_sessions.show(10, truncate=False)
 
 # COMMAND ----------
 
@@ -179,7 +174,7 @@ df_sessions_sql = spark.sql(f"""
       AND next_event_type = 'session_end'
 """)
 
-display(df_sessions_sql.limit(10))
+df_sessions_sql.show(10, truncate=False)
 
 # COMMAND ----------
 
@@ -206,7 +201,7 @@ df_sessions_enriched = (
     .withColumn("_updated_at", current_timestamp())
 )
 
-display(df_sessions_enriched.limit(10))
+df_sessions_enriched.show(10, truncate=False)
 
 # COMMAND ----------
 

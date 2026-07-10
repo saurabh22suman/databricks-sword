@@ -107,6 +107,7 @@ employees.show()
 # COMMAND ----------
 
 # These are TRANSFORMATIONS - they execute instantly but don't compute anything yet
+from pyspark import StorageLevel
 from pyspark.sql.functions import col, avg, count
 
 # Chain multiple transformations - still lazy!
@@ -280,7 +281,7 @@ print("Written to JSON!")
 # COMMAND ----------
 
 # Cache the DataFrame
-employees.cache()
+employees.persist(StorageLevel.MEMORY_AND_DISK)
 
 # First action will compute and cache
 employees.count()  # Caches the data
